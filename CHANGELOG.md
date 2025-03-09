@@ -1,6 +1,4 @@
 
-
-
 # Changelog
 
 This document tracks the implementation progress of the AI Automation Consulting Website.
@@ -24,7 +22,7 @@ This document tracks the implementation progress of the AI Automation Consulting
 - ✅ About page with personal background and experience
 - ✅ Contact/Book a Call page with Calendly integration
 - ✅ Blog/case studies section
-- 🔄 Testimonials from clients
+- ✅ Testimonials from clients
 - 🔄 Pricing information (if applicable)
 - 🔄 Full CopilotKit integration with actual API key
 - 🔄 SEO optimization
@@ -78,3 +76,9 @@ This document tracks the implementation progress of the AI Automation Consulting
 - Updated navigation to include Blog link
 - Routes for Blog and individual BlogPost pages
 
+## [0.6.0] - 2023-12-05
+### Added
+- Testimonials section with client feedback
+- TestimonialCard component for displaying individual testimonials
+- Responsive testimonial grid with animation effects
+- Integration of testimonials into the Services page
