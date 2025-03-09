@@ -22,13 +22,13 @@ const Index = () => {
     };
   }, []);
 
-  // Setup CopilotKit integration
+  // Setup CopilotKit integration with dummy actions
   useCopilotAction({
     name: "book_consultation",
     description: "Book a free consultation call",
     parameters: [],
     handler: async () => {
-      // In a real implementation, this would open a calendar booking interface
+      // Just show a toast notification for development
       toast.success("Opening calendar to book a consultation");
       return "I'll help you schedule a consultation. Please check your calendar app.";
     },
@@ -55,6 +55,9 @@ const Index = () => {
         "data_insights": "Our AI Data Insights service transforms your raw business data into actionable intelligence through automated analysis and reporting.",
         "custom_development": "Our Custom AI Development service builds tailored solutions for your unique business challenges using cutting-edge AI technologies."
       };
+      
+      // Display a toast for demonstration purposes
+      toast.info(`Service details for: ${service}`);
       
       return serviceDetails[service as keyof typeof serviceDetails] || "I don't have details about that specific service. Would you like to book a call to discuss your needs?";
     },

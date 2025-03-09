@@ -7,17 +7,16 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
-// CopilotKit integration
+// CopilotKit integration with dummy config
 import { CopilotKit } from "@copilotkit/react-core";
-import { CopilotTextarea } from "@copilotkit/react-textarea";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <CopilotKit
-      // In a production app, you would add your API key configuration
-      // openAIApiKey="your-openai-key" 
+      // Dummy configuration for development - no actual API calls will be made
+      publicApiKey="dummy-key"
     >
       <TooltipProvider>
         <Toaster />
