@@ -4,7 +4,8 @@ import { useParams, Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
-import { ArrowLeftIcon, CalendarIcon, ClockIcon, TagIcon, ShareIcon } from 'lucide-react';
+import { ArrowLeftIcon, CalendarIcon, ClockIcon, TagIcon, ShareIcon, ArrowRightIcon } from 'lucide-react';
+import { Card, CardHeader, CardFooter, CardTitle } from "@/components/ui/card";
 
 // In a real implementation, this would fetch from an API
 const getBlogPost = (slug: string) => {
