@@ -87,6 +87,67 @@
   @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70;
 }
 
+/* New 2025 design styles */
+.text-gradient-teal {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-teal to-teal/70;
+}
+
+.text-gradient-retro {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-retro-pink to-teal;
+}
+
+.text-gradient-neon {
+  @apply bg-clip-text text-transparent bg-neon-gradient;
+}
+
+/* Bento grid styles */
+.bento-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+}
+
+.bento-card {
+  @apply relative overflow-hidden rounded-xl bg-glass-card glassmorphism shadow-bento transition-all duration-300 hover:shadow-glass-hover;
+}
+
+.bento-card:hover {
+  @apply animate-hover-lift;
+}
+
+/* Retro futuristic styling */
+.retro-grid {
+  background-size: 50px 50px;
+  background-image:
+    linear-gradient(to right, rgba(0, 196, 180, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 196, 180, 0.1) 1px, transparent 1px);
+}
+
+.retro-gradient-bg {
+  @apply bg-retro-gradient bg-[size:200%_200%] animate-gradient-shift;
+}
+
+/* Voice UI */
+.voice-ui-btn {
+  @apply fixed bottom-6 right-6 w-12 h-12 rounded-full bg-teal text-white flex items-center justify-center shadow-xl z-50 hover:scale-110 transition-transform duration-300;
+}
+
+.voice-ui-active {
+  @apply animate-pulse-slow;
+}
+
+.voice-waveform {
+  @apply h-6 w-20 bg-teal opacity-70 rounded-full overflow-hidden;
+}
+
+.waveform-bar {
+  @apply inline-block w-1 bg-white mx-[2px] rounded-full;
+  animation: waveform 1.2s ease-in-out infinite;
+}
+
+@keyframes waveform {
+  0%, 100% { height: 4px; }
+  50% { height: 20px; }
+}
+
 /* Shadow for buttons */
 .shadow-button {
   box-shadow: 0 4px 14px 0 rgba(0, 118, 255, 0.39);
@@ -106,4 +167,18 @@
 
 .animate-fade-in-up {
   animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* Scrollytelling animation triggers */
+.reveal-on-scroll {
+  @apply opacity-0 translate-y-8 transition-all duration-700;
+}
+
+.reveal-on-scroll.revealed {
+  @apply opacity-100 translate-y-0;
+}
+
+/* 3D element container */
+.brain-3d-container {
+  @apply relative w-full h-[400px] md:h-[500px];
 }

@@ -133,3 +133,12 @@ This document tracks the implementation progress of the AI Automation Consulting
 - Simplified component structure using semantic HTML tags
 - Removed unnecessary code and improved maintainability
 - Fixed layout issues with proper flexbox implementation
+
+## [1.4.0] - 2024-07-10
+### Added
+- Updated color scheme with teal, deep purple, neon white, and retro pink
+- 3D interactive brain model in Hero section using React Three Fiber
+- Bento grid layout for Services section with glassmorphism effects
+- Enhanced animations with scrollytelling for process sections
+- Voice UI component for interactive navigation
+- Location-based personalization in hero greeting
