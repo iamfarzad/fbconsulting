@@ -1,64 +1,38 @@
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AnimatedText from './AnimatedText';
+import { TiltedScroll, TiltedScrollItem } from './ui/tilted-scroll';
 
 const PainPoints = () => {
-  const painPointsRef = useRef<HTMLDivElement>(null);
-  const solutionsRef = useRef<HTMLDivElement>(null);
+  const painPoints: TiltedScrollItem[] = [
+    { id: "1", text: "Wasting hours on repetitive tasks" },
+    { id: "2", text: "Struggling to scale operations efficiently" },
+    { id: "3", text: "Drowning in manual processes" },
+    { id: "4", text: "Missing insights from your data" },
+    { id: "5", text: "Dealing with communication silos" },
+    { id: "6", text: "Losing track of leads and opportunities" },
+  ];
 
-  useEffect(() => {
-    const observerOptions = {
-      threshold: 0.2,
-      rootMargin: '0px 0px -10% 0px'
-    };
-
-    const painPointsObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const items = entry.target.querySelectorAll('.pain-point');
-          items.forEach((item, index) => {
-            setTimeout(() => {
-              item.classList.add('animate-fade-in-up');
-              item.classList.remove('opacity-0');
-            }, 150 * index);
-          });
-        }
-      });
-    }, observerOptions);
-
-    const solutionsObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const items = entry.target.querySelectorAll('.solution');
-          items.forEach((item, index) => {
-            setTimeout(() => {
-              item.classList.add('animate-fade-in-up');
-              item.classList.remove('opacity-0');
-            }, 150 * index);
-          });
-        }
-      });
-    }, observerOptions);
-
-    if (painPointsRef.current) {
-      painPointsObserver.observe(painPointsRef.current);
+  const solutions = [
+    {
+      title: "Automate routine workflows",
+      description: "Free up 20+ hours per week with intelligent automation for repetitive tasks and processes."
+    },
+    {
+      title: "Scale without proportional cost",
+      description: "Handle increased volume without adding staff by implementing AI-powered operations."
+    },
+    {
+      title: "Improve customer experiences",
+      description: "Reduce response times by up to 80% with AI chatbots and automated service systems."
+    },
+    {
+      title: "Unlock data-driven insights",
+      description: "Make better decisions with automated analysis and AI-powered business intelligence."
     }
-
-    if (solutionsRef.current) {
-      solutionsObserver.observe(solutionsRef.current);
-    }
-
-    return () => {
-      if (painPointsRef.current) {
-        painPointsObserver.unobserve(painPointsRef.current);
-      }
-      if (solutionsRef.current) {
-        solutionsObserver.unobserve(solutionsRef.current);
-      }
-    };
-  }, []);
+  ];
 
   return (
     <section className="py-20 px-4 bg-secondary/50">
@@ -78,94 +52,31 @@ const PainPoints = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          {/* Pain Points */}
-          <div ref={painPointsRef} className="space-y-6">
+          {/* Pain Points - TiltedScroll */}
+          <div className="space-y-6">
             <h3 className="text-2xl font-semibold mb-6">Business Challenges</h3>
-            
-            <div className="pain-point opacity-0 flex items-start gap-4 p-4 rounded-lg border border-border">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600">
-                <X size={18} />
-              </div>
-              <div>
-                <h4 className="text-lg font-medium mb-1">Wasting hours on repetitive tasks</h4>
-                <p className="text-muted-foreground">Manual data entry, report generation, and routine communications that drain resources.</p>
-              </div>
-            </div>
-            
-            <div className="pain-point opacity-0 flex items-start gap-4 p-4 rounded-lg border border-border">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600">
-                <X size={18} />
-              </div>
-              <div>
-                <h4 className="text-lg font-medium mb-1">Struggling to scale operations efficiently</h4>
-                <p className="text-muted-foreground">Growth that demands more staff instead of smarter systems, leading to increased costs.</p>
-              </div>
-            </div>
-            
-            <div className="pain-point opacity-0 flex items-start gap-4 p-4 rounded-lg border border-border">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600">
-                <X size={18} />
-              </div>
-              <div>
-                <h4 className="text-lg font-medium mb-1">Drowning in manual processes</h4>
-                <p className="text-muted-foreground">Workflow bottlenecks causing delays, errors, and customer dissatisfaction.</p>
-              </div>
-            </div>
-            
-            <div className="pain-point opacity-0 flex items-start gap-4 p-4 rounded-lg border border-border">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600">
-                <X size={18} />
-              </div>
-              <div>
-                <h4 className="text-lg font-medium mb-1">Missing insights from your data</h4>
-                <p className="text-muted-foreground">Valuable business intelligence that remains locked in unprocessed information.</p>
-              </div>
-            </div>
+            <TiltedScroll items={painPoints} />
           </div>
           
           {/* Solutions */}
-          <div ref={solutionsRef} className="space-y-6">
+          <div className="space-y-6">
             <h3 className="text-2xl font-semibold mb-6">AI Automation Solutions</h3>
             
-            <div className="solution opacity-0 flex items-start gap-4 p-4 rounded-lg border border-border bg-white/80 shadow-subtle">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                <Check size={18} />
+            {solutions.map((solution, index) => (
+              <div 
+                key={index}
+                className="solution opacity-0 animate-fade-in-up flex items-start gap-4 p-4 rounded-lg border border-border bg-white/80 shadow-subtle"
+                style={{ animationDelay: `${150 * index}ms`, animationFillMode: 'forwards' }}
+              >
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                  <Check size={18} />
+                </div>
+                <div>
+                  <h4 className="text-lg font-medium mb-1">{solution.title}</h4>
+                  <p className="text-muted-foreground">{solution.description}</p>
+                </div>
               </div>
-              <div>
-                <h4 className="text-lg font-medium mb-1">Automate routine workflows</h4>
-                <p className="text-muted-foreground">Free up 20+ hours per week with intelligent automation for repetitive tasks and processes.</p>
-              </div>
-            </div>
-            
-            <div className="solution opacity-0 flex items-start gap-4 p-4 rounded-lg border border-border bg-white/80 shadow-subtle">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                <Check size={18} />
-              </div>
-              <div>
-                <h4 className="text-lg font-medium mb-1">Scale without proportional cost</h4>
-                <p className="text-muted-foreground">Handle increased volume without adding staff by implementing AI-powered operations.</p>
-              </div>
-            </div>
-            
-            <div className="solution opacity-0 flex items-start gap-4 p-4 rounded-lg border border-border bg-white/80 shadow-subtle">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                <Check size={18} />
-              </div>
-              <div>
-                <h4 className="text-lg font-medium mb-1">Improve customer experiences</h4>
-                <p className="text-muted-foreground">Reduce response times by up to 80% with AI chatbots and automated service systems.</p>
-              </div>
-            </div>
-            
-            <div className="solution opacity-0 flex items-start gap-4 p-4 rounded-lg border border-border bg-white/80 shadow-subtle">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                <Check size={18} />
-              </div>
-              <div>
-                <h4 className="text-lg font-medium mb-1">Unlock data-driven insights</h4>
-                <p className="text-muted-foreground">Make better decisions with automated analysis and AI-powered business intelligence.</p>
-              </div>
-            </div>
+            ))}
             
             <div className="mt-8 opacity-0 animate-fade-in-up" style={{ animationDelay: '800ms', animationFillMode: 'forwards' }}>
               <Button size="lg" className="rounded-full px-8 w-full sm:w-auto">
