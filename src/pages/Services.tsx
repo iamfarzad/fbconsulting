@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -7,6 +8,7 @@ import ContactCTA from '@/components/ContactCTA';
 import Testimonials from '@/components/testimonials/Testimonials';
 import Pricing from '@/components/Pricing';
 import SEO from '@/components/SEO';
+import ServicesHero from '@/components/services/ServicesHero';
 import { Bot, MessageSquare, Workflow, BarChart3, Code } from 'lucide-react';
 
 const Services = () => {
@@ -80,11 +82,13 @@ const Services = () => {
       
       <Navbar />
       
-      <div className="flex-grow pt-28 pb-12">
+      <ServicesHero />
+      
+      <div className="flex-grow pt-12 pb-12">
         <div className="container mx-auto max-w-6xl px-4">
           <PageHeader
-            title="AI Automation Services"
-            subtitle="Transforming business operations with intelligent automation"
+            title="Our AI Services"
+            subtitle="Comprehensive solutions tailored to your business needs"
           />
           
           <div className="mt-16">
