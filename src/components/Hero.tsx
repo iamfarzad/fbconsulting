@@ -33,7 +33,7 @@ const Hero = () => {
   return (
     <section 
       ref={heroRef}
-      className="relative min-h-screen flex flex-col items-center justify-center px-4 overflow-hidden pt-16"
+      className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 overflow-hidden pt-16"
     >
       {/* Background elements */}
       <div className="hero-bg absolute inset-0 retro-gradient-bg pointer-events-none transition-transform duration-500 ease-out"></div>
@@ -49,7 +49,7 @@ const Hero = () => {
         </div>
         
         <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 space-y-8">
-          <h1 className="text-4xl font-bold text-neon-white dark:text-white">
+          <h1 className="text-4xl md:text-5xl font-bold text-neon-white dark:text-white">
             What can I help you automate?
           </h1>
           

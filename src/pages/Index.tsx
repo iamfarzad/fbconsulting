@@ -21,7 +21,10 @@ const Index = () => {
 
   useEffect(() => {
     console.log("Index page effect running");
+    // Remove previous class first if exists
+    document.body.classList.remove('page-enter');
     document.body.classList.add('page-enter-active');
+    
     return () => {
       document.body.classList.remove('page-enter-active');
       document.body.classList.add('page-enter');
@@ -68,9 +71,9 @@ const Index = () => {
         title="AI Automation Ally - Automate Your Business with AI"
         description="Unlock the power of AI to automate your business processes, increase efficiency, and drive growth. Discover tailored AI solutions for your unique needs."
       />
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
-        <div className="flex-grow">
+        <main className="flex-grow">
           <Hero />
           <div className="w-full py-16 bg-gradient-to-r from-deep-purple/10 to-background relative">
             <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-25" />
@@ -84,7 +87,7 @@ const Index = () => {
           <WhyWorkWithMe />
           <Testimonials />
           <ContactCTA />
-        </div>
+        </main>
         <Footer />
       </div>
     </>
