@@ -13,6 +13,7 @@ import { usePageViewTracking } from '@/hooks/useAnalytics';
 import DisplayCards from '@/components/ui/display-cards';
 import DotPattern from '@/components/ui/dot-pattern';
 import { Bot, MessageSquare, Workflow } from 'lucide-react';
+import ScrollAnimationDemo from '@/components/ScrollAnimationDemo';
 
 const Index = () => {
   console.log("Index page rendering");
@@ -79,6 +80,7 @@ const Index = () => {
               <DisplayCards cards={featuredServices} />
             </div>
           </div>
+          <ScrollAnimationDemo />
           <PainPoints />
           <ServicesList />
           <WhyWorkWithMe />
