@@ -7,6 +7,7 @@ import PageHeader from '@/components/PageHeader';
 import ContactCTA from '@/components/ContactCTA';
 import Testimonials from '@/components/testimonials/Testimonials';
 import Pricing from '@/components/Pricing';
+import SEO from '@/components/SEO';
 import { Bot, MessageSquare, Workflow, BarChart3, Code } from 'lucide-react';
 
 const Services = () => {
@@ -19,8 +20,72 @@ const Services = () => {
     };
   }, []);
 
+  // Services structured data
+  const servicesStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": [
+      {
+        "@type": "Service",
+        "position": 1,
+        "name": "AI Strategy & Consulting",
+        "description": "Get a customized roadmap for integrating AI into your business operations, with clear implementation steps and ROI projections.",
+        "provider": {
+          "@type": "ProfessionalService",
+          "name": "AI Automation Ally"
+        }
+      },
+      {
+        "@type": "Service",
+        "position": 2,
+        "name": "Chatbots & Virtual Assistants",
+        "description": "Implement intelligent AI assistants that can handle customer inquiries, support requests, and internal knowledge management.",
+        "provider": {
+          "@type": "ProfessionalService",
+          "name": "AI Automation Ally"
+        }
+      },
+      {
+        "@type": "Service",
+        "position": 3,
+        "name": "Workflow Automation",
+        "description": "Connect your applications and systems to eliminate manual data entry, reduce errors, and streamline operations.",
+        "provider": {
+          "@type": "ProfessionalService",
+          "name": "AI Automation Ally"
+        }
+      },
+      {
+        "@type": "Service",
+        "position": 4,
+        "name": "AI Data Insights",
+        "description": "Transform your raw business data into actionable intelligence through automated analysis and reporting.",
+        "provider": {
+          "@type": "ProfessionalService",
+          "name": "AI Automation Ally"
+        }
+      },
+      {
+        "@type": "Service",
+        "position": 5,
+        "name": "Custom AI Development",
+        "description": "Tailored solutions for your unique business challenges using cutting-edge AI technologies.",
+        "provider": {
+          "@type": "ProfessionalService",
+          "name": "AI Automation Ally"
+        }
+      }
+    ]
+  };
+
   return (
     <div className="min-h-screen page-enter">
+      <SEO 
+        title="AI Automation Services | Business Process Optimization"
+        description="Explore our specialized AI automation services: strategy consulting, chatbots, workflow automation, data insights, and custom AI development for businesses."
+        structuredData={servicesStructuredData}
+      />
+      
       <Navbar />
       
       <PageHeader

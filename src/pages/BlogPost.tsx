@@ -10,6 +10,7 @@ import PostContent from '@/components/blog/PostContent';
 import ShareSection from '@/components/blog/ShareSection';
 import RelatedPosts from '@/components/blog/RelatedPosts';
 import { getBlogPost } from '@/services/blogService';
+import SEO from '@/components/SEO';
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -17,8 +18,42 @@ const BlogPost = () => {
   // In a real app, this would check if the post exists and handle loading states
   const post = getBlogPost(slug || '');
 
+  // Create article structured data
+  const articleStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "image": post.featuredImage || "",
+    "datePublished": post.date,
+    "dateModified": post.date,
+    "author": {
+      "@type": "Person",
+      "name": post.author
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "AI Automation Ally",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${window.location.origin}/og-image.png`
+      }
+    },
+    "description": post.excerpt || post.title,
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": window.location.href
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
+      <SEO 
+        title={`${post.title} | AI Automation Ally Blog`}
+        description={post.excerpt || `Read about ${post.title} in our AI automation blog`}
+        ogType="article"
+        ogImage={post.featuredImage || ""}
+        structuredData={articleStructuredData}
+      />
       <Navbar />
       <main className="flex-grow pt-24 pb-16">
         <div className="container px-4 mx-auto">

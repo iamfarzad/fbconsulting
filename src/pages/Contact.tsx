@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import BookingCalendar from '@/components/BookingCalendar';
 import PageHeader from '@/components/PageHeader';
+import SEO from '@/components/SEO';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -21,8 +22,30 @@ const Contact = () => {
     });
   };
 
+  // Local business structured data
+  const contactStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "AI Automation Ally",
+    "description": "Expert AI automation consulting services",
+    "url": window.location.origin,
+    "email": "contact@aiautomationally.com",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+1-555-123-4567",
+      "contactType": "customer service",
+      "availableLanguage": ["English"]
+    }
+  };
+
   return (
     <div className="container mx-auto py-24 px-4 md:px-6">
+      <SEO 
+        title="Contact & Book a Consultation | AI Automation Ally"
+        description="Schedule a free consultation to discuss your business automation needs or send a message to learn more about our AI automation services."
+        structuredData={contactStructuredData}
+      />
+      
       <PageHeader
         title="Let's Work Together"
         subtitle="Book a consultation or send me a message"

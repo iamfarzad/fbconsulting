@@ -7,6 +7,7 @@ import PainPoints from '@/components/PainPoints';
 import WhyWorkWithMe from '@/components/WhyWorkWithMe';
 import ContactCTA from '@/components/ContactCTA';
 import Footer from '@/components/Footer';
+import SEO from '@/components/SEO';
 
 // For integration with CopilotKit
 import { useCopilotAction } from '@copilotkit/react-core';
@@ -63,8 +64,44 @@ const Index = () => {
     },
   });
 
+  // Business structured data
+  const businessStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "name": "AI Automation Ally",
+    "description": "Expert AI automation consulting services to help businesses streamline operations, reduce costs, and scale efficiently",
+    "url": window.location.origin,
+    "priceRange": "$$$",
+    "serviceType": [
+      "AI Automation",
+      "Business Consulting",
+      "Workflow Optimization",
+      "Chatbot Development",
+      "Data Analytics"
+    ],
+    "makesOffer": [
+      {
+        "@type": "Offer",
+        "name": "AI Strategy Session",
+        "price": "499",
+        "priceCurrency": "USD"
+      },
+      {
+        "@type": "Offer",
+        "name": "Implementation Package",
+        "price": "2499",
+        "priceCurrency": "USD"
+      }
+    ]
+  };
+
   return (
     <div className="min-h-screen page-enter">
+      <SEO 
+        title="AI Automation Ally | Business Automation Consulting"
+        description="Transform your business with AI automation solutions that reduce costs, streamline operations, and drive growth - expert consulting for businesses of all sizes."
+        structuredData={businessStructuredData}
+      />
       <Navbar />
       <Hero />
       <Services />

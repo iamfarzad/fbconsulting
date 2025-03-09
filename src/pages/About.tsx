@@ -3,12 +3,36 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import AnimatedText from '@/components/AnimatedText';
+import SEO from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { Calendar } from 'lucide-react';
 
 const About = () => {
+  // Structured data for the person
+  const personStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "AI Automation Expert",
+    "jobTitle": "AI Automation Consultant",
+    "description": "With over 10 years of experience in business automation and AI integration, I help companies streamline operations, reduce costs, and scale efficiently.",
+    "knowsAbout": [
+      "Artificial Intelligence",
+      "Machine Learning",
+      "Business Process Automation",
+      "Natural Language Processing",
+      "Data Analytics"
+    ]
+  };
+  
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO 
+        title="About - AI Automation Ally | Expert Consultant"
+        description="Learn about my 10+ years of experience helping businesses leverage AI and automation technology to reduce costs, streamline operations, and drive growth."
+        ogType="website"
+        structuredData={personStructuredData}
+      />
+      
       <Navbar />
       
       <main className="flex-grow pt-20">
@@ -24,7 +48,7 @@ const About = () => {
                 />
                 <AnimatedText
                   text="AI Automation Expert & Business Consultant"
-                  tag="p"
+                  tag="h2"
                   delay={200}
                   className="text-xl text-muted-foreground mb-8"
                 />
