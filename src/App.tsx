@@ -55,10 +55,10 @@ const App = () => {
       <CopilotKit publicApiKey="dummy-key">
         <HelmetProvider>
           <TooltipProvider>
-            <Toaster />
-            <Sonner />
             <BrowserRouter>
               <AnalyticsTracker />
+              <Toaster />
+              <Sonner />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/test" element={<TestPage />} />

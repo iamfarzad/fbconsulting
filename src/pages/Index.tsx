@@ -26,22 +26,24 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="page-enter">
+    <>
       <SEO
         title="AI Automation Ally - Automate Your Business with AI"
         description="Unlock the power of AI to automate your business processes, increase efficiency, and drive growth. Discover tailored AI solutions for your unique needs."
       />
-      <Navbar />
-      <main>
-        <Hero />
-        <PainPoints />
-        <ServicesList />
-        <WhyWorkWithMe />
-        <Testimonials />
-        <ContactCTA />
-      </main>
-      <Footer />
-    </div>
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-grow">
+          <Hero />
+          <PainPoints />
+          <ServicesList />
+          <WhyWorkWithMe />
+          <Testimonials />
+          <ContactCTA />
+        </div>
+        <Footer />
+      </div>
+    </>
   );
 };
 
