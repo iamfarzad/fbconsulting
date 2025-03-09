@@ -3,7 +3,7 @@ import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import DotPattern from './ui/dot-pattern';
-import { VercelV0Chat } from './ui/v0-ai-chat';
+import { AIChatInput } from './ui/ai-chat';
 import LocationGreeting from './LocationGreeting';
 import VoiceUI from './VoiceUI';
 
@@ -48,7 +48,13 @@ const Hero = () => {
           <LocationGreeting className="mb-2 text-neon-white" />
         </div>
         
-        <VercelV0Chat />
+        <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 space-y-8">
+          <h1 className="text-4xl font-bold text-neon-white dark:text-white">
+            What can I help you automate?
+          </h1>
+          
+          <AIChatInput />
+        </div>
         
         <div className="mt-8 flex justify-center">
           <motion.div 

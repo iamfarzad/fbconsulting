@@ -15,6 +15,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/NotFound";
 import TestPage from "./pages/TestPage";
+import ChatButton from "./components/ChatButton";
 
 // CopilotKit integration with dummy config
 import { CopilotKit } from "@copilotkit/react-core";
@@ -70,6 +71,7 @@ const App = () => {
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              <ChatButton />
             </BrowserRouter>
           </TooltipProvider>
         </HelmetProvider>

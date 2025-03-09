@@ -5,6 +5,7 @@ import AnimatedText from './AnimatedText';
 import { TiltedScroll, TiltedScrollItem } from './ui/tilted-scroll';
 import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { trackEvent } from '@/services/analyticsService';
 
 const PainPoints = () => {
   const navigate = useNavigate();
@@ -20,6 +21,14 @@ const PainPoints = () => {
   ];
 
   const handleGetAuditClick = () => {
+    // Track this CTA click
+    trackEvent({
+      action: 'click',
+      category: 'cta',
+      label: 'get_ai_audit',
+      cta_location: 'pain_points_section'
+    });
+    
     navigate('/contact');
   };
 
