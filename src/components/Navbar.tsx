@@ -40,6 +40,12 @@ const Navbar = () => {
             Services
           </Link>
           <Link 
+            to="/blog" 
+            className="text-foreground/80 hover:text-foreground transition-colors duration-200"
+          >
+            Blog
+          </Link>
+          <Link 
             to="/about" 
             className="text-foreground/80 hover:text-foreground transition-colors duration-200"
           >
@@ -86,6 +92,13 @@ const Navbar = () => {
             onClick={() => setIsMenuOpen(false)}
           >
             Services
+          </Link>
+          <Link 
+            to="/blog" 
+            className="text-xl font-medium"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Blog
           </Link>
           <Link 
             to="/about" 

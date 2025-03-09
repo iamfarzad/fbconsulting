@@ -23,7 +23,7 @@ This document tracks the implementation progress of the AI Automation Consulting
 ### Pending
 - ✅ About page with personal background and experience
 - ✅ Contact/Book a Call page with Calendly integration
-- 🔄 Blog/case studies section
+- ✅ Blog/case studies section
 - 🔄 Testimonials from clients
 - 🔄 Pricing information (if applicable)
 - 🔄 Full CopilotKit integration with actual API key
@@ -66,4 +66,15 @@ This document tracks the implementation progress of the AI Automation Consulting
 - Contact form for general inquiries
 - Updated navigation to include Contact page
 - PageHeader component for consistent page headers
+
+## [0.5.0] - 2023-11-30
+### Added
+- Blog and Case Studies page with featured post section
+- BlogPost component for individual blog posts
+- Responsive design for blog listings
+- Category filtering UI (static for now)
+- Newsletter signup section
+- Related posts functionality
+- Updated navigation to include Blog link
+- Routes for Blog and individual BlogPost pages
 
