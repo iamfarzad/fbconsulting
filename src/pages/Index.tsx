@@ -9,7 +9,7 @@ import ContactCTA from '@/components/ContactCTA';
 import Footer from '@/components/Footer';
 
 // For integration with CopilotKit
-import { useCopilotAction, useCopilotConversation } from '@copilotkit/react-core';
+import { useCopilotAction } from '@copilotkit/react-core';
 import { toast } from 'sonner';
 
 const Index = () => {
@@ -23,8 +23,6 @@ const Index = () => {
   }, []);
 
   // Setup CopilotKit integration
-  const conversation = useCopilotConversation();
-  
   useCopilotAction({
     name: "book_consultation",
     description: "Book a free consultation call",
@@ -61,9 +59,6 @@ const Index = () => {
       return serviceDetails[service as keyof typeof serviceDetails] || "I don't have details about that specific service. Would you like to book a call to discuss your needs?";
     },
   });
-
-  // For the purposes of this implementation, we're adding these hooks but not fully implementing the chatbot
-  // In a real implementation, you would add a chat interface component
 
   return (
     <div className="min-h-screen page-enter">
