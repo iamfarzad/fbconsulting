@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllBlogPosts, getBlogCategories } from '@/services/blogService';
 import Navbar from '@/components/Navbar';
@@ -20,6 +19,17 @@ const Blog = () => {
   const featuredPost = allPosts[0]; // Just use the first post as featured
   const regularPosts = allPosts.slice(1);
   const [activeCategory, setActiveCategory] = useState<string>("all");
+
+  useEffect(() => {
+    // Remove previous class first if exists
+    document.body.classList.remove('page-enter');
+    document.body.classList.add('page-enter-active');
+    
+    return () => {
+      document.body.classList.remove('page-enter-active');
+      document.body.classList.add('page-enter');
+    };
+  }, []);
 
   const filteredPosts = activeCategory === "all" 
     ? regularPosts 
@@ -45,7 +55,7 @@ const Blog = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <SEO 
         title="AI Automation Blog | Insights & Case Studies"
         description="Explore expert insights, case studies, and guides on AI automation for business - stay updated on the latest AI trends and implementation strategies."
@@ -53,7 +63,7 @@ const Blog = () => {
       />
       <Navbar />
       
-      <div className="flex-grow pt-24 pb-16 relative">
+      <main className="flex-grow pt-24 pb-16 relative">
         <DotPattern width={14} height={14} cx={7} cy={7} cr={1.2} className="opacity-30" />
         
         {/* Hero section with text reveal */}
@@ -172,7 +182,7 @@ const Blog = () => {
             <NewsletterSignup />
           </section>
         </div>
-      </div>
+      </main>
       
       <Footer />
     </div>

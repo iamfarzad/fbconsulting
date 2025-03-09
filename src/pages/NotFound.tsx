@@ -11,10 +11,19 @@ const NotFound = () => {
       "404 Error: User attempted to access non-existent route:",
       location.pathname
     );
+    
+    // Remove previous class first if exists
+    document.body.classList.remove('page-enter');
+    document.body.classList.add('page-enter-active');
+    
+    return () => {
+      document.body.classList.remove('page-enter-active');
+      document.body.classList.add('page-enter');
+    };
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 relative">
+    <div className="min-h-screen flex items-center justify-center bg-background relative">
       <DotPattern width={20} height={20} cx={10} cy={10} cr={2} className="opacity-30" />
       <div className="text-center relative z-10">
         <h1 className="text-4xl font-bold mb-4">404</h1>

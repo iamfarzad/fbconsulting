@@ -1,12 +1,25 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import AnimatedText from '@/components/AnimatedText';
 import SEO from '@/components/SEO';
 import { Button } from '@/components/ui/button';
 import { Calendar } from 'lucide-react';
+import DotPattern from '@/components/ui/dot-pattern';
 
 const About = () => {
+  useEffect(() => {
+    // Remove previous class first if exists
+    document.body.classList.remove('page-enter');
+    document.body.classList.add('page-enter-active');
+    
+    return () => {
+      document.body.classList.remove('page-enter-active');
+      document.body.classList.add('page-enter');
+    };
+  }, []);
+
   // Structured data for the person
   const personStructuredData = {
     "@context": "https://schema.org",
@@ -24,7 +37,7 @@ const About = () => {
   };
   
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <SEO 
         title="About - AI Automation Ally | Expert Consultant"
         description="Learn about my 10+ years of experience helping businesses leverage AI and automation technology to reduce costs, streamline operations, and drive growth."
@@ -36,8 +49,9 @@ const About = () => {
       
       <main className="flex-grow pt-20">
         {/* Hero Section */}
-        <section className="py-20 px-4">
-          <div className="container mx-auto max-w-5xl">
+        <section className="py-20 px-4 relative">
+          <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-25" />
+          <div className="container mx-auto max-w-5xl relative z-10">
             <div className="flex flex-col md:flex-row gap-12 items-center">
               <div className="flex-1">
                 <AnimatedText

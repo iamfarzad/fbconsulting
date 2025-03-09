@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ServiceDetail from '@/components/ServiceDetail';
@@ -14,6 +14,17 @@ import { Bot, MessageSquare, Workflow, BarChart3, Code } from 'lucide-react';
 
 const Services = () => {
   console.log("Services page rendering");
+  
+  useEffect(() => {
+    // Remove previous class first if exists
+    document.body.classList.remove('page-enter');
+    document.body.classList.add('page-enter-active');
+    
+    return () => {
+      document.body.classList.remove('page-enter-active');
+      document.body.classList.add('page-enter');
+    };
+  }, []);
   
   // Structured data for SEO
   const servicesStructuredData = {
@@ -74,7 +85,7 @@ const Services = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <SEO 
         title="AI Automation Services | Business Process Optimization"
         description="Explore our specialized AI automation services: strategy consulting, chatbots, workflow automation, data insights, and custom AI development for businesses."
@@ -85,7 +96,7 @@ const Services = () => {
       
       <ServicesHero />
       
-      <div className="flex-grow pt-12 pb-12 relative">
+      <main className="flex-grow pt-12 pb-12 relative">
         <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-20" />
         <div className="container mx-auto max-w-6xl px-4 relative z-10">
           <PageHeader
@@ -180,7 +191,7 @@ const Services = () => {
             />
           </div>
         </div>
-      </div>
+      </main>
       
       <Pricing />
       <Testimonials />

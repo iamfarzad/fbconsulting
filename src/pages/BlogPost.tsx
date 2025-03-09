@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeftIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,17 @@ import DotPattern from '@/components/ui/dot-pattern';
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
+  
+  useEffect(() => {
+    // Remove previous class first if exists
+    document.body.classList.remove('page-enter');
+    document.body.classList.add('page-enter-active');
+    
+    return () => {
+      document.body.classList.remove('page-enter-active');
+      document.body.classList.add('page-enter');
+    };
+  }, []);
   
   // In a real app, this would check if the post exists and handle loading states
   const post = getBlogPost(slug || '');
@@ -47,7 +58,7 @@ const BlogPost = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-background">
       <SEO 
         title={`${post.title} | AI Automation Ally Blog`}
         description={post.excerpt || `Read about ${post.title} in our AI automation blog`}

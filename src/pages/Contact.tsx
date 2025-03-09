@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Mail, MessageSquare, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -22,6 +21,17 @@ const Contact = () => {
     email: '',
     message: '',
   });
+
+  useEffect(() => {
+    // Remove previous class first if exists
+    document.body.classList.remove('page-enter');
+    document.body.classList.add('page-enter-active');
+    
+    return () => {
+      document.body.classList.remove('page-enter-active');
+      document.body.classList.add('page-enter');
+    };
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target;
@@ -63,7 +73,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-background">
       <SEO 
         title="Contact & Book a Consultation | AI Automation Ally"
         description="Schedule a free consultation to discuss your business automation needs or send a message to learn more about our AI automation services."
@@ -72,7 +82,7 @@ const Contact = () => {
       
       <Navbar />
       
-      <div className="flex-grow pt-28 pb-12 relative">
+      <main className="flex-grow pt-28 pb-12 relative">
         <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-25" />
         <div className="container mx-auto px-4 relative z-10">
           <PageHeader
@@ -174,7 +184,7 @@ const Contact = () => {
             </p>
           </div>
         </div>
-      </div>
+      </main>
       
       <Footer />
     </div>
