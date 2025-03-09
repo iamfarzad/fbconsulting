@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Calendar, Clock, Mail, MessageSquare, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,7 @@ import SEO from '@/components/SEO';
 import { useLeadTracking } from '@/hooks/useAnalytics';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import DotPattern from '@/components/ui/dot-pattern';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -70,8 +72,9 @@ const Contact = () => {
       
       <Navbar />
       
-      <div className="flex-grow pt-28 pb-12">
-        <div className="container mx-auto px-4">
+      <div className="flex-grow pt-28 pb-12 relative">
+        <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-25" />
+        <div className="container mx-auto px-4 relative z-10">
           <PageHeader
             title="Let's Work Together"
             subtitle="Book a consultation or send me a message"

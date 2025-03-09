@@ -11,6 +11,7 @@ import ContactCTA from '@/components/ContactCTA';
 import SEO from '@/components/SEO';
 import { usePageViewTracking } from '@/hooks/useAnalytics';
 import DisplayCards from '@/components/ui/display-cards';
+import DotPattern from '@/components/ui/dot-pattern';
 import { Bot, MessageSquare, Workflow } from 'lucide-react';
 
 const Index = () => {
@@ -37,7 +38,7 @@ const Index = () => {
       iconClassName: "text-teal",
       titleClassName: "text-teal",
       className:
-        "[grid-area:stack] hover:-translate-y-10 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0",
+        "[grid-area:stack] hover:-translate-y-10 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0 border-white/5",
     },
     {
       icon: <MessageSquare className="size-4 text-retro-pink" />,
@@ -47,7 +48,7 @@ const Index = () => {
       iconClassName: "text-retro-pink",
       titleClassName: "text-retro-pink",
       className:
-        "[grid-area:stack] translate-x-16 translate-y-10 hover:-translate-y-1 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0",
+        "[grid-area:stack] translate-x-16 translate-y-10 hover:-translate-y-1 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0 border-white/5",
     },
     {
       icon: <Workflow className="size-4 text-neon-blue" />,
@@ -57,7 +58,7 @@ const Index = () => {
       iconClassName: "text-neon-blue",
       titleClassName: "text-neon-blue",
       className:
-        "[grid-area:stack] translate-x-32 translate-y-20 hover:translate-y-10",
+        "[grid-area:stack] translate-x-32 translate-y-20 hover:translate-y-10 border-white/5",
     },
   ];
 
@@ -71,8 +72,9 @@ const Index = () => {
         <Navbar />
         <div className="flex-grow">
           <Hero />
-          <div className="w-full py-16 bg-gradient-to-r from-deep-purple/10 to-background">
-            <div className="container mx-auto max-w-6xl px-4">
+          <div className="w-full py-16 bg-gradient-to-r from-deep-purple/10 to-background relative">
+            <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-25" />
+            <div className="container mx-auto max-w-6xl px-4 relative z-10">
               <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gradient-retro">Featured Services</h2>
               <DisplayCards cards={featuredServices} />
             </div>

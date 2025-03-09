@@ -9,6 +9,7 @@ import Testimonials from '@/components/testimonials/Testimonials';
 import Pricing from '@/components/Pricing';
 import SEO from '@/components/SEO';
 import ServicesHero from '@/components/services/ServicesHero';
+import DotPattern from '@/components/ui/dot-pattern';
 import { Bot, MessageSquare, Workflow, BarChart3, Code } from 'lucide-react';
 
 const Services = () => {
@@ -84,8 +85,9 @@ const Services = () => {
       
       <ServicesHero />
       
-      <div className="flex-grow pt-12 pb-12">
-        <div className="container mx-auto max-w-6xl px-4">
+      <div className="flex-grow pt-12 pb-12 relative">
+        <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-20" />
+        <div className="container mx-auto max-w-6xl px-4 relative z-10">
           <PageHeader
             title="Our AI Services"
             subtitle="Comprehensive solutions tailored to your business needs"

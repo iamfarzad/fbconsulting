@@ -11,6 +11,7 @@ import ShareSection from '@/components/blog/ShareSection';
 import RelatedPosts from '@/components/blog/RelatedPosts';
 import { getBlogPost } from '@/services/blogService';
 import SEO from '@/components/SEO';
+import DotPattern from '@/components/ui/dot-pattern';
 
 const BlogPost = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -55,8 +56,9 @@ const BlogPost = () => {
         structuredData={articleStructuredData}
       />
       <Navbar />
-      <main className="flex-grow pt-24 pb-16">
-        <div className="container px-4 mx-auto">
+      <main className="flex-grow pt-24 pb-16 relative">
+        <DotPattern width={14} height={14} cx={7} cy={7} cr={1.2} className="opacity-20" />
+        <div className="container px-4 mx-auto relative z-10">
           <div className="mb-8">
             <Button variant="ghost" asChild>
               <Link to="/blog" className="inline-flex items-center">
