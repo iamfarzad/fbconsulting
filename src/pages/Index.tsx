@@ -32,12 +32,14 @@ const Index = () => {
         description="Unlock the power of AI to automate your business processes, increase efficiency, and drive growth. Discover tailored AI solutions for your unique needs."
       />
       <Navbar />
-      <Hero />
-      <PainPoints />
-      <ServicesList />
-      <WhyWorkWithMe />
-      <Testimonials />
-      <ContactCTA />
+      <main>
+        <Hero />
+        <PainPoints />
+        <ServicesList />
+        <WhyWorkWithMe />
+        <Testimonials />
+        <ContactCTA />
+      </main>
       <Footer />
     </div>
   );

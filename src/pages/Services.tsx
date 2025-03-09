@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -12,11 +11,10 @@ import { usePageViewTracking } from '@/hooks/useAnalytics';
 import { Bot, MessageSquare, Workflow, BarChart3, Code } from 'lucide-react';
 
 const Services = () => {
-  console.log("Services page component rendering");
+  console.log("Services page rendering");
   
   usePageViewTracking("AI Automation Services");
   
-  // Page transition effect
   useEffect(() => {
     console.log("Services page effect running");
     document.body.classList.add('page-enter-active');
@@ -26,7 +24,6 @@ const Services = () => {
     };
   }, []);
 
-  // Services structured data
   const servicesStructuredData = {
     "@context": "https://schema.org",
     "@type": "ItemList",
