@@ -89,9 +89,9 @@ const demoData = {
     { name: "Privacy", url: "/privacy" },
     { name: "Terms", url: "/terms" },
   ],
-  auth: {
-    login: { text: "Log in", url: "/login" },
-    signup: { text: "Book a Call", url: "/contact" },
+  ctaButton: {
+    text: "Book a Call",
+    url: "/contact",
   },
 };
 
