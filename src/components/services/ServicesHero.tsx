@@ -131,7 +131,6 @@ const ServicesHero: React.FC<ServicesHeroProps> = ({ className }) => {
                 {/* Orbiting circle */}
                 <motion.div 
                   className="absolute w-8 h-8 rounded-full bg-retro-pink/80"
-                  style={{ top: '50%', left: '50%', x: '-50%', y: '-50%' }}
                   animate={{
                     rotate: 360
                   }}
@@ -142,7 +141,9 @@ const ServicesHero: React.FC<ServicesHeroProps> = ({ className }) => {
                   }}
                   style={{
                     transformOrigin: '50px 50px',
-                    transform: 'translate(-50%, -50%) rotate(0deg) translateX(110px)'
+                    transform: 'translate(-50%, -50%) rotate(0deg) translateX(110px)',
+                    top: '50%', 
+                    left: '50%'
                   }}
                 />
               </div>
