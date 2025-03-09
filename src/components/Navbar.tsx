@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -27,23 +28,23 @@ const Navbar = () => {
       )}
     >
       <div className="container mx-auto flex items-center justify-between">
-        <a href="/" className="text-xl font-bold transition-opacity hover:opacity-80">
+        <Link to="/" className="text-xl font-bold transition-opacity hover:opacity-80">
           AI Automation Ally
-        </a>
+        </Link>
 
         <nav className="hidden md:flex items-center space-x-8">
-          <a 
-            href="#services" 
+          <Link 
+            to="/services" 
             className="text-foreground/80 hover:text-foreground transition-colors duration-200"
           >
             Services
-          </a>
-          <a 
-            href="#why-me" 
+          </Link>
+          <Link 
+            to="/about" 
             className="text-foreground/80 hover:text-foreground transition-colors duration-200"
           >
-            Why Me
-          </a>
+            About
+          </Link>
           <a 
             href="#contact" 
             className="text-foreground/80 hover:text-foreground transition-colors duration-200"
@@ -78,20 +79,20 @@ const Navbar = () => {
         )}
       >
         <nav className="flex flex-col items-center space-y-8 p-8">
-          <a 
-            href="#services" 
+          <Link 
+            to="/services" 
             className="text-xl font-medium"
             onClick={() => setIsMenuOpen(false)}
           >
             Services
-          </a>
-          <a 
-            href="#why-me" 
+          </Link>
+          <Link 
+            to="/about" 
             className="text-xl font-medium"
             onClick={() => setIsMenuOpen(false)}
           >
-            Why Me
-          </a>
+            About
+          </Link>
           <a 
             href="#contact" 
             className="text-xl font-medium"
