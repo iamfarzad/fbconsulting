@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AnimatedText from './AnimatedText';
 import { TiltedScroll, TiltedScrollItem } from './ui/tilted-scroll';

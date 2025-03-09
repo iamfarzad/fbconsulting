@@ -1,7 +1,5 @@
 
-import React from "react";
-import { cn } from "@/lib/utils";
-import { Check } from "lucide-react";
+import { cn } from "@/lib/utils"
 
 export interface TiltedScrollItem {
   id: string;
@@ -26,9 +24,7 @@ export function TiltedScroll({
               key={item.id}
               className="group flex items-center gap-2 cursor-pointer rounded-md border border-border/40 bg-gradient-to-b from-background/80 to-muted/80 p-4 shadow-md transition-all duration-300 ease-in-out hover:scale-105 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-xl dark:border-border"
             >
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                <Check size={18} />
-              </div>
+              <CheckCircleIcon className="h-6 w-6 mr-2 stroke-foreground/40 transition-colors group-hover:stroke-foreground" />
               <p className="text-foreground/80 transition-colors group-hover:text-foreground">
                 {item.text}
               </p>
@@ -37,7 +33,26 @@ export function TiltedScroll({
         </div>
       </div>
     </div>
-  );
+  )
+}
+
+function CheckCircleIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      strokeWidth="1"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  )
 }
 
 const defaultItems: TiltedScrollItem[] = [
