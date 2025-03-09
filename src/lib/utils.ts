@@ -13,6 +13,7 @@ export function cn(...inputs: ClassValue[]) {
  * animation: {
  *   "skew-scroll": "skew-scroll 20s linear infinite",
  *   "fade-in-up": "fade-in-up 0.8s ease-out",
+ *   "text-reveal": "text-reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
  * },
  * keyframes: {
  *   "skew-scroll": {
@@ -22,6 +23,10 @@ export function cn(...inputs: ClassValue[]) {
  *   "fade-in-up": {
  *     "0%": { opacity: "0", transform: "translateY(20px)" },
  *     "100%": { opacity: "1", transform: "translateY(0)" }
+ *   },
+ *   "text-reveal": {
+ *     "0%": { transform: "translateY(100%)", opacity: "0" },
+ *     "100%": { transform: "translateY(0)", opacity: "1" }
  *   }
  * },
  */

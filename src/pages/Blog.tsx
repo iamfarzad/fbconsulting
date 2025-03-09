@@ -1,13 +1,14 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { getAllBlogPosts, getBlogCategories } from '@/services/blogService';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import NewsletterSignup from '@/components/NewsletterSignup';
 import SEO from '@/components/SEO';
 import DotPattern from '@/components/ui/dot-pattern';
+import { TextRevealByWord } from '@/components/ui/text-reveal';
 
 const Blog = () => {
   const allPosts = getAllBlogPosts();
@@ -45,10 +46,14 @@ const Blog = () => {
       
       <div className="flex-grow pt-24 pb-16 tech-grid relative">
         <DotPattern width={14} height={14} cx={7} cy={7} cr={1.2} className="opacity-30" />
-        <PageHeader
-          title="Blog & Case Studies"
-          subtitle="Expert insights on AI automation for business"
-        />
+        
+        {/* Hero section with text reveal */}
+        <div className="h-[60vh] relative overflow-hidden">
+          <TextRevealByWord 
+            text="Discover AI automation insights, case studies, and expert guides to transform your business processes." 
+            className="h-[60vh]"
+          />
+        </div>
         
         <div className="container mx-auto px-4 py-12 relative z-10">
           <section className="mb-16">
