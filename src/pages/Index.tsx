@@ -1,20 +1,18 @@
-
 import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
-import Hero from '@/components/Hero';
-import Services from '@/components/Services';
-import PainPoints from '@/components/PainPoints';
-import WhyWorkWithMe from '@/components/WhyWorkWithMe';
-import ContactCTA from '@/components/ContactCTA';
 import Footer from '@/components/Footer';
+import Hero from '@/components/Hero';
+import PainPoints from '@/components/PainPoints';
+import ServicesList from '@/components/ServicesList';
+import WhyWorkWithMe from '@/components/WhyWorkWithMe';
+import Testimonials from '@/components/testimonials/Testimonials';
+import ContactCTA from '@/components/ContactCTA';
 import SEO from '@/components/SEO';
-
-// For integration with CopilotKit
-import { useCopilotAction } from '@copilotkit/react-core';
-import { toast } from 'sonner';
+import { usePageViewTracking } from '@/hooks/useAnalytics';
 
 const Index = () => {
-  // Page transition effect
+  usePageViewTracking("AI Automation Ally - Home");
+
   useEffect(() => {
     document.body.classList.add('page-enter-active');
     return () => {
@@ -23,90 +21,18 @@ const Index = () => {
     };
   }, []);
 
-  // Setup CopilotKit integration with dummy actions
-  useCopilotAction({
-    name: "book_consultation",
-    description: "Book a free consultation call",
-    parameters: [],
-    handler: async () => {
-      // Just show a toast notification for development
-      toast.success("Opening calendar to book a consultation");
-      return "I'll help you schedule a consultation. Please check your calendar app.";
-    },
-  });
-
-  useCopilotAction({
-    name: "get_service_details",
-    description: "Get details about a specific AI automation service",
-    parameters: [
-      {
-        name: "service",
-        type: "string",
-        description: "The service to get details for",
-        required: true,
-      },
-    ],
-    handler: async (params) => {
-      const { service } = params;
-      
-      const serviceDetails = {
-        "ai_strategy": "Our AI Strategy & Consulting service provides a comprehensive roadmap for implementing AI automation in your business. We analyze your current processes, identify automation opportunities, and create a detailed implementation plan.",
-        "chatbots": "Our Chatbots & Virtual Assistants service builds intelligent AI assistants that can handle customer inquiries, automate support tasks, and streamline internal communications.",
-        "workflow": "Our Workflow Automation service connects your applications and systems to eliminate manual data entry, reduce errors, and streamline operations.",
-        "data_insights": "Our AI Data Insights service transforms your raw business data into actionable intelligence through automated analysis and reporting.",
-        "custom_development": "Our Custom AI Development service builds tailored solutions for your unique business challenges using cutting-edge AI technologies."
-      };
-      
-      // Display a toast for demonstration purposes
-      toast.info(`Service details for: ${service}`);
-      
-      return serviceDetails[service as keyof typeof serviceDetails] || "I don't have details about that specific service. Would you like to book a call to discuss your needs?";
-    },
-  });
-
-  // Business structured data
-  const businessStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "ProfessionalService",
-    "name": "AI Automation Ally",
-    "description": "Expert AI automation consulting services to help businesses streamline operations, reduce costs, and scale efficiently",
-    "url": window.location.origin,
-    "priceRange": "$$$",
-    "serviceType": [
-      "AI Automation",
-      "Business Consulting",
-      "Workflow Optimization",
-      "Chatbot Development",
-      "Data Analytics"
-    ],
-    "makesOffer": [
-      {
-        "@type": "Offer",
-        "name": "AI Strategy Session",
-        "price": "499",
-        "priceCurrency": "USD"
-      },
-      {
-        "@type": "Offer",
-        "name": "Implementation Package",
-        "price": "2499",
-        "priceCurrency": "USD"
-      }
-    ]
-  };
-
   return (
-    <div className="min-h-screen page-enter">
-      <SEO 
-        title="AI Automation Ally | Business Automation Consulting"
-        description="Transform your business with AI automation solutions that reduce costs, streamline operations, and drive growth - expert consulting for businesses of all sizes."
-        structuredData={businessStructuredData}
+    <div className="page-enter">
+      <SEO
+        title="AI Automation Ally - Automate Your Business with AI"
+        description="Unlock the power of AI to automate your business processes, increase efficiency, and drive growth. Discover tailored AI solutions for your unique needs."
       />
       <Navbar />
       <Hero />
-      <Services />
       <PainPoints />
+      <ServicesList />
       <WhyWorkWithMe />
+      <Testimonials />
       <ContactCTA />
       <Footer />
     </div>

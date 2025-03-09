@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import FeatureCard from './FeatureCard';
 import AnimatedText from './AnimatedText';
@@ -10,7 +9,7 @@ import {
   Code 
 } from 'lucide-react';
 
-const Services = () => {
+const ServicesList = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
@@ -116,4 +115,4 @@ const Services = () => {
   );
 };
 
-export default Services;
+export default ServicesList;
