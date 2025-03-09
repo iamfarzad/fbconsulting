@@ -1,5 +1,6 @@
 
 
+
 # Changelog
 
 This document tracks the implementation progress of the AI Automation Consulting Website.
@@ -21,7 +22,7 @@ This document tracks the implementation progress of the AI Automation Consulting
 
 ### Pending
 - ✅ About page with personal background and experience
-- 🔄 Contact/Book a Call page with Calendly integration
+- ✅ Contact/Book a Call page with Calendly integration
 - 🔄 Blog/case studies section
 - 🔄 Testimonials from clients
 - 🔄 Pricing information (if applicable)
@@ -57,4 +58,12 @@ This document tracks the implementation progress of the AI Automation Consulting
 - About page with personal background and experience
 - Updated navigation to include About page
 - Comprehensive sections on professional background, expertise, and skills
+
+## [0.4.0] - 2023-11-28
+### Added
+- Contact/Book a Call page with dummy calendar integration
+- Booking form with date and time selection
+- Contact form for general inquiries
+- Updated navigation to include Contact page
+- PageHeader component for consistent page headers
 

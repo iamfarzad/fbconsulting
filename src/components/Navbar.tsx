@@ -45,18 +45,19 @@ const Navbar = () => {
           >
             About
           </Link>
-          <a 
-            href="#contact" 
+          <Link 
+            to="/contact" 
             className="text-foreground/80 hover:text-foreground transition-colors duration-200"
           >
             Contact
-          </a>
+          </Link>
         </nav>
 
         <div className="hidden md:block">
           <Button 
             size="sm" 
             className="rounded-full px-5 shadow-button transition-all duration-300 hover:shadow-lg"
+            onClick={() => window.location.href = '/contact'}
           >
             Book a Call
           </Button>
@@ -93,17 +94,20 @@ const Navbar = () => {
           >
             About
           </Link>
-          <a 
-            href="#contact" 
+          <Link 
+            to="/contact" 
             className="text-xl font-medium"
             onClick={() => setIsMenuOpen(false)}
           >
             Contact
-          </a>
+          </Link>
           <Button 
             size="lg" 
             className="mt-4 w-full rounded-full"
-            onClick={() => setIsMenuOpen(false)}
+            onClick={() => {
+              setIsMenuOpen(false);
+              window.location.href = '/contact';
+            }}
           >
             Book a Call
           </Button>
