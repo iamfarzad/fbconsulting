@@ -1,29 +1,15 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Bot, X } from 'lucide-react';
 import { AIChatInput } from './ui/ai-chat';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useLocation } from 'react-router-dom';
-import { trackEvent } from '@/services/analyticsService';
+import { useChatButton } from '@/hooks/useChatButton';
 
 const ChatButton = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const location = useLocation();
-  
-  const toggleChat = () => {
-    setIsOpen(prev => !prev);
-    
-    // Track the chat toggle action
-    trackEvent({
-      action: isOpen ? 'chat_closed' : 'chat_opened',
-      category: 'chatbot',
-      label: 'chat_toggle',
-      page: location.pathname,
-    });
-  };
+  const { isOpen, toggleChat, shouldShowButton } = useChatButton();
   
   // Hide on the home page since we already have the chat there
-  if (location.pathname === '/') {
+  if (!shouldShowButton) {
     return null;
   }
   
