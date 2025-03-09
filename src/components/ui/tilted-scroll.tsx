@@ -1,19 +1,25 @@
 
 import { cn } from "@/lib/utils"
+import { LucideIcon } from "lucide-react"
 
 export interface TiltedScrollItem {
   id: string;
   text: string;
+  icon?: React.ReactNode;
 }
 
 interface TiltedScrollProps {
   items?: TiltedScrollItem[];
   className?: string;
+  itemClassName?: string;
+  iconComponent?: React.ReactNode;
 }
 
 export function TiltedScroll({ 
-  items = defaultItems,
-  className 
+  items = [],
+  className,
+  itemClassName,
+  iconComponent
 }: TiltedScrollProps) {
   return (
     <div className={cn("flex items-center justify-center", className)}>
@@ -22,9 +28,12 @@ export function TiltedScroll({
           {items.map((item) => (
             <div
               key={item.id}
-              className="group flex items-center gap-2 cursor-pointer rounded-md bg-white/5 p-4 shadow-sm transition-all duration-300 ease-in-out hover:scale-105 hover:-translate-x-1 hover:-translate-y-1 hover:bg-white/10"
+              className={cn(
+                "group flex items-center gap-2 cursor-pointer rounded-md bg-white/5 p-4 shadow-sm transition-all duration-300 ease-in-out hover:scale-105 hover:-translate-x-1 hover:-translate-y-1 hover:bg-white/10",
+                itemClassName
+              )}
             >
-              <CheckCircleIcon className="h-6 w-6 mr-2 stroke-teal group-hover:stroke-teal/100" />
+              {item.icon || iconComponent || <CheckCircleIcon className="h-6 w-6 mr-2 stroke-teal group-hover:stroke-teal/100" />}
               <p className="text-foreground font-medium transition-colors group-hover:text-white">
                 {item.text}
               </p>
@@ -54,14 +63,3 @@ function CheckCircleIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   )
 }
-
-const defaultItems: TiltedScrollItem[] = [
-  { id: "1", text: "Wasting hours on repetitive tasks" },
-  { id: "2", text: "Struggling with manual data entry" },
-  { id: "3", text: "Missing customer follow-ups" },
-  { id: "4", text: "Dealing with communication silos" },
-  { id: "5", text: "Losing track of leads and opportunities" },
-  { id: "6", text: "Struggling to scale operations efficiently" },
-  { id: "7", text: "Drowning in manual processes" },
-  { id: "8", text: "Missing insights from your data" },
-];
