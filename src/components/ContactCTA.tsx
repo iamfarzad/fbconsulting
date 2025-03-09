@@ -3,8 +3,34 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Calendar, Mail } from 'lucide-react';
 import AnimatedText from './AnimatedText';
+import { trackEvent } from '@/services/analyticsService';
+import { useNavigate } from 'react-router-dom';
 
 const ContactCTA = () => {
+  const navigate = useNavigate();
+
+  const handleBookClick = () => {
+    trackEvent({
+      action: 'click',
+      category: 'cta',
+      label: 'book_consultation',
+      cta_location: 'contact_section',
+      cta_text: 'Book a Free Consultation'
+    });
+    navigate('/contact');
+  };
+
+  const handleContactClick = () => {
+    trackEvent({
+      action: 'click',
+      category: 'cta',
+      label: 'contact_me',
+      cta_location: 'contact_section',
+      cta_text: 'Contact Me'
+    });
+    navigate('/contact');
+  };
+
   return (
     <section id="contact" className="py-20 px-4 relative overflow-hidden">
       {/* Background Elements */}
@@ -33,6 +59,7 @@ const ContactCTA = () => {
             <Button 
               size="lg" 
               className="rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300 w-full md:w-auto flex items-center gap-2 justify-center"
+              onClick={handleBookClick}
             >
               <Calendar size={20} />
               Book a Free Consultation
@@ -42,6 +69,7 @@ const ContactCTA = () => {
               variant="outline" 
               size="lg" 
               className="rounded-full px-8 py-6 text-lg w-full md:w-auto flex items-center gap-2 justify-center"
+              onClick={handleContactClick}
             >
               <Mail size={20} />
               Contact Me

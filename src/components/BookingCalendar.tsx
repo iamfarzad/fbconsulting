@@ -4,6 +4,7 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { addDays, format, startOfDay } from 'date-fns';
+import { trackEvent } from '@/services/analyticsService';
 
 // Dummy time slots
 const TIME_SLOTS = [
@@ -34,6 +35,23 @@ const BookingCalendar = () => {
     toast({
       title: "Consultation booked!",
       description: `Your consultation is scheduled for ${format(date, 'MMMM d, yyyy')} at ${selectedTime}.`,
+    });
+    
+    // Track the lead generation event for consultation booking
+    trackEvent({
+      action: 'generate_lead',
+      category: 'conversion',
+      label: 'consultation_booking',
+      value: 10, // Higher value assigned to consultation bookings
+      lead_type: 'consultation',
+      lead_source: window.location.pathname,
+      booking_date: format(date, 'yyyy-MM-dd'),
+      booking_time: selectedTime,
+    });
+    
+    console.log('Lead generated: Consultation booking', {
+      date: format(date, 'yyyy-MM-dd'),
+      time: selectedTime
     });
     
     // Reset form

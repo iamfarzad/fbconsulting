@@ -28,7 +28,7 @@ This document tracks the implementation progress of the AI Automation Consulting
 - ✅ SEO optimization
 - ✅ Analytics integration
 - ✅ Email capture and newsletter signup
-- 🔄 Lead generation tracking
+- ✅ Lead generation tracking
 
 ### Tech Implementation Notes
 - Using React with TypeScript
@@ -118,3 +118,11 @@ This document tracks the implementation progress of the AI Automation Consulting
 - Integration of newsletter signup on Blog page and BlogPost pages
 - Form validation and success messaging
 - Analytics tracking for newsletter subscriptions
+
+## [1.2.0] - 2024-01-10
+### Added
+- Lead generation tracking for newsletter signups, contact form submissions, and consultation bookings
+- Enhanced useAnalytics hook with useLeadTracking for consistent lead tracking
+- Improved event tracking with detailed properties
+- Updated CTAs with tracking functionality
+- Completed all features in the original roadmap

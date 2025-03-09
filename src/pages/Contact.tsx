@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Calendar, Clock, Mail, MessageSquare, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -9,9 +9,21 @@ import { useToast } from '@/hooks/use-toast';
 import BookingCalendar from '@/components/BookingCalendar';
 import PageHeader from '@/components/PageHeader';
 import SEO from '@/components/SEO';
+import { useLeadTracking } from '@/hooks/useAnalytics';
 
 const Contact = () => {
   const { toast } = useToast();
+  const { trackLead } = useLeadTracking();
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    message: '',
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,6 +32,15 @@ const Contact = () => {
       title: "Message sent!",
       description: "Thanks for reaching out. I'll get back to you soon.",
     });
+
+    // Track the contact form submission as a lead
+    trackLead('contact_form', {
+      form_location: 'contact_page',
+      email_domain: formData.email.split('@')[1], // Only tracking domain for privacy
+    });
+    
+    // Reset form
+    setFormData({ name: '', email: '', message: '' });
   };
 
   // Local business structured data
@@ -64,7 +85,14 @@ const Contact = () => {
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
                   <User size={18} />
                 </div>
-                <Input id="name" placeholder="Your Name" className="pl-10" required />
+                <Input 
+                  id="name" 
+                  placeholder="Your Name" 
+                  className="pl-10" 
+                  required 
+                  value={formData.name}
+                  onChange={handleChange}
+                />
               </div>
             </div>
 
@@ -76,7 +104,15 @@ const Contact = () => {
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
                   <Mail size={18} />
                 </div>
-                <Input id="email" type="email" placeholder="your.email@example.com" className="pl-10" required />
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="your.email@example.com" 
+                  className="pl-10" 
+                  required 
+                  value={formData.email}
+                  onChange={handleChange}
+                />
               </div>
             </div>
 
@@ -93,6 +129,8 @@ const Contact = () => {
                   placeholder="How can I help you?"
                   className="pl-10 min-h-[120px]"
                   required
+                  value={formData.message}
+                  onChange={handleChange}
                 />
               </div>
             </div>

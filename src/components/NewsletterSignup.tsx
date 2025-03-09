@@ -4,6 +4,7 @@ import { Mail, MailCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { trackEvent } from '@/services/analyticsService';
 
 interface NewsletterSignupProps {
   title?: string;
@@ -31,6 +32,17 @@ const NewsletterSignup: React.FC<NewsletterSignupProps> = ({
     
     // Simulate API call delay for demonstration purposes
     setTimeout(() => {
+      // Track the lead generation event
+      trackEvent({
+        action: 'generate_lead',
+        category: 'conversion',
+        label: 'newsletter_signup',
+        value: 1,
+        lead_type: 'newsletter',
+        lead_source: window.location.pathname,
+        lead_email: email.split('@')[1], // Only tracking domain for privacy
+      });
+      
       // Success message
       toast.success("Thank you for subscribing!", {
         description: "You've been added to our newsletter list.",
