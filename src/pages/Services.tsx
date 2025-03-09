@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -11,10 +12,13 @@ import { usePageViewTracking } from '@/hooks/useAnalytics';
 import { Bot, MessageSquare, Workflow, BarChart3, Code } from 'lucide-react';
 
 const Services = () => {
+  console.log("Services page component rendering");
+  
   usePageViewTracking("AI Automation Services");
   
   // Page transition effect
   useEffect(() => {
+    console.log("Services page effect running");
     document.body.classList.add('page-enter-active');
     return () => {
       document.body.classList.remove('page-enter-active');
