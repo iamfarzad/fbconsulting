@@ -46,10 +46,7 @@ const AnalyticsTracker = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <CopilotKit
-      // Dummy configuration for development - no actual API calls will be made
-      publicApiKey="dummy-key"
-    >
+    <CopilotKit publicApiKey="dummy-key">
       <HelmetProvider>
         <TooltipProvider>
           <Toaster />
