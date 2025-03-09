@@ -3,8 +3,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigationType } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
+import { useEffect } from "react";
+import { initializeAnalytics, trackPageView } from "@/services/analyticsService";
 import Index from "./pages/Index";
 import Services from "./pages/Services";
 import About from "./pages/About";
@@ -18,6 +20,30 @@ import { CopilotKit } from "@copilotkit/react-core";
 
 const queryClient = new QueryClient();
 
+// Google Analytics measurement ID
+const GA_MEASUREMENT_ID = "G-XXXXXXXXXX"; // Replace with your actual GA4 measurement ID
+
+// Analytics tracker component that listens for route changes
+const AnalyticsTracker = () => {
+  const location = useLocation();
+  const navigationType = useNavigationType();
+
+  useEffect(() => {
+    // Initialize analytics only once
+    initializeAnalytics(GA_MEASUREMENT_ID);
+  }, []);
+
+  useEffect(() => {
+    // Track page views when the location changes
+    trackPageView({
+      path: location.pathname,
+      search: location.search,
+    });
+  }, [location]);
+
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <CopilotKit
@@ -29,6 +55,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <AnalyticsTracker />
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/services" element={<Services />} />
