@@ -2,6 +2,45 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff } from 'lucide-react';
 
+// Add TypeScript declarations for SpeechRecognition
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionResultList {
+  readonly length: number;
+  [index: number]: SpeechRecognitionResult;
+}
+
+interface SpeechRecognitionResult {
+  readonly length: number;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+interface SpeechRecognitionAlternative {
+  readonly transcript: string;
+  readonly confidence: number;
+}
+
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start(): void;
+  stop(): void;
+  abort(): void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onend: () => void;
+  onerror: (event: Event) => void;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition?: new () => SpeechRecognition;
+    webkitSpeechRecognition?: new () => SpeechRecognition;
+  }
+}
+
 interface VoiceUIProps {
   onCommand?: (command: string) => void;
 }
@@ -15,30 +54,32 @@ const VoiceUI: React.FC<VoiceUIProps> = ({ onCommand = () => {} }) => {
   useEffect(() => {
     // Check if browser supports SpeechRecognition
     if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      
-      recognitionRef.current.onresult = (event) => {
-        const transcript = event.results[0][0].transcript.toLowerCase();
-        setTranscript(transcript);
+      const SpeechRecognitionConstructor = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognitionConstructor) {
+        recognitionRef.current = new SpeechRecognitionConstructor();
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = false;
         
-        // Process commands
-        if (transcript.includes('show me your work') || transcript.includes('portfolio')) {
-          onCommand('portfolio');
-        } else if (transcript.includes('tell me more') || transcript.includes('about')) {
-          onCommand('about');
-        } else if (transcript.includes('contact') || transcript.includes('get in touch')) {
-          onCommand('contact');
-        } else if (transcript.includes('services')) {
-          onCommand('services');
-        }
-      };
-      
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-      };
+        recognitionRef.current.onresult = (event) => {
+          const transcript = event.results[0][0].transcript.toLowerCase();
+          setTranscript(transcript);
+          
+          // Process commands
+          if (transcript.includes('show me your work') || transcript.includes('portfolio')) {
+            onCommand('portfolio');
+          } else if (transcript.includes('tell me more') || transcript.includes('about')) {
+            onCommand('about');
+          } else if (transcript.includes('contact') || transcript.includes('get in touch')) {
+            onCommand('contact');
+          } else if (transcript.includes('services')) {
+            onCommand('services');
+          }
+        };
+        
+        recognitionRef.current.onend = () => {
+          setIsListening(false);
+        };
+      }
     }
     
     return () => {

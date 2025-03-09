@@ -2,7 +2,7 @@
 import React, { useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, OrbitControls, PresentationControls, ContactShadows, Html } from '@react-three/drei';
-import { Vector3 } from 'three';
+import * as THREE from 'three';
 
 // Brain node component to represent different AI capabilities
 const BrainNode = ({ position, color, label, onClick }: { 
@@ -22,7 +22,7 @@ const BrainNode = ({ position, color, label, onClick }: {
   });
   
   return (
-    <group position={new Vector3(...position)}>
+    <group position={new THREE.Vector3(...position)}>
       <mesh
         ref={ref}
         onPointerOver={() => setHovered(true)}
@@ -58,7 +58,7 @@ const BrainModel = ({ onNodeClick }: { onNodeClick: (label: string) => void }) =
     <group ref={brainRef}>
       {/* Central Brain Shape */}
       <mesh>
-        <ellipsoidGeometry args={[1.5, 1.2, 1.2]} />
+        <sphereGeometry args={[1.5, 32, 32]} />
         <meshStandardMaterial 
           color="#2E1A47" 
           transparent 
