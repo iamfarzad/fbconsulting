@@ -1,5 +1,4 @@
 
-
 # Changelog
 
 This document tracks the implementation progress of the AI Automation Consulting Website.
@@ -89,4 +88,11 @@ This document tracks the implementation progress of the AI Automation Consulting
 - Replaced deprecated Robot icon with Bot icon from Lucide React
 - Fixed duplicate images across service entries
 - Updated AI Data Insights section with appropriate data visualization image
+
+## [0.8.0] - 2023-12-15
+### Added
+- Pricing information section with three-tier pricing model
+- Clear pricing cards with featured options and benefits
+- Custom quote request option
+- Integration of pricing section into Services page
 

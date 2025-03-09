@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -5,6 +6,7 @@ import ServiceDetail from '@/components/ServiceDetail';
 import PageHeader from '@/components/PageHeader';
 import ContactCTA from '@/components/ContactCTA';
 import Testimonials from '@/components/testimonials/Testimonials';
+import Pricing from '@/components/Pricing';
 import { Bot, MessageSquare, Workflow, BarChart3, Code } from 'lucide-react';
 
 const Services = () => {
@@ -113,6 +115,7 @@ const Services = () => {
         />
       </main>
       
+      <Pricing />
       <Testimonials />
       <ContactCTA />
       <Footer />
