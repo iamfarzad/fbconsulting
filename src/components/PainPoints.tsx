@@ -51,12 +51,15 @@ const PainPoints = () => {
           <div className="space-y-6">
             <h3 className="text-2xl font-semibold mb-6">AI Automation Solutions</h3>
             <TiltedScroll items={solutions} />
-            
-            <div className="mt-8 opacity-0 animate-fade-in-up" style={{ animationDelay: '800ms', animationFillMode: 'forwards' }}>
-              <Button size="lg" className="rounded-full px-8 w-full sm:w-auto">
-                Get a Free AI Audit
-              </Button>
-            </div>
+          </div>
+        </div>
+        
+        {/* Centered CTA button */}
+        <div className="mt-12 flex justify-center">
+          <div className="opacity-0 animate-fade-in-up" style={{ animationDelay: '800ms', animationFillMode: 'forwards' }}>
+            <Button size="lg" className="rounded-full px-8 neo-button">
+              Get a Free AI Audit
+            </Button>
           </div>
         </div>
       </div>
