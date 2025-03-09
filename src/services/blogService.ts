@@ -1,17 +1,19 @@
 
 import { BlogPost } from '../types/blog';
 
-// In a real implementation, this would fetch from an API
-export const getBlogPost = (slug: string): BlogPost => {
-  // This is a dummy function that would normally fetch data from an API
-  return {
+// Dummy blog posts data
+const blogPosts: BlogPost[] = [
+  {
     title: 'How AI Automation Saved a Manufacturing Company $1.2M Annually',
+    slug: 'ai-automation-manufacturing-case-study',
     date: 'May 15, 2023',
     readTime: '8 min read',
     category: 'Case Study',
     author: 'John Doe',
     authorTitle: 'AI Automation Consultant',
     authorAvatar: '/placeholder.svg',
+    excerpt: 'Discover how strategic AI implementation transformed a mid-sized manufacturing company, reducing costs and increasing efficiency.',
+    featuredImage: '/placeholder.svg',
     content: `
       <p class="mb-4">
         In the competitive landscape of modern manufacturing, efficiency is king. This case study explores how a mid-sized manufacturing company facing rising costs and increasing competition transformed their operations through strategic AI implementation.
@@ -122,5 +124,76 @@ export const getBlogPost = (slug: string): BlogPost => {
         slug: 'ai-workflow-automation-success-stories',
       },
     ]
-  };
+  },
+  {
+    title: 'The Future of Customer Service: AI Chatbots That Actually Work',
+    slug: 'future-of-customer-service-ai-chatbots',
+    date: 'June 2, 2023',
+    readTime: '6 min read',
+    category: 'Technology',
+    author: 'Jane Smith',
+    authorTitle: 'Customer Experience Specialist',
+    authorAvatar: '/placeholder.svg',
+    excerpt: 'Learn how advanced AI chatbots are revolutionizing customer service with real understanding and personalized responses.',
+    featuredImage: '/placeholder.svg',
+    content: `<p>Content for this blog post...</p>`,
+    relatedPosts: [
+      {
+        id: '1',
+        title: 'How AI Automation Saved a Manufacturing Company $1.2M Annually',
+        slug: 'ai-automation-manufacturing-case-study',
+      },
+      {
+        id: '3',
+        title: 'Predictive Analytics: Forecasting Business Trends With 95% Accuracy',
+        slug: 'predictive-analytics-forecasting-business-trends',
+      }
+    ]
+  },
+  {
+    title: 'Predictive Analytics: Forecasting Business Trends With 95% Accuracy',
+    slug: 'predictive-analytics-forecasting-business-trends',
+    date: 'June 18, 2023',
+    readTime: '7 min read',
+    category: 'Data Science',
+    author: 'Michael Johnson',
+    authorTitle: 'Data Scientist',
+    authorAvatar: '/placeholder.svg',
+    excerpt: 'Explore how advanced predictive analytics is helping businesses forecast market trends with unprecedented accuracy.',
+    featuredImage: '/placeholder.svg',
+    content: `<p>Content for this blog post...</p>`,
+    relatedPosts: [
+      {
+        id: '2',
+        title: 'The Future of Customer Service: AI Chatbots That Actually Work',
+        slug: 'future-of-customer-service-ai-chatbots',
+      },
+      {
+        id: '4',
+        title: 'AI for Small Business: Affordable Solutions That Drive Growth',
+        slug: 'ai-small-business-affordable-solutions',
+      }
+    ]
+  }
+];
+
+// In a real implementation, this would fetch from an API
+export const getBlogPost = (slug: string): BlogPost => {
+  // Try to find the post with the matching slug
+  const post = blogPosts.find(post => post.slug === slug);
+  
+  // If found, return it; otherwise return the first post as a fallback
+  return post || blogPosts[0];
+};
+
+// Function to get all blog posts
+export const getAllBlogPosts = (): BlogPost[] => {
+  return blogPosts;
+};
+
+// Function to get all unique blog categories
+export const getBlogCategories = (): string[] => {
+  // Extract all categories from blog posts and remove duplicates
+  const categories = blogPosts.map(post => post.category);
+  return [...new Set(categories)];
 };

@@ -9,6 +9,8 @@ export interface BlogPost {
   authorAvatar: string;
   content: string;
   featuredImage?: string;
+  excerpt?: string;
+  slug?: string;
   relatedPosts: RelatedPost[];
 }
 
