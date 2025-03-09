@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { getAllBlogPosts, getBlogCategories } from '@/services/blogService';
@@ -42,7 +43,7 @@ const Blog = () => {
       />
       <Navbar />
       
-      <div className="flex-grow pt-24 pb-16">
+      <div className="flex-grow pt-24 pb-16 tech-grid">
         <PageHeader
           title="Blog & Case Studies"
           subtitle="Expert insights on AI automation for business"
@@ -50,37 +51,47 @@ const Blog = () => {
         
         <div className="container mx-auto px-4 py-12">
           <section className="mb-16">
-            <h2 className="text-2xl font-bold mb-4">Featured Post</h2>
+            <h2 className="text-2xl font-bold mb-6 text-gradient-teal">Featured Post</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <Link to={`/blog/${featuredPost.slug}`} className="block">
-                <img
-                  src={featuredPost.featuredImage}
-                  alt={featuredPost.title}
-                  className="rounded-lg shadow-md mb-4"
-                />
-                <h3 className="text-xl font-semibold">{featuredPost.title}</h3>
-                <p className="text-muted-foreground">{featuredPost.excerpt}</p>
-                <div className="mt-2 text-sm text-muted-foreground">
-                  {featuredPost.date} - {featuredPost.author}
+                <div className="tech-card h-full">
+                  <img
+                    src={featuredPost.featuredImage}
+                    alt={featuredPost.title}
+                    className="rounded-t-lg w-full h-48 object-cover"
+                  />
+                  <div className="p-6 frosted-glass rounded-b-lg">
+                    <h3 className="text-xl font-semibold text-gradient-teal mb-2">{featuredPost.title}</h3>
+                    <p className="text-muted-foreground mb-4">{featuredPost.excerpt}</p>
+                    <div className="text-sm text-muted-foreground flex items-center justify-between">
+                      <span>{featuredPost.date}</span>
+                      <span className="text-teal">{featuredPost.author}</span>
+                    </div>
+                  </div>
                 </div>
               </Link>
             </div>
           </section>
 
           <section className="mb-16">
-            <h2 className="text-2xl font-bold mb-4">All Posts</h2>
+            <h2 className="text-2xl font-bold mb-6 text-gradient-teal">All Posts</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {regularPosts.map((post) => (
                 <Link to={`/blog/${post.slug}`} key={post.slug} className="block">
-                  <img
-                    src={post.featuredImage}
-                    alt={post.title}
-                    className="rounded-lg shadow-md mb-4"
-                  />
-                  <h3 className="text-lg font-semibold">{post.title}</h3>
-                  <p className="text-muted-foreground">{post.excerpt}</p>
-                  <div className="mt-2 text-sm text-muted-foreground">
-                    {post.date} - {post.author}
+                  <div className="tech-card h-full flex flex-col">
+                    <img
+                      src={post.featuredImage}
+                      alt={post.title}
+                      className="rounded-t-lg w-full h-36 object-cover"
+                    />
+                    <div className="p-6 frosted-glass rounded-b-lg flex-grow">
+                      <h3 className="text-lg font-semibold text-gradient-teal mb-2">{post.title}</h3>
+                      <p className="text-muted-foreground mb-4">{post.excerpt}</p>
+                      <div className="text-sm text-muted-foreground flex items-center justify-between mt-auto">
+                        <span>{post.date}</span>
+                        <span className="text-teal">{post.author}</span>
+                      </div>
+                    </div>
                   </div>
                 </Link>
               ))}
@@ -88,10 +99,10 @@ const Blog = () => {
           </section>
           
           <section>
-            <h2 className="text-2xl font-bold mb-4">Categories</h2>
+            <h2 className="text-2xl font-bold mb-6 text-gradient-teal">Categories</h2>
             <div className="flex flex-wrap gap-4">
               {categories.map((category) => (
-                <Button variant="outline" key={category}>{category}</Button>
+                <Button variant="outline" key={category} className="border-teal text-teal hover:bg-teal/10">{category}</Button>
               ))}
             </div>
           </section>

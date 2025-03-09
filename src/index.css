@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -23,7 +24,7 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    --radius: 0.75rem;
   }
 
   .dark {
@@ -71,9 +72,10 @@
 
 /* Glassmorphism */
 .glassmorphism {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .dark .glassmorphism {
@@ -180,4 +182,37 @@
 /* 3D element container */
 .brain-3d-container {
   @apply relative w-full h-[400px] md:h-[500px];
+}
+
+/* Modern High-Tech Additions */
+.frosted-glass {
+  @apply backdrop-blur-xl bg-white/5 border border-white/10 rounded-xl;
+}
+
+.tech-card {
+  @apply rounded-xl overflow-hidden transition-all duration-300 hover:shadow-[0_10px_40px_rgba(0,196,180,0.15)] hover:-translate-y-1;
+}
+
+.subtle-border {
+  @apply border border-white/10;
+}
+
+.tech-gradient {
+  @apply bg-gradient-to-br from-deep-purple via-deep-purple/90 to-deep-purple/80;
+}
+
+.hover-glow:hover {
+  @apply shadow-[0_0_20px_rgba(0,196,180,0.4)];
+}
+
+.neo-button {
+  @apply rounded-full shadow-lg hover:shadow-xl transition-all duration-300;
+}
+
+/* Grid pattern */
+.tech-grid {
+  background-size: 30px 30px;
+  background-image: 
+    linear-gradient(to right, rgba(0, 196, 180, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 196, 180, 0.05) 1px, transparent 1px);
 }
