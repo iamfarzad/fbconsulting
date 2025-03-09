@@ -14,6 +14,11 @@ import {
     ArrowUpIcon,
     Paperclip,
     PlusIcon,
+    Bot,
+    MessageSquare,
+    Workflow,
+    BarChart3,
+    Code,
 } from "lucide-react";
 
 interface UseAutoResizeTextareaProps {
