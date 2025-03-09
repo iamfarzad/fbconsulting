@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+
+import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ServiceDetail from '@/components/ServiceDetail';
@@ -7,23 +8,12 @@ import ContactCTA from '@/components/ContactCTA';
 import Testimonials from '@/components/testimonials/Testimonials';
 import Pricing from '@/components/Pricing';
 import SEO from '@/components/SEO';
-import { usePageViewTracking } from '@/hooks/useAnalytics';
 import { Bot, MessageSquare, Workflow, BarChart3, Code } from 'lucide-react';
 
 const Services = () => {
   console.log("Services page rendering");
   
-  usePageViewTracking("AI Automation Services");
-  
-  useEffect(() => {
-    console.log("Services page effect running");
-    document.body.classList.add('page-enter-active');
-    return () => {
-      document.body.classList.remove('page-enter-active');
-      document.body.classList.add('page-enter');
-    };
-  }, []);
-
+  // Structured data for SEO
   const servicesStructuredData = {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -89,7 +79,7 @@ const Services = () => {
         structuredData={servicesStructuredData}
       />
       
-      <div className="min-h-screen flex flex-col">
+      <main className="flex flex-col min-h-screen">
         <Navbar />
         
         <div className="flex-grow pt-28 pb-12">
@@ -192,7 +182,7 @@ const Services = () => {
         <Testimonials />
         <ContactCTA />
         <Footer />
-      </div>
+      </main>
     </>
   );
 };
