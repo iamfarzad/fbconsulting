@@ -13,7 +13,7 @@ const blogPosts: BlogPost[] = [
     authorTitle: 'AI Automation Consultant',
     authorAvatar: '/placeholder.svg',
     excerpt: 'Discover how strategic AI implementation transformed a mid-sized manufacturing company, reducing costs and increasing efficiency.',
-    featuredImage: '/placeholder.svg',
+    featuredImage: 'https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7',
     content: `
       <p class="mb-4">
         In the competitive landscape of modern manufacturing, efficiency is king. This case study explores how a mid-sized manufacturing company facing rising costs and increasing competition transformed their operations through strategic AI implementation.
@@ -135,7 +135,7 @@ const blogPosts: BlogPost[] = [
     authorTitle: 'Customer Experience Specialist',
     authorAvatar: '/placeholder.svg',
     excerpt: 'Learn how advanced AI chatbots are revolutionizing customer service with real understanding and personalized responses.',
-    featuredImage: '/placeholder.svg',
+    featuredImage: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c',
     content: `<p>Content for this blog post...</p>`,
     relatedPosts: [
       {
@@ -160,7 +160,7 @@ const blogPosts: BlogPost[] = [
     authorTitle: 'Data Scientist',
     authorAvatar: '/placeholder.svg',
     excerpt: 'Explore how advanced predictive analytics is helping businesses forecast market trends with unprecedented accuracy.',
-    featuredImage: '/placeholder.svg',
+    featuredImage: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9',
     content: `<p>Content for this blog post...</p>`,
     relatedPosts: [
       {

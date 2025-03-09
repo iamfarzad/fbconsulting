@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllBlogPosts, getBlogCategories } from '@/services/blogService';
 import Navbar from '@/components/Navbar';
@@ -9,12 +9,20 @@ import NewsletterSignup from '@/components/NewsletterSignup';
 import SEO from '@/components/SEO';
 import DotPattern from '@/components/ui/dot-pattern';
 import { TextRevealByWord } from '@/components/ui/text-reveal';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SearchIcon } from 'lucide-react';
+import FeatureCard from '@/components/FeatureCard';
 
 const Blog = () => {
   const allPosts = getAllBlogPosts();
   const categories = getBlogCategories();
   const featuredPost = allPosts[0]; // Just use the first post as featured
   const regularPosts = allPosts.slice(1);
+  const [activeCategory, setActiveCategory] = useState<string>("all");
+
+  const filteredPosts = activeCategory === "all" 
+    ? regularPosts 
+    : regularPosts.filter(post => post.category === activeCategory);
 
   // Blog structured data
   const blogStructuredData = {
@@ -44,75 +52,122 @@ const Blog = () => {
       />
       <Navbar />
       
-      <div className="flex-grow pt-24 pb-16 tech-grid relative">
+      <div className="flex-grow pt-24 pb-16 relative">
         <DotPattern width={14} height={14} cx={7} cy={7} cr={1.2} className="opacity-30" />
         
         {/* Hero section with text reveal */}
-        <div className="h-[60vh] relative overflow-hidden">
+        <div className="h-[40vh] relative overflow-hidden mb-12">
           <TextRevealByWord 
             text="Discover AI automation insights, case studies, and expert guides to transform your business processes." 
-            className="h-[60vh]"
+            className="h-[40vh]"
           />
         </div>
         
-        <div className="container mx-auto px-4 py-12 relative z-10">
+        <div className="container mx-auto px-4 py-8 relative z-10">
+          {/* Search bar - currently just visual */}
+          <div className="max-w-2xl mx-auto mb-12">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <SearchIcon className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search articles..."
+                className="block w-full pl-10 pr-3 py-3 border border-input bg-background rounded-full focus:outline-none focus:ring-2 focus:ring-teal/50"
+              />
+            </div>
+          </div>
+
           <section className="mb-16">
-            <h2 className="text-2xl font-bold mb-6 text-gradient-teal">Featured Post</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Link to={`/blog/${featuredPost.slug}`} className="block">
-                <div className="tech-card h-full">
-                  <img
-                    src={featuredPost.featuredImage}
-                    alt={featuredPost.title}
-                    className="rounded-t-lg w-full h-48 object-cover"
-                  />
-                  <div className="p-6 frosted-glass rounded-b-lg">
-                    <h3 className="text-xl font-semibold text-gradient-teal mb-2">{featuredPost.title}</h3>
-                    <p className="text-muted-foreground mb-4">{featuredPost.excerpt}</p>
-                    <div className="text-sm text-muted-foreground flex items-center justify-between">
-                      <span>{featuredPost.date}</span>
-                      <span className="text-teal">{featuredPost.author}</span>
+            <h2 className="text-3xl font-bold mb-10 text-gradient-teal text-center">Featured Article</h2>
+            <Link to={`/blog/${featuredPost.slug}`} className="block max-w-4xl mx-auto">
+              <div className="tech-card hover-glow transition-all duration-300">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="rounded-lg overflow-hidden">
+                    <img
+                      src={featuredPost.featuredImage || "https://images.unsplash.com/photo-1498050108023-c5249f4df085"}
+                      alt={featuredPost.title}
+                      className="w-full h-full object-cover aspect-video"
+                    />
+                  </div>
+                  <div className="p-6 frosted-glass rounded-lg flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center mb-4">
+                        <span className="inline-block px-3 py-1 bg-primary text-primary-foreground text-sm font-medium rounded-full mr-3">
+                          {featuredPost.category}
+                        </span>
+                        <span className="text-sm text-muted-foreground">{featuredPost.date}</span>
+                      </div>
+                      <h3 className="text-2xl font-semibold text-gradient-teal mb-4">{featuredPost.title}</h3>
+                      <p className="text-muted-foreground mb-4">{featuredPost.excerpt}</p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <img 
+                          src={featuredPost.authorAvatar || "/placeholder.svg"}
+                          alt={featuredPost.author}
+                          className="w-8 h-8 rounded-full mr-2"
+                        />
+                        <span className="text-sm">{featuredPost.author}</span>
+                      </div>
+                      <span className="text-sm text-muted-foreground">{featuredPost.readTime}</span>
                     </div>
                   </div>
                 </div>
-              </Link>
-            </div>
+              </div>
+            </Link>
           </section>
 
           <section className="mb-16">
-            <h2 className="text-2xl font-bold mb-6 text-gradient-teal">All Posts</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {regularPosts.map((post) => (
-                <Link to={`/blog/${post.slug}`} key={post.slug} className="block">
-                  <div className="tech-card h-full flex flex-col">
-                    <img
-                      src={post.featuredImage}
-                      alt={post.title}
-                      className="rounded-t-lg w-full h-36 object-cover"
-                    />
-                    <div className="p-6 frosted-glass rounded-b-lg flex-grow">
-                      <h3 className="text-lg font-semibold text-gradient-teal mb-2">{post.title}</h3>
-                      <p className="text-muted-foreground mb-4">{post.excerpt}</p>
-                      <div className="text-sm text-muted-foreground flex items-center justify-between mt-auto">
-                        <span>{post.date}</span>
-                        <span className="text-teal">{post.author}</span>
-                      </div>
-                    </div>
+            <div className="flex flex-col items-center mb-10">
+              <h2 className="text-3xl font-bold mb-6 text-gradient-teal text-center">Browse Articles</h2>
+              
+              <Tabs defaultValue="all" className="w-full max-w-3xl">
+                <TabsList className="grid grid-cols-3 md:grid-cols-5 mb-8">
+                  <TabsTrigger 
+                    value="all" 
+                    onClick={() => setActiveCategory("all")}
+                    className="data-[state=active]:bg-teal/10 data-[state=active]:text-teal"
+                  >
+                    All
+                  </TabsTrigger>
+                  {categories.map((category) => (
+                    <TabsTrigger 
+                      key={category} 
+                      value={category}
+                      onClick={() => setActiveCategory(category)}
+                      className="data-[state=active]:bg-teal/10 data-[state=active]:text-teal"
+                    >
+                      {category}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+                
+                <TabsContent value={activeCategory} className="w-full">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {filteredPosts.map((post) => (
+                      <Link to={`/blog/${post.slug}`} key={post.slug} className="group">
+                        <FeatureCard
+                          title={post.title}
+                          description={
+                            <div className="space-y-4">
+                              <p className="text-muted-foreground line-clamp-3">{post.excerpt}</p>
+                              <div className="flex items-center justify-between mt-4">
+                                <span className="text-sm">{post.date}</span>
+                                <span className="text-sm text-teal group-hover:underline">Read more</span>
+                              </div>
+                            </div>
+                          }
+                          className="h-full"
+                        />
+                      </Link>
+                    ))}
                   </div>
-                </Link>
-              ))}
+                </TabsContent>
+              </Tabs>
             </div>
           </section>
           
-          <section>
-            <h2 className="text-2xl font-bold mb-6 text-gradient-teal">Categories</h2>
-            <div className="flex flex-wrap gap-4">
-              {categories.map((category) => (
-                <Button variant="outline" key={category} className="border-teal text-teal hover:bg-teal/10">{category}</Button>
-              ))}
-            </div>
-          </section>
-
           <section className="mt-16">
             <NewsletterSignup />
           </section>
