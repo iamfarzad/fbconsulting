@@ -1,48 +1,16 @@
 
-import React, { useEffect, useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { ChevronRight, Calendar, Sparkles } from 'lucide-react';
-import AnimatedText from './AnimatedText';
-import Brain3D from './3d/Brain3D';
-import VoiceUI from './VoiceUI';
-import LocationGreeting from './LocationGreeting';
+import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import DotPattern from './ui/dot-pattern';
+import { VercelV0Chat } from './ui/v0-ai-chat';
+import LocationGreeting from './LocationGreeting';
+import VoiceUI from './VoiceUI';
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const [brainCapability, setBrainCapability] = useState<string | null>(null);
   
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!heroRef.current) return;
-      
-      const { clientX, clientY } = e;
-      const { left, top, width, height } = heroRef.current.getBoundingClientRect();
-      
-      const x = (clientX - left) / width;
-      const y = (clientY - top) / height;
-      
-      const moveX = (x - 0.5) * 20;
-      const moveY = (y - 0.5) * 20;
-      
-      const bgElement = heroRef.current.querySelector('.hero-bg') as HTMLElement;
-      const gridElement = heroRef.current.querySelector('.retro-grid') as HTMLElement;
-      
-      if (bgElement) {
-        bgElement.style.transform = `translate(${moveX * -0.5}px, ${moveY * -0.5}px)`;
-      }
-      
-      if (gridElement) {
-        gridElement.style.transform = `translate(${moveX * -0.2}px, ${moveY * -0.2}px)`;
-      }
-    };
-    
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
   const handleVoiceCommand = (command: string) => {
     switch (command) {
       case 'portfolio':
@@ -62,11 +30,6 @@ const Hero = () => {
     }
   };
 
-  const handleBrainNodeClick = (capability: string) => {
-    setBrainCapability(capability);
-    setTimeout(() => setBrainCapability(null), 3000);
-  };
-
   return (
     <section 
       ref={heroRef}
@@ -81,91 +44,26 @@ const Hero = () => {
       
       {/* Content */}
       <div className="container mx-auto max-w-6xl relative z-10 mt-10 md:mt-0">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="text-left">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-block mb-4 px-3 py-1 rounded-full bg-teal/10 text-teal"
-            >
-              <span className="flex items-center text-sm font-medium">
-                <Sparkles className="w-4 h-4 mr-2" />
-                AI-Powered Business Automation
-              </span>
-            </motion.div>
-            
-            <div className="mb-6">
-              <LocationGreeting className="mb-2 text-neon-white" />
-              
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-futuristic font-bold leading-tight overflow-hidden">
-                <AnimatedText 
-                  text="Automate Your Business" 
-                  tag="span" 
-                  animation="text-reveal"
-                  className="block text-neon-white" 
-                />
-                <AnimatedText 
-                  text="with AI" 
-                  tag="span" 
-                  animation="text-reveal"
-                  delay={200}
-                  className="block text-gradient-retro" 
-                />
-              </h1>
-            </div>
-            
-            <p className="text-xl md:text-2xl text-neon-white/80 max-w-xl mb-8 opacity-0 animate-fade-in-up" style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}>
-              Reduce manual work, increase efficiency, and scale faster with AI-driven automation solutions tailored for your business.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row items-start gap-4 opacity-0 animate-fade-in-up" style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}>
-              <Button 
-                size="lg" 
-                className="rounded-full px-8 py-6 text-lg bg-teal hover:bg-teal/90 text-deep-purple shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
-              >
-                <Calendar size={20} />
-                Book a Free Consultation
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="rounded-full px-8 py-6 text-lg border-neon-white text-neon-white hover:bg-neon-white/10 flex items-center gap-1"
-              >
-                Learn More
-                <ChevronRight size={18} />
-              </Button>
-            </div>
-            
-            {brainCapability && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                className="mt-8 p-4 bg-deep-purple/80 border border-teal/30 rounded-lg text-neon-white"
-              >
-                <h3 className="text-lg font-semibold text-teal mb-1">{brainCapability}</h3>
-                {brainCapability === 'Strategy' && (
-                  <p>Developing custom AI roadmaps to transform your business operations.</p>
-                )}
-                {brainCapability === 'Design' && (
-                  <p>Creating intuitive AI interfaces that feel natural to your team and customers.</p>
-                )}
-                {brainCapability === 'Execution' && (
-                  <p>Implementing solutions that integrate seamlessly with your existing workflows.</p>
-                )}
-                {brainCapability === 'Analysis' && (
-                  <p>Measuring and optimizing AI performance for maximum ROI.</p>
-                )}
-              </motion.div>
-            )}
-          </div>
-          
-          <div className="hidden lg:block">
-            <Brain3D onNodeClick={handleBrainNodeClick} />
-          </div>
+        <div className="text-center mb-6">
+          <LocationGreeting className="mb-2 text-neon-white" />
+        </div>
+        
+        <VercelV0Chat />
+        
+        <div className="mt-8 flex justify-center">
+          <motion.div 
+            className="text-lg text-neon-white/70 text-center max-w-lg"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+          >
+            Reduce manual work, increase efficiency, and scale faster with AI-driven automation solutions tailored for your business.
+          </motion.div>
         </div>
       </div>
+      
+      {/* Dot pattern */}
+      <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-15" />
       
       {/* Voice UI */}
       <VoiceUI onCommand={handleVoiceCommand} />
