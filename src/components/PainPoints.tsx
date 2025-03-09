@@ -24,7 +24,7 @@ const PainPoints = () => {
   ];
 
   return (
-    <section className="py-20 px-4 bg-background">
+    <section className="py-20 px-4 bg-gradient-to-b from-background to-deep-purple/5">
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-16">
           <AnimatedText
@@ -42,19 +42,15 @@ const PainPoints = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           {/* Pain Points Section */}
-          <div className="space-y-6 bg-white/5 p-8 rounded-xl shadow-lg frosted-glass">
+          <div className="space-y-6 backdrop-blur-sm p-8 rounded-xl">
             <h3 className="text-2xl font-semibold mb-6 text-teal">Business Challenges</h3>
-            <div className="tilted-scroll-container bg-black/10 p-5 rounded-xl">
-              <TiltedScroll items={painPoints} />
-            </div>
+            <TiltedScroll items={painPoints} />
           </div>
           
           {/* Solutions Section */}
-          <div className="space-y-6 bg-white/5 p-8 rounded-xl shadow-lg frosted-glass">
+          <div className="space-y-6 backdrop-blur-sm p-8 rounded-xl">
             <h3 className="text-2xl font-semibold mb-6 text-retro-pink">AI Automation Solutions</h3>
-            <div className="tilted-scroll-container bg-black/10 p-5 rounded-xl">
-              <TiltedScroll items={solutions} />
-            </div>
+            <TiltedScroll items={solutions} />
           </div>
         </div>
         
