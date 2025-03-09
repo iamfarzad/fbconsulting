@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { getAllBlogPosts, getBlogCategories } from '@/services/blogService';
@@ -87,7 +86,7 @@ const Blog = () => {
               ))}
             </div>
           </section>
-
+          
           <section>
             <h2 className="text-2xl font-bold mb-4">Categories</h2>
             <div className="flex flex-wrap gap-4">

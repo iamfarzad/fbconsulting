@@ -35,8 +35,8 @@ const ContactCTA = () => {
     <section id="contact" className="py-20 px-4 relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-primary/5 filter blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-blue-400/5 filter blur-3xl"></div>
+        <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-teal/5 filter blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-teal/5 filter blur-3xl"></div>
       </div>
       
       <div className="container mx-auto max-w-4xl relative z-10">
