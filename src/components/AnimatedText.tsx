@@ -19,8 +19,8 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
   animation = 'fade-in-up',
   tag: Tag = 'span',
 }) => {
-  // Fix: Use a more specific ref type that matches the element type
-  const textRef = useRef<HTMLElement | null>(null);
+  // Create a properly typed ref that matches the HTML element type for the selected tag
+  const textRef = useRef<HTMLHeadingElement | HTMLParagraphElement | HTMLSpanElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -53,10 +53,9 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({
     };
   }, [animation, delay, once]);
 
-  // The ref is cast as any to avoid the TypeScript error
   return (
     <Tag
-      ref={textRef as any}
+      ref={textRef as React.RefObject<any>}
       className={cn('opacity-0', className)}
       style={{ animationDelay: `${delay}ms` }}
     >
