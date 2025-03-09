@@ -249,4 +249,3 @@ export const useCopilot = (options: UseCopilotOptions = {}): UseCopilotReturn =>
     currentPersona
   };
 };
-
