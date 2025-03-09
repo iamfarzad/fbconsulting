@@ -14,6 +14,7 @@ import Contact from "./pages/Contact";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/NotFound";
+import TestPage from "./pages/TestPage";
 
 // CopilotKit integration with dummy config
 import { CopilotKit } from "@copilotkit/react-core";
@@ -30,11 +31,13 @@ const AnalyticsTracker = () => {
 
   useEffect(() => {
     // Initialize analytics only once
+    console.log("Trying to initialize analytics with ID:", GA_MEASUREMENT_ID);
     initializeAnalytics(GA_MEASUREMENT_ID);
   }, []);
 
   useEffect(() => {
     // Track page views when the location changes
+    console.log("Tracking page view for:", location.pathname);
     trackPageView({
       path: location.pathname,
       search: location.search,
@@ -58,6 +61,7 @@ const App = () => {
               <AnalyticsTracker />
               <Routes>
                 <Route path="/" element={<Index />} />
+                <Route path="/test" element={<TestPage />} />
                 <Route path="/services" element={<Services />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />

@@ -19,8 +19,8 @@ const SEO: React.FC<SEOProps> = ({
   ogType = 'website',
   structuredData,
 }) => {
-  const siteUrl = window.location.origin;
-  const pageUrl = canonicalUrl || window.location.href;
+  const siteUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const pageUrl = canonicalUrl || (typeof window !== 'undefined' ? window.location.href : '');
   const imageUrl = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`;
   
   return (

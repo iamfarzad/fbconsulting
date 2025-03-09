@@ -12,9 +12,12 @@ import SEO from '@/components/SEO';
 import { usePageViewTracking } from '@/hooks/useAnalytics';
 
 const Index = () => {
+  console.log("Index page rendering");
+  
   usePageViewTracking("AI Automation Ally - Home");
 
   useEffect(() => {
+    console.log("Index page effect running");
     document.body.classList.add('page-enter-active');
     return () => {
       document.body.classList.remove('page-enter-active');
