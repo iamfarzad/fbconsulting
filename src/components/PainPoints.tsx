@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { X, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AnimatedText from './AnimatedText';
 import { TiltedScroll, TiltedScrollItem } from './ui/tilted-scroll';
@@ -15,23 +15,13 @@ const PainPoints = () => {
     { id: "6", text: "Losing track of leads and opportunities" },
   ];
 
-  const solutions = [
-    {
-      title: "Automate routine workflows",
-      description: "Free up 20+ hours per week with intelligent automation for repetitive tasks and processes."
-    },
-    {
-      title: "Scale without proportional cost",
-      description: "Handle increased volume without adding staff by implementing AI-powered operations."
-    },
-    {
-      title: "Improve customer experiences",
-      description: "Reduce response times by up to 80% with AI chatbots and automated service systems."
-    },
-    {
-      title: "Unlock data-driven insights",
-      description: "Make better decisions with automated analysis and AI-powered business intelligence."
-    }
+  const solutions: TiltedScrollItem[] = [
+    { id: "1", text: "Automate routine workflows - Free up 20+ hours per week" },
+    { id: "2", text: "Scale without proportional cost with AI-powered operations" },
+    { id: "3", text: "Reduce response times by up to 80% with AI chatbots" },
+    { id: "4", text: "Make better decisions with AI-powered business intelligence" },
+    { id: "5", text: "Streamline communication with automated systems" },
+    { id: "6", text: "Never miss a lead with AI-driven opportunity tracking" },
   ];
 
   return (
@@ -52,31 +42,16 @@ const PainPoints = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          {/* Pain Points - TiltedScroll */}
+          {/* Pain Points Section */}
           <div className="space-y-6">
             <h3 className="text-2xl font-semibold mb-6">Business Challenges</h3>
             <TiltedScroll items={painPoints} />
           </div>
           
-          {/* Solutions */}
+          {/* Solutions Section */}
           <div className="space-y-6">
             <h3 className="text-2xl font-semibold mb-6">AI Automation Solutions</h3>
-            
-            {solutions.map((solution, index) => (
-              <div 
-                key={index}
-                className="solution opacity-0 animate-fade-in-up flex items-start gap-4 p-4 rounded-lg border border-border bg-white/80 shadow-subtle"
-                style={{ animationDelay: `${150 * index}ms`, animationFillMode: 'forwards' }}
-              >
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-                  <Check size={18} />
-                </div>
-                <div>
-                  <h4 className="text-lg font-medium mb-1">{solution.title}</h4>
-                  <p className="text-muted-foreground">{solution.description}</p>
-                </div>
-              </div>
-            ))}
+            <TiltedScroll items={solutions} />
             
             <div className="mt-8 opacity-0 animate-fade-in-up" style={{ animationDelay: '800ms', animationFillMode: 'forwards' }}>
               <Button size="lg" className="rounded-full px-8 w-full sm:w-auto">
