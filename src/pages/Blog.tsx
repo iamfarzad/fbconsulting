@@ -12,6 +12,7 @@ import { TextRevealByWord } from '@/components/ui/text-reveal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SearchIcon } from 'lucide-react';
 import FeatureCard from '@/components/FeatureCard';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 
 const Blog = () => {
   const allPosts = getAllBlogPosts();
@@ -147,19 +148,18 @@ const Blog = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {filteredPosts.map((post) => (
                       <Link to={`/blog/${post.slug}`} key={post.slug} className="group">
-                        <FeatureCard
-                          title={post.title}
-                          description={
-                            <div className="space-y-4">
-                              <p className="text-muted-foreground line-clamp-3">{post.excerpt}</p>
-                              <div className="flex items-center justify-between mt-4">
-                                <span className="text-sm">{post.date}</span>
-                                <span className="text-sm text-teal group-hover:underline">Read more</span>
-                              </div>
-                            </div>
-                          }
-                          className="h-full"
-                        />
+                        <Card className="h-full hover:shadow-md transition-shadow duration-300 frosted-glass">
+                          <CardHeader>
+                            <h3 className="text-xl font-semibold text-gradient-teal">{post.title}</h3>
+                          </CardHeader>
+                          <CardContent>
+                            <p className="text-muted-foreground line-clamp-3">{post.excerpt}</p>
+                          </CardContent>
+                          <CardFooter className="flex items-center justify-between pt-4">
+                            <span className="text-sm">{post.date}</span>
+                            <span className="text-sm text-teal group-hover:underline">Read more</span>
+                          </CardFooter>
+                        </Card>
                       </Link>
                     ))}
                   </div>
