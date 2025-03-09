@@ -1,0 +1,86 @@
+
+import React, { useState } from 'react';
+import { Mail, MailCheck } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
+
+interface NewsletterSignupProps {
+  title?: string;
+  description?: string;
+  className?: string;
+}
+
+const NewsletterSignup: React.FC<NewsletterSignupProps> = ({
+  title = "Subscribe to our Newsletter",
+  description = "Stay up to date with the latest AI trends and insights.",
+  className,
+}) => {
+  const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !email.includes('@')) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    // Simulate API call delay for demonstration purposes
+    setTimeout(() => {
+      // Success message
+      toast.success("Thank you for subscribing!", {
+        description: "You've been added to our newsletter list.",
+        icon: <MailCheck className="h-4 w-4" />,
+      });
+      
+      setEmail('');
+      setIsLoading(false);
+      
+      // Track the newsletter signup event
+      if (window.gtag) {
+        window.gtag('event', 'newsletter_signup', {
+          event_category: 'engagement',
+          event_label: 'newsletter',
+        });
+      }
+    }, 1500);
+  };
+
+  return (
+    <div className={`py-8 ${className}`}>
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-2">
+          <Mail className="h-5 w-5 text-primary" />
+          <h3 className="text-xl font-semibold">{title}</h3>
+        </div>
+        
+        <p className="text-muted-foreground">{description}</p>
+        
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 mt-2">
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
+            required
+            aria-label="Email address"
+            className="flex-grow"
+          />
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Subscribing..." : "Subscribe"}
+          </Button>
+        </form>
+        
+        <p className="text-xs text-muted-foreground mt-2">
+          By subscribing, you agree to our Privacy Policy and consent to receive updates from our company.
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default NewsletterSignup;

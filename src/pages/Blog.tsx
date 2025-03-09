@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { getAllBlogPosts, getBlogCategories } from '@/services/blogService';
@@ -5,7 +6,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import NewsletterSignup from '@/components/NewsletterSignup';
 import SEO from '@/components/SEO';
 
 const Blog = () => {
@@ -97,14 +98,7 @@ const Blog = () => {
           </section>
 
           <section className="mt-16">
-            <h2 className="text-2xl font-bold mb-4">Subscribe to Newsletter</h2>
-            <p className="text-muted-foreground mb-4">
-              Stay up to date with the latest AI trends and insights.
-            </p>
-            <div className="flex flex-col md:flex-row gap-4">
-              <Input type="email" placeholder="Enter your email" />
-              <Button>Subscribe</Button>
-            </div>
+            <NewsletterSignup />
           </section>
         </div>
       </div>

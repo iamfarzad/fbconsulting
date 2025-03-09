@@ -1,3 +1,4 @@
+
 # Changelog
 
 This document tracks the implementation progress of the AI Automation Consulting Website.
@@ -26,7 +27,7 @@ This document tracks the implementation progress of the AI Automation Consulting
 - ✅ Full CopilotKit integration with actual API key
 - ✅ SEO optimization
 - ✅ Analytics integration
-- 🔄 Email capture and newsletter signup
+- ✅ Email capture and newsletter signup
 - 🔄 Lead generation tracking
 
 ### Tech Implementation Notes
@@ -110,3 +111,10 @@ This document tracks the implementation progress of the AI Automation Consulting
 - useAnalytics hook for consistent analytics tracking across the application
 - Automatic page view tracking on route changes
 - Custom event tracking capability for user interactions
+
+## [1.1.0] - 2024-01-05
+### Added
+- Newsletter signup component with email capture functionality
+- Integration of newsletter signup on Blog page and BlogPost pages
+- Form validation and success messaging
+- Analytics tracking for newsletter subscriptions
