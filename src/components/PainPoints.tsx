@@ -24,33 +24,37 @@ const PainPoints = () => {
   ];
 
   return (
-    <section className="py-20 px-4 bg-secondary/50">
+    <section className="py-20 px-4 bg-background">
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-16">
           <AnimatedText
             text="Is This You?"
             tag="h2"
-            className="text-3xl md:text-4xl font-bold mb-4"
+            className="text-3xl md:text-4xl font-bold mb-4 text-foreground"
           />
           <AnimatedText
             text="Common business challenges that AI automation can solve"
             tag="p"
             delay={200}
-            className="text-xl text-muted-foreground max-w-2xl mx-auto"
+            className="text-xl text-foreground/80 max-w-2xl mx-auto"
           />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           {/* Pain Points Section */}
-          <div className="space-y-6">
-            <h3 className="text-2xl font-semibold mb-6">Business Challenges</h3>
-            <TiltedScroll items={painPoints} />
+          <div className="space-y-6 bg-white/5 p-8 rounded-xl shadow-lg frosted-glass">
+            <h3 className="text-2xl font-semibold mb-6 text-teal">Business Challenges</h3>
+            <div className="tilted-scroll-container bg-black/10 p-5 rounded-xl">
+              <TiltedScroll items={painPoints} />
+            </div>
           </div>
           
           {/* Solutions Section */}
-          <div className="space-y-6">
-            <h3 className="text-2xl font-semibold mb-6">AI Automation Solutions</h3>
-            <TiltedScroll items={solutions} />
+          <div className="space-y-6 bg-white/5 p-8 rounded-xl shadow-lg frosted-glass">
+            <h3 className="text-2xl font-semibold mb-6 text-retro-pink">AI Automation Solutions</h3>
+            <div className="tilted-scroll-container bg-black/10 p-5 rounded-xl">
+              <TiltedScroll items={solutions} />
+            </div>
           </div>
         </div>
         
