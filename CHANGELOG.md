@@ -1,4 +1,5 @@
 
+
 # Changelog
 
 This document tracks the implementation progress of the AI Automation Consulting Website.
@@ -82,3 +83,10 @@ This document tracks the implementation progress of the AI Automation Consulting
 - TestimonialCard component for displaying individual testimonials
 - Responsive testimonial grid with animation effects
 - Integration of testimonials into the Services page
+
+## [0.7.0] - 2023-12-10
+### Fixed
+- Replaced deprecated Robot icon with Bot icon from Lucide React
+- Fixed duplicate images across service entries
+- Updated AI Data Insights section with appropriate data visualization image
+
