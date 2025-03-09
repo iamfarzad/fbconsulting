@@ -11,7 +11,7 @@ const testimonialData: Testimonial[] = [
     name: 'Sarah Johnson',
     company: 'TechInnovate',
     role: 'CTO',
-    content: 'The AI automation solutions transformed our customer service operations. We've reduced response times by 65% while improving customer satisfaction scores.',
+    content: "The AI automation solutions transformed our customer service operations. We've reduced response times by 65% while improving customer satisfaction scores.",
     rating: 5
   },
   {
@@ -19,7 +19,7 @@ const testimonialData: Testimonial[] = [
     name: 'Michael Chen',
     company: 'FinanceFlow',
     role: 'Operations Director',
-    content: 'Implementing AI for our document processing workflows was a game-changer. What took days now happens in minutes with greater accuracy.',
+    content: "Implementing AI for our document processing workflows was a game-changer. What took days now happens in minutes with greater accuracy.",
     rating: 5
   },
   {
@@ -27,7 +27,7 @@ const testimonialData: Testimonial[] = [
     name: 'Alicia Rodriguez',
     company: 'RetailPro',
     role: 'Marketing Manager',
-    content: 'The customer insights we've gained through AI analysis have completely changed how we approach our marketing strategies. We're seeing a 40% increase in campaign effectiveness.',
+    content: "The customer insights we've gained through AI analysis have completely changed how we approach our marketing strategies. We're seeing a 40% increase in campaign effectiveness.",
     rating: 4
   }
 ];
