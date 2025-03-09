@@ -6,7 +6,7 @@ import ServiceDetail from '@/components/ServiceDetail';
 import PageHeader from '@/components/PageHeader';
 import ContactCTA from '@/components/ContactCTA';
 import Testimonials from '@/components/testimonials/Testimonials';
-import { Robot, MessageSquare, Workflow, BarChart3, Code } from 'lucide-react';
+import { Bot, MessageSquare, Workflow, BarChart3, Code } from 'lucide-react';
 
 const Services = () => {
   // Page transition effect
@@ -38,7 +38,7 @@ const Services = () => {
             "Technology stack recommendations",
             "Change management guidance"
           ]}
-          icon={<Robot />}
+          icon={<Bot />}
           imagePosition="right"
           imageSrc="https://images.unsplash.com/photo-1589254065909-b7086229d08c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=870&q=80"
           altText="AI Strategy Planning Session"
