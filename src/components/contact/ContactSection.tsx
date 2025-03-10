@@ -63,8 +63,8 @@ const ContactSection = () => {
                     <Mail className="w-5 h-5 mt-1" />
                     <div>
                       <p className="font-medium">Email</p>
-                      <a href="mailto:hello@farzadbayat.com" className="text-white/90 hover:text-white">
-                        hello@farzadbayat.com
+                      <a href="mailto:Farzad@fbconsulting.com" className="text-white/90 hover:text-white">
+                        Farzad@fbconsulting.com
                       </a>
                     </div>
                   </div>
@@ -73,7 +73,7 @@ const ContactSection = () => {
                     <Phone className="w-5 h-5 mt-1" />
                     <div>
                       <p className="font-medium">Phone</p>
-                      <p className="text-white/90">+1 (555) 123-4567</p>
+                      <p className="text-white/90">+47 94446446</p>
                     </div>
                   </div>
                   
@@ -81,7 +81,7 @@ const ContactSection = () => {
                     <MapPin className="w-5 h-5 mt-1" />
                     <div>
                       <p className="font-medium">Location</p>
-                      <p className="text-white/90">San Francisco, CA</p>
+                      <p className="text-white/90">Oslo, Norway</p>
                     </div>
                   </div>
                   
