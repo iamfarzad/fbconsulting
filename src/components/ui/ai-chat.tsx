@@ -17,11 +17,10 @@ export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatIn
   const { messages, addUserMessage, addAssistantMessage, clearMessages } = useMessages();
   const [isLoading, setIsLoading] = useState(false);
   
-  // Create a mock LeadInfo object for suggestions
+  // Create a mock LeadInfo object for suggestions with correct type structure
   const mockLeadInfo: LeadInfo = {
     interests: messages.map(m => m.content),
-    stage: 'discovery', // Using a valid property from LeadInfo
-    // Remove lastInteraction as it doesn't exist in LeadInfo type
+    stage: 'discovery' // Using a valid property from LeadInfo
   };
   
   const suggestedResponse = useSuggestedResponse(mockLeadInfo);
