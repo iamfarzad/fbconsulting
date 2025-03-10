@@ -52,6 +52,22 @@
   transform-origin: left;
 }
 
+/* Norwegian-specific animations */
+@keyframes norwayGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.norway-gradient-text {
+  background: linear-gradient(90deg, #EF2B2D, #FFFFFF, #002868);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: norwayGradient 5s ease infinite;
+}
+
 /* Minimal UI animations */
 @keyframes pulse {
   0%, 100% { opacity: 1; }
@@ -92,4 +108,16 @@
 
 .neo-button:hover::before {
   left: 100%;
+}
+
+/* Norwegian flag color-inspired animations */
+@keyframes norwayFlag {
+  0% { border-color: rgba(239, 43, 45, 0.5); }
+  33% { border-color: rgba(255, 255, 255, 0.5); }
+  66% { border-color: rgba(0, 40, 104, 0.5); }
+  100% { border-color: rgba(239, 43, 45, 0.5); }
+}
+
+.norway-border-pulse {
+  animation: norwayFlag 4s infinite;
 }

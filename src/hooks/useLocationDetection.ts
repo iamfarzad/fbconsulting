@@ -21,6 +21,12 @@ export function useLocationDetection(): LocationData {
   
   useEffect(() => {
     let isMounted = true;
+    const detectionTimeout = setTimeout(() => {
+      if (isMounted && locationData.isLoading) {
+        // If taking too long, fall back to default
+        fallbackToLanguage();
+      }
+    }, 5000); // 5 second timeout for detection
     
     const detectLocation = async () => {
       try {
@@ -36,6 +42,9 @@ export function useLocationDetection(): LocationData {
               countryCode: data.country,
               isLoading: false
             });
+            
+            // Log successful location detection
+            console.log("Location detected via IP API:", data.city, data.country_name);
           }
           return;
         }
@@ -62,6 +71,9 @@ export function useLocationDetection(): LocationData {
                   countryCode: geoData.countryCode,
                   isLoading: false
                 });
+                
+                // Log successful geolocation
+                console.log("Location detected via geolocation:", geoData.city, geoData.countryName);
               }
             }
           } catch (error) {
@@ -89,12 +101,16 @@ export function useLocationDetection(): LocationData {
         country: isNorwegianLanguage ? 'Norway' : undefined,
         isLoading: false
       });
+      
+      // Log language-based detection
+      console.log("Location detection fell back to language:", userLang, isNorwegianLanguage ? "Norwegian" : "Non-Norwegian");
     };
     
     detectLocation();
     
     return () => {
       isMounted = false;
+      clearTimeout(detectionTimeout);
     };
   }, []);
   

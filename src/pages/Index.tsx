@@ -11,7 +11,6 @@ import ContactCTA from '@/components/ContactCTA';
 import SEO from '@/components/SEO';
 import { usePageViewTracking } from '@/hooks/useAnalytics';
 import DisplayCards from '@/components/ui/display-cards';
-import DotPattern from '@/components/ui/dot-pattern';
 import { Bot, MessageSquare, Workflow } from 'lucide-react';
 import NorwegianPainPoints from '@/components/NorwegianPainPoints';
 import { useLocationDetection } from '@/hooks/useLocationDetection';
@@ -81,7 +80,7 @@ const Index = () => {
           <div className="w-full py-16 bg-gray-50 dark:bg-gray-900/20 relative">
             <div className="container mx-auto max-w-6xl px-4 relative z-10">
               <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-black dark:text-white">
-                {isNorwegian ? "AI Solutions for Norwegian Businesses" : "Featured Services"}
+                {isNorwegian ? "Our AI Services" : "Featured Services"}
               </h2>
               <DisplayCards cards={featuredServices} />
             </div>

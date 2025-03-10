@@ -9,22 +9,24 @@ interface LocationGreetingProps {
 }
 
 const LocationGreeting: React.FC<LocationGreetingProps> = ({ className = "" }) => {
-  const { city, country, isNorwegian } = useLocationDetection();
+  const { city, country, isNorwegian, isLoading } = useLocationDetection();
   
   // Create greeting based on location
   const getGreeting = () => {
-    if (city) {
+    if (isNorwegian && city) {
+      return `Hei fra ${city}`;
+    } else if (city) {
       return `Hi ${city} Innovator`;
     }
     
     // Fall back to time-based greeting
     const hour = new Date().getHours();
     if (hour < 12) {
-      return "Hi Early Riser";
+      return isNorwegian ? "God Morgen" : "Hi Early Riser";
     } else if (hour < 17) {
-      return "Hi Productivity Seeker";
+      return isNorwegian ? "God Dag" : "Hi Productivity Seeker";
     } else {
-      return "Hi Night Owl";
+      return isNorwegian ? "God Kveld" : "Hi Night Owl";
     }
   };
 
@@ -36,12 +38,12 @@ const LocationGreeting: React.FC<LocationGreetingProps> = ({ className = "" }) =
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        {city && (
+        {(city || isNorwegian) && (
           <motion.div 
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.3, type: "spring" }}
-            className="text-muted-foreground"
+            className={`text-muted-foreground ${isNorwegian ? "text-red-500" : ""}`}
           >
             <MapPin className="h-5 w-5" />
           </motion.div>
@@ -56,7 +58,7 @@ const LocationGreeting: React.FC<LocationGreetingProps> = ({ className = "" }) =
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.4 }}
         >
-          Specialized in AI solutions for Norwegian businesses
+          {isLoading ? "Detecting location..." : "AI Solutions for Norwegian Businesses"}
         </motion.p>
       )}
     </div>

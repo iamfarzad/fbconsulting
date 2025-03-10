@@ -46,27 +46,29 @@ const NorwegianPainPoints: React.FC<NorwegianPainPointsProps> = ({ isVisible }) 
 
   return (
     <section className="py-12 px-4 relative z-10 border-t border-white/5">
-      {/* Norwegian-themed background with subtle flag colors */}
+      {/* Norwegian-themed background with flag colors */}
       <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 via-transparent to-red-900/5 pointer-events-none" />
       
       <div className="container mx-auto max-w-4xl relative">
         <div className="flex items-center justify-center gap-2 mb-2">
-          <Flag className="h-5 w-5 text-red-600" />
-          <span className="text-sm font-medium text-foreground/70">Norway Specific</span>
+          <motion.div 
+            animate={{ 
+              rotateY: [0, 180, 0],
+              transition: { duration: 2, repeat: Infinity, repeatDelay: 5 }
+            }}
+          >
+            <Flag className="h-5 w-5 text-red-600" />
+          </motion.div>
+          <span className="text-sm font-medium text-foreground/70">Norwegian Market Solutions</span>
         </div>
         
         <div className="text-center mb-8">
           <AnimatedText
-            text="AI Solutions for Norwegian Businesses"
+            text="Norway-Specific Challenges We Solve"
             tag="h2"
             className="text-2xl md:text-3xl font-bold mb-3 text-foreground"
           />
-          <AnimatedText
-            text="Addressing unique challenges in the Norwegian market"
-            tag="p"
-            delay={200}
-            className="text-lg text-foreground/80 max-w-2xl mx-auto"
-          />
+          <div className="h-1 w-32 mx-auto bg-gradient-to-r from-red-600 to-blue-600 rounded-full mb-4" />
         </div>
 
         <motion.div 

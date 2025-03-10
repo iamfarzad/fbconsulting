@@ -1,5 +1,5 @@
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { AIChatInput } from './ui/ai-chat';
 import LocationGreeting from './LocationGreeting';
@@ -8,7 +8,7 @@ import { Flag } from 'lucide-react';
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
-  const { isNorwegian, country } = useLocationDetection();
+  const { isNorwegian } = useLocationDetection();
   
   return (
     <section 
@@ -23,13 +23,13 @@ const Hero = () => {
         <div className="flex flex-col items-center w-full max-w-3xl mx-auto p-4 space-y-8">
           {isNorwegian && (
             <motion.div 
-              className="bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 flex items-center gap-2 border border-white/10"
+              className="bg-gradient-to-r from-red-600/10 to-blue-600/10 backdrop-blur-sm rounded-full px-4 py-1.5 flex items-center gap-2 border border-white/10 animate-flag-wave"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
               <Flag className="w-4 h-4 text-red-600" />
-              <span className="text-sm font-medium">Norway Customized</span>
+              <span className="text-sm font-medium">Norway Focused Solutions</span>
             </motion.div>
           )}
           
@@ -43,7 +43,7 @@ const Hero = () => {
               <span className="relative">
                 AI Automation for Norwegian Businesses
                 <motion.span
-                  className="absolute -bottom-2 left-0 w-full h-0.5 bg-gradient-to-r from-red-600 via-white to-blue-600 opacity-80"
+                  className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-red-600 via-white to-blue-600 opacity-80"
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
                   transition={{ delay: 0.7, duration: 0.6 }}
@@ -59,7 +59,7 @@ const Hero = () => {
             transition={{ delay: 0.2, duration: 0.5 }}
           >
             {isNorwegian 
-              ? "Tailored AI solutions that comply with Norwegian regulations" 
+              ? "GDPR-compliant AI solutions built for Norwegian regulations & business needs" 
               : "Transform your business with intelligent automation"}
           </motion.p>
           
