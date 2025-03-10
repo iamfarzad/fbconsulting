@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Bot, X } from 'lucide-react';
 import { AIChatInput } from './ui/ai-chat';
@@ -28,18 +29,11 @@ const ChatButton = () => {
             animate={{ opacity: 1, x: 0, y: 0 }}
             exit={{ opacity: 0, x: 300, y: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-20 right-4 md:right-6 z-50 w-full max-w-md"
+            className="fixed inset-0 z-50"
           >
-            <div className="bg-black border border-white/30 rounded-xl shadow-lg p-4 dark:bg-black dark:border-white/30">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-white font-medium flex items-center gap-2">
-                  <Bot size={18} className="text-white" />
-                  Farzad's AI
-                </h3>
-                <div className="flex items-center gap-3">
-                  <div className="hidden sm:block">
-                    <AnimatedBars isActive={true} small={true} />
-                  </div>
+            <div className="absolute inset-0 bg-black/95 backdrop-blur-md">
+              <div className="relative w-full h-full max-w-7xl mx-auto px-4">
+                <div className="flex justify-end p-4">
                   <button 
                     onClick={toggleChat}
                     className="text-white/70 hover:text-white p-1 rounded-full hover:bg-black/80"
@@ -47,9 +41,25 @@ const ChatButton = () => {
                     <X size={18} />
                   </button>
                 </div>
+                
+                <div className="h-full pt-20 pb-10">
+                  <div className="bg-transparent h-full max-w-4xl mx-auto overflow-hidden flex flex-col">
+                    <div className="p-6 text-center mb-4">
+                      <h2 className="text-2xl font-semibold text-white mb-2">Chat with AI Assistant</h2>
+                      <div className="flex justify-center">
+                        <AnimatedBars isActive={true} />
+                      </div>
+                      <p className="text-white/70 mt-4">
+                        Ask me anything about our AI services and automation solutions
+                      </p>
+                    </div>
+                    
+                    <div className="flex-1 p-6 overflow-hidden">
+                      <AIChatInput />
+                    </div>
+                  </div>
+                </div>
               </div>
-              
-              <AIChatInput placeholderText="Ask me anything about our AI services..." />
             </div>
           </motion.div>
         )}
