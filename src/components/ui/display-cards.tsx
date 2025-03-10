@@ -16,28 +16,32 @@ interface DisplayCardProps {
 
 function DisplayCard({
   className,
-  icon = <Sparkles className="size-4 text-teal" />,
+  icon = <Sparkles className="size-4 text-black dark:text-white" />,
   title = "Featured",
   description = "Discover amazing content",
   date = "Just now",
-  iconClassName = "text-teal",
-  titleClassName = "text-teal",
+  iconClassName,
+  titleClassName,
 }: DisplayCardProps) {
   return (
     <div
       className={cn(
-        "relative flex h-36 w-[22rem] -skew-y-[8deg] select-none flex-col justify-between rounded-xl border-2 bg-muted/60 backdrop-blur-md px-4 py-3 transition-all duration-700 after:absolute after:-right-1 after:top-[-5%] after:h-[110%] after:w-[20rem] after:bg-gradient-to-l after:from-background after:to-transparent after:content-[''] hover:border-white/20 hover:bg-muted/80 [&>*]:flex [&>*]:items-center [&>*]:gap-2",
+        "relative flex h-36 w-[22rem] select-none flex-col justify-between rounded-xl border bg-white dark:bg-black px-4 py-3 transition-all duration-300",
+        "hover:shadow-lg",
+        "[&>*]:flex [&>*]:items-center [&>*]:gap-2",
         className
       )}
     >
       <div>
-        <span className="relative inline-block rounded-full bg-deep-purple/80 p-1">
+        <span className="relative inline-block rounded-full bg-black/5 dark:bg-white/5 p-1">
           {icon}
         </span>
-        <p className={cn("text-lg font-medium", titleClassName)}>{title}</p>
+        <p className={cn("text-lg font-medium text-black dark:text-white", titleClassName)}>
+          {title}
+        </p>
       </div>
-      <p className="whitespace-nowrap text-lg">{description}</p>
-      <p className="text-muted-foreground">{date}</p>
+      <p className="text-lg text-black/80 dark:text-white/80">{description}</p>
+      <p className="text-sm text-black/60 dark:text-white/60">{date}</p>
     </div>
   );
 }
@@ -49,20 +53,20 @@ interface DisplayCardsProps {
 export default function DisplayCards({ cards }: DisplayCardsProps) {
   const defaultCards = [
     {
-      className: "[grid-area:stack] hover:-translate-y-10 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration:700 hover:grayscale-0 before:left-0 before:top-0 border-white/5",
+      className: "translate-y-0 hover:-translate-y-2",
     },
     {
-      className: "[grid-area:stack] translate-x-16 translate-y-10 hover:-translate-y-1 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration:700 hover:grayscale-0 before:left-0 before:top-0 border-white/5",
+      className: "translate-y-0 hover:-translate-y-2",
     },
     {
-      className: "[grid-area:stack] translate-x-32 translate-y-20 hover:translate-y-10 border-white/5",
+      className: "translate-y-0 hover:-translate-y-2",
     },
   ];
 
   const displayCards = cards || defaultCards;
 
   return (
-    <div className="grid [grid-template-areas:'stack'] place-items-center opacity-100 animate-in fade-in-0 duration-700">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
       {displayCards.map((cardProps, index) => (
         <DisplayCard key={index} {...cardProps} />
       ))}

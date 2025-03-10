@@ -11,13 +11,13 @@ interface ActionButtonProps {
 export function ActionButton({ icon, label, onClick }: ActionButtonProps) {
   return (
     <Button
-      variant="secondary"
+      variant="outline" 
       size="sm"
-      className="flex items-center gap-2 px-4 py-2 rounded-full border border-black/30 dark:border-white/30 text-white hover:text-white hover:dark:text-white transition-colors"
+      className="flex items-center gap-2 px-4 py-2 rounded-full border border-black/30 dark:border-white/30 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
       onClick={onClick}
     >
       {icon}
-      <span className="text-xs text-white">{label}</span>
+      <span className="text-xs">{label}</span>
     </Button>
   );
 }
