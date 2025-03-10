@@ -13,12 +13,13 @@ import { usePageViewTracking } from '@/hooks/useAnalytics';
 import DisplayCards from '@/components/ui/display-cards';
 import { Bot, MessageSquare, Workflow } from 'lucide-react';
 import NorwegianPainPoints from '@/components/NorwegianPainPoints';
-import { useLocationDetection } from '@/hooks/useLocationDetection';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Index = () => {
   console.log("Index page rendering");
   
-  const { isNorwegian } = useLocationDetection();
+  const { t, language } = useLanguage();
+  const isNorwegian = language === 'no';
   usePageViewTracking("AI Automation Ally - Home");
 
   useEffect(() => {
@@ -37,22 +38,22 @@ const Index = () => {
   const featuredServices = [
     {
       icon: <Bot className="size-4 text-black dark:text-white" />,
-      title: "AI Strategy",
-      description: isNorwegian ? "Custom roadmaps for Norwegian businesses" : "Custom roadmaps for your business",
+      title: t('service_ai_strategy'),
+      description: t('service_ai_strategy_desc'),
       date: "Premium Service",
       className: "bg-white dark:bg-black hover:-translate-y-1 transition-transform duration-300",
     },
     {
       icon: <MessageSquare className="size-4 text-black dark:text-white" />,
-      title: "AI Chatbots",
-      description: "24/7 Customer Support",
+      title: t('service_chatbots'),
+      description: t('service_chatbots_desc'),
       date: "Most Popular",
       className: "bg-white dark:bg-black hover:-translate-y-1 transition-transform duration-300",
     },
     {
       icon: <Workflow className="size-4 text-black dark:text-white" />,
-      title: "Workflow Automation",
-      description: isNorwegian ? "Streamline processes while ensuring compliance" : "Streamline your business processes",
+      title: t('service_workflow'),
+      description: t('service_workflow_desc'),
       date: "High ROI",
       className: "bg-white dark:bg-black hover:-translate-y-1 transition-transform duration-300",
     },
@@ -61,11 +62,11 @@ const Index = () => {
   return (
     <>
       <SEO
-        title={isNorwegian ? "AI Automation for Norwegian Businesses" : "AI Automation Ally - Automate Your Business with AI"}
+        title={isNorwegian ? "AI Automatisering for Norske Bedrifter" : "AI Automation Ally - Automate Your Business with AI"}
         description={isNorwegian 
-          ? "AI automation solutions tailored for Norwegian businesses, ensuring compliance with local regulations and addressing specific market needs."
+          ? "AI-automatiseringsløsninger skreddersydd for norske bedrifter, sikrer samsvar med lokale forskrifter og adresserer spesifikke markedsbehov."
           : "Unlock the power of AI to automate your business processes, increase efficiency, and drive growth. Discover tailored AI solutions for your unique needs."}
-        keywords={isNorwegian ? "AI Norway, AI automation Norway, GDPR compliance, Norwegian business automation" : undefined}
+        keywords={isNorwegian ? "AI Norge, AI automatisering Norge, GDPR samsvar, Norsk bedriftsautomatisering" : undefined}
       />
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
@@ -80,13 +81,13 @@ const Index = () => {
           <div className="w-full py-16 bg-gray-50 dark:bg-gray-900/20 relative">
             <div className="container mx-auto max-w-6xl px-4 relative z-10">
               <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-black dark:text-white">
-                {isNorwegian ? "Our AI Services" : "Featured Services"}
+                {isNorwegian ? "Våre AI-Tjenester" : "Featured Services"}
               </h2>
               <DisplayCards cards={featuredServices} />
             </div>
           </div>
           
-          {/* Conditionally show Norwegian pain points for Norwegian visitors */}
+          {/* Conditionally show Norwegian pain points for Norwegian language */}
           <NorwegianPainPoints isVisible={isNorwegian} />
           
           {/* Show standard pain points for everyone */}

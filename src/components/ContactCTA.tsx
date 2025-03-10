@@ -5,11 +5,12 @@ import { Calendar, Mail } from 'lucide-react';
 import AnimatedText from './AnimatedText';
 import { trackEvent } from '@/services/analyticsService';
 import { useNavigate } from 'react-router-dom';
-import { useLocationDetection } from '@/hooks/useLocationDetection';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const ContactCTA = () => {
   const navigate = useNavigate();
-  const { isNorwegian } = useLocationDetection();
+  const { t, language } = useLanguage();
+  const isNorwegian = language === 'no';
 
   const handleBookClick = () => {
     trackEvent({
@@ -48,13 +49,13 @@ const ContactCTA = () => {
         <div className="bg-white/20 backdrop-blur-md rounded-2xl p-8 md:p-12 shadow-glass border border-white/20">
           <div className="text-center mb-8">
             <AnimatedText
-              text={isNorwegian ? "Ready to Transform Your Norwegian Business?" : "Ready to Automate and Scale?"}
+              text={isNorwegian ? "Klar til å Transformere Din Norske Bedrift?" : "Ready to Automate and Scale?"}
               tag="h2"
               className="text-3xl md:text-4xl font-bold mb-4 text-gradient-teal"
             />
             <AnimatedText
               text={isNorwegian 
-                ? "Let's discuss tailored AI solutions that comply with Norwegian regulations"
+                ? "La oss diskutere skreddersydde AI-løsninger som overholder norske forskrifter"
                 : "Let's discuss how AI automation can transform your business operations"
               }
               tag="p"
@@ -70,7 +71,7 @@ const ContactCTA = () => {
               onClick={handleBookClick}
             >
               <Calendar size={20} />
-              {isNorwegian ? "Book a Free AI Compliance Audit" : "Book a Free Consultation"}
+              {t('book_consultation')}
             </Button>
             
             <Button 
@@ -80,16 +81,13 @@ const ContactCTA = () => {
               onClick={handleContactClick}
             >
               <Mail size={20} />
-              Contact Me
+              {t('contact_me')}
             </Button>
           </div>
           
           <div className="mt-8 text-center text-muted-foreground">
             <p>
-              {isNorwegian 
-                ? "No obligations, just a conversation about your Norwegian business needs" 
-                : "No obligations, just a conversation about your business needs"
-              }
+              {t('no_obligation')}
             </p>
           </div>
         </div>

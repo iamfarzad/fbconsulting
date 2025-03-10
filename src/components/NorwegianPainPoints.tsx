@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { trackEvent } from '@/services/analyticsService';
 import AnimatedText from './AnimatedText';
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface NorwegianPainPointsProps {
   isVisible: boolean;
@@ -13,8 +14,10 @@ interface NorwegianPainPointsProps {
 
 const NorwegianPainPoints: React.FC<NorwegianPainPointsProps> = ({ isVisible }) => {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
   
-  if (!isVisible) return null;
+  // Only show for Norwegian language
+  if (!isVisible && language !== 'no') return null;
   
   const handleGetAuditClick = () => {
     trackEvent({
@@ -59,12 +62,12 @@ const NorwegianPainPoints: React.FC<NorwegianPainPointsProps> = ({ isVisible }) 
           >
             <Flag className="h-5 w-5 text-red-600" />
           </motion.div>
-          <span className="text-sm font-medium text-foreground/70">Norwegian Market Solutions</span>
+          <span className="text-sm font-medium text-foreground/70">{t('norway_focused')}</span>
         </div>
         
         <div className="text-center mb-8">
           <AnimatedText
-            text="Norway-Specific Challenges We Solve"
+            text={t('norway_specific_title')}
             tag="h2"
             className="text-2xl md:text-3xl font-bold mb-3 text-foreground"
           />
@@ -86,10 +89,10 @@ const NorwegianPainPoints: React.FC<NorwegianPainPointsProps> = ({ isVisible }) 
               <div className="bg-gradient-to-br from-red-500 to-red-600 p-2.5 rounded-lg text-white">
                 <Shield className="h-5 w-5" />
               </div>
-              <h3 className="text-lg font-semibold">Regulatory Compliance</h3>
+              <h3 className="text-lg font-semibold">{t('regulatory_compliance')}</h3>
             </div>
             <p className="text-muted-foreground mb-4">
-              Navigate complex GDPR, EU AI Act, and Norwegian data privacy requirements with compliant AI solutions.
+              {t('regulatory_desc')}
             </p>
             <div className="h-1 w-full bg-gradient-to-r from-red-600/50 to-blue-600/50 rounded-full transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
           </motion.div>
@@ -102,10 +105,10 @@ const NorwegianPainPoints: React.FC<NorwegianPainPointsProps> = ({ isVisible }) 
               <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2.5 rounded-lg text-white">
                 <BookOpen className="h-5 w-5" />
               </div>
-              <h3 className="text-lg font-semibold">AI Expertise Gap</h3>
+              <h3 className="text-lg font-semibold">{t('expertise_gap')}</h3>
             </div>
             <p className="text-muted-foreground mb-4">
-              Bridge the AI knowledge gap with tailored consulting for Norwegian industries like energy, manufacturing and finance.
+              {t('expertise_desc')}
             </p>
             <div className="h-1 w-full bg-gradient-to-r from-blue-600/50 to-red-600/50 rounded-full transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
           </motion.div>
@@ -118,10 +121,10 @@ const NorwegianPainPoints: React.FC<NorwegianPainPointsProps> = ({ isVisible }) 
               <div className="bg-gradient-to-br from-white to-gray-200 p-2.5 rounded-lg text-blue-600">
                 <Workflow className="h-5 w-5" />
               </div>
-              <h3 className="text-lg font-semibold">Workflow Automation</h3>
+              <h3 className="text-lg font-semibold">{t('workflow')}</h3>
             </div>
             <p className="text-muted-foreground mb-4">
-              Optimize operations with AI automation tailored to Norwegian business processes and compliance needs.
+              {t('workflow_desc')}
             </p>
             <div className="h-1 w-full bg-gradient-to-r from-white/50 to-blue-600/50 rounded-full transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
           </motion.div>
@@ -140,7 +143,7 @@ const NorwegianPainPoints: React.FC<NorwegianPainPointsProps> = ({ isVisible }) 
             className="rounded-full px-8 neo-button group relative overflow-hidden"
             onClick={handleGetAuditClick}
           >
-            <span className="relative z-10">Get a Free AI Compliance Audit</span>
+            <span className="relative z-10">{t('get_compliance_audit')}</span>
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1 relative z-10" />
             <div className="absolute inset-0 bg-gradient-to-r from-red-600/80 via-white/20 to-blue-600/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </Button>

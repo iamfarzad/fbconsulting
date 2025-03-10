@@ -3,12 +3,14 @@ import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { AIChatInput } from './ui/ai-chat';
 import LocationGreeting from './LocationGreeting';
-import { useLocationDetection } from '@/hooks/useLocationDetection';
 import { Flag } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
-  const { isNorwegian } = useLocationDetection();
+  const { t, language } = useLanguage();
+  const isNorwegian = language === 'no';
   
   return (
     <section 
@@ -16,6 +18,10 @@ const Hero = () => {
       className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 overflow-hidden pt-16"
     >
       <div className="container mx-auto max-w-4xl relative z-10 mt-10 md:mt-0">
+        <div className="absolute top-0 right-0 md:right-4">
+          <LanguageSwitcher variant="flag" />
+        </div>
+        
         <div className="text-center mb-6">
           <LocationGreeting className="mb-2 text-muted-foreground" />
         </div>
@@ -29,7 +35,7 @@ const Hero = () => {
               transition={{ duration: 0.3 }}
             >
               <Flag className="w-4 h-4 text-red-600" />
-              <span className="text-sm font-medium">Norway Focused Solutions</span>
+              <span className="text-sm font-medium">{t('norway_focused')}</span>
             </motion.div>
           )}
           
@@ -41,7 +47,7 @@ const Hero = () => {
           >
             {isNorwegian ? (
               <span className="relative">
-                AI Automation for Norwegian Businesses
+                {t('norway_title')}
                 <motion.span
                   className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-red-600 via-white to-blue-600 opacity-80"
                   initial={{ scaleX: 0 }}
@@ -49,7 +55,7 @@ const Hero = () => {
                   transition={{ delay: 0.7, duration: 0.6 }}
                 ></motion.span>
               </span>
-            ) : "AI Automation Solutions"}
+            ) : t('hero_title')}
           </motion.h1>
           
           <motion.p
@@ -58,9 +64,7 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
-            {isNorwegian 
-              ? "GDPR-compliant AI solutions built for Norwegian regulations & business needs" 
-              : "Transform your business with intelligent automation"}
+            {t('hero_subtitle')}
           </motion.p>
           
           <motion.div 
