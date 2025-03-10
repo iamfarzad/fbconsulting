@@ -7,8 +7,16 @@ export const getPersonStructuredData = () => {
     "@type": "Person",
     "name": "AI Automation Expert",
     "jobTitle": "AI Automation Consultant",
-    "description": "With over 10 years of experience in business automation and AI integration, I help companies streamline operations, reduce costs, and scale efficiently.",
-    "knowsAbout": ["Artificial Intelligence", "Machine Learning", "Business Process Automation", "Natural Language Processing", "Data Analytics"]
+    "description": "Based in Oslo, Norway, with over 10 years of experience in business automation and AI integration, I help companies streamline operations, reduce costs, and scale efficiently.",
+    "knowsAbout": ["Artificial Intelligence", "Machine Learning", "Business Process Automation", "Natural Language Processing", "Data Analytics"],
+    "location": {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Oslo",
+        "addressCountry": "Norway"
+      }
+    }
   };
 };
 
