@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { FileText } from 'lucide-react';
 
 const Footer = () => {
   const { t } = useLanguage();
@@ -16,6 +17,10 @@ const Footer = () => {
             <ul className="space-y-2">
               <li><Link to="/about" className="text-muted-foreground hover:text-foreground transition">{t('nav_about')}</Link></li>
               <li><Link to="/blog" className="text-muted-foreground hover:text-foreground transition">{t('nav_blog')}</Link></li>
+              <li><Link to="/changelog" className="text-muted-foreground hover:text-foreground transition flex items-center gap-1.5">
+                <FileText size={14} />
+                Changelog
+              </Link></li>
             </ul>
           </div>
           
