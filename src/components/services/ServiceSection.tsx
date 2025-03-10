@@ -1,6 +1,8 @@
 
 import React from 'react';
 import ServiceDetail from '@/components/ServiceDetail';
+import { useNavigate } from 'react-router-dom';
+import { trackEvent } from '@/services/analyticsService';
 
 interface ServiceSectionProps {
   id: string;
@@ -25,6 +27,23 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
   altText,
   callToAction
 }) => {
+  const navigate = useNavigate();
+  
+  const handleCallToAction = () => {
+    // Track the button click event
+    trackEvent({
+      action: 'click',
+      category: 'cta',
+      label: 'service_cta',
+      cta_location: 'service_section',
+      cta_text: callToAction,
+      service_name: title
+    });
+    
+    // Navigate to the contact page
+    navigate('/contact');
+  };
+  
   return (
     <div id={id} className="scroll-mt-32">
       <ServiceDetail
@@ -36,6 +55,7 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({
         imageSrc={imageSrc}
         altText={altText}
         callToAction={callToAction}
+        onCallToAction={handleCallToAction}
       />
     </div>
   );
