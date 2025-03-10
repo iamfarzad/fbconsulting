@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot } from "lucide-react";
@@ -55,7 +56,7 @@ export const ChatMessageList = ({ messages, showMessages }: ChatMessageListProps
   return (
     <div 
       ref={containerRef}
-      className="bg-black rounded-t-xl border border-white/30 p-4 overflow-y-auto overscroll-contain"
+      className="bg-black rounded-xl border border-white/30 p-4 overflow-y-auto overscroll-contain"
       style={{
         height: messages.length > 0 ? 'auto' : '200px',
         maxHeight: '400px',

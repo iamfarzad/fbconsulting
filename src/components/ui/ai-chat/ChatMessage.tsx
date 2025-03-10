@@ -19,7 +19,7 @@ export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       className={cn(
-        "p-3 rounded-lg mb-3 max-w-[80%]",
+        "p-3 rounded-xl mb-3 max-w-[80%]",
         isUser 
           ? "ml-auto bg-white text-black" 
           : "mr-auto bg-black text-white"

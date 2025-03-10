@@ -73,7 +73,7 @@ export function ChatInput({
       {/* Animated Transcription Display */}
       <div 
         className={cn(
-          "overflow-hidden transition-all duration-500 ease-in-out bg-black text-white rounded-t-xl",
+          "overflow-hidden transition-all duration-500 ease-in-out bg-black text-white rounded-xl",
           isTranscribing ? "max-h-24 opacity-100 py-3 px-4 mb-0 border border-black/70 border-b-0" : "max-h-0 opacity-0 py-0 px-0"
         )}
       >
@@ -93,7 +93,7 @@ export function ChatInput({
       {/* Chat Input Box */}
       <div className={cn(
         "relative bg-white border border-black/70",
-        (showMessages || hasMessages) ? "rounded-b-xl border-t-0" : isTranscribing ? "rounded-b-xl" : "rounded-xl"
+        (showMessages || hasMessages) ? "rounded-xl" : isTranscribing ? "rounded-b-xl" : "rounded-xl"
       )}>
         <div className="overflow-y-auto">
           <Textarea
