@@ -3,9 +3,11 @@ import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { AIChatInput } from './ui/ai-chat';
 import LocationGreeting from './LocationGreeting';
-import { Flag } from 'lucide-react';
+import { Flag, Globe } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
+import { AnimatedGridPattern } from './ui/animated-grid-pattern';
+import { cn } from '@/lib/utils';
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -17,9 +19,22 @@ const Hero = () => {
       ref={heroRef}
       className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 overflow-hidden pt-16"
     >
+      {/* Animated Grid Pattern Background */}
+      <AnimatedGridPattern
+        numSquares={30}
+        maxOpacity={0.05}
+        duration={4}
+        repeatDelay={1}
+        className={cn(
+          "opacity-70 dark:opacity-50",
+          "[mask-image:radial-gradient(900px_circle_at_center,white,transparent)]",
+          "z-0"
+        )}
+      />
+      
       <div className="container mx-auto max-w-4xl relative z-10 mt-10 md:mt-0">
-        <div className="absolute top-0 right-0 md:right-4">
-          <LanguageSwitcher variant="flag" />
+        <div className="absolute top-0 right-0 md:right-4 flex items-center gap-3">
+          <LanguageSwitcher variant="dropdown" />
         </div>
         
         <div className="text-center mb-6">

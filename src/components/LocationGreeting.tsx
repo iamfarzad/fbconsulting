@@ -10,7 +10,7 @@ interface LocationGreetingProps {
 }
 
 const LocationGreeting: React.FC<LocationGreetingProps> = ({ className = "" }) => {
-  const { city, isNorwegian, isLoading } = useLocationDetection();
+  const { city, isLoading } = useLocationDetection();
   const { t, language } = useLanguage();
   
   // Create greeting based on location and language

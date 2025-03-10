@@ -10,6 +10,7 @@ interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
+  availableLanguages: Record<Language, string>;
 }
 
 // Create the context
@@ -19,8 +20,9 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 const translations: Record<Language, Record<string, string>> = {
   en: {
     // Common
-    'switch_language': 'Norsk',
+    'switch_language': 'Switch to Norwegian',
     'language_code': 'NO',
+    'language_select': 'Select Language',
     
     // Hero section
     'greeting_morning': 'Hi Early Riser',
@@ -65,8 +67,9 @@ const translations: Record<Language, Record<string, string>> = {
   },
   no: {
     // Common
-    'switch_language': 'English',
+    'switch_language': 'Bytt til Engelsk',
     'language_code': 'EN',
+    'language_select': 'Velg Språk',
     
     // Hero section
     'greeting_morning': 'God Morgen',
@@ -111,6 +114,12 @@ const translations: Record<Language, Record<string, string>> = {
   }
 };
 
+// Available languages with their display names
+const availableLanguages: Record<Language, string> = {
+  en: 'English',
+  no: 'Norwegian'
+};
+
 // Provider component
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { isNorwegian } = useLocationDetection();
@@ -126,9 +135,15 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     return translation;
   };
   
-  // Set initial language based on location detection
+  // Set initial language based on saved preference or location detection
   useEffect(() => {
-    if (isNorwegian) {
+    // First try to get from localStorage
+    const savedLanguage = localStorage.getItem('preferredLanguage') as Language | null;
+    
+    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'no')) {
+      setLanguage(savedLanguage);
+    } else if (isNorwegian) {
+      // If no saved preference, use location detection
       setLanguage('no');
     }
   }, [isNorwegian]);
@@ -138,16 +153,8 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     localStorage.setItem('preferredLanguage', language);
   }, [language]);
   
-  // Load language preference from localStorage on mount
-  useEffect(() => {
-    const savedLanguage = localStorage.getItem('preferredLanguage') as Language | null;
-    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'no')) {
-      setLanguage(savedLanguage);
-    }
-  }, []);
-  
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, availableLanguages }}>
       {children}
     </LanguageContext.Provider>
   );
