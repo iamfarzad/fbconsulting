@@ -6,8 +6,10 @@ import {
   createIncrementMessage, 
   createDecrementMessage, 
   createResetMessage,
-  createSetMessage
+  createSetMessage,
+  CounterContext
 } from './counterProtocol';
+import { Protocol } from '../core/types';
 
 interface CounterComponentProps {
   initialCount?: number;
@@ -22,7 +24,7 @@ export const CounterComponent: React.FC<CounterComponentProps> = ({
 }) => {
   // Create protocol and use MCP hook
   const counterProtocol = createCounterProtocol(initialCount, minValue, maxValue);
-  const [model, sendMessage] = useMCP(counterProtocol);
+  const [model, sendMessage] = useMCP<typeof counterProtocol.initialModel, CounterContext>(counterProtocol);
 
   // Input state for setting custom values
   const [inputValue, setInputValue] = React.useState(initialCount.toString());
