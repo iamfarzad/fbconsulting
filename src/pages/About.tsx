@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -27,6 +26,7 @@ const About = () => {
     "description": "With over 10 years of experience in business automation and AI integration, I help companies streamline operations, reduce costs, and scale efficiently.",
     "knowsAbout": ["Artificial Intelligence", "Machine Learning", "Business Process Automation", "Natural Language Processing", "Data Analytics"]
   };
+  
   return <div className="min-h-screen flex flex-col bg-background">
       <SEO title="About - AI Automation Ally | Expert Consultant" description="Learn about my 10+ years of experience helping businesses leverage AI and automation technology to reduce costs, streamline operations, and drive growth." ogType="website" structuredData={personStructuredData} />
       
@@ -82,10 +82,18 @@ const About = () => {
             }}>
                 <h3 className="text-xl font-semibold mb-3">Self-Taught AI Expert & Startup Founder</h3>
                 <p className="mb-3">
-                  My expertise in AI-driven automation and business optimization comes from hands-on experience building, scaling, and automating my own startups. Unlike traditional consultants who rely on theory, I've spent years developing and implementing AI systems to solve real-world business challenges.
+                  I built my expertise in AI-driven automation, workflow optimization, and business scalability through hands-on experience—developing, scaling, and automating my own startups. Unlike traditional consultants who rely on theoretical frameworks, I've spent years designing, implementing, and refining AI systems that solve real-world business challenges.
                 </p>
-                <p>
-                  From launching AI-powered platforms to optimizing workflows for startups and enterprises, I know what works and what doesn't. My approach is based on practical execution, not just consulting frameworks.
+                <div className="mb-4">
+                  <p className="font-medium mb-2">What makes me different?</p>
+                  <ul className="list-disc pl-5 space-y-1">
+                    <li>Practical Execution – I don't just advise; I build, test, and implement AI-driven automation.</li>
+                    <li>Proven Startup Success – I've scaled AI-powered platforms that reduced costs and improved efficiency.</li>
+                    <li>Business & Technical Expertise – Deep understanding of AI implementation beyond just coding—I focus on business impact.</li>
+                  </ul>
+                </div>
+                <p className="italic">
+                  If you want AI solutions that work in practice, not just on paper, let's talk.
                 </p>
               </div>
               
