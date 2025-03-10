@@ -15,6 +15,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/NotFound";
 import TestPage from "./pages/TestPage";
+import TestMCP from "./pages/TestMCP";
 import ChatButton from "./components/ChatButton";
 import { LanguageProvider } from "./contexts/LanguageContext";
 
@@ -65,6 +66,7 @@ const App = () => {
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/test" element={<TestPage />} />
+                  <Route path="/test-mcp" element={<TestMCP />} />
                   <Route path="/services" element={<Services />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/contact" element={<Contact />} />
