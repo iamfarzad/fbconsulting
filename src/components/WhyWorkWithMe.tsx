@@ -29,6 +29,7 @@ const WhyWorkWithMe = () => {
               description="Years of experience in AI automation and business transformation with a track record of successful implementations."
               icon={<Shield className="w-6 h-6" />}
               className="h-full"
+              glassmorphism={false}
             />
           </div>
           
@@ -38,6 +39,7 @@ const WhyWorkWithMe = () => {
               description="No generic advice—every automation strategy is tailored to your specific business needs, processes, and goals."
               icon={<Zap className="w-6 h-6" />}
               className="h-full"
+              glassmorphism={false}
             />
           </div>
           
@@ -47,11 +49,12 @@ const WhyWorkWithMe = () => {
               description="Focus on automation that delivers measurable returns, whether through time savings, cost reduction, or revenue growth."
               icon={<Target className="w-6 h-6" />}
               className="h-full"
+              glassmorphism={false}
             />
           </div>
         </div>
         
-        <div className="mt-16 px-4 py-8 rounded-xl glassmorphism text-center max-w-3xl mx-auto opacity-0 animate-fade-in-up" style={{ animationDelay: '700ms', animationFillMode: 'forwards' }}>
+        <div className="mt-16 px-4 py-8 rounded-xl bg-gradient-to-br from-deep-purple/5 to-teal/5 text-center max-w-3xl mx-auto opacity-0 animate-fade-in-up" style={{ animationDelay: '700ms', animationFillMode: 'forwards' }}>
           <p className="text-xl font-medium mb-2">
             "AI is no longer a luxury—it's a competitive advantage."
           </p>

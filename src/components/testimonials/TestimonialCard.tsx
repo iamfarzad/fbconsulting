@@ -21,7 +21,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({ testimonial }) => {
   };
 
   return (
-    <Card className="h-full flex flex-col glassmorphism">
+    <Card className="h-full flex flex-col bg-white dark:bg-zinc-900 border-border/20 shadow-lg">
       <CardContent className="pt-6 pb-2 flex-grow">
         <div className="flex mb-3">
           {renderStars(testimonial.rating)}

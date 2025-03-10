@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -73,45 +72,25 @@ const Index = () => {
       />
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
-        <main className="flex-grow">
+        <main className="flex-grow relative">
+          {/* Global background pattern */}
+          <div className="fixed inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
+          <div className="fixed inset-0 bg-gradient-to-b from-background via-background to-deep-purple/5 pointer-events-none"></div>
+          
+          {/* Content sections */}
           <Hero />
-          <div className="w-full py-16 bg-white relative overflow-hidden">
-            <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-25" />
-            <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
+          
+          <div className="w-full py-16 bg-white/80 dark:bg-white/5 backdrop-blur-sm relative">
             <div className="container mx-auto max-w-6xl px-4 relative z-10">
               <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gradient-retro">Featured Services</h2>
               <DisplayCards cards={featuredServices} />
             </div>
           </div>
           
-          {/* PainPoints section - Adding dotted pattern */}
-          <div className="relative">
-            <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-25" />
-            <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
-            <PainPoints />
-          </div>
-          
-          {/* ServicesList section - Adding dotted pattern */}
-          <div className="relative">
-            <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-25" />
-            <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
-            <ServicesList />
-          </div>
-          
-          {/* WhyWorkWithMe section - Adding dotted pattern */}
-          <div className="relative">
-            <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-25" />
-            <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
-            <WhyWorkWithMe />
-          </div>
-          
-          {/* Testimonials section - Adding dotted pattern */}
-          <div className="relative">
-            <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-25" />
-            <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
-            <Testimonials />
-          </div>
-          
+          <PainPoints />
+          <ServicesList />
+          <WhyWorkWithMe />
+          <Testimonials />
           <ContactCTA />
         </main>
         <Footer />
