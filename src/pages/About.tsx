@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -101,12 +102,25 @@ const About = () => {
               animationDelay: '400ms',
               animationFillMode: 'forwards'
             }}>
-                <h3 className="text-xl font-semibold mb-3">Education & Expertise</h3>
-                <p className="mb-3">
-                  With a background in Computer Science and an MBA, I bridge the gap between technical implementation and business strategy.
+                <h3 className="text-xl font-semibold mb-3">Expertise</h3>
+                <p className="mb-3 font-medium">
+                  Bridging AI Technology & Business Strategy
                 </p>
+                <p className="mb-4">
+                  My expertise comes from a deep understanding of AI automation, data-driven decision-making, and workflow optimization, combined with years of hands-on implementation.
+                </p>
+                <div className="mb-4">
+                  <p className="font-medium mb-2">Key Areas of Expertise:</p>
+                  <ul className="list-disc pl-5 space-y-1">
+                    <li>AI Workflow Automation – Using AI to optimize business operations and eliminate inefficiencies.</li>
+                    <li>Machine Learning & Process Optimization – Implementing predictive analytics for smarter decision-making.</li>
+                    <li>AI Chatbots & Virtual Assistants – Automating customer support and internal processes.</li>
+                    <li>Cloud-Based AI Solutions – Deploying scalable AI models for startups and enterprises.</li>
+                    <li>Business Intelligence & AI Strategy – Helping companies use AI for long-term competitive advantage.</li>
+                  </ul>
+                </div>
                 <p>
-                  I stay at the forefront of AI advancements through continuous learning and active participation in technology communities, ensuring my clients receive the most innovative solutions.
+                  I stay ahead of AI advancements by actively engaging in the latest LLM (Large Language Model) research, AI automation tools, and business applications of artificial intelligence.
                 </p>
               </div>
               
