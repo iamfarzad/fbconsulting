@@ -33,7 +33,7 @@ const About = () => {
         description="Learn about my 10+ years of experience helping businesses leverage AI and automation technology to reduce costs, streamline operations, and drive growth." 
         ogType="website" 
         structuredData={personStructuredData}
-        keywords="AI automation expert, business process optimization, startup AI consultant, workflow automation specialist, AI consultant, machine learning expert, AI workflow automation, AI-powered business optimization, AI strategy consultant, business automation expert, AI transformation, AI-driven business optimization"
+        keywords="AI automation expert, business process optimization, startup AI consultant, workflow automation specialist, AI consultant, machine learning expert, AI workflow automation, AI-powered business optimization, AI strategy consultant, business automation expert, AI transformation, AI-driven business optimization, AI business consultant, AI automation coach, AI strategy for small businesses, AI workflow advisor"
       />
       
       
@@ -158,11 +158,21 @@ const About = () => {
               animationFillMode: 'forwards'
             }}>
                 <h3 className="text-xl font-semibold mb-3">Personal Touch</h3>
-                <p className="mb-3">
-                  I'm not just a consultant—I'm a partner in your business growth. I take the time to understand your operations deeply before suggesting any automation solutions.
+                <p className="mb-3 font-medium">
+                  AI Consulting Without the Jargon—Just Results
                 </p>
+                <p className="mb-4">
+                  I'm not just a consultant—I'm a partner in your business growth. My clients choose me because I take the time to understand their challenges, simplify AI implementation, and make automation work for their unique needs.
+                </p>
+                <div className="mb-4">
+                  <ul className="list-disc pl-5 space-y-1">
+                    <li>Hands-On Approach – I work closely with businesses to implement AI solutions that fit their existing operations.</li>
+                    <li>Jargon-Free Communication – No unnecessary complexity—just clear, actionable AI automation strategies.</li>
+                    <li>Training & Support – I ensure teams understand and leverage AI effectively without needing a technical background.</li>
+                  </ul>
+                </div>
                 <p>
-                  My clients appreciate my jargon-free communication style and hands-on approach to implementation and training.
+                  AI doesn't have to be overwhelming or complicated. My goal is to make AI automation simple, effective, and tailored to your business.
                 </p>
               </div>
             </div>
