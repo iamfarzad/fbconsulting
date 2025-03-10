@@ -75,19 +75,21 @@ export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatIn
   return (
     <AnimatePresence mode="wait">
       <motion.div 
-        className="flex flex-col w-full"
+        className="flex flex-col w-full max-h-[80vh] relative"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        {/* Messages Container - conditionally rendered */}
+        {/* Messages Container with fixed height and scroll */}
         <AnimatePresence mode="wait">
           {(showMessages || messages.length > 0) && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
+              animate={{ opacity: 1, height: "auto", maxHeight: "60vh" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
+              className="will-change-scroll"
+              style={{ scrollbarGutter: "stable" }}
             >
               <ChatMessageList 
                 messages={messages} 
@@ -97,11 +99,15 @@ export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatIn
           )}
         </AnimatePresence>
         
-        {/* Input Container */}
+        {/* Input Container with shadow transition */}
         <motion.div
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          animate={{ 
+            opacity: 1,
+            boxShadow: showMessages ? "0 -4px 6px -1px rgba(0, 0, 0, 0.1)" : "none"
+          }}
           transition={{ delay: 0.2 }}
+          className="relative z-10 bg-background"
         >
           <ChatInput
             value={inputValue}
@@ -121,4 +127,3 @@ export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatIn
 }
 
 export default AIChatInput;
-
