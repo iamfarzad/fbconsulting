@@ -1,6 +1,18 @@
 
 # Recent Versions (1.0.0 - 1.9.0)
 
+## Table of Contents
+- [1.0.0](#100---2025-04-12) - Google Analytics integration
+- [1.1.0](#110---2025-04-18) - Newsletter signup
+- [1.2.0](#120---2025-04-25) - Lead generation tracking
+- [1.3.0](#130---2025-05-05) - Services page refactoring
+- [1.4.0](#140---2025-05-15) - UI enhancements and 3D model
+- [1.5.0](#150---2025-05-28) - AI chatbot and accessibility
+- [1.6.0](#160---2025-06-10) - Interactive calculators and client portal
+- [1.7.0](#170---2025-06-25) - UI simplification
+- [1.8.0](#180---2025-07-10) - Full CopilotKit integration
+- [1.9.0](#190---2025-07-15) - Voice interaction system
+
 This document tracks the recent implementation progress of the AI Automation Consulting Website.
 
 ## [1.0.0] - 2025-04-12

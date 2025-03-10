@@ -1,6 +1,9 @@
 
 # Planned Future Versions
 
+## Table of Contents
+- [2.0.0](#200---future-release-planned) - Advanced AI capabilities
+
 This document outlines the planned future features and enhancements for the AI Automation Consulting Website.
 
 ## [2.0.0] - Future Release (Planned)

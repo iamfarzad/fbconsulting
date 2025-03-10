@@ -1,6 +1,11 @@
 
 # Changelog
 
+## Table of Contents
+- [Early Versions (0.1.0 - 0.9.0)](#early-versions-010---090)
+- [Recent Versions (1.0.0 - 1.9.0)](#recent-versions-100---190)
+- [Planned Future Versions](#planned-future-versions)
+
 This document tracks the implementation progress of the AI Automation Consulting Website.
 
 For detailed version history, please see the following files:

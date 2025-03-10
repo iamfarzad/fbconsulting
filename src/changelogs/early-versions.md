@@ -1,6 +1,17 @@
 
 # Early Versions (0.1.0 - 0.9.0)
 
+## Table of Contents
+- [0.1.0](#010---2025-03-09) - Initial project structure
+- [0.2.0](#020---2025-03-12) - Services page
+- [0.3.0](#030---2025-03-15) - About page
+- [0.4.0](#040---2025-03-18) - Contact/Book a Call page
+- [0.5.0](#050---2025-03-22) - Blog and Case Studies page
+- [0.6.0](#060---2025-03-25) - Testimonials section
+- [0.7.0](#070---2025-03-28) - Icon and image fixes
+- [0.8.0](#080---2025-04-02) - Pricing information
+- [0.9.0](#090---2025-04-07) - SEO optimization
+
 This document tracks the early implementation progress of the AI Automation Consulting Website.
 
 ## [0.1.0] - 2025-03-09
