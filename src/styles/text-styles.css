@@ -1,15 +1,10 @@
 
 /* Text gradient - simplified */
 .text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70;
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-black to-black/80 dark:from-white dark:to-white/80;
 }
 
-/* Simplified color variations */
-.text-gradient-teal {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-teal-500 to-teal-400;
-}
-
-/* Minimal text highlighting options */
+/* Simple highlight */
 .text-highlight {
-  @apply bg-primary/10 px-1 py-0.5 rounded;
+  @apply bg-black/5 dark:bg-white/5 px-1 py-0.5 rounded;
 }

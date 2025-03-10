@@ -34,34 +34,25 @@ const Index = () => {
   // Featured services cards data
   const featuredServices = [
     {
-      icon: <Bot className="size-4 text-white dark:text-white" />,
+      icon: <Bot className="size-4 text-black dark:text-white" />,
       title: "AI Strategy",
       description: "Custom roadmaps for your business",
       date: "Premium Service",
-      iconClassName: "text-white dark:text-white",
-      titleClassName: "text-black dark:text-white",
-      className:
-        "[grid-area:stack] hover:-translate-y-10 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0 border-black/5 dark:border-white/5 bg-white dark:bg-black",
+      className: "bg-white dark:bg-black hover:-translate-y-1 transition-transform duration-300",
     },
     {
-      icon: <MessageSquare className="size-4 text-white dark:text-white" />,
+      icon: <MessageSquare className="size-4 text-black dark:text-white" />,
       title: "AI Chatbots",
       description: "24/7 Customer Support",
       date: "Most Popular",
-      iconClassName: "text-white dark:text-white",
-      titleClassName: "text-black dark:text-white",
-      className:
-        "[grid-area:stack] translate-x-16 translate-y-10 hover:-translate-y-1 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0 border-black/5 dark:border-white/5 bg-white dark:bg-black",
+      className: "bg-white dark:bg-black hover:-translate-y-1 transition-transform duration-300",
     },
     {
-      icon: <Workflow className="size-4 text-white dark:text-white" />,
+      icon: <Workflow className="size-4 text-black dark:text-white" />,
       title: "Workflow Automation",
       description: "Streamline your business processes",
       date: "High ROI",
-      iconClassName: "text-white dark:text-white",
-      titleClassName: "text-black dark:text-white",
-      className:
-        "[grid-area:stack] translate-x-32 translate-y-20 hover:translate-y-10 border-black/5 dark:border-white/5 bg-white dark:bg-black",
+      className: "bg-white dark:bg-black hover:-translate-y-1 transition-transform duration-300",
     },
   ];
 
@@ -81,7 +72,7 @@ const Index = () => {
           {/* Content sections */}
           <Hero />
           
-          <div className="w-full py-16 bg-black/5 dark:bg-white/5 backdrop-blur-sm relative">
+          <div className="w-full py-16 bg-gray-50 dark:bg-gray-900/20 relative">
             <div className="container mx-auto max-w-6xl px-4 relative z-10">
               <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-black dark:text-white">Featured Services</h2>
               <DisplayCards cards={featuredServices} />
