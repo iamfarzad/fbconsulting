@@ -1,0 +1,18 @@
+
+/* Text gradient */
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70;
+}
+
+/* New 2025 design styles */
+.text-gradient-teal {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-teal to-teal/70;
+}
+
+.text-gradient-retro {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-retro-pink to-teal;
+}
+
+.text-gradient-neon {
+  @apply bg-clip-text text-transparent bg-neon-gradient;
+}
