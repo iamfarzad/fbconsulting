@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllBlogPosts, getBlogCategories } from '@/services/blogService';
@@ -63,17 +62,18 @@ const Blog = () => {
       />
       <Navbar />
       
-      <main className="flex-grow pt-24 pb-16 relative">
+      <main className="flex-grow pt-16 relative overflow-hidden">
         <DotPattern width={14} height={14} cx={7} cy={7} cr={1.2} className="opacity-30" />
         
-        {/* Hero section with text reveal */}
-        <div className="relative overflow-hidden mb-20">
+        {/* Hero section with text reveal - adjusted to ensure complete animation */}
+        <div className="relative mb-12">
           <TextRevealByWord 
             text="Discover AI automation insights, case studies, and expert guides to transform your business processes." 
-            className="h-[70vh]"
+            className="h-[120vh]" // Match the height in the component
           />
         </div>
         
+        {/* Content section starts after the text reveal is complete */}
         <div className="container mx-auto px-4 py-8 relative z-10">
           {/* Search bar - currently just visual */}
           <div className="max-w-2xl mx-auto mb-12">
@@ -89,6 +89,7 @@ const Blog = () => {
             </div>
           </div>
 
+          {/* Featured Article section */}
           <section className="mb-16">
             <h2 className="text-3xl font-bold mb-10 text-gradient-teal text-center">Featured Article</h2>
             <Link to={`/blog/${featuredPost.slug}`} className="block max-w-4xl mx-auto">
@@ -129,6 +130,7 @@ const Blog = () => {
             </Link>
           </section>
 
+          {/* Browse Articles section */}
           <section className="mb-16">
             <div className="flex flex-col items-center mb-10">
               <h2 className="text-3xl font-bold mb-6 text-gradient-teal text-center">Browse Articles</h2>
@@ -178,6 +180,7 @@ const Blog = () => {
             </div>
           </section>
           
+          {/* Newsletter signup */}
           <section className="mt-16">
             <NewsletterSignup />
           </section>
