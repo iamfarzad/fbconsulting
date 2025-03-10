@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, Clock, Mail, MessageSquare, User } from 'lucide-react';
+import { Calendar, Clock, Mail, MessageSquare, User, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,7 @@ import { useLeadTracking } from '@/hooks/useAnalytics';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import DotPattern from '@/components/ui/dot-pattern';
+import ContactSection from '@/components/contact/ContactSection';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -83,108 +84,11 @@ const Contact = () => {
       
       <Navbar />
       
-      <main className="flex-grow pt-28 pb-12 relative">
+      <main className="flex-grow relative overflow-hidden">
         <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-25" />
-        <div className="container mx-auto px-4 relative z-10">
-          <PageHeader
-            title="Let's Work Together"
-            subtitle="Book a consultation or send me a message"
-          />
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-12">
-            {/* Contact Form */}
-            <Card className="p-6 shadow-sm">
-              <h2 className="text-2xl font-bold mb-6">Get in Touch</h2>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <label htmlFor="name" className="block text-sm font-medium">
-                    Name
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
-                      <User size={18} />
-                    </div>
-                    <Input 
-                      id="name" 
-                      placeholder="Your Name" 
-                      className="pl-10" 
-                      required 
-                      value={formData.name}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="email" className="block text-sm font-medium">
-                    Email
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
-                      <Mail size={18} />
-                    </div>
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="your.email@example.com" 
-                      className="pl-10" 
-                      required 
-                      value={formData.email}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label htmlFor="message" className="block text-sm font-medium">
-                    Message
-                  </label>
-                  <div className="relative">
-                    <div className="absolute top-3 left-3 pointer-events-none text-muted-foreground">
-                      <MessageSquare size={18} />
-                    </div>
-                    <Textarea 
-                      id="message" 
-                      placeholder="How can I help you?"
-                      className="pl-10 min-h-[120px]"
-                      required
-                      value={formData.message}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-
-                <Button type="submit" className="w-full">
-                  Send Message
-                </Button>
-              </form>
-            </Card>
-
-            {/* Booking Calendar */}
-            <div>
-              <h2 className="text-2xl font-bold mb-6">Book a Consultation</h2>
-              <Card className="p-6 shadow-sm">
-                <div className="flex items-center gap-2 mb-4 text-muted-foreground">
-                  <Calendar size={18} />
-                  <span>Select a date & time for your consultation</span>
-                </div>
-                <BookingCalendar />
-                <div className="mt-4 text-sm text-muted-foreground flex items-center gap-2">
-                  <Clock size={16} />
-                  <span>All consultations are 30 minutes and in your local timezone</span>
-                </div>
-              </Card>
-            </div>
-          </div>
-
-          {/* Additional Contact Information */}
-          <div className="mt-16 text-center">
-            <h3 className="text-xl font-bold mb-4">Prefer email?</h3>
-            <p className="text-muted-foreground">
-              You can reach me directly at <a href="mailto:hello@farzadbayat.com" className="text-teal font-medium hover:underline">hello@farzadbayat.com</a>
-            </p>
-          </div>
-        </div>
+        
+        {/* Main Contact Section */}
+        <ContactSection />
       </main>
       
       <Footer />

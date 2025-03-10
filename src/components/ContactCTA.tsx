@@ -40,8 +40,8 @@ const ContactCTA = () => {
         <div className="tech-grid absolute inset-0 opacity-30"></div>
       </div>
       
-      <div className="container mx-auto max-w-4xl relative z-10">
-        <div className="frosted-glass p-8 md:p-12 shadow-glass">
+      <div className="container mx-auto max-w-5xl relative z-10">
+        <div className="bg-white/20 backdrop-blur-md rounded-2xl p-8 md:p-12 shadow-glass border border-white/20">
           <div className="text-center mb-8">
             <AnimatedText
               text="Ready to Automate and Scale?"
@@ -59,7 +59,7 @@ const ContactCTA = () => {
           <div className="flex flex-col md:flex-row gap-4 justify-center items-center mt-8">
             <Button 
               size="lg" 
-              className="rounded-full px-8 py-6 text-lg w-full md:w-auto flex items-center gap-2 justify-center neo-button"
+              className="rounded-full px-8 py-6 text-lg w-full md:w-auto flex items-center gap-2 justify-center bg-teal-600 hover:bg-teal-700 text-white shadow-md"
               onClick={handleBookClick}
             >
               <Calendar size={20} />
@@ -69,7 +69,7 @@ const ContactCTA = () => {
             <Button 
               variant="outline" 
               size="lg" 
-              className="rounded-full px-8 py-6 text-lg w-full md:w-auto flex items-center gap-2 justify-center border-teal text-teal hover:bg-teal/10"
+              className="rounded-full px-8 py-6 text-lg w-full md:w-auto flex items-center gap-2 justify-center border-teal text-teal hover:bg-teal/10 shadow-sm"
               onClick={handleContactClick}
             >
               <Mail size={20} />
