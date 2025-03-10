@@ -13,7 +13,11 @@ const TIME_SLOTS = [
   '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM'
 ];
 
-const BookingCalendar = () => {
+interface BookingCalendarProps {
+  onBookingSelected?: (date: Date | undefined, time: string | null) => void;
+}
+
+const BookingCalendar = ({ onBookingSelected }: BookingCalendarProps) => {
   const [date, setDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const { toast } = useToast();
@@ -32,32 +36,38 @@ const BookingCalendar = () => {
       return;
     }
 
-    // This would normally send to the Calendly API
-    toast({
-      title: "Consultation booked!",
-      description: `Your consultation is scheduled for ${format(date, 'MMMM d, yyyy')} at ${selectedTime}.`,
-    });
-    
-    // Track the lead generation event for consultation booking
-    trackEvent({
-      action: 'generate_lead',
-      category: 'conversion',
-      label: 'consultation_booking',
-      value: 10, // Higher value assigned to consultation bookings
-      lead_type: 'consultation',
-      lead_source: window.location.pathname,
-      booking_date: format(date, 'yyyy-MM-dd'),
-      booking_time: selectedTime,
-    });
-    
-    console.log('Lead generated: Consultation booking', {
-      date: format(date, 'yyyy-MM-dd'),
-      time: selectedTime
-    });
-    
-    // Reset form
-    setDate(undefined);
-    setSelectedTime(null);
+    if (onBookingSelected) {
+      // If using the confirmation step, pass data to parent
+      onBookingSelected(date, selectedTime);
+    } else {
+      // Legacy direct booking flow (for backward compatibility)
+      // This would normally send to the Calendly API
+      toast({
+        title: "Consultation booked!",
+        description: `Your consultation is scheduled for ${format(date, 'MMMM d, yyyy')} at ${selectedTime}.`,
+      });
+      
+      // Track the lead generation event for consultation booking
+      trackEvent({
+        action: 'generate_lead',
+        category: 'conversion',
+        label: 'consultation_booking',
+        value: 10, // Higher value assigned to consultation bookings
+        lead_type: 'consultation',
+        lead_source: window.location.pathname,
+        booking_date: format(date, 'yyyy-MM-dd'),
+        booking_time: selectedTime,
+      });
+      
+      console.log('Lead generated: Consultation booking', {
+        date: format(date, 'yyyy-MM-dd'),
+        time: selectedTime
+      });
+      
+      // Reset form
+      setDate(undefined);
+      setSelectedTime(null);
+    }
   };
 
   return (
@@ -118,7 +128,7 @@ const BookingCalendar = () => {
               className="w-full mt-6 bg-teal-600 hover:bg-teal-700 text-white"
               disabled={!date || !selectedTime}
             >
-              Confirm Booking
+              {onBookingSelected ? "Continue to Confirm" : "Confirm Booking"}
             </Button>
           </div>
         ) : (
