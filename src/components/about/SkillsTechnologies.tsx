@@ -1,85 +1,171 @@
 
 import React from 'react';
 import AnimatedText from '@/components/AnimatedText';
+import { cn } from "@/lib/utils";
+import {
+  Sparkles,
+  Bot,
+  BrainCircuit,
+  Cloud,
+  Workflow,
+  MessagesSquare,
+  Network,
+  Database
+} from "lucide-react";
 
-// Organize skills into categories
-const SKILL_CATEGORIES = [
+// Skills data organized in the new format
+const SKILLS_DATA = [
   {
-    title: "AI & Machine Learning",
-    skills: [
-      "OpenAI Fine-Tuning",
-      "ChatGPT Custom Model Training",
-      "Synthetic Data Generation (Gretel.ai)",
-      "Machine Learning & Predictive Analytics",
-      "Natural Language Processing (NLP)",
-      "Knowledge Graphs & AI Reasoning"
-    ]
+    title: "OpenAI Fine-Tuning",
+    description: "Trained custom GPT models for specialized business applications.",
+    icon: <Sparkles className="w-6 h-6" />,
+    category: "AI & Machine Learning"
   },
   {
-    title: "AI-Powered Business Automation",
-    skills: [
-      "Microsoft Azure AI Foundry",
-      "Azure OpenAI Services",
-      "Copilot (Microsoft 365 AI Integration)",
-      "Workflow Automation",
-      "AI-Driven Data Augmentation"
-    ]
+    title: "ChatGPT Custom Model Training",
+    description: "Developed tailored AI assistants with domain-specific expertise.",
+    icon: <BrainCircuit className="w-6 h-6" />,
+    category: "AI & Machine Learning"
   },
   {
-    title: "Chatbots & AI Assistants",
-    skills: [
-      "Conversational AI",
-      "Virtual Assistants & AI Copilots",
-      "LLM Prompt Engineering"
-    ]
+    title: "Synthetic Data Generation",
+    description: "Created privacy-first datasets to improve AI model performance.",
+    icon: <Database className="w-6 h-6" />,
+    category: "AI & Machine Learning"
   },
   {
-    title: "Data, Cloud & Systems Integration",
-    skills: [
-      "Microsoft Azure & Cloud AI Solutions",
-      "Systems Integration & API Development",
-      "Business Intelligence & Data Analytics",
-      "Edge AI & Hybrid AI Models"
-    ]
-  }
+    title: "Machine Learning & Predictive Analytics",
+    description: "Built AI-driven insights platforms for automation and decision-making.",
+    icon: <BrainCircuit className="w-6 h-6" />,
+    category: "AI & Machine Learning"
+  },
+  {
+    title: "Microsoft Azure AI Foundry",
+    description: "Built and deployed scalable AI models using Microsoft's enterprise AI tools.",
+    icon: <Cloud className="w-6 h-6" />,
+    category: "AI-Powered Business Automation"
+  },
+  {
+    title: "Azure OpenAI Services",
+    description: "Integrated OpenAI's GPT models into business workflows via Azure's AI stack.",
+    icon: <Cloud className="w-6 h-6" />,
+    category: "AI-Powered Business Automation"
+  },
+  {
+    title: "Copilot Integration",
+    description: "Developed AI-powered automation assistants for enterprise productivity.",
+    icon: <Bot className="w-6 h-6" />,
+    category: "AI-Powered Business Automation"
+  },
+  {
+    title: "Conversational AI",
+    description: "Developed AI chatbots for mental wellness and business automation.",
+    icon: <MessagesSquare className="w-6 h-6" />,
+    category: "Chatbots & AI Assistants"
+  },
+  {
+    title: "Virtual Assistants & AI Copilots",
+    description: "Built AI-powered productivity tools using ChatGPT & Microsoft Copilot.",
+    icon: <Bot className="w-6 h-6" />,
+    category: "Chatbots & AI Assistants"
+  },
+  {
+    title: "LLM Prompt Engineering",
+    description: "Optimized GPT-based assistants for maximum accuracy and efficiency.",
+    icon: <Sparkles className="w-6 h-6" />,
+    category: "Chatbots & AI Assistants"
+  },
+  {
+    title: "Systems Integration & API Development",
+    description: "Connected AI models to databases, cloud services, and automation tools.",
+    icon: <Network className="w-6 h-6" />,
+    category: "Data, Cloud & Systems Integration"
+  },
+  {
+    title: "Workflow Automation",
+    description: "Eliminated manual workflows with AI in mental health and content creation.",
+    icon: <Workflow className="w-6 h-6" />,
+    category: "Data, Cloud & Systems Integration"
+  },
 ];
+
+const FeatureSkill = ({
+  title,
+  description,
+  icon,
+  index,
+}: {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  index: number;
+}) => {
+  return (
+    <div
+      className={cn(
+        "flex flex-col lg:border-r py-10 relative group/feature dark:border-neutral-800",
+        (index === 0 || index === 4 || index === 8) && "lg:border-l dark:border-neutral-800",
+        index < 4 && "lg:border-b dark:border-neutral-800",
+        (index >= 4 && index < 8) && "lg:border-b dark:border-neutral-800"
+      )}
+    >
+      {index < 8 && (
+        <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-t from-primary/5 to-transparent pointer-events-none" />
+      )}
+      {index >= 8 && (
+        <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+      )}
+      <div className="mb-4 relative z-10 px-6 text-primary">
+        {icon}
+      </div>
+      <div className="text-lg font-bold mb-2 relative z-10 px-6">
+        <div className="absolute left-0 inset-y-0 h-6 group-hover/feature:h-8 w-1 rounded-tr-full rounded-br-full bg-muted group-hover/feature:bg-primary transition-all duration-200 origin-center" />
+        <span className="group-hover/feature:translate-x-2 transition duration-200 inline-block text-foreground">
+          {title}
+        </span>
+      </div>
+      <p className="text-sm text-muted-foreground max-w-xs relative z-10 px-6">
+        {description}
+      </p>
+    </div>
+  );
+};
+
+// Group skills by category
+const groupedSkills = SKILLS_DATA.reduce((acc, skill) => {
+  if (!acc[skill.category]) {
+    acc[skill.category] = [];
+  }
+  acc[skill.category].push(skill);
+  return acc;
+}, {} as Record<string, typeof SKILLS_DATA>);
 
 const SkillsTechnologies = () => {
   return (
     <section className="py-16 px-4">
-      <div className="container mx-auto max-w-5xl">
-        <AnimatedText text="Skills & Technologies" tag="h2" className="text-3xl font-bold mb-8 text-center" />
+      <div className="container mx-auto max-w-7xl">
+        <AnimatedText 
+          text="Skills & Technologies" 
+          tag="h2" 
+          className="text-3xl font-bold mb-8 text-center"
+        />
         
-        <div className="space-y-10">
-          {SKILL_CATEGORIES.map((category, categoryIndex) => (
-            <div key={category.title} className="space-y-4">
-              <h3 
-                className="text-xl font-semibold text-foreground opacity-0 animate-fade-in-up"
-                style={{
-                  animationDelay: `${200 + categoryIndex * 100}ms`,
-                  animationFillMode: 'forwards'
-                }}
-              >
-                {category.title}
-              </h3>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {category.skills.map((skill, index) => (
-                  <div 
-                    key={skill} 
-                    className="bg-primary/10 rounded-lg px-4 py-3 text-sm opacity-0 animate-fade-in-up" 
-                    style={{
-                      animationDelay: `${300 + categoryIndex * 100 + index * 50}ms`,
-                      animationFillMode: 'forwards'
-                    }}
-                  >
-                    {skill}
-                  </div>
-                ))}
-              </div>
+        {Object.entries(groupedSkills).map(([category, skills], categoryIndex) => (
+          <div key={category} className="mb-16">
+            <h3 className="text-xl font-semibold mb-6">{category}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 relative z-10">
+              {skills.map((skill, index) => (
+                <FeatureSkill 
+                  key={skill.title} 
+                  title={skill.title} 
+                  description={skill.description} 
+                  icon={skill.icon} 
+                  index={index + (categoryIndex * 4)} 
+                />
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </section>
   );
