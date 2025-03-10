@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllBlogPosts, getBlogCategories } from '@/services/blogService';
@@ -10,7 +11,6 @@ import DotPattern from '@/components/ui/dot-pattern';
 import { TextRevealByWord } from '@/components/ui/text-reveal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SearchIcon } from 'lucide-react';
-import FeatureCard from '@/components/FeatureCard';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 
 const Blog = () => {
@@ -67,10 +67,10 @@ const Blog = () => {
         <DotPattern width={14} height={14} cx={7} cy={7} cr={1.2} className="opacity-30" />
         
         {/* Hero section with text reveal */}
-        <div className="h-[40vh] relative overflow-hidden mb-12">
+        <div className="relative overflow-hidden mb-20">
           <TextRevealByWord 
             text="Discover AI automation insights, case studies, and expert guides to transform your business processes." 
-            className="h-[40vh]"
+            className="h-[70vh]"
           />
         </div>
         
