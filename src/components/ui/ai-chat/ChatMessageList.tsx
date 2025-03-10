@@ -12,21 +12,53 @@ interface ChatMessageListProps {
 
 export const ChatMessageList = ({ messages, showMessages }: ChatMessageListProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
   
+  // Enhanced scrolling behavior
   useEffect(() => {
-    scrollToBottom();
+    if (messages.length > 0) {
+      // Delay slightly to ensure DOM update is complete
+      const timer = setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
   }, [messages]);
+  
+  // Also scroll when a new message is added
+  useEffect(() => {
+    const container = containerRef.current;
+    if (container) {
+      // Use Intersection Observer to detect if the container is in view
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          // If not fully visible, scroll into view
+          if (!entry.isIntersecting) {
+            container.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+        },
+        { threshold: 0.5 }
+      );
+      
+      observer.observe(container);
+      return () => observer.disconnect();
+    }
+  }, [showMessages]);
 
   if (!showMessages && messages.length === 0) {
     return null;
   }
 
   return (
-    <div className="bg-black rounded-t-xl border border-white/30 p-4 overflow-y-auto max-h-[400px] min-h-[200px]">
+    <div 
+      ref={containerRef}
+      className="bg-black rounded-t-xl border border-white/30 p-4 overflow-y-auto max-h-[400px] min-h-[200px]"
+    >
       <AnimatePresence>
         {messages.length === 0 ? (
           <motion.div 

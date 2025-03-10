@@ -27,18 +27,24 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
     voiceError 
   } = useSpeechRecognition(handleCommand);
 
-  // Add animation state management
+  // Add animation state management with delay to prevent flickering
   useEffect(() => {
+    let timer: NodeJS.Timeout;
+    
     if (isListening) {
+      // Set transcribing state immediately when starting to listen
       setIsTranscribing(true);
     } else {
-      // Delay setting isTranscribing to false to allow for exit animation
-      const timer = setTimeout(() => {
+      // When stopping listening, delay turning off the UI to allow for animations
+      // and prevent flickering with short recognition attempts
+      timer = setTimeout(() => {
         setIsTranscribing(false);
-      }, 500); // Match this with animation duration
-      
-      return () => clearTimeout(timer);
+      }, 800); // Increased from 500ms to 800ms for smoother transitions
     }
+    
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [isListening]);
 
   return {

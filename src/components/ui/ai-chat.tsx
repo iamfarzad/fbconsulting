@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useCopilot } from "@/hooks/useCopilot";
 import { useNavigate } from "react-router-dom";
@@ -41,6 +41,21 @@ export function AIChatInput({
     await sendMessage(message);
   };
   
+  // Auto scroll to ensure the chat is visible when messages appear
+  useEffect(() => {
+    if (messages.length > 0 && showMessages) {
+      // Small delay to ensure DOM is updated
+      const timer = setTimeout(() => {
+        const chatElement = document.querySelector('.message-list-container');
+        if (chatElement) {
+          chatElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [messages.length, showMessages]);
+  
   const handleActionClick = (topic: string) => {
     const actionMessages = {
       'Chatbots': "I'm interested in implementing AI chatbots for my business. What options do you offer?",
@@ -78,10 +93,12 @@ export function AIChatInput({
   return (
     <div className="flex flex-col w-full max-w-4xl mx-auto">
       {(showMessages || messages.length > 0) && (
-        <ChatMessageList 
-          messages={messages}
-          showMessages={showMessages}
-        />
+        <div className="message-list-container">
+          <ChatMessageList 
+            messages={messages}
+            showMessages={showMessages}
+          />
+        </div>
       )}
       
       <ChatInput

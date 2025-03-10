@@ -26,7 +26,7 @@ export function VoiceControls({
         isListening 
           ? "bg-black text-white animate-pulse-subtle" 
           : "text-black/70 hover:bg-black/10",
-        aiProcessing && "opacity-50 cursor-wait"
+        (disabled || aiProcessing) && "opacity-50 cursor-not-allowed"
       )}
       disabled={disabled || aiProcessing}
       aria-label={isListening ? "Stop listening" : "Start listening"}

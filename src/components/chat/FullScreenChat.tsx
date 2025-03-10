@@ -30,8 +30,8 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({ onMinimize }) => {
           </Button>
         </div>
         
-        <div className="h-full pt-20 pb-10">
-          <div className="bg-transparent h-full max-w-4xl mx-auto overflow-hidden flex flex-col">
+        <div className="h-full pt-20 pb-10 overflow-auto">
+          <div className="bg-transparent h-full max-w-4xl mx-auto flex flex-col">
             <div className="p-6 text-center mb-4">
               <h2 className="text-2xl font-semibold text-white mb-2">Chat with AI Assistant</h2>
               <div className="flex justify-center">
@@ -43,7 +43,7 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({ onMinimize }) => {
             </div>
             
             <div className="flex-1 p-6 overflow-hidden">
-              <AIChatInput />
+              <AIChatInput placeholderText="Ask about our AI services..." />
             </div>
           </div>
         </div>
