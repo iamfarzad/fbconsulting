@@ -1,7 +1,6 @@
 
 import { Book, Sunset, Trees, Zap } from "lucide-react";
-import { Navbar1 } from "./shadcnblocks-com-navbar1";
-import { Moon, Sun } from "lucide-react";
+import { Navbar1 } from "./navbar";
 
 // Define the dark mode toggle props
 interface DarkModeToggle {
