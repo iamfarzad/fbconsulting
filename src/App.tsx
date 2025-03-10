@@ -10,7 +10,6 @@ import Services from '@/pages/Services';
 import Contact from '@/pages/Contact';
 import Blog from '@/pages/Blog';
 import BlogPost from '@/pages/BlogPost';
-import Changelog from '@/pages/Changelog';
 import NotFound from '@/pages/NotFound';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import TestPage from './pages/TestPage';
@@ -32,7 +31,6 @@ function App() {
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/blog" element={<Blog />} />
                 <Route path="/blog/:slug" element={<BlogPost />} />
-                <Route path="/changelog" element={<Changelog />} />
                 <Route path="/test" element={<TestPage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
