@@ -1,4 +1,3 @@
-
 import React from 'react';
 import AnimatedText from '@/components/AnimatedText';
 import { cn } from "@/lib/utils";
@@ -12,9 +11,9 @@ import {
   MessagesSquare,
   Network,
   Database,
-  OpenAI,
-  Copilot,
-  GeminiIcon,
+  Code,
+  Terminal,
+  Brain,
   Braces,
   LineChart
 } from "lucide-react";
@@ -131,6 +130,15 @@ const SKILLS_DATA = [
   },
 ];
 
+// Group skills by category
+const groupedSkills = SKILLS_DATA.reduce((acc, skill) => {
+  if (!acc[skill.category]) {
+    acc[skill.category] = [];
+  }
+  acc[skill.category].push(skill);
+  return acc;
+}, {} as Record<string, typeof SKILLS_DATA>);
+
 const FeatureSkill = ({
   title,
   description,
@@ -173,15 +181,6 @@ const FeatureSkill = ({
   );
 };
 
-// Group skills by category
-const groupedSkills = SKILLS_DATA.reduce((acc, skill) => {
-  if (!acc[skill.category]) {
-    acc[skill.category] = [];
-  }
-  acc[skill.category].push(skill);
-  return acc;
-}, {} as Record<string, typeof SKILLS_DATA>);
-
 const SkillsTechnologies = () => {
   return (
     <section className="py-16 px-4">
@@ -199,19 +198,19 @@ const SkillsTechnologies = () => {
             description="I leverage the latest AI models and platforms to deliver cutting-edge solutions for businesses"
             icons={[
               {
-                icon: <OpenAI className="h-8 w-8 dark:text-white" />,
+                icon: <BrainCircuit className="h-8 w-8 dark:text-white" />,
                 size: "lg",
               },
               {
-                icon: <Copilot className="h-6 w-6 dark:text-white" />,
+                icon: <Terminal className="h-6 w-6 dark:text-white" />,
                 size: "md",
               },
               {
-                icon: <GeminiIcon className="h-4 w-4" />,
+                icon: <Code className="h-4 w-4" />,
                 size: "sm",
               },
               {
-                icon: <BrainCircuit className="h-6 w-6" />,
+                icon: <Brain className="h-6 w-6" />,
                 size: "md",
               },
               {

@@ -63,11 +63,17 @@ function AnimatedIcons({ icons }: { icons: AnimatedCardProps["icons"] }) {
   ])
 
   useEffect(() => {
-    animate(sequence, {
-      repeat: Infinity,
-      repeatDelay: 1,
-    })
-  }, [])
+    // Modified to use a more type-safe approach for the animation
+    if (sequence.length > 0) {
+      const animation = animate(sequence as any);
+      animation.repeat(Infinity);
+      animation.repeatDelay(1);
+      
+      return () => {
+        animation.stop();
+      };
+    }
+  }, [sequence]);
 
   return (
     <div className="p-8 overflow-hidden h-full relative flex items-center justify-center">
