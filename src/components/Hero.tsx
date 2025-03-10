@@ -3,32 +3,13 @@ import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { AIChatInput } from './ui/ai-chat';
 import LocationGreeting from './LocationGreeting';
+import { useLocationDetection } from '@/hooks/useLocationDetection';
+import { Flag } from 'lucide-react';
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
-  const [isNorwegian, setIsNorwegian] = useState(false);
+  const { isNorwegian, country } = useLocationDetection();
   
-  // Function to check if user is from Norway
-  useEffect(() => {
-    const checkIfNorwegian = async () => {
-      try {
-        const response = await fetch('https://ipapi.co/json/');
-        if (response.ok) {
-          const data = await response.json();
-          setIsNorwegian(data.country === 'NO');
-        }
-      } catch (error) {
-        console.log("Location detection failed", error);
-        
-        // Fallback to browser language
-        const userLang = navigator.language || navigator.languages?.[0];
-        setIsNorwegian(userLang?.includes('nb') || userLang?.includes('nn') || userLang?.includes('no'));
-      }
-    };
-    
-    checkIfNorwegian();
-  }, []);
-
   return (
     <section 
       ref={heroRef}
@@ -40,13 +21,35 @@ const Hero = () => {
         </div>
         
         <div className="flex flex-col items-center w-full max-w-3xl mx-auto p-4 space-y-8">
+          {isNorwegian && (
+            <motion.div 
+              className="bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 flex items-center gap-2 border border-white/10"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Flag className="w-4 h-4 text-red-600" />
+              <span className="text-sm font-medium">Norway Customized</span>
+            </motion.div>
+          )}
+          
           <motion.h1 
             className="text-4xl md:text-5xl font-semibold text-foreground"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            {isNorwegian ? "AI Automation for Norwegian Businesses" : "AI Automation Solutions"}
+            {isNorwegian ? (
+              <span className="relative">
+                AI Automation for Norwegian Businesses
+                <motion.span
+                  className="absolute -bottom-2 left-0 w-full h-0.5 bg-gradient-to-r from-red-600 via-white to-blue-600 opacity-80"
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ delay: 0.7, duration: 0.6 }}
+                ></motion.span>
+              </span>
+            ) : "AI Automation Solutions"}
           </motion.h1>
           
           <motion.p

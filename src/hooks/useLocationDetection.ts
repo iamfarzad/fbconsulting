@@ -6,6 +6,8 @@ interface LocationData {
   city?: string;
   country?: string;
   countryCode?: string;
+  isLoading: boolean;
+  error?: string;
 }
 
 export function useLocationDetection(): LocationData {
@@ -13,22 +15,28 @@ export function useLocationDetection(): LocationData {
     isNorwegian: false,
     city: undefined,
     country: undefined,
-    countryCode: undefined
+    countryCode: undefined,
+    isLoading: true
   });
   
   useEffect(() => {
+    let isMounted = true;
+    
     const detectLocation = async () => {
       try {
         // Try IP-based location first
         const response = await fetch('https://ipapi.co/json/');
         if (response.ok) {
           const data = await response.json();
-          setLocationData({
-            isNorwegian: data.country === 'NO',
-            city: data.city,
-            country: data.country_name,
-            countryCode: data.country
-          });
+          if (isMounted) {
+            setLocationData({
+              isNorwegian: data.country === 'NO',
+              city: data.city,
+              country: data.country_name,
+              countryCode: data.country,
+              isLoading: false
+            });
+          }
           return;
         }
       } catch (error) {
@@ -46,24 +54,27 @@ export function useLocationDetection(): LocationData {
             
             if (geoResponse.ok) {
               const geoData = await geoResponse.json();
-              setLocationData({
-                isNorwegian: geoData.countryCode === 'NO' || geoData.countryName === 'Norway',
-                city: geoData.city,
-                country: geoData.countryName,
-                countryCode: geoData.countryCode
-              });
+              if (isMounted) {
+                setLocationData({
+                  isNorwegian: geoData.countryCode === 'NO' || geoData.countryName === 'Norway',
+                  city: geoData.city,
+                  country: geoData.countryName,
+                  countryCode: geoData.countryCode,
+                  isLoading: false
+                });
+              }
             }
           } catch (error) {
             console.log("Geolocation reverse lookup failed", error);
-            fallbackToLanguage();
+            if (isMounted) fallbackToLanguage();
           }
         }, (error) => {
           console.log("Browser geolocation failed", error);
-          fallbackToLanguage();
+          if (isMounted) fallbackToLanguage();
         });
       } catch (error) {
         console.log("Geolocation error", error);
-        fallbackToLanguage();
+        if (isMounted) fallbackToLanguage();
       }
     };
     
@@ -74,11 +85,17 @@ export function useLocationDetection(): LocationData {
       
       setLocationData({
         isNorwegian: isNorwegianLanguage,
-        countryCode: isNorwegianLanguage ? 'NO' : undefined
+        countryCode: isNorwegianLanguage ? 'NO' : undefined,
+        country: isNorwegianLanguage ? 'Norway' : undefined,
+        isLoading: false
       });
     };
     
     detectLocation();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
   
   return locationData;

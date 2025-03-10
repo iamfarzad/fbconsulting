@@ -1,95 +1,63 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useLocationDetection } from '@/hooks/useLocationDetection';
+import { motion } from 'framer-motion';
+import { MapPin } from 'lucide-react';
 
 interface LocationGreetingProps {
   className?: string;
 }
 
 const LocationGreeting: React.FC<LocationGreetingProps> = ({ className = "" }) => {
-  const [greeting, setGreeting] = useState("Hi Visionary");
-  const [isNorwegian, setIsNorwegian] = useState(false);
+  const { city, country, isNorwegian } = useLocationDetection();
   
-  useEffect(() => {
-    // Try to get location from browser
-    const getLocation = async () => {
-      try {
-        // First try to get location from IP lookup
-        const response = await fetch('https://ipapi.co/json/');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.city) {
-            setGreeting(`Hi ${data.city} Innovator`);
-            
-            // Check if location is in Norway by country code
-            if (data.country === 'NO') {
-              setIsNorwegian(true);
-            }
-            return;
-          }
-        }
-        
-        // Fall back to browser geolocation API
-        navigator.geolocation.getCurrentPosition(async (position) => {
-          try {
-            const { latitude, longitude } = position.coords;
-            const geoResponse = await fetch(
-              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
-            );
-            
-            if (geoResponse.ok) {
-              const geoData = await geoResponse.json();
-              if (geoData.city) {
-                setGreeting(`Hi ${geoData.city} Innovator`);
-                
-                // Check if location is in Norway
-                if (geoData.countryCode === 'NO' || geoData.countryName === 'Norway') {
-                  setIsNorwegian(true);
-                }
-              }
-            }
-          } catch (error) {
-            console.log("Geocoding failed", error);
-          }
-        }, (error) => {
-          console.log("Geolocation failed", error);
-          // Try to detect user characteristics from user agent
-          detectUserType();
-        });
-      } catch (error) {
-        console.log("Location detection failed", error);
-        detectUserType();
-      }
-    };
+  // Create greeting based on location
+  const getGreeting = () => {
+    if (city) {
+      return `Hi ${city} Innovator`;
+    }
     
-    const detectUserType = () => {
-      const hour = new Date().getHours();
-      if (hour < 12) {
-        setGreeting("Hi Early Riser");
-      } else if (hour < 17) {
-        setGreeting("Hi Productivity Seeker");
-      } else {
-        setGreeting("Hi Night Owl");
-      }
-      
-      // Try to detect Norway from browser language
-      const userLang = navigator.language || navigator.languages?.[0];
-      if (userLang?.includes('nb') || userLang?.includes('nn') || userLang?.includes('no')) {
-        setIsNorwegian(true);
-      }
-    };
-    
-    getLocation();
-  }, []);
-  
+    // Fall back to time-based greeting
+    const hour = new Date().getHours();
+    if (hour < 12) {
+      return "Hi Early Riser";
+    } else if (hour < 17) {
+      return "Hi Productivity Seeker";
+    } else {
+      return "Hi Night Owl";
+    }
+  };
+
   return (
     <div className={`${className}`}>
-      <h2 className="text-2xl md:text-3xl font-futuristic">
-        {greeting}
-      </h2>
+      <motion.div 
+        className="flex items-center justify-center gap-2 text-2xl md:text-3xl font-futuristic"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        {city && (
+          <motion.div 
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.3, type: "spring" }}
+            className="text-muted-foreground"
+          >
+            <MapPin className="h-5 w-5" />
+          </motion.div>
+        )}
+        <h2>{getGreeting()}</h2>
+      </motion.div>
+      
       {isNorwegian && (
-        <p className="text-sm text-accent-foreground mt-1 animate-fade-in-up">
+        <motion.p 
+          className="text-sm text-accent-foreground mt-2 sm:mt-1"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
+        >
           Specialized in AI solutions for Norwegian businesses
-        </p>
+        </motion.p>
       )}
     </div>
   );

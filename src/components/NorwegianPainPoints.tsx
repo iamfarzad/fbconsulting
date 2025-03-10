@@ -1,10 +1,11 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Shield, BookOpen, Workflow } from 'lucide-react';
+import { ArrowRight, Shield, BookOpen, Workflow, Flag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { trackEvent } from '@/services/analyticsService';
 import AnimatedText from './AnimatedText';
+import { motion } from 'framer-motion';
 
 interface NorwegianPainPointsProps {
   isVisible: boolean;
@@ -27,9 +28,33 @@ const NorwegianPainPoints: React.FC<NorwegianPainPointsProps> = ({ isVisible }) 
     navigate('/contact');
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: { 
+        staggerChildren: 0.2,
+        delayChildren: 0.3
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.5 } }
+  };
+
   return (
-    <section className="py-10 px-4 bg-gradient-to-b from-background to-deep-purple/5 relative z-10 border-t border-white/5">
-      <div className="container mx-auto max-w-4xl">
+    <section className="py-12 px-4 relative z-10 border-t border-white/5">
+      {/* Norwegian-themed background with subtle flag colors */}
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 via-transparent to-red-900/5 pointer-events-none" />
+      
+      <div className="container mx-auto max-w-4xl relative">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <Flag className="h-5 w-5 text-red-600" />
+          <span className="text-sm font-medium text-foreground/70">Norway Specific</span>
+        </div>
+        
         <div className="text-center mb-8">
           <AnimatedText
             text="AI Solutions for Norwegian Businesses"
@@ -44,51 +69,80 @@ const NorwegianPainPoints: React.FC<NorwegianPainPointsProps> = ({ isVisible }) 
           />
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 mt-8">
-          <div className="bg-white/5 backdrop-blur-md p-6 rounded-xl border border-white/10 transition-all duration-300 hover:translate-y-[-5px]">
+        <motion.div 
+          className="grid md:grid-cols-3 gap-6 mt-10"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          <motion.div 
+            className="bg-white/5 backdrop-blur-md p-6 rounded-xl border border-white/10 transition-all duration-300 hover:translate-y-[-5px] hover:bg-white/8 group"
+            variants={itemVariants}
+          >
             <div className="flex items-center gap-3 mb-4">
-              <Shield className="h-6 w-6 text-teal-500" />
+              <div className="bg-gradient-to-br from-red-500 to-red-600 p-2.5 rounded-lg text-white">
+                <Shield className="h-5 w-5" />
+              </div>
               <h3 className="text-lg font-semibold">Regulatory Compliance</h3>
             </div>
             <p className="text-muted-foreground mb-4">
               Navigate complex GDPR, EU AI Act, and Norwegian data privacy requirements with compliant AI solutions.
             </p>
-          </div>
+            <div className="h-1 w-full bg-gradient-to-r from-red-600/50 to-blue-600/50 rounded-full transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
+          </motion.div>
           
-          <div className="bg-white/5 backdrop-blur-md p-6 rounded-xl border border-white/10 transition-all duration-300 hover:translate-y-[-5px]">
+          <motion.div 
+            className="bg-white/5 backdrop-blur-md p-6 rounded-xl border border-white/10 transition-all duration-300 hover:translate-y-[-5px] hover:bg-white/8 group"
+            variants={itemVariants}
+          >
             <div className="flex items-center gap-3 mb-4">
-              <BookOpen className="h-6 w-6 text-teal-500" />
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2.5 rounded-lg text-white">
+                <BookOpen className="h-5 w-5" />
+              </div>
               <h3 className="text-lg font-semibold">AI Expertise Gap</h3>
             </div>
             <p className="text-muted-foreground mb-4">
               Bridge the AI knowledge gap with tailored consulting for Norwegian industries like energy, manufacturing and finance.
             </p>
-          </div>
+            <div className="h-1 w-full bg-gradient-to-r from-blue-600/50 to-red-600/50 rounded-full transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
+          </motion.div>
           
-          <div className="bg-white/5 backdrop-blur-md p-6 rounded-xl border border-white/10 transition-all duration-300 hover:translate-y-[-5px]">
+          <motion.div 
+            className="bg-white/5 backdrop-blur-md p-6 rounded-xl border border-white/10 transition-all duration-300 hover:translate-y-[-5px] hover:bg-white/8 group"
+            variants={itemVariants}
+          >
             <div className="flex items-center gap-3 mb-4">
-              <Workflow className="h-6 w-6 text-teal-500" />
+              <div className="bg-gradient-to-br from-white to-gray-200 p-2.5 rounded-lg text-blue-600">
+                <Workflow className="h-5 w-5" />
+              </div>
               <h3 className="text-lg font-semibold">Workflow Automation</h3>
             </div>
             <p className="text-muted-foreground mb-4">
               Optimize operations with AI automation tailored to Norwegian business processes and compliance needs.
             </p>
-          </div>
-        </div>
+            <div className="h-1 w-full bg-gradient-to-r from-white/50 to-blue-600/50 rounded-full transform origin-left scale-x-0 transition-transform duration-300 group-hover:scale-x-100" />
+          </motion.div>
+        </motion.div>
         
         {/* Norwegian-specific CTA button */}
-        <div className="mt-10 flex justify-center">
-          <div className="opacity-0 animate-fade-in-up" style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}>
-            <Button 
-              size="lg" 
-              className="rounded-full px-8 neo-button group"
-              onClick={handleGetAuditClick}
-            >
-              Get a Free AI Compliance Audit
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </Button>
-          </div>
-        </div>
+        <motion.div 
+          className="mt-12 flex justify-center"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.8, duration: 0.5 }}
+        >
+          <Button 
+            size="lg" 
+            className="rounded-full px-8 neo-button group relative overflow-hidden"
+            onClick={handleGetAuditClick}
+          >
+            <span className="relative z-10">Get a Free AI Compliance Audit</span>
+            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1 relative z-10" />
+            <div className="absolute inset-0 bg-gradient-to-r from-red-600/80 via-white/20 to-blue-600/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </Button>
+        </motion.div>
       </div>
     </section>
   );
