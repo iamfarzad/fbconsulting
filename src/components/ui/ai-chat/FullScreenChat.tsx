@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { AIChatInput } from '../ui/ai-chat';
-import { Button } from '../ui/button';
-import { AnimatedBars } from '../ui/AnimatedBars';
+import { AIChatInput } from '../ai-chat';
+import { Button } from '../../ui/button';
+import { AnimatedBars } from '../AnimatedBars';
 
 interface FullScreenChatProps {
   onMinimize: () => void;
