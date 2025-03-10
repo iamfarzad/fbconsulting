@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllBlogPosts, getBlogCategories } from '@/services/blogService';
@@ -65,18 +66,18 @@ const Blog = () => {
       <main className="flex-grow pt-16 relative overflow-hidden">
         <DotPattern width={14} height={14} cx={7} cy={7} cr={1.2} className="opacity-30" />
         
-        {/* Hero section with text reveal - adjusted to ensure complete animation */}
-        <div className="relative mb-12">
+        {/* Hero section with text reveal - adjusted placement */}
+        <div className="relative overflow-hidden">
           <TextRevealByWord 
             text="Discover AI automation insights, case studies, and expert guides to transform your business processes." 
-            className="h-[120vh]" // Match the height in the component
+            className="pt-8 pb-12 md:pt-12 md:pb-16" // Added padding for better mobile placement
           />
         </div>
         
-        {/* Content section starts after the text reveal is complete */}
-        <div className="container mx-auto px-4 py-8 relative z-10">
+        {/* Content section starts after the text reveal - adjusted spacing */}
+        <div className="container mx-auto px-4 py-8 relative z-10 mt-[-120px] sm:mt-[-100px] md:mt-[-60px]">
           {/* Search bar - currently just visual */}
-          <div className="max-w-2xl mx-auto mb-12">
+          <div className="max-w-2xl mx-auto mb-12 pt-24 md:pt-16">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <SearchIcon className="h-5 w-5 text-muted-foreground" />
