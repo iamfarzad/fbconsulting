@@ -4,7 +4,7 @@ import { Timeline } from "@/components/ui/timeline";
 
 const journeyData = [
   {
-    title: "2024",
+    title: "2024-2025",
     content: (
       <div>
         <h4 className="text-foreground text-base md:text-lg font-semibold mb-2">Talk to Eve (AI Mental Wellness & Burnout Prevention)</h4>
