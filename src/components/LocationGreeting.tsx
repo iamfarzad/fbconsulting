@@ -7,6 +7,7 @@ interface LocationGreetingProps {
 
 const LocationGreeting: React.FC<LocationGreetingProps> = ({ className = "" }) => {
   const [greeting, setGreeting] = useState("Hi Visionary");
+  const [isNorwegian, setIsNorwegian] = useState(false);
   
   useEffect(() => {
     // Try to get location from browser
@@ -18,6 +19,11 @@ const LocationGreeting: React.FC<LocationGreetingProps> = ({ className = "" }) =
           const data = await response.json();
           if (data.city) {
             setGreeting(`Hi ${data.city} Innovator`);
+            
+            // Check if location is in Norway by country code
+            if (data.country === 'NO') {
+              setIsNorwegian(true);
+            }
             return;
           }
         }
@@ -34,6 +40,11 @@ const LocationGreeting: React.FC<LocationGreetingProps> = ({ className = "" }) =
               const geoData = await geoResponse.json();
               if (geoData.city) {
                 setGreeting(`Hi ${geoData.city} Innovator`);
+                
+                // Check if location is in Norway
+                if (geoData.countryCode === 'NO' || geoData.countryName === 'Norway') {
+                  setIsNorwegian(true);
+                }
               }
             }
           } catch (error) {
@@ -59,15 +70,28 @@ const LocationGreeting: React.FC<LocationGreetingProps> = ({ className = "" }) =
       } else {
         setGreeting("Hi Night Owl");
       }
+      
+      // Try to detect Norway from browser language
+      const userLang = navigator.language || navigator.languages?.[0];
+      if (userLang?.includes('nb') || userLang?.includes('nn') || userLang?.includes('no')) {
+        setIsNorwegian(true);
+      }
     };
     
     getLocation();
   }, []);
   
   return (
-    <h2 className={`text-2xl md:text-3xl font-futuristic ${className}`}>
-      {greeting}
-    </h2>
+    <div className={`${className}`}>
+      <h2 className="text-2xl md:text-3xl font-futuristic">
+        {greeting}
+      </h2>
+      {isNorwegian && (
+        <p className="text-sm text-accent-foreground mt-1 animate-fade-in-up">
+          Specialized in AI solutions for Norwegian businesses
+        </p>
+      )}
+    </div>
   );
 };
 

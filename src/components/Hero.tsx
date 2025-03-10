@@ -1,11 +1,33 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { AIChatInput } from './ui/ai-chat';
 import LocationGreeting from './LocationGreeting';
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
+  const [isNorwegian, setIsNorwegian] = useState(false);
+  
+  // Function to check if user is from Norway
+  useEffect(() => {
+    const checkIfNorwegian = async () => {
+      try {
+        const response = await fetch('https://ipapi.co/json/');
+        if (response.ok) {
+          const data = await response.json();
+          setIsNorwegian(data.country === 'NO');
+        }
+      } catch (error) {
+        console.log("Location detection failed", error);
+        
+        // Fallback to browser language
+        const userLang = navigator.language || navigator.languages?.[0];
+        setIsNorwegian(userLang?.includes('nb') || userLang?.includes('nn') || userLang?.includes('no'));
+      }
+    };
+    
+    checkIfNorwegian();
+  }, []);
 
   return (
     <section 
@@ -24,7 +46,7 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            AI Automation Solutions
+            {isNorwegian ? "AI Automation for Norwegian Businesses" : "AI Automation Solutions"}
           </motion.h1>
           
           <motion.p
@@ -33,7 +55,9 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
-            Transform your business with intelligent automation
+            {isNorwegian 
+              ? "Tailored AI solutions that comply with Norwegian regulations" 
+              : "Transform your business with intelligent automation"}
           </motion.p>
           
           <motion.div 

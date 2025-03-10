@@ -5,9 +5,11 @@ import { Calendar, Mail } from 'lucide-react';
 import AnimatedText from './AnimatedText';
 import { trackEvent } from '@/services/analyticsService';
 import { useNavigate } from 'react-router-dom';
+import { useLocationDetection } from '@/hooks/useLocationDetection';
 
 const ContactCTA = () => {
   const navigate = useNavigate();
+  const { isNorwegian } = useLocationDetection();
 
   const handleBookClick = () => {
     trackEvent({
@@ -15,7 +17,8 @@ const ContactCTA = () => {
       category: 'cta',
       label: 'book_consultation',
       cta_location: 'contact_section',
-      cta_text: 'Book a Free Consultation'
+      cta_text: 'Book a Free Consultation',
+      is_norwegian: isNorwegian
     });
     navigate('/contact');
   };
@@ -26,7 +29,8 @@ const ContactCTA = () => {
       category: 'cta',
       label: 'contact_me',
       cta_location: 'contact_section',
-      cta_text: 'Contact Me'
+      cta_text: 'Contact Me',
+      is_norwegian: isNorwegian
     });
     navigate('/contact');
   };
@@ -44,12 +48,15 @@ const ContactCTA = () => {
         <div className="bg-white/20 backdrop-blur-md rounded-2xl p-8 md:p-12 shadow-glass border border-white/20">
           <div className="text-center mb-8">
             <AnimatedText
-              text="Ready to Automate and Scale?"
+              text={isNorwegian ? "Ready to Transform Your Norwegian Business?" : "Ready to Automate and Scale?"}
               tag="h2"
               className="text-3xl md:text-4xl font-bold mb-4 text-gradient-teal"
             />
             <AnimatedText
-              text="Let's discuss how AI automation can transform your business operations"
+              text={isNorwegian 
+                ? "Let's discuss tailored AI solutions that comply with Norwegian regulations"
+                : "Let's discuss how AI automation can transform your business operations"
+              }
               tag="p"
               delay={200}
               className="text-xl text-muted-foreground max-w-2xl mx-auto"
@@ -63,7 +70,7 @@ const ContactCTA = () => {
               onClick={handleBookClick}
             >
               <Calendar size={20} />
-              Book a Free Consultation
+              {isNorwegian ? "Book a Free AI Compliance Audit" : "Book a Free Consultation"}
             </Button>
             
             <Button 
@@ -78,7 +85,12 @@ const ContactCTA = () => {
           </div>
           
           <div className="mt-8 text-center text-muted-foreground">
-            <p>No obligations, just a conversation about your business needs</p>
+            <p>
+              {isNorwegian 
+                ? "No obligations, just a conversation about your Norwegian business needs" 
+                : "No obligations, just a conversation about your business needs"
+              }
+            </p>
           </div>
         </div>
       </div>

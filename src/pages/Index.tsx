@@ -13,10 +13,13 @@ import { usePageViewTracking } from '@/hooks/useAnalytics';
 import DisplayCards from '@/components/ui/display-cards';
 import DotPattern from '@/components/ui/dot-pattern';
 import { Bot, MessageSquare, Workflow } from 'lucide-react';
+import NorwegianPainPoints from '@/components/NorwegianPainPoints';
+import { useLocationDetection } from '@/hooks/useLocationDetection';
 
 const Index = () => {
   console.log("Index page rendering");
   
+  const { isNorwegian } = useLocationDetection();
   usePageViewTracking("AI Automation Ally - Home");
 
   useEffect(() => {
@@ -36,7 +39,7 @@ const Index = () => {
     {
       icon: <Bot className="size-4 text-black dark:text-white" />,
       title: "AI Strategy",
-      description: "Custom roadmaps for your business",
+      description: isNorwegian ? "Custom roadmaps for Norwegian businesses" : "Custom roadmaps for your business",
       date: "Premium Service",
       className: "bg-white dark:bg-black hover:-translate-y-1 transition-transform duration-300",
     },
@@ -50,7 +53,7 @@ const Index = () => {
     {
       icon: <Workflow className="size-4 text-black dark:text-white" />,
       title: "Workflow Automation",
-      description: "Streamline your business processes",
+      description: isNorwegian ? "Streamline processes while ensuring compliance" : "Streamline your business processes",
       date: "High ROI",
       className: "bg-white dark:bg-black hover:-translate-y-1 transition-transform duration-300",
     },
@@ -59,8 +62,11 @@ const Index = () => {
   return (
     <>
       <SEO
-        title="AI Automation Ally - Automate Your Business with AI"
-        description="Unlock the power of AI to automate your business processes, increase efficiency, and drive growth. Discover tailored AI solutions for your unique needs."
+        title={isNorwegian ? "AI Automation for Norwegian Businesses" : "AI Automation Ally - Automate Your Business with AI"}
+        description={isNorwegian 
+          ? "AI automation solutions tailored for Norwegian businesses, ensuring compliance with local regulations and addressing specific market needs."
+          : "Unlock the power of AI to automate your business processes, increase efficiency, and drive growth. Discover tailored AI solutions for your unique needs."}
+        keywords={isNorwegian ? "AI Norway, AI automation Norway, GDPR compliance, Norwegian business automation" : undefined}
       />
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
@@ -74,11 +80,17 @@ const Index = () => {
           
           <div className="w-full py-16 bg-gray-50 dark:bg-gray-900/20 relative">
             <div className="container mx-auto max-w-6xl px-4 relative z-10">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-black dark:text-white">Featured Services</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-black dark:text-white">
+                {isNorwegian ? "AI Solutions for Norwegian Businesses" : "Featured Services"}
+              </h2>
               <DisplayCards cards={featuredServices} />
             </div>
           </div>
           
+          {/* Conditionally show Norwegian pain points for Norwegian visitors */}
+          <NorwegianPainPoints isVisible={isNorwegian} />
+          
+          {/* Show standard pain points for everyone */}
           <PainPoints />
           <ServicesList />
           <WhyWorkWithMe />
