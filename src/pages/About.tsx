@@ -1,12 +1,13 @@
+
 import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import AnimatedText from '@/components/AnimatedText';
 import SEO from '@/components/SEO';
-import { Button } from '@/components/ui/button';
-import { Calendar } from 'lucide-react';
-import DotPattern from '@/components/ui/dot-pattern';
-import { WorldMap } from '@/components/ui/world-map';
+import AboutHero from '@/components/about/AboutHero';
+import GlobalImpact from '@/components/about/GlobalImpact';
+import BackgroundExperience from '@/components/about/BackgroundExperience';
+import SkillsTechnologies from '@/components/about/SkillsTechnologies';
+import { getPersonStructuredData } from '@/components/about/AboutStructuredData';
 
 const About = () => {
   useEffect(() => {
@@ -19,17 +20,10 @@ const About = () => {
     };
   }, []);
 
-  // Structured data for the person
-  const personStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "Person",
-    "name": "AI Automation Expert",
-    "jobTitle": "AI Automation Consultant",
-    "description": "With over 10 years of experience in business automation and AI integration, I help companies streamline operations, reduce costs, and scale efficiently.",
-    "knowsAbout": ["Artificial Intelligence", "Machine Learning", "Business Process Automation", "Natural Language Processing", "Data Analytics"]
-  };
+  const personStructuredData = getPersonStructuredData();
   
-  return <div className="min-h-screen flex flex-col bg-background">
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
       <SEO 
         title="About - AI Automation Ally | Expert Consultant" 
         description="Learn about my 10+ years of experience helping businesses leverage AI and automation technology to reduce costs, streamline operations, and drive growth." 
@@ -38,209 +32,18 @@ const About = () => {
         keywords="AI automation expert, business process optimization, startup AI consultant, workflow automation specialist, AI consultant, machine learning expert, AI workflow automation, AI-powered business optimization, AI strategy consultant, business automation expert, AI transformation, AI-driven business optimization, AI business consultant, AI automation coach, AI strategy for small businesses, AI workflow advisor"
       />
       
-      
       <Navbar />
       
       <main className="flex-grow pt-20">
-        {/* Hero Section */}
-        <section className="py-20 px-4 relative">
-          <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-25" />
-          <div className="container mx-auto max-w-5xl relative z-10">
-            <div className="flex flex-col md:flex-row gap-12 items-center">
-              <div className="flex-1">
-                <AnimatedText text="About Me" tag="h1" className="text-3xl md:text-5xl font-bold mb-6" />
-                <AnimatedText text="Helping Businesses Cut Costs, Automate Workflows & Scale with AI" tag="h2" delay={200} className="text-xl text-muted-foreground mb-8" />
-                <div className="opacity-0 animate-fade-in-up" style={{
-                animationDelay: '400ms',
-                animationFillMode: 'forwards'
-              }}>
-                  <p className="mb-4">
-                    I specialize in AI automation, workflow optimization, and intelligent process design—helping businesses reduce manual work, increase efficiency, and drive revenue growth with AI-powered solutions.
-                  </p>
-                  <p className="mb-6">
-                    My approach combines deep technical expertise with business acumen, ensuring that AI solutions deliver measurable ROI and solve real business problems.
-                  </p>
-                  <Button size="lg" className="rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2">
-                    <Calendar size={20} />
-                    Book a Free Consultation
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="flex-1 opacity-0 animate-fade-in-up" style={{
-              animationDelay: '300ms',
-              animationFillMode: 'forwards'
-            }}>
-                <div className="aspect-square rounded-2xl overflow-hidden shadow-lg">
-                  <img alt="AI Automation Consultant" src="/lovable-uploads/5acb6ca9-27a4-40f0-b32d-65655787eaaa.jpg" className="w-full h-full object-cover" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      
-      {/* Global Impact Section */}
-      <section className="py-16 px-4 bg-background relative overflow-hidden">
-        <div className="container mx-auto max-w-5xl">
-          <AnimatedText text="Global Impact" tag="h2" className="text-3xl font-bold mb-8 text-center" />
-          
-          <div className="mb-8 text-center max-w-2xl mx-auto">
-            <p className="text-muted-foreground">
-              From Silicon Valley startups to European enterprises, I've helped businesses worldwide harness the power of AI automation.
-            </p>
-          </div>
-          
-          <div className="glassmorphism p-6 rounded-xl">
-            <WorldMap
-              dots={[
-                {
-                  start: { lat: 37.7749, lng: -122.4194 }, // San Francisco
-                  end: { lat: 51.5074, lng: -0.1278 }, // London
-                },
-                {
-                  start: { lat: 51.5074, lng: -0.1278 }, // London
-                  end: { lat: 48.8566, lng: 2.3522 }, // Paris
-                },
-                {
-                  start: { lat: 48.8566, lng: 2.3522 }, // Paris
-                  end: { lat: 52.5200, lng: 13.4050 }, // Berlin
-                },
-                {
-                  start: { lat: 37.7749, lng: -122.4194 }, // San Francisco
-                  end: { lat: -33.8688, lng: 151.2093 }, // Sydney
-                },
-                {
-                  start: { lat: 35.6762, lng: 139.6503 }, // Tokyo
-                  end: { lat: 1.3521, lng: 103.8198 }, // Singapore
-                },
-              ]}
-              lineColor="#00BFA6"
-            />
-          </div>
-        </div>
-      </section>
-      
-      {/* Background & Experience */}
-        <section className="py-16 px-4 bg-muted/30">
-          <div className="container mx-auto max-w-5xl">
-            <AnimatedText text="My Background" tag="h2" className="text-3xl font-bold mb-8 text-center" />
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="glassmorphism p-6 rounded-xl opacity-0 animate-fade-in-up" style={{
-              animationDelay: '200ms',
-              animationFillMode: 'forwards'
-            }}>
-                <h3 className="text-xl font-semibold mb-3">Self-Taught AI Expert & Startup Founder</h3>
-                <p className="mb-3">
-                  I built my expertise in AI-driven automation, workflow optimization, and business scalability through hands-on experience—developing, scaling, and automating my own startups. Unlike traditional consultants who rely on theoretical frameworks, I've spent years designing, implementing, and refining AI systems that solve real-world business challenges.
-                </p>
-                <div className="mb-4">
-                  <p className="font-medium mb-2">What makes me different?</p>
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li>Practical Execution – I don't just advise; I build, test, and implement AI-driven automation.</li>
-                    <li>Proven Startup Success – I've scaled AI-powered platforms that reduced costs and improved efficiency.</li>
-                    <li>Business & Technical Expertise – Deep understanding of AI implementation beyond just coding—I focus on business impact.</li>
-                  </ul>
-                </div>
-                <p className="italic">
-                  If you want AI solutions that work in practice, not just on paper, let's talk.
-                </p>
-              </div>
-              
-              <div className="glassmorphism p-6 rounded-xl opacity-0 animate-fade-in-up" style={{
-              animationDelay: '400ms',
-              animationFillMode: 'forwards'
-            }}>
-                <h3 className="text-xl font-semibold mb-3">Expertise</h3>
-                <p className="mb-3 font-medium">
-                  Bridging AI Technology & Business Strategy
-                </p>
-                <p className="mb-4">
-                  My expertise comes from a deep understanding of AI automation, data-driven decision-making, and workflow optimization, combined with years of hands-on implementation.
-                </p>
-                <div className="mb-4">
-                  <p className="font-medium mb-2">Key Areas of Expertise:</p>
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li>AI Workflow Automation – Using AI to optimize business operations and eliminate inefficiencies.</li>
-                    <li>Machine Learning & Process Optimization – Implementing predictive analytics for smarter decision-making.</li>
-                    <li>AI Chatbots & Virtual Assistants – Automating customer support and internal processes.</li>
-                    <li>Cloud-Based AI Solutions – Deploying scalable AI models for startups and enterprises.</li>
-                    <li>Business Intelligence & AI Strategy – Helping companies use AI for long-term competitive advantage.</li>
-                  </ul>
-                </div>
-                <p>
-                  I stay ahead of AI advancements by actively engaging in the latest LLM (Large Language Model) research, AI automation tools, and business applications of artificial intelligence.
-                </p>
-              </div>
-              
-              <div className="glassmorphism p-6 rounded-xl opacity-0 animate-fade-in-up" style={{
-              animationDelay: '600ms',
-              animationFillMode: 'forwards'
-            }}>
-                <h3 className="text-xl font-semibold mb-3">Business Philosophy</h3>
-                <p className="mb-3 font-medium">
-                  AI Should Solve Real Business Problems—Not Just Be a Trend
-                </p>
-                <p className="mb-4">
-                  I believe AI should be practical, accessible, and results-driven—not just a buzzword. My approach is built on clear, ROI-focused automation strategies that deliver measurable impact.
-                </p>
-                <div className="mb-4">
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li>Pragmatic AI Adoption – AI should save time, reduce costs, and boost efficiency from day one.</li>
-                    <li>Custom-Tailored Solutions – No generic advice—every recommendation is based on your business needs, data, and goals.</li>
-                    <li>Long-Term Transformation – AI isn’t just about automation; it’s about building a smarter, more agile business.</li>
-                  </ul>
-                </div>
-                <p>
-                  Every AI strategy I build is backed by real-world data and designed to drive immediate business value while setting the foundation for long-term AI-driven success.
-                </p>
-              </div>
-              
-              <div className="glassmorphism p-6 rounded-xl opacity-0 animate-fade-in-up" style={{
-              animationDelay: '800ms',
-              animationFillMode: 'forwards'
-            }}>
-                <h3 className="text-xl font-semibold mb-3">Personal Touch</h3>
-                <p className="mb-3 font-medium">
-                  AI Consulting Without the Jargon—Just Results
-                </p>
-                <p className="mb-4">
-                  I'm not just a consultant—I'm a partner in your business growth. My clients choose me because I take the time to understand their challenges, simplify AI implementation, and make automation work for their unique needs.
-                </p>
-                <div className="mb-4">
-                  <ul className="list-disc pl-5 space-y-1">
-                    <li>Hands-On Approach – I work closely with businesses to implement AI solutions that fit their existing operations.</li>
-                    <li>Jargon-Free Communication – No unnecessary complexity—just clear, actionable AI automation strategies.</li>
-                    <li>Training & Support – I ensure teams understand and leverage AI effectively without needing a technical background.</li>
-                  </ul>
-                </div>
-                <p>
-                  AI doesn't have to be overwhelming or complicated. My goal is to make AI automation simple, effective, and tailored to your business.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-        
-        {/* Skills & Technologies */}
-        <section className="py-16 px-4">
-          <div className="container mx-auto max-w-5xl">
-            <AnimatedText text="Skills & Technologies" tag="h2" className="text-3xl font-bold mb-8 text-center" />
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-              {["Machine Learning", "Natural Language Processing", "Workflow Automation", "Process Optimization", "Chatbot Development", "Data Analysis", "Systems Integration", "Cloud Solutions", "Virtual Assistants", "RPA", "API Development", "Business Intelligence"].map((skill, index) => <div key={skill} className="bg-primary/10 rounded-lg px-4 py-3 text-center opacity-0 animate-fade-in-up" style={{
-              animationDelay: `${200 + index * 100}ms`,
-              animationFillMode: 'forwards'
-            }}>
-                  {skill}
-                </div>)}
-            </div>
-          </div>
-        </section>
+        <AboutHero />
+        <GlobalImpact />
+        <BackgroundExperience />
+        <SkillsTechnologies />
       </main>
       
       <Footer />
-    </div>;
+    </div>
+  );
 };
 
 export default About;
