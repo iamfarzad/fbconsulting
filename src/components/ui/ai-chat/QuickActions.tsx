@@ -24,27 +24,27 @@ export function QuickActions({ onActionClick }: QuickActionsProps) {
   return (
     <div className="flex items-center justify-center gap-3 mt-4 flex-wrap">
       <ActionButton
-        icon={<MonitorIcon className="w-4 h-4" />}
+        icon={<MonitorIcon className="w-4 h-4 text-white" />}
         label="Chatbots"
         onClick={() => handleActionClick('Chatbots')}
       />
       <ActionButton
-        icon={<Workflow className="w-4 h-4" />}
+        icon={<Workflow className="w-4 h-4 text-white" />}
         label="Workflow Automation"
         onClick={() => handleActionClick('Workflow Automation')}
       />
       <ActionButton
-        icon={<Code className="w-4 h-4" />}
+        icon={<Code className="w-4 h-4 text-white" />}
         label="AI Strategy"
         onClick={() => handleActionClick('AI Strategy')}
       />
       <ActionButton
-        icon={<MessageSquare className="w-4 h-4" />}
+        icon={<MessageSquare className="w-4 h-4 text-white" />}
         label="Content Generation"
         onClick={() => handleActionClick('Content Generation')}
       />
       <ActionButton
-        icon={<BarChart3 className="w-4 h-4" />}
+        icon={<BarChart3 className="w-4 h-4 text-white" />}
         label="Data Analysis"
         onClick={() => handleActionClick('Data Analysis')}
       />
