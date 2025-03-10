@@ -1,4 +1,3 @@
-
 import { Book, Sunset, Trees, Zap } from "lucide-react";
 import { Navbar1 } from "./shadcnblocks-com-navbar1";
 
@@ -22,25 +21,25 @@ const demoData = {
           title: "AI Strategy",
           description: "Custom roadmaps for your business",
           icon: <Book className="size-5 shrink-0" />,
-          url: "/services",
+          url: "/services#ai-strategy",
         },
         {
           title: "Chatbots & Virtual Assistants",
           description: "24/7 customer support automation",
           icon: <Trees className="size-5 shrink-0" />,
-          url: "/services",
+          url: "/services#chatbots",
         },
         {
           title: "Workflow Automation",
           description: "Streamline your business processes",
           icon: <Sunset className="size-5 shrink-0" />,
-          url: "/services",
+          url: "/services#workflow",
         },
         {
           title: "AI Data Insights",
           description: "Transform your raw business data into intelligence",
           icon: <Zap className="size-5 shrink-0" />,
-          url: "/services",
+          url: "/services#data-insights",
         },
       ],
     },
