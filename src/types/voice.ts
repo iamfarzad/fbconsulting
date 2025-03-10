@@ -10,6 +10,7 @@ export interface SpeechRecognitionResultList {
 
 export interface SpeechRecognitionResult {
   readonly length: number;
+  readonly isFinal: boolean;
   [index: number]: SpeechRecognitionAlternative;
 }
 
