@@ -1,35 +1,55 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSpeechRecognition } from './useSpeechRecognition';
 import debounce from 'lodash/debounce';
 
 export function useVoiceInput(setValue: (value: string) => void, onSend: () => void) {
   const [aiProcessing, setAiProcessing] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
+  const processingRef = useRef(false);
   
-  // Increased debounce delay and memoized with useCallback
-  const debouncedProcessing = useCallback(
-    debounce((command: string) => {
+  // Improved debounce implementation that won't get recreated on renders
+  const debouncedProcessingRef = useRef<ReturnType<typeof debounce>>();
+  
+  // Create debounced function only once
+  useEffect(() => {
+    debouncedProcessingRef.current = debounce((command: string) => {
+      if (processingRef.current) return;
+      
+      processingRef.current = true;
       setValue(command);
+      
+      // Only send if there's content
       if (command.trim()) {
         onSend();
       }
-    }, 500), // Increased from 300ms to 500ms for better debouncing
-    [setValue, onSend]
-  );
+      
+      // Reset processing flag after a delay
+      setTimeout(() => {
+        processingRef.current = false;
+        setAiProcessing(false);
+      }, 800); // Longer delay for smoother transitions
+    }, 700); // Increased debounce delay for better performance
+    
+    // Cleanup debounce on unmount
+    return () => {
+      debouncedProcessingRef.current?.cancel();
+    };
+  }, [setValue, onSend]);
   
   // Memoize handleCommand to prevent unnecessary recreations
   const handleCommand = useCallback(async (command: string) => {
     setAiProcessing(true);
+    
     try {
-      await debouncedProcessing(command);
-    } finally {
-      // Increased delay before setting aiProcessing to false for smoother transitions
-      setTimeout(() => {
-        setAiProcessing(false);
-      }, 600); // Increased from 300ms to 600ms for smoother state transition
+      // Execute the debounced processing
+      debouncedProcessingRef.current?.(command);
+    } catch (error) {
+      console.error('Error processing voice command:', error);
+      setAiProcessing(false);
+      processingRef.current = false;
     }
-  }, [debouncedProcessing]);
+  }, []);
   
   const { 
     isListening, 
@@ -48,10 +68,13 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
         setIsTranscribing(true);
       }, 150); // Small delay for smoother start
     } else {
+      // Cancel any pending debounced operations when stopping listening
+      debouncedProcessingRef.current?.cancel();
+      
       // Increased delay when stopping to allow for smoother animations
       transcribingTimer = setTimeout(() => {
         setIsTranscribing(false);
-      }, 1500); // Increased from 1000ms to 1500ms for smoother exit
+      }, 1500); // Increased for smoother exit
     }
     
     // Cleanup function to handle component unmount and state changes
@@ -59,17 +82,15 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
       if (transcribingTimer) {
         clearTimeout(transcribingTimer);
       }
-      // Cancel any pending debounced operations
-      debouncedProcessing.cancel();
     };
-  }, [isListening, debouncedProcessing]);
+  }, [isListening]);
 
-  // Cleanup on unmount
+  // Extra cleanup on unmount
   useEffect(() => {
     return () => {
-      debouncedProcessing.cancel();
+      debouncedProcessingRef.current?.cancel();
     };
-  }, [debouncedProcessing]);
+  }, []);
 
   return {
     isListening,

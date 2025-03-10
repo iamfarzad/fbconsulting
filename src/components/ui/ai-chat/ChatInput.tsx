@@ -70,11 +70,11 @@ export function ChatInput({
 
   return (
     <div className="flex flex-col w-full">
-      {/* Animated Transcription Display */}
+      {/* Animated Transcription Display with consistent rounding */}
       <div 
         className={cn(
-          "overflow-hidden transition-all duration-500 ease-in-out bg-black text-white rounded-xl",
-          isTranscribing ? "max-h-24 opacity-100 py-3 px-4 mb-0 border border-black/70 border-b-0" : "max-h-0 opacity-0 py-0 px-0"
+          "overflow-hidden transition-all duration-500 ease-in-out bg-black text-white rounded-xl mb-2",
+          isTranscribing ? "max-h-24 opacity-100 py-3 px-4 border border-white/30" : "max-h-0 opacity-0 py-0 px-0 border-0"
         )}
       >
         <div className={cn(
@@ -90,10 +90,10 @@ export function ChatInput({
         </div>
       </div>
 
-      {/* Chat Input Box */}
+      {/* Chat Input Box with consistent rounding */}
       <div className={cn(
-        "relative bg-white border border-black/70",
-        (showMessages || hasMessages) ? "rounded-xl" : isTranscribing ? "rounded-b-xl" : "rounded-xl"
+        "relative bg-white border border-black/70 rounded-xl transition-shadow duration-300",
+        (showMessages || hasMessages) ? "shadow-md" : ""
       )}>
         <div className="overflow-y-auto">
           <Textarea

@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ChatInput } from "./ai-chat/ChatInput";
 import { ChatMessageList } from "./ai-chat/ChatMessageList";
 import { useMessages } from "@/hooks/useMessages";
@@ -19,6 +19,7 @@ export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatIn
   const { messages, addUserMessage, addAssistantMessage, clearMessages } = useMessages();
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const containerRef = useRef<HTMLDivElement>(null);
   
   // Create a mock LeadInfo object for suggestions with correct type structure
   const mockLeadInfo: LeadInfo = {
@@ -28,6 +29,23 @@ export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatIn
   
   const suggestedResponse = useSuggestedResponse(mockLeadInfo);
   const [inputValue, setInputValue] = useState("");
+
+  // Calculate container height based on content
+  const calculateContainerHeight = () => {
+    if (containerRef.current) {
+      // Update max-height based on viewport if needed
+      const vh = window.innerHeight;
+      const maxHeight = Math.min(vh * 0.7, 600); // 70% of viewport height or 600px, whichever is smaller
+      containerRef.current.style.maxHeight = `${maxHeight}px`;
+    }
+  };
+
+  // Update container height on window resize
+  useEffect(() => {
+    calculateContainerHeight();
+    window.addEventListener('resize', calculateContainerHeight);
+    return () => window.removeEventListener('resize', calculateContainerHeight);
+  }, []);
 
   const handleSend = async () => {
     if (!inputValue.trim()) {
@@ -75,7 +93,8 @@ export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatIn
   return (
     <AnimatePresence mode="wait">
       <motion.div 
-        className="flex flex-col w-full max-h-[80vh] relative"
+        ref={containerRef}
+        className="flex flex-col w-full relative"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
@@ -85,11 +104,23 @@ export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatIn
           {(showMessages || messages.length > 0) && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto", maxHeight: "60vh" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="will-change-scroll"
-              style={{ scrollbarGutter: "stable" }}
+              animate={{ 
+                opacity: 1, 
+                height: "auto",
+                transition: {
+                  height: { type: "spring", damping: 15, stiffness: 300 },
+                  opacity: { duration: 0.3 }
+                }
+              }}
+              exit={{ 
+                opacity: 0, 
+                height: 0,
+                transition: {
+                  height: { duration: 0.3 },
+                  opacity: { duration: 0.2 }
+                }
+              }}
+              className="will-change-scroll mb-4"
             >
               <ChatMessageList 
                 messages={messages} 
@@ -104,9 +135,8 @@ export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatIn
           initial={{ opacity: 0 }}
           animate={{ 
             opacity: 1,
-            boxShadow: showMessages ? "0 -4px 6px -1px rgba(0, 0, 0, 0.1)" : "none"
+            transition: { delay: 0.2 }
           }}
-          transition={{ delay: 0.2 }}
           className="relative z-10 bg-background"
         >
           <ChatInput

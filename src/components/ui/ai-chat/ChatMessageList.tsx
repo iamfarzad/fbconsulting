@@ -14,36 +14,38 @@ export const ChatMessageList = ({ messages, showMessages }: ChatMessageListProps
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
-  const scrollToBottom = () => {
+  // Improved scroll behavior with guaranteed scroll-to-bottom
+  const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ 
-        behavior: "smooth", 
+        behavior, 
         block: "end" 
       });
     }
   };
   
-  // Scroll to bottom when messages change
+  // Scroll to bottom when messages change - enhanced with immediate scroll first
   useEffect(() => {
     if (messages.length > 0) {
-      // Immediate scroll for better UX
-      messagesEndRef.current?.scrollIntoView({ block: "end" });
+      // Immediate scroll for better UX to avoid content jumping
+      scrollToBottom("auto");
       
-      // Then smooth scroll after a small delay to ensure rendering is complete
+      // Then smooth scroll after a small delay for animation purposes
       const timer = setTimeout(() => {
-        scrollToBottom();
+        scrollToBottom("smooth");
       }, 100);
       
       return () => clearTimeout(timer);
     }
   }, [messages]);
   
-  // Also scroll when visibility changes
+  // Scroll when visibility changes with enhanced timing
   useEffect(() => {
     if (showMessages) {
+      // Allow animation to complete before scrolling
       const timer = setTimeout(() => {
-        scrollToBottom();
-      }, 300); // Allow animation to complete
+        scrollToBottom("smooth");
+      }, 300);
       
       return () => clearTimeout(timer);
     }
@@ -59,6 +61,7 @@ export const ChatMessageList = ({ messages, showMessages }: ChatMessageListProps
       className="bg-black rounded-xl border border-white/30 p-4 overflow-y-auto overscroll-contain"
       style={{
         height: messages.length > 0 ? 'auto' : '200px',
+        minHeight: '120px', // Ensures minimum height when empty
         maxHeight: '400px',
         scrollbarGutter: 'stable',
         scrollBehavior: 'smooth'

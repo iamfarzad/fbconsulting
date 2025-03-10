@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 interface AnimatedBarsProps {
   isActive: boolean;
@@ -11,13 +11,15 @@ export const AnimatedBars: React.FC<AnimatedBarsProps> = ({ isActive, small = fa
     Array(small ? 4 : 9).fill(33)
   );
   
+  const animationRef = useRef<number>();
+  const timerRef = useRef<NodeJS.Timeout>();
+  
   useEffect(() => {
     if (!isActive) {
       setHeights(Array(small ? 4 : 9).fill(33));
       return;
     }
     
-    let animationFrame: number;
     let isAnimating = true;
     
     const updateHeights = () => {
@@ -28,9 +30,9 @@ export const AnimatedBars: React.FC<AnimatedBarsProps> = ({ isActive, small = fa
       );
       
       // Use consistent timing for smoother animation
-      animationFrame = requestAnimationFrame(() => {
-        setTimeout(updateHeights, 150); // More consistent timing than RAF alone
-      });
+      timerRef.current = setTimeout(() => {
+        animationRef.current = requestAnimationFrame(updateHeights);
+      }, 150); // More consistent timing
     };
     
     // Start animation with a small delay to prevent visual glitches
@@ -41,8 +43,11 @@ export const AnimatedBars: React.FC<AnimatedBarsProps> = ({ isActive, small = fa
     return () => {
       isAnimating = false;
       clearTimeout(startTimeout);
-      if (animationFrame) {
-        cancelAnimationFrame(animationFrame);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
       }
     };
   }, [isActive, small]);
