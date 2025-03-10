@@ -35,9 +35,20 @@ export const useSpeechRecognition = (onCommand: (command: string) => void = () =
         };
         
         recognitionRef.current.onerror = (event: Event) => {
-          // Safely access error properties with type checking
-          const errorEvent = event as unknown as { error?: string; message?: string };
-          const errorMessage = errorEvent.message || errorEvent.error || 'Error with voice recognition';
+          // Safely convert the event to access potential error properties
+          const errorEvent = event as unknown;
+          let errorMessage = 'Error with voice recognition';
+          
+          // Check if the event has error or message properties
+          if (typeof errorEvent === 'object' && errorEvent !== null) {
+            const errorObj = errorEvent as Record<string, unknown>;
+            if (errorObj.error && typeof errorObj.error === 'string') {
+              errorMessage = errorObj.error;
+            } else if (errorObj.message && typeof errorObj.message === 'string') {
+              errorMessage = errorObj.message;
+            }
+          }
+          
           setVoiceError(errorMessage);
           setIsListening(false);
         };

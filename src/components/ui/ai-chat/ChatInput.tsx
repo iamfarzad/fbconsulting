@@ -100,7 +100,7 @@ export function ChatInput({
             value={value}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            placeholder={placeholder}
+            placeholder={isListening ? "Listening..." : placeholder}
             className={cn(
               "w-full px-4 py-3",
               "resize-none",
@@ -119,19 +119,34 @@ export function ChatInput({
           />
         </div>
         
-        {/* Transcription display with error handling */}
-        {isListening && (
-          <div className="px-4 py-2 text-xs">
-            {transcript ? (
-              <p className="text-black/70 italic">"{transcript}"</p>
-            ) : (
-              <p className="text-black/50">Listening...</p>
-            )}
-            {voiceError && (
-              <p className="text-red-500 mt-1">{voiceError}</p>
-            )}
-          </div>
-        )}
+        {/* Transcription display with error handling - Expanded when listening */}
+        <AnimatePresence>
+          {isListening && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="bg-black/5 overflow-hidden"
+            >
+              <div className="px-4 py-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Mic size={16} className="text-black/70" />
+                  <p className="text-black/70 font-medium text-sm">Voice recognition active</p>
+                </div>
+                
+                {transcript ? (
+                  <p className="text-black/90 italic text-sm">"{transcript}"</p>
+                ) : (
+                  <p className="text-black/50 text-sm">Waiting for speech...</p>
+                )}
+                
+                {voiceError && (
+                  <p className="text-red-500 mt-2 text-xs">{voiceError}</p>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <div className="flex items-center justify-between p-3">
           <div className="flex items-center gap-2">
