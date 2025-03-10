@@ -4,9 +4,16 @@ import { Bot, X } from 'lucide-react';
 import { AIChatInput } from './ui/ai-chat';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChatButton } from '@/hooks/useChatButton';
+import FullScreenChat from './chat/FullScreenChat';
 
 const ChatButton = () => {
-  const { isOpen, toggleChat, shouldShowButton } = useChatButton();
+  const { 
+    isOpen, 
+    isFullScreen, 
+    toggleChat, 
+    toggleFullScreen, 
+    shouldShowButton 
+  } = useChatButton();
   
   // Hide on the home page since we already have the chat there
   if (!shouldShowButton) {
@@ -16,7 +23,7 @@ const ChatButton = () => {
   return (
     <>
       <AnimatePresence>
-        {isOpen && (
+        {isOpen && !isFullScreen && (
           <motion.div
             initial={{ opacity: 0, x: 300, y: 0 }}
             animate={{ opacity: 1, x: 0, y: 0 }}
@@ -41,6 +48,10 @@ const ChatButton = () => {
               <AIChatInput placeholderText="Ask me anything about our AI services..." />
             </div>
           </motion.div>
+        )}
+        
+        {isOpen && isFullScreen && (
+          <FullScreenChat onMinimize={toggleFullScreen} />
         )}
       </AnimatePresence>
       
