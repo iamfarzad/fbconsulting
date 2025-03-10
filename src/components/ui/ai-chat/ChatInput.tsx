@@ -42,7 +42,8 @@ export function ChatInput({
     transcript,
     toggleListening,
     voiceError,
-    aiProcessing
+    aiProcessing,
+    isTranscribing
   } = useVoiceInput(setValue, onSend);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -67,75 +68,98 @@ export function ChatInput({
   };
 
   return (
-    <div className={cn(
-      "relative bg-white border border-black/70",
-      (showMessages || hasMessages) ? "rounded-b-xl border-t-0" : "rounded-xl"
-    )}>
-      <div className="overflow-y-auto">
-        <Textarea
-          ref={textareaRef}
-          value={value}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          placeholder={isListening ? "Listening..." : placeholder}
-          className={cn(
-            "w-full px-4 py-3",
-            "resize-none",
-            "bg-transparent",
-            "border-none",
-            "text-black text-sm",
-            "focus:outline-none",
-            "focus-visible:ring-0 focus-visible:ring-offset-0",
-            "placeholder:text-black/50 placeholder:text-sm",
-            "min-h-[60px]"
-          )}
-          style={{
-            overflow: "hidden",
-          }}
-          disabled={isLoading || isListening}
-        />
+    <div className="flex flex-col w-full">
+      {/* Animated Transcription Display */}
+      <div 
+        className={cn(
+          "overflow-hidden transition-all duration-500 ease-in-out bg-black text-white rounded-t-xl",
+          isTranscribing ? "max-h-24 opacity-100 py-3 px-4 mb-0 border border-black/70 border-b-0" : "max-h-0 opacity-0 py-0 px-0"
+        )}
+      >
+        <div className={cn(
+          "flex items-center gap-2 transition-transform duration-500",
+          isTranscribing ? "translate-y-0" : "-translate-y-full"
+        )}>
+          <div className="flex-shrink-0">
+            <AnimatedBars isActive={isListening} small={false} />
+          </div>
+          <p className="text-sm font-medium animate-fade-in-up">
+            {transcript || "Listening..."}
+          </p>
+        </div>
       </div>
 
-      <div className="flex items-center justify-between p-3">
-        <div className="flex items-center gap-2">
-          {hasMessages && (
-            <button
-              type="button"
-              className="group p-2 hover:bg-black/10 rounded-lg transition-colors flex items-center gap-1"
-              onClick={onClear}
-              disabled={isLoading || isListening}
-            >
-              <Loader2 className="w-4 h-4 text-black" />
-              <span className="text-xs text-black hidden group-hover:inline transition-opacity">
-                Clear
-              </span>
-            </button>
-          )}
+      {/* Chat Input Box */}
+      <div className={cn(
+        "relative bg-white border border-black/70",
+        (showMessages || hasMessages) ? "rounded-b-xl border-t-0" : isTranscribing ? "rounded-b-xl" : "rounded-xl"
+      )}>
+        <div className="overflow-y-auto">
+          <Textarea
+            ref={textareaRef}
+            value={value}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            placeholder={isListening ? "Listening..." : placeholder}
+            className={cn(
+              "w-full px-4 py-3",
+              "resize-none",
+              "bg-transparent",
+              "border-none",
+              "text-black text-sm",
+              "focus:outline-none",
+              "focus-visible:ring-0 focus-visible:ring-offset-0",
+              "placeholder:text-black/50 placeholder:text-sm",
+              "min-h-[60px]"
+            )}
+            style={{
+              overflow: "hidden",
+            }}
+            disabled={isLoading || isListening}
+          />
         </div>
-        
-        <div className="flex items-center gap-2">
-          {suggestedResponse && (
-            <SuggestionButton
-              suggestion={suggestedResponse}
-              onClick={handleSuggestionClick}
-              disabled={isLoading || isListening}
+
+        <div className="flex items-center justify-between p-3">
+          <div className="flex items-center gap-2">
+            {hasMessages && (
+              <button
+                type="button"
+                className="group p-2 hover:bg-black/10 rounded-lg transition-colors flex items-center gap-1"
+                onClick={onClear}
+                disabled={isLoading || isListening}
+              >
+                <Loader2 className="w-4 h-4 text-black" />
+                <span className="text-xs text-black hidden group-hover:inline transition-opacity">
+                  Clear
+                </span>
+              </button>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {suggestedResponse && (
+              <SuggestionButton
+                suggestion={suggestedResponse}
+                onClick={handleSuggestionClick}
+                disabled={isLoading || isListening}
+              />
+            )}
+            
+            <VoiceControls
+              isListening={isListening}
+              toggleListening={toggleListening}
+              disabled={isLoading}
+              aiProcessing={aiProcessing}
             />
-          )}
-          
-          <VoiceControls
-            isListening={isListening}
-            toggleListening={toggleListening}
-            disabled={isLoading}
-            aiProcessing={aiProcessing}
-          />
-          
-          <SendButton
-            hasContent={!!value.trim()}
-            isLoading={isLoading}
-            aiProcessing={aiProcessing}
-            disabled={isListening}
-            onClick={onSend}
-          />
+            
+            <SendButton
+              hasContent={!!value.trim()}
+              isLoading={isLoading}
+              aiProcessing={aiProcessing}
+              disabled={isListening}
+              onClick={onSend}
+            />
+          </div>
         </div>
       </div>
     </div>

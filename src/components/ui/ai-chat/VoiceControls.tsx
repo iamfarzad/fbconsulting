@@ -22,13 +22,14 @@ export function VoiceControls({
       type="button"
       onClick={toggleListening}
       className={cn(
-        "p-2 rounded-lg transition-colors flex items-center gap-1",
+        "p-2 rounded-lg transition-all duration-300 flex items-center gap-1",
         isListening 
-          ? "bg-black text-white" 
+          ? "bg-black text-white animate-pulse-subtle" 
           : "text-black/70 hover:bg-black/10",
         aiProcessing && "opacity-50 cursor-wait"
       )}
       disabled={disabled || aiProcessing}
+      aria-label={isListening ? "Stop listening" : "Start listening"}
     >
       {isListening ? (
         <>
