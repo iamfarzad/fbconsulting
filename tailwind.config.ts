@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -113,10 +112,6 @@ export default {
         'rotate-slow': {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' }
-        },
-        'move': {
-          '0%': { transform: 'translateY(-100%)' },
-          '100%': { transform: 'translateY(100%)' }
         }
       },
       animation: {
@@ -131,8 +126,7 @@ export default {
         'gradient-shift': 'gradient-shift 15s ease infinite',
         'grid-pulse': 'grid-pulse 4s ease-in-out infinite',
         'hover-lift': 'hover-lift 0.3s ease-out forwards',
-        'rotate-slow': 'rotate-slow 20s linear infinite',
-        'move': 'move 3s linear infinite'
+        'rotate-slow': 'rotate-slow 20s linear infinite'
       },
       backdropBlur: {
         xs: '2px',

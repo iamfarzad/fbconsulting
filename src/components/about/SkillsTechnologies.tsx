@@ -1,7 +1,7 @@
+
 import React from 'react';
 import AnimatedText from '@/components/AnimatedText';
 import { cn } from "@/lib/utils";
-import { AnimatedCard } from '@/components/ui/animated-card';
 import {
   Sparkles,
   Bot,
@@ -10,12 +10,7 @@ import {
   Workflow,
   MessagesSquare,
   Network,
-  Database,
-  Code,
-  Terminal,
-  Brain,
-  Braces,
-  LineChart
+  Database
 } from "lucide-react";
 
 // Skills data organized in the new format
@@ -28,13 +23,13 @@ const SKILLS_DATA = [
   },
   {
     title: "ChatGPT Custom Model Training",
-    description: "Developed tailored AI assistants with domain-specific expertise for businesses.",
+    description: "Developed tailored AI assistants with domain-specific expertise.",
     icon: <BrainCircuit className="w-6 h-6" />,
     category: "AI & Machine Learning"
   },
   {
     title: "Synthetic Data Generation",
-    description: "Created privacy-first datasets to improve AI model performance and generalization.",
+    description: "Created privacy-first datasets to improve AI model performance.",
     icon: <Database className="w-6 h-6" />,
     category: "AI & Machine Learning"
   },
@@ -42,18 +37,6 @@ const SKILLS_DATA = [
     title: "Machine Learning & Predictive Analytics",
     description: "Built AI-driven insights platforms for automation and decision-making.",
     icon: <BrainCircuit className="w-6 h-6" />,
-    category: "AI & Machine Learning"
-  },
-  {
-    title: "Natural Language Processing",
-    description: "Integrated LLMs into chatbots, AI-driven customer support, and mental health solutions.",
-    icon: <MessagesSquare className="w-6 h-6" />,
-    category: "AI & Machine Learning"
-  },
-  {
-    title: "Knowledge Graphs & AI Reasoning",
-    description: "Designed graph-based AI models for better data relationships and AI decision-making.",
-    icon: <Network className="w-6 h-6" />,
     category: "AI & Machine Learning"
   },
   {
@@ -75,20 +58,8 @@ const SKILLS_DATA = [
     category: "AI-Powered Business Automation"
   },
   {
-    title: "Workflow Automation",
-    description: "Eliminated manual workflows in mental health, content creation, and video production with AI.",
-    icon: <Workflow className="w-6 h-6" />,
-    category: "AI-Powered Business Automation"
-  },
-  {
-    title: "AI-Driven Data Augmentation",
-    description: "Used synthetic data and AI models to train more accurate predictive systems.",
-    icon: <Database className="w-6 h-6" />,
-    category: "AI-Powered Business Automation"
-  },
-  {
     title: "Conversational AI",
-    description: "Developed AI chatbots for mental wellness, business automation, and customer service.",
+    description: "Developed AI chatbots for mental wellness and business automation.",
     icon: <MessagesSquare className="w-6 h-6" />,
     category: "Chatbots & AI Assistants"
   },
@@ -105,39 +76,18 @@ const SKILLS_DATA = [
     category: "Chatbots & AI Assistants"
   },
   {
-    title: "Microsoft Azure & Cloud AI Solutions",
-    description: "Deployed scalable AI applications on Azure & AWS for enterprise clients.",
-    icon: <Cloud className="w-6 h-6" />,
-    category: "Data, Cloud & Systems Integration"
-  },
-  {
     title: "Systems Integration & API Development",
     description: "Connected AI models to databases, cloud services, and automation tools.",
     icon: <Network className="w-6 h-6" />,
     category: "Data, Cloud & Systems Integration"
   },
   {
-    title: "Business Intelligence & Data Analytics",
-    description: "Designed AI-driven dashboards and decision-making tools for businesses.",
-    icon: <LineChart className="w-6 h-6" />,
-    category: "Data, Cloud & Systems Integration"
-  },
-  {
-    title: "Edge AI & Hybrid AI Models",
-    description: "Worked with on-premise AI + cloud AI integrations for fast, secure processing.",
-    icon: <Braces className="w-6 h-6" />,
+    title: "Workflow Automation",
+    description: "Eliminated manual workflows with AI in mental health and content creation.",
+    icon: <Workflow className="w-6 h-6" />,
     category: "Data, Cloud & Systems Integration"
   },
 ];
-
-// Group skills by category
-const groupedSkills = SKILLS_DATA.reduce((acc, skill) => {
-  if (!acc[skill.category]) {
-    acc[skill.category] = [];
-  }
-  acc[skill.category].push(skill);
-  return acc;
-}, {} as Record<string, typeof SKILLS_DATA>);
 
 const FeatureSkill = ({
   title,
@@ -181,6 +131,15 @@ const FeatureSkill = ({
   );
 };
 
+// Group skills by category
+const groupedSkills = SKILLS_DATA.reduce((acc, skill) => {
+  if (!acc[skill.category]) {
+    acc[skill.category] = [];
+  }
+  acc[skill.category].push(skill);
+  return acc;
+}, {} as Record<string, typeof SKILLS_DATA>);
+
 const SkillsTechnologies = () => {
   return (
     <section className="py-16 px-4">
@@ -190,36 +149,6 @@ const SkillsTechnologies = () => {
           tag="h2" 
           className="text-3xl font-bold mb-8 text-center"
         />
-        
-        <div className="mb-16">
-          <AnimatedCard
-            className="mb-10"
-            title="AI Technologies I Work With"
-            description="I leverage the latest AI models and platforms to deliver cutting-edge solutions for businesses"
-            icons={[
-              {
-                icon: <BrainCircuit className="h-8 w-8 dark:text-white" />,
-                size: "lg",
-              },
-              {
-                icon: <Terminal className="h-6 w-6 dark:text-white" />,
-                size: "md",
-              },
-              {
-                icon: <Code className="h-4 w-4" />,
-                size: "sm",
-              },
-              {
-                icon: <Brain className="h-6 w-6" />,
-                size: "md",
-              },
-              {
-                icon: <Sparkles className="h-4 w-4" />,
-                size: "sm",
-              },
-            ]}
-          />
-        </div>
         
         {Object.entries(groupedSkills).map(([category, skills], categoryIndex) => (
           <div key={category} className="mb-16">
