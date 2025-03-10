@@ -5,6 +5,7 @@ import { SpeechRecognition, SpeechRecognitionEvent } from '@/types/voice';
 export const useSpeechRecognition = (onCommand: (command: string) => void = () => {}) => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
+  const [voiceError, setVoiceError] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   useEffect(() => {
@@ -18,6 +19,7 @@ export const useSpeechRecognition = (onCommand: (command: string) => void = () =
         recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
           const transcript = event.results[0][0].transcript;
           setTranscript(transcript);
+          setVoiceError(null);
           
           // Check if the result is final
           if (event.results[0].isFinal) {
@@ -30,6 +32,12 @@ export const useSpeechRecognition = (onCommand: (command: string) => void = () =
               setIsListening(false);
             }
           }
+        };
+        
+        recognitionRef.current.onerror = (event: Event) => {
+          const error = event as { error: string; message: string };
+          setVoiceError(error.message || 'Error with voice recognition');
+          setIsListening(false);
         };
         
         recognitionRef.current.onend = () => {
@@ -45,9 +53,9 @@ export const useSpeechRecognition = (onCommand: (command: string) => void = () =
     };
   }, [onCommand]);
 
-  const toggleListening = () => {
+  const toggleListening = async () => {
     if (!recognitionRef.current) {
-      console.log('Speech recognition not supported');
+      setVoiceError('Speech recognition not supported in this browser');
       return;
     }
     
@@ -55,16 +63,25 @@ export const useSpeechRecognition = (onCommand: (command: string) => void = () =
       recognitionRef.current.stop();
       setIsListening(false);
     } else {
-      // Reset transcript when starting new recording
-      setTranscript('');
-      recognitionRef.current.start();
-      setIsListening(true);
+      try {
+        // Request microphone permission
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Reset states
+        setVoiceError(null);
+        setTranscript('');
+        // Start recognition
+        recognitionRef.current.start();
+        setIsListening(true);
+      } catch (error) {
+        setVoiceError('Microphone permission denied');
+      }
     }
   };
 
   return {
     isListening,
     transcript,
-    toggleListening
+    toggleListening,
+    voiceError
   };
 };

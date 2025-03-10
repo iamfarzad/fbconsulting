@@ -35,13 +35,30 @@ export function ChatInput({
     maxHeight: 200,
   });
   
-  const handleCommand = (command: string) => {
-    // For now, just set the transcribed text as the input value
-    setValue(command);
-    adjustHeight();
+  const [aiProcessing, setAiProcessing] = useState(false);
+  
+  const handleCommand = async (command: string) => {
+    setAiProcessing(true);
+    try {
+      // Set the transcribed text as input value
+      setValue(command);
+      adjustHeight();
+      
+      // Auto-send if we have a complete command
+      if (command.trim()) {
+        await onSend();
+      }
+    } finally {
+      setAiProcessing(false);
+    }
   };
   
-  const { isListening, transcript, toggleListening } = useSpeechRecognition(handleCommand);
+  const { 
+    isListening, 
+    transcript, 
+    toggleListening,
+    voiceError 
+  } = useSpeechRecognition(handleCommand);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -98,14 +115,21 @@ export function ChatInput({
             style={{
               overflow: "hidden",
             }}
-            disabled={isLoading}
+            disabled={isLoading || isListening}
           />
         </div>
         
-        {/* Transcription display */}
-        {isListening && transcript && (
-          <div className="px-4 py-2 text-xs text-black/70 italic">
-            "{transcript}"
+        {/* Transcription display with error handling */}
+        {isListening && (
+          <div className="px-4 py-2 text-xs">
+            {transcript ? (
+              <p className="text-black/70 italic">"{transcript}"</p>
+            ) : (
+              <p className="text-black/50">Listening...</p>
+            )}
+            {voiceError && (
+              <p className="text-red-500 mt-1">{voiceError}</p>
+            )}
           </div>
         )}
 
@@ -116,7 +140,7 @@ export function ChatInput({
                 type="button"
                 className="group p-2 hover:bg-black/10 rounded-lg transition-colors flex items-center gap-1"
                 onClick={onClear}
-                disabled={isLoading}
+                disabled={isLoading || isListening}
               >
                 <Loader2 className="w-4 h-4 text-black" />
                 <span className="text-xs text-black hidden group-hover:inline transition-opacity">
@@ -125,35 +149,38 @@ export function ChatInput({
               </button>
             )}
           </div>
+          
           <div className="flex items-center gap-2">
             {suggestedResponse && (
               <button
                 type="button"
                 className="px-2 py-1 rounded-lg text-sm text-black/80 transition-colors border border-dashed border-black/30 hover:border-black/60 hover:bg-black/10 flex items-center justify-between gap-1"
                 onClick={handleSuggestionClick}
-                disabled={isLoading}
+                disabled={isLoading || isListening}
               >
                 <PlusIcon className="w-4 h-4" />
                 Suggestion
               </button>
             )}
             
-            {/* Voice button */}
+            {/* Voice button with dynamic states */}
             <button
               type="button"
               onClick={toggleListening}
-              className={`p-2 rounded-lg transition-colors ${
+              className={cn(
+                "p-2 rounded-lg transition-colors flex items-center gap-1",
                 isListening 
                   ? "bg-black text-white" 
-                  : "text-black/70 hover:bg-black/10"
-              }`}
-              disabled={isLoading}
+                  : "text-black/70 hover:bg-black/10",
+                aiProcessing && "opacity-50 cursor-wait"
+              )}
+              disabled={isLoading || aiProcessing}
             >
               {isListening ? (
-                <div className="flex items-center gap-1">
+                <>
                   <MicOff className="w-4 h-4" />
                   <AnimatedBars isActive={true} small={true} />
-                </div>
+                </>
               ) : (
                 <Mic className="w-4 h-4" />
               )}
@@ -167,12 +194,12 @@ export function ChatInput({
                 value.trim() && !isLoading
                   ? "bg-black text-white border-black"
                   : "text-black/80 border-black/30",
-                isLoading && "opacity-50 cursor-not-allowed"
+                (isLoading || aiProcessing) && "opacity-50 cursor-not-allowed"
               )}
               onClick={onSend}
-              disabled={!value.trim() || isLoading}
+              disabled={!value.trim() || isLoading || isListening || aiProcessing}
             >
-              {isLoading ? (
+              {isLoading || aiProcessing ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <ArrowUpIcon
