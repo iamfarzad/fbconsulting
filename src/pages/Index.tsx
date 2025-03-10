@@ -39,28 +39,28 @@ const Index = () => {
   // Featured services cards data
   const featuredServices = [
     {
-      icon: <Bot className="size-5 text-black dark:text-white" />,
+      icon: <Bot className="size-5 text-purple-600" />,
       title: t('service_ai_strategy'),
       description: t('service_ai_strategy_desc'),
-      date: "Premium Service",
-      className: "bg-white/90 dark:bg-black/90 backdrop-blur-sm border-[#9b87f5]/20 dark:border-[#9b87f5]/20",
-      iconClassName: "bg-[#E5DEFF] dark:bg-[#9b87f5]/20 text-[#9b87f5]",
+      date: t('premium_service'),
+      className: "border-purple-500/20",
+      iconClassName: "bg-purple-50 dark:bg-purple-500/10",
     },
     {
-      icon: <MessageSquare className="size-5 text-black dark:text-white" />,
+      icon: <MessageSquare className="size-5 text-teal-600" />,
       title: t('service_chatbots'),
       description: t('service_chatbots_desc'),
-      date: "Most Popular",
-      className: "bg-white/90 dark:bg-black/90 backdrop-blur-sm border-teal-500/20 dark:border-teal-500/20",
-      iconClassName: "bg-teal-50 dark:bg-teal-500/20 text-teal-500",
+      date: t('most_popular'),
+      className: "border-teal-500/20",
+      iconClassName: "bg-teal-50 dark:bg-teal-500/10",
     },
     {
-      icon: <Workflow className="size-5 text-black dark:text-white" />,
+      icon: <Workflow className="size-5 text-orange-600" />,
       title: t('service_workflow'),
       description: t('service_workflow_desc'),
-      date: "High ROI",
-      className: "bg-white/90 dark:bg-black/90 backdrop-blur-sm border-orange-500/20 dark:border-orange-500/20",
-      iconClassName: "bg-orange-50 dark:bg-orange-500/20 text-orange-500",
+      date: t('high_roi'),
+      className: "border-orange-500/20",
+      iconClassName: "bg-orange-50 dark:bg-orange-500/10",
     },
   ];
 
@@ -83,10 +83,10 @@ const Index = () => {
           {/* Content sections */}
           <Hero />
           
-          <div className="w-full py-20 bg-gradient-to-b from-gray-50/50 to-white/20 dark:from-gray-900/20 dark:to-black/30 relative overflow-hidden">
+          <section className="w-full py-20 relative overflow-hidden">
             {/* Subtle background elements */}
             <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none"></div>
-            <div className="absolute -top-[10%] -right-[5%] w-96 h-96 rounded-full bg-[#9b87f5]/5 blur-3xl"></div>
+            <div className="absolute -top-[10%] -right-[5%] w-96 h-96 rounded-full bg-purple-500/5 blur-3xl"></div>
             <div className="absolute -bottom-[10%] -left-[5%] w-96 h-96 rounded-full bg-teal-500/5 blur-3xl"></div>
             
             <div className="container mx-auto max-w-6xl px-4 relative z-10">
@@ -107,7 +107,7 @@ const Index = () => {
               
               <DisplayCards cards={featuredServices} />
             </div>
-          </div>
+          </section>
           
           {/* Conditionally show Norwegian pain points for Norwegian language */}
           <NorwegianPainPoints isVisible={isNorwegian} />
