@@ -75,7 +75,7 @@ const Index = () => {
         <Navbar />
         <main className="flex-grow">
           <Hero />
-          <div className="w-full py-16 bg-gradient-to-r from-sky-50 to-white relative overflow-hidden">
+          <div className="w-full py-16 bg-white relative overflow-hidden">
             <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-25" />
             <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
             <div className="container mx-auto max-w-6xl px-4 relative z-10">
