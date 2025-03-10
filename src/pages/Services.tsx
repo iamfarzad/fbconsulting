@@ -54,8 +54,8 @@ const Services = () => {
       
       <ServicesContent />
       
-      <Pricing />
-      <Testimonials />
+      <Pricing id="pricing" />
+      <Testimonials id="testimonials" />
       <ContactCTA />
       <Footer />
     </div>
