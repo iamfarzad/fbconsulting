@@ -14,7 +14,7 @@ import DisplayCards from '@/components/ui/display-cards';
 import { Bot, MessageSquare, Workflow } from 'lucide-react';
 import NorwegianPainPoints from '@/components/NorwegianPainPoints';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Faq3Demo } from '@/components/ui/faq3-demo';
+import { Faq3 } from "@/components/ui/faq3";
 import { motion } from 'framer-motion';
 
 const Index = () => {
@@ -63,6 +63,57 @@ const Index = () => {
       iconClassName: "bg-orange-50 dark:bg-orange-500/10",
     },
   ];
+
+  // FAQ data
+  const faqData = {
+    heading: isNorwegian ? "Ofte stilte spørsmål" : "Frequently asked questions",
+    description: isNorwegian 
+      ? "Alt du trenger å vite om våre AI-tjenester. Finner du ikke svaret du leter etter? Ta gjerne kontakt med vårt supportteam."
+      : "Everything you need to know about our AI services. Can't find the answer you're looking for? Feel free to contact our support team.",
+    items: [
+      {
+        id: "faq-1",
+        question: isNorwegian ? "Hvilke AI-tjenester tilbyr dere?" : "What AI services do you offer?",
+        answer: isNorwegian
+          ? "Vi tilbyr et bredt spekter av AI-tjenester inkludert chatbots, virtuelle assistenter, arbeidsflytautomatisering, AI-strategirådgivning og spesialtilpasset AI-utvikling skreddersydd for din bedrifts behov."
+          : "We offer a wide range of AI services including chatbots, virtual assistants, workflow automation, AI strategy consulting, and custom AI development tailored to your business needs.",
+      },
+      {
+        id: "faq-2",
+        question: isNorwegian ? "Hvordan kan AI-automatisering gagne min bedrift?" : "How can AI automation benefit my business?",
+        answer: isNorwegian
+          ? "AI-automatisering kan betydelig redusere manuelle prosesser, minimere menneskelige feil, forbedre kundeservice, forbedre beslutningsprosesser med datainnsikt, og til slutt øke operasjonell effektivitet og inntekt."
+          : "AI automation can significantly reduce manual processes, minimize human error, improve customer service, enhance decision-making with data insights, and ultimately increase operational efficiency and revenue.",
+      },
+      {
+        id: "faq-3",
+        question: isNorwegian ? "Er AI-implementering dyrt?" : "Is AI implementation expensive?",
+        answer: isNorwegian
+          ? "Kostnader for AI-implementering varierer basert på dine spesifikke behov. Vi tilbyr fleksible prisplaner som passer for bedrifter i alle størrelser, med fokus på løsninger som gir målbar ROI og rask verdi."
+          : "AI implementation costs vary based on your specific needs. We offer flexible pricing plans suitable for businesses of all sizes, focusing on solutions that provide measurable ROI and quick time-to-value.",
+      },
+      {
+        id: "faq-4",
+        question: isNorwegian ? "Hvor lang tid tar det å implementere AI-løsninger?" : "How long does it take to implement AI solutions?",
+        answer: isNorwegian
+          ? "Implementeringstider avhenger av kompleksiteten i dine behov. Enkle chatbots kan rulles ut på noen uker, mens omfattende arbeidsflytautomatisering kan ta 2-3 måneder. Vi gir klare tidslinjer under vår innledende konsultasjon."
+          : "Implementation timelines depend on the complexity of your needs. Simple chatbots can be deployed in a few weeks, while comprehensive workflow automation might take 2-3 months. We provide clear timelines during our initial consultation.",
+      },
+      {
+        id: "faq-5",
+        question: isNorwegian ? "Tilbyr dere støtte etter implementering?" : "Do you offer support after implementation?",
+        answer: isNorwegian
+          ? "Ja, vi tilbyr kontinuerlig støtte og vedlikehold for alle våre AI-løsninger. Våre støttepakker inkluderer regelmessige oppdateringer, ytelsesovervåking og teknisk hjelp for å sikre at AI-systemene dine fortsetter å yte optimalt."
+          : "Yes, we provide ongoing support and maintenance for all our AI solutions. Our support packages include regular updates, performance monitoring, and technical assistance to ensure your AI systems continue to perform optimally.",
+      },
+    ],
+    supportHeading: isNorwegian ? "Har du fortsatt spørsmål?" : "Still have questions?",
+    supportDescription: isNorwegian
+      ? "Våre AI-spesialister er klare til å hjelpe deg med å finne den perfekte automatiseringsløsningen for din bedrift. Ta kontakt for en gratis konsultasjon."
+      : "Our AI specialists are ready to help you find the perfect automation solution for your business. Get in touch for a free consultation.",
+    supportButtonText: isNorwegian ? "Kontakt Vårt Team" : "Contact Our Team",
+    supportButtonUrl: "/contact",
+  };
 
   return (
     <>
@@ -120,7 +171,7 @@ const Index = () => {
           
           {/* FAQ Section */}
           <div id="faq">
-            <Faq3Demo />
+            <Faq3 {...faqData} />
           </div>
           
           <ContactCTA />
