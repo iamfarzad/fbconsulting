@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { AIChatInput } from '../ui/ai-chat';
 import { Button } from '../ui/button';
+import { AnimatedBars } from '../ui/AnimatedBars';
 
 interface FullScreenChatProps {
   onMinimize: () => void;
@@ -15,7 +16,7 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({ onMinimize }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
-      className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm"
+      className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md"
     >
       <div className="relative w-full h-full max-w-7xl mx-auto px-4">
         <div className="absolute right-4 top-4 z-50">
@@ -23,17 +24,20 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({ onMinimize }) => {
             variant="outline"
             size="icon"
             onClick={onMinimize}
-            className="rounded-full"
+            className="rounded-full border-white/30 bg-black/50 hover:bg-black/70"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4 text-white" />
           </Button>
         </div>
         
         <div className="h-full pt-20 pb-10">
-          <div className="bg-background rounded-lg shadow-xl h-full max-w-4xl mx-auto overflow-hidden flex flex-col">
-            <div className="p-6 text-center border-b">
-              <h2 className="text-2xl font-semibold">Chat with AI Assistant</h2>
-              <p className="text-muted-foreground mt-2">
+          <div className="bg-transparent h-full max-w-4xl mx-auto overflow-hidden flex flex-col">
+            <div className="p-6 text-center mb-4">
+              <h2 className="text-2xl font-semibold text-white mb-2">Chat with AI Assistant</h2>
+              <div className="flex justify-center">
+                <AnimatedBars isActive={true} />
+              </div>
+              <p className="text-white/70 mt-4">
                 Ask me anything about our AI services and automation solutions
               </p>
             </div>

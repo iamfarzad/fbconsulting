@@ -28,3 +28,26 @@
   0%, 100% { height: 4px; }
   50% { height: 20px; }
 }
+
+@keyframes sound-wave {
+  0%, 100% { height: 10%; }
+  50% { height: 100%; }
+}
+
+.animate-sound-wave {
+  animation: sound-wave 1s ease-in-out infinite;
+}
+
+.animate-subtle-bounce {
+  animation: subtle-bounce 2s ease-in-out infinite;
+}
+
+@keyframes subtle-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-eq-bars {
+  animation: sound-wave 0.5s ease-in-out infinite;
+}
+

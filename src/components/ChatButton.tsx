@@ -5,6 +5,7 @@ import { AIChatInput } from './ui/ai-chat';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChatButton } from '@/hooks/useChatButton';
 import FullScreenChat from './chat/FullScreenChat';
+import { AnimatedBars } from './ui/AnimatedBars';
 
 const ChatButton = () => {
   const { 
@@ -37,12 +38,17 @@ const ChatButton = () => {
                   <Bot size={18} className="text-white" />
                   AI Assistant
                 </h3>
-                <button 
-                  onClick={toggleChat}
-                  className="text-white/70 hover:text-white p-1 rounded-full hover:bg-black/80"
-                >
-                  <X size={18} />
-                </button>
+                <div className="flex items-center gap-3">
+                  <div className="hidden sm:block">
+                    <AnimatedBars isActive={true} small={true} />
+                  </div>
+                  <button 
+                    onClick={toggleChat}
+                    className="text-white/70 hover:text-white p-1 rounded-full hover:bg-black/80"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
               </div>
               
               <AIChatInput placeholderText="Ask me anything about our AI services..." />
@@ -62,6 +68,7 @@ const ChatButton = () => {
         whileTap={{ scale: 0.95 }}
       >
         <Bot size={24} />
+        <span className="sr-only">Open AI Chat</span>
       </motion.button>
     </>
   );

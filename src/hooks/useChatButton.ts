@@ -32,7 +32,15 @@ export function useChatButton() {
   
   const toggleFullScreen = useCallback(() => {
     setIsFullScreen(prev => !prev);
-  }, []);
+    
+    // Track the fullscreen toggle
+    trackEvent({
+      action: isFullScreen ? 'chat_minimized' : 'chat_fullscreen',
+      category: 'chatbot',
+      label: 'fullscreen_toggle',
+      page: location.pathname,
+    });
+  }, [isFullScreen, location.pathname]);
   
   // Check if we should show the chat button (hide on homepage)
   const shouldShowButton = location.pathname !== '/';

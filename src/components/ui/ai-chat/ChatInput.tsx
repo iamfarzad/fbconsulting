@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -53,12 +54,19 @@ export function ChatInput({
     }
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent form submission which causes page jumps
+    if (value.trim() && !isLoading) {
+      onSend();
+    }
+  };
+
   return (
     <div className={cn(
       "relative bg-white border border-black/70",
       (showMessages || hasMessages) ? "rounded-b-xl border-t-0" : "rounded-xl"
     )}>
-      <form onSubmit={(e) => e.preventDefault()}>
+      <form onSubmit={handleSubmit}>
         <div className="overflow-y-auto">
           <Textarea
             ref={textareaRef}
