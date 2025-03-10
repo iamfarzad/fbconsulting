@@ -20,8 +20,8 @@ export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatIn
   // Create a mock LeadInfo object for suggestions
   const mockLeadInfo: LeadInfo = {
     interests: messages.map(m => m.content),
-    lastInteraction: Date.now(),
-    stage: 'discovery' // Using a valid property from LeadInfo
+    stage: 'discovery', // Using a valid property from LeadInfo
+    // Remove lastInteraction as it doesn't exist in LeadInfo type
   };
   
   const suggestedResponse = useSuggestedResponse(mockLeadInfo);
