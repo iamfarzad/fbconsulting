@@ -58,10 +58,10 @@ export const ChatMessageList = ({ messages, showMessages }: ChatMessageListProps
   return (
     <div 
       ref={containerRef}
-      className="bg-black rounded-xl border border-white/30 p-4 overflow-y-auto overscroll-contain"
+      className="bg-black/95 backdrop-blur-lg rounded-2xl border border-white/20 p-4 overflow-y-auto overscroll-contain shadow-lg"
       style={{
         height: messages.length > 0 ? 'auto' : '200px',
-        minHeight: '120px', // Ensures minimum height when empty
+        minHeight: '120px',
         maxHeight: '400px',
         scrollbarGutter: 'stable',
         scrollBehavior: 'smooth'
@@ -74,8 +74,8 @@ export const ChatMessageList = ({ messages, showMessages }: ChatMessageListProps
             animate={{ opacity: 1 }}
             className="flex flex-col items-center justify-center h-full text-center py-10"
           >
-            <Bot size={40} className="text-white mb-4" />
-            <h3 className="text-white text-lg font-medium mb-2">
+            <Bot size={40} className="text-white/90 mb-4" />
+            <h3 className="text-white/90 text-lg font-medium mb-2">
               How can I help with your AI automation needs?
             </h3>
             <p className="text-white/70 max-w-lg">

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -70,11 +69,11 @@ export function ChatInput({
 
   return (
     <div className="flex flex-col w-full">
-      {/* Animated Transcription Display with consistent rounding */}
+      {/* Animated Transcription Display */}
       <div 
         className={cn(
-          "overflow-hidden transition-all duration-500 ease-in-out bg-black text-white rounded-xl mb-2",
-          isTranscribing ? "max-h-24 opacity-100 py-3 px-4 border border-white/30" : "max-h-0 opacity-0 py-0 px-0 border-0"
+          "overflow-hidden transition-all duration-500 ease-in-out bg-black/95 backdrop-blur-lg text-white rounded-2xl mb-2",
+          isTranscribing ? "max-h-24 opacity-100 py-3 px-4 border border-white/20" : "max-h-0 opacity-0 py-0 px-0"
         )}
       >
         <div className={cn(
@@ -90,10 +89,10 @@ export function ChatInput({
         </div>
       </div>
 
-      {/* Chat Input Box with consistent rounding */}
+      {/* Chat Input Box */}
       <div className={cn(
-        "relative bg-white border border-black/70 rounded-xl transition-shadow duration-300",
-        (showMessages || hasMessages) ? "shadow-md" : ""
+        "relative bg-white/95 backdrop-blur-lg border border-black/20 rounded-2xl transition-all duration-300",
+        (showMessages || hasMessages) ? "shadow-lg" : ""
       )}>
         <div className="overflow-y-auto">
           <Textarea
@@ -107,11 +106,11 @@ export function ChatInput({
               "resize-none",
               "bg-transparent",
               "border-none",
-              "text-black text-sm",
+              "text-black/90 text-sm",
               "focus:outline-none",
               "focus-visible:ring-0 focus-visible:ring-offset-0",
               "placeholder:text-black/50 placeholder:text-sm",
-              "min-h-[60px]"
+              "min-h-[60px] rounded-2xl"
             )}
             style={{
               overflow: "hidden",
@@ -120,7 +119,7 @@ export function ChatInput({
           />
         </div>
 
-        <div className="flex items-center justify-between p-3">
+        <div className="flex items-center justify-between p-3 border-t border-black/10">
           <div className="flex items-center gap-2">
             {hasMessages && (
               <button
