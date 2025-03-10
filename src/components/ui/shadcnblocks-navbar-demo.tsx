@@ -1,4 +1,3 @@
-
 import { Book, Sunset, Trees, Zap } from "lucide-react";
 import { Navbar1 } from "./shadcnblocks-com-navbar1";
 import { Moon, Sun } from "lucide-react";
@@ -19,8 +18,8 @@ const demoData = {
   logo: {
     url: "/",
     src: "https://www.shadcnblocks.com/images/block/block-1.svg",
-    alt: "AI Automation Ally",
-    title: "AI Automation Ally",
+    alt: "F.B Consulting",
+    title: "F.B Consulting",
   },
   menu: [
     {
