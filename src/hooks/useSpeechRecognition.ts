@@ -35,8 +35,10 @@ export const useSpeechRecognition = (onCommand: (command: string) => void = () =
         };
         
         recognitionRef.current.onerror = (event: Event) => {
-          const error = event as { error: string; message: string };
-          setVoiceError(error.message || 'Error with voice recognition');
+          // Safely access error properties with type checking
+          const errorEvent = event as unknown as { error?: string; message?: string };
+          const errorMessage = errorEvent.message || errorEvent.error || 'Error with voice recognition';
+          setVoiceError(errorMessage);
           setIsListening(false);
         };
         
