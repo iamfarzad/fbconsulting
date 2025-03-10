@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -39,13 +40,13 @@ const About = () => {
             <div className="flex flex-col md:flex-row gap-12 items-center">
               <div className="flex-1">
                 <AnimatedText text="About Me" tag="h1" className="text-3xl md:text-5xl font-bold mb-6" />
-                <AnimatedText text="AI Automation Expert & Business Consultant" tag="h2" delay={200} className="text-xl text-muted-foreground mb-8" />
+                <AnimatedText text="Helping Businesses Cut Costs, Automate Workflows & Scale with AI" tag="h2" delay={200} className="text-xl text-muted-foreground mb-8" />
                 <div className="opacity-0 animate-fade-in-up" style={{
                 animationDelay: '400ms',
                 animationFillMode: 'forwards'
               }}>
                   <p className="mb-4">
-                    With over 10 years of experience in business automation and AI integration, I help companies streamline operations, reduce costs, and scale efficiently.
+                    I specialize in AI automation, workflow optimization, and intelligent process design—helping businesses reduce manual work, increase efficiency, and drive revenue growth with AI-powered solutions.
                   </p>
                   <p className="mb-6">
                     My approach combines deep technical expertise with business acumen, ensuring that AI solutions deliver measurable ROI and solve real business problems.
@@ -79,12 +80,12 @@ const About = () => {
               animationDelay: '200ms',
               animationFillMode: 'forwards'
             }}>
-                <h3 className="text-xl font-semibold mb-3">Professional Journey</h3>
+                <h3 className="text-xl font-semibold mb-3">Self-Taught AI Expert & Startup Founder</h3>
                 <p className="mb-3">
-                  Before founding AI Automation Ally, I spent a decade working with Fortune 500 companies, helping them implement cutting-edge automation solutions and AI technologies.
+                  My expertise in AI-driven automation and business optimization comes from hands-on experience building, scaling, and automating my own startups. Unlike traditional consultants who rely on theory, I've spent years developing and implementing AI systems to solve real-world business challenges.
                 </p>
                 <p>
-                  My experience spans industries from finance and healthcare to retail and manufacturing, giving me a broad perspective on how AI can transform various business models.
+                  From launching AI-powered platforms to optimizing workflows for startups and enterprises, I know what works and what doesn't. My approach is based on practical execution, not just consulting frameworks.
                 </p>
               </div>
               
