@@ -9,6 +9,7 @@ interface SEOProps {
   ogImage?: string;
   ogType?: 'website' | 'article';
   structuredData?: Record<string, any>;
+  keywords?: string;
 }
 
 const SEO: React.FC<SEOProps> = ({
@@ -18,6 +19,7 @@ const SEO: React.FC<SEOProps> = ({
   ogImage = '/og-image.png',
   ogType = 'website',
   structuredData,
+  keywords,
 }) => {
   const siteUrl = typeof window !== 'undefined' ? window.location.origin : '';
   const pageUrl = canonicalUrl || (typeof window !== 'undefined' ? window.location.href : '');
@@ -29,6 +31,7 @@ const SEO: React.FC<SEOProps> = ({
       <title>{title}</title>
       <meta name="description" content={description} />
       <link rel="canonical" href={pageUrl} />
+      {keywords && <meta name="keywords" content={keywords} />}
       
       {/* OpenGraph tags */}
       <meta property="og:title" content={title} />
