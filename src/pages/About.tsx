@@ -7,6 +7,7 @@ import AboutHero from '@/components/about/AboutHero';
 import GlobalImpact from '@/components/about/GlobalImpact';
 import BackgroundExperience from '@/components/about/BackgroundExperience';
 import SkillsTechnologies from '@/components/about/SkillsTechnologies';
+import AIJourney from '@/components/about/AIJourney';
 import { getPersonStructuredData } from '@/components/about/AboutStructuredData';
 
 const About = () => {
@@ -37,6 +38,7 @@ const About = () => {
       <main className="flex-grow pt-20">
         <AboutHero />
         <GlobalImpact />
+        <AIJourney />
         <BackgroundExperience />
         <SkillsTechnologies />
       </main>
