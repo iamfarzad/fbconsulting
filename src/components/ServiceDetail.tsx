@@ -14,6 +14,7 @@ interface ServiceDetailProps {
   imageSrc: string;
   altText: string;
   callToAction: string;
+  onCallToAction?: () => void; // Added this prop
 }
 
 const ServiceDetail: React.FC<ServiceDetailProps> = ({
@@ -25,6 +26,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({
   imageSrc,
   altText,
   callToAction,
+  onCallToAction, // Added this prop
 }) => {
   const isImageRight = imagePosition === 'right';
 
@@ -75,6 +77,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({
             size="lg" 
             className="mt-4 opacity-0 animate-fade-in-up neo-button rounded-full" 
             style={{ animationDelay: `${400 + (benefits.length * 100)}ms` }}
+            onClick={onCallToAction} // Added onClick handler
           >
             {callToAction}
           </Button>
