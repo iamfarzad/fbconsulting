@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -8,6 +7,7 @@ import { useVoiceInput } from "@/hooks/useVoiceInput";
 import { VoiceControls } from "./VoiceControls";
 import { SendButton } from "./SendButton";
 import { SuggestionButton } from "./SuggestionButton";
+import { AnimatedBars } from "@/components/ui/AnimatedBars";
 
 interface ChatInputProps {
   value: string;
