@@ -26,15 +26,15 @@ const ChatButton = () => {
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className="fixed bottom-20 right-4 md:right-6 z-50 w-full max-w-md"
           >
-            <div className="bg-deep-purple border border-teal/30 rounded-xl shadow-lg p-4">
+            <div className="bg-black border border-white/30 rounded-xl shadow-lg p-4 dark:bg-black dark:border-white/30">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-neon-white font-medium flex items-center gap-2">
-                  <Bot size={18} className="text-teal" />
+                <h3 className="text-white font-medium flex items-center gap-2">
+                  <Bot size={18} className="text-white" />
                   AI Assistant
                 </h3>
                 <button 
                   onClick={toggleChat}
-                  className="text-neon-white/70 hover:text-neon-white p-1 rounded-full hover:bg-deep-purple/80"
+                  className="text-white/70 hover:text-white p-1 rounded-full hover:bg-black/80"
                 >
                   <X size={18} />
                 </button>
@@ -48,7 +48,7 @@ const ChatButton = () => {
                     toggleChat();
                     navigate('/animated-chat');
                   }}
-                  className="text-teal hover:text-teal/80 flex items-center justify-center gap-1 mx-auto"
+                  className="text-white hover:text-white/80 flex items-center justify-center gap-1 mx-auto"
                 >
                   <Sparkles size={12} />
                   Try our animated chat experience
@@ -61,7 +61,7 @@ const ChatButton = () => {
       
       <motion.button
         onClick={toggleChat}
-        className="fixed bottom-4 right-4 md:right-6 z-50 w-14 h-14 bg-teal text-deep-purple rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
+        className="fixed bottom-4 right-4 md:right-6 z-50 w-14 h-14 bg-black text-white dark:bg-white dark:text-black rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
         whileHover={{ y: -2 }}
         whileTap={{ scale: 0.95 }}
       >

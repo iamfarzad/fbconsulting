@@ -63,7 +63,7 @@ export function AnimatedChatInput({
 
   return (
     <div className={cn(
-      "relative bg-deep-purple border border-teal/30",
+      "relative bg-black border border-white/30",
       (showMessages || hasMessages) ? "rounded-b-xl border-t-0" : "rounded-xl"
     )}>
       <div className="py-2 px-2">
@@ -79,12 +79,12 @@ export function AnimatedChatInput({
           {hasMessages && (
             <button
               type="button"
-              className="group p-2 hover:bg-deep-purple/80 rounded-lg transition-colors flex items-center gap-1"
+              className="group p-2 hover:bg-black/80 rounded-lg transition-colors flex items-center gap-1"
               onClick={onClear}
               disabled={isLoading}
             >
-              <Eraser className="w-4 h-4 text-teal" />
-              <span className="text-xs text-teal hidden group-hover:inline transition-opacity">
+              <Eraser className="w-4 h-4 text-white" />
+              <span className="text-xs text-white hidden group-hover:inline transition-opacity">
                 Clear
               </span>
             </button>
@@ -94,7 +94,7 @@ export function AnimatedChatInput({
           {suggestedResponse && (
             <button
               type="button"
-              className="px-2 py-1 rounded-lg text-sm text-teal/80 transition-colors border border-dashed border-teal/30 hover:border-teal/60 hover:bg-deep-purple/80 flex items-center justify-between gap-1"
+              className="px-2 py-1 rounded-lg text-sm text-white/80 transition-colors border border-dashed border-white/30 hover:border-white/60 hover:bg-black/80 flex items-center justify-between gap-1"
               onClick={handleSuggestionClick}
               disabled={isLoading}
             >
@@ -104,7 +104,7 @@ export function AnimatedChatInput({
           )}
           {isLoading && (
             <div className="px-3 py-1">
-              <Loader2 className="w-4 h-4 text-teal animate-spin" />
+              <Loader2 className="w-4 h-4 text-white animate-spin" />
             </div>
           )}
         </div>

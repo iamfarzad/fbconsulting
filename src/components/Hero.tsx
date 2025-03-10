@@ -36,21 +36,21 @@ const Hero = () => {
   return (
     <section 
       ref={heroRef}
-      className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 overflow-hidden pt-16 bg-white dark:bg-transparent"
+      className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 overflow-hidden pt-16 bg-white dark:bg-black"
     >
       {/* Background elements */}
-      <div className="absolute inset-0 bg-gradient-to-b from-sky-50 to-white dark:from-deep-purple/80 dark:to-transparent dark:mix-blend-multiply"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-50 to-white dark:from-black/80 dark:to-black"></div>
       
-      <div className="absolute inset-0 bg-grid-pattern opacity-10 dark:opacity-30 dark:retro-grid pointer-events-none"></div>
+      <div className="absolute inset-0 bg-grid-pattern opacity-10 dark:opacity-30 pointer-events-none"></div>
       
       {/* Content */}
       <div className="container mx-auto max-w-6xl relative z-10 mt-10 md:mt-0">
         <div className="text-center mb-6">
-          <LocationGreeting className="mb-2 text-teal-600 dark:text-neon-white" />
+          <LocationGreeting className="mb-2 text-black dark:text-white" />
         </div>
         
         <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 space-y-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-deep-purple dark:text-neon-white">
+          <h1 className="text-4xl md:text-5xl font-bold text-black dark:text-white">
             What can I help you automate?
           </h1>
           
@@ -64,7 +64,7 @@ const Hero = () => {
           >
             <button 
               onClick={() => navigate('/animated-chat')}
-              className="text-teal hover:underline text-sm"
+              className="text-black hover:underline dark:text-white text-sm"
             >
               Try our new animated chat experience →
             </button>
@@ -73,7 +73,7 @@ const Hero = () => {
         
         <div className="mt-8 flex justify-center">
           <motion.div 
-            className="text-lg text-deep-purple/70 dark:text-neon-white/70 text-center max-w-lg"
+            className="text-lg text-black/70 dark:text-white/70 text-center max-w-lg"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.5 }}
@@ -102,8 +102,8 @@ const Hero = () => {
         animate={{ y: [0, 10, 0] }}
         transition={{ repeat: Infinity, duration: 2 }}
       >
-        <div className="w-8 h-12 rounded-full border-2 border-deep-purple/20 dark:border-neon-white/20 flex items-start justify-center p-2">
-          <div className="w-1 h-3 rounded-full bg-deep-purple/40 dark:bg-neon-white/40"></div>
+        <div className="w-8 h-12 rounded-full border-2 border-black/20 dark:border-white/20 flex items-start justify-center p-2">
+          <div className="w-1 h-3 rounded-full bg-black/40 dark:bg-white/40"></div>
         </div>
       </motion.div>
     </section>

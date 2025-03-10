@@ -22,10 +22,10 @@ const ChatbotAnimation: React.FC = () => {
           duration: 2,
         }}
       >
-        <MessageSquare className="w-10 h-10 text-teal" />
+        <MessageSquare className="w-10 h-10 text-black dark:text-white" />
       </motion.div>
       <motion.div 
-        className="mt-1 h-1 w-16 mx-auto bg-teal/30 rounded-full"
+        className="mt-1 h-1 w-16 mx-auto bg-black/30 dark:bg-white/30 rounded-full"
         animate={{
           width: [40, 60, 40]
         }}

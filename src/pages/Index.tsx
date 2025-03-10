@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -33,34 +34,34 @@ const Index = () => {
   // Featured services cards data
   const featuredServices = [
     {
-      icon: <Bot className="size-4 text-teal" />,
+      icon: <Bot className="size-4 text-white dark:text-white" />,
       title: "AI Strategy",
       description: "Custom roadmaps for your business",
       date: "Premium Service",
-      iconClassName: "text-teal",
-      titleClassName: "text-teal",
+      iconClassName: "text-white dark:text-white",
+      titleClassName: "text-black dark:text-white",
       className:
-        "[grid-area:stack] hover:-translate-y-10 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0 border-white/5",
+        "[grid-area:stack] hover:-translate-y-10 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0 border-black/5 dark:border-white/5 bg-white dark:bg-black",
     },
     {
-      icon: <MessageSquare className="size-4 text-retro-pink" />,
+      icon: <MessageSquare className="size-4 text-white dark:text-white" />,
       title: "AI Chatbots",
       description: "24/7 Customer Support",
       date: "Most Popular",
-      iconClassName: "text-retro-pink",
-      titleClassName: "text-retro-pink",
+      iconClassName: "text-white dark:text-white",
+      titleClassName: "text-black dark:text-white",
       className:
-        "[grid-area:stack] translate-x-16 translate-y-10 hover:-translate-y-1 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0 border-white/5",
+        "[grid-area:stack] translate-x-16 translate-y-10 hover:-translate-y-1 before:absolute before:w-[100%] before:outline-1 before:rounded-xl before:outline-border before:h-[100%] before:content-[''] before:bg-blend-overlay before:bg-background/50 grayscale-[100%] hover:before:opacity-0 before:transition-opacity before:duration-700 hover:grayscale-0 before:left-0 before:top-0 border-black/5 dark:border-white/5 bg-white dark:bg-black",
     },
     {
-      icon: <Workflow className="size-4 text-neon-blue" />,
+      icon: <Workflow className="size-4 text-white dark:text-white" />,
       title: "Workflow Automation",
       description: "Streamline your business processes",
       date: "High ROI",
-      iconClassName: "text-neon-blue",
-      titleClassName: "text-neon-blue",
+      iconClassName: "text-white dark:text-white",
+      titleClassName: "text-black dark:text-white",
       className:
-        "[grid-area:stack] translate-x-32 translate-y-20 hover:translate-y-10 border-white/5",
+        "[grid-area:stack] translate-x-32 translate-y-20 hover:translate-y-10 border-black/5 dark:border-white/5 bg-white dark:bg-black",
     },
   ];
 
@@ -75,14 +76,14 @@ const Index = () => {
         <main className="flex-grow relative">
           {/* Global background pattern */}
           <div className="fixed inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
-          <div className="fixed inset-0 bg-gradient-to-b from-background via-background to-deep-purple/5 pointer-events-none"></div>
+          <div className="fixed inset-0 bg-gradient-to-b from-background via-background to-black/5 pointer-events-none"></div>
           
           {/* Content sections */}
           <Hero />
           
-          <div className="w-full py-16 bg-white/80 dark:bg-white/5 backdrop-blur-sm relative">
+          <div className="w-full py-16 bg-black/5 dark:bg-white/5 backdrop-blur-sm relative">
             <div className="container mx-auto max-w-6xl px-4 relative z-10">
-              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gradient-retro">Featured Services</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-black dark:text-white">Featured Services</h2>
               <DisplayCards cards={featuredServices} />
             </div>
           </div>
