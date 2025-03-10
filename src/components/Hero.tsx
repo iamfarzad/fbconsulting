@@ -33,23 +33,21 @@ const Hero = () => {
   return (
     <section 
       ref={heroRef}
-      className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 overflow-hidden pt-16"
+      className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 overflow-hidden pt-16 bg-white dark:bg-transparent"
     >
       {/* Background elements */}
-      <div className="hero-bg absolute inset-0 retro-gradient-bg pointer-events-none transition-transform duration-500 ease-out"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-sky-50 to-white dark:from-deep-purple/80 dark:to-transparent dark:mix-blend-multiply"></div>
       
-      <div className="retro-grid absolute inset-0 opacity-30 pointer-events-none transition-transform duration-500 ease-out"></div>
-      
-      <div className="absolute inset-0 bg-gradient-to-b from-deep-purple/80 to-transparent mix-blend-multiply pointer-events-none"></div>
+      <div className="absolute inset-0 bg-grid-pattern opacity-10 dark:opacity-30 dark:retro-grid pointer-events-none"></div>
       
       {/* Content */}
       <div className="container mx-auto max-w-6xl relative z-10 mt-10 md:mt-0">
         <div className="text-center mb-6">
-          <LocationGreeting className="mb-2 text-neon-white" />
+          <LocationGreeting className="mb-2 text-teal-600 dark:text-neon-white" />
         </div>
         
         <div className="flex flex-col items-center w-full max-w-4xl mx-auto p-4 space-y-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-neon-white dark:text-white">
+          <h1 className="text-4xl md:text-5xl font-bold text-deep-purple dark:text-neon-white">
             What can I help you automate?
           </h1>
           
@@ -58,7 +56,7 @@ const Hero = () => {
         
         <div className="mt-8 flex justify-center">
           <motion.div 
-            className="text-lg text-neon-white/70 text-center max-w-lg"
+            className="text-lg text-deep-purple/70 dark:text-neon-white/70 text-center max-w-lg"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.5 }}
@@ -69,7 +67,14 @@ const Hero = () => {
       </div>
       
       {/* Dot pattern */}
-      <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-15" />
+      <DotPattern 
+        width={16} 
+        height={16} 
+        cx={8} 
+        cy={8} 
+        cr={1.5} 
+        className="opacity-25 dark:opacity-15" 
+      />
       
       {/* Voice UI */}
       <VoiceUI onCommand={handleVoiceCommand} />
@@ -80,8 +85,8 @@ const Hero = () => {
         animate={{ y: [0, 10, 0] }}
         transition={{ repeat: Infinity, duration: 2 }}
       >
-        <div className="w-8 h-12 rounded-full border-2 border-neon-white/20 flex items-start justify-center p-2">
-          <div className="w-1 h-3 rounded-full bg-neon-white/40"></div>
+        <div className="w-8 h-12 rounded-full border-2 border-deep-purple/20 dark:border-neon-white/20 flex items-start justify-center p-2">
+          <div className="w-1 h-3 rounded-full bg-deep-purple/40 dark:bg-neon-white/40"></div>
         </div>
       </motion.div>
     </section>
