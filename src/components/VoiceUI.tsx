@@ -14,7 +14,15 @@ const VoiceUI: React.FC<VoiceUIProps> = ({ onCommand = () => {} }) => {
     return localStorage.getItem('hasInteractedWithVoice') === 'true';
   });
 
-  const { isListening, transcript, toggleListening } = useSpeechRecognition(onCommand);
+  const { isListening, transcript, toggleListening, voiceError } = useSpeechRecognition(onCommand);
+  
+  // Show error toast if there's a voice error
+  useEffect(() => {
+    if (voiceError) {
+      console.error("Voice recognition error:", voiceError);
+      // You could add toast notification here
+    }
+  }, [voiceError]);
   
   const handleToggleListening = () => {
     toggleListening();
@@ -53,8 +61,8 @@ const VoiceUI: React.FC<VoiceUIProps> = ({ onCommand = () => {} }) => {
       </AnimatePresence>
       
       {showTooltip && !isExpanded && (
-        <div className="fixed bottom-20 right-6 p-3 bg-deep-purple text-neon-white rounded-lg shadow-lg z-50 max-w-xs">
-          <p className="text-sm mb-2">Hey, I'm your guide—say "show me your work" or "tell me more"!</p>
+        <div className="fixed bottom-20 right-6 p-3 bg-black text-white rounded-lg shadow-lg z-50 max-w-xs">
+          <p className="text-sm mb-2">Hey, I'm your voice assistant—say something to try it out!</p>
           {isListening && (
             <div className="voice-waveform flex justify-center items-end h-5">
               <AnimatedBars isActive={isListening} small={true} />
@@ -64,7 +72,7 @@ const VoiceUI: React.FC<VoiceUIProps> = ({ onCommand = () => {} }) => {
       )}
       
       {transcript && isListening && !isExpanded && (
-        <div className="fixed bottom-24 right-24 p-2 bg-white/90 text-deep-purple rounded shadow-md">
+        <div className="fixed bottom-24 right-24 p-2 bg-white/90 text-black rounded shadow-md">
           "{transcript}"
         </div>
       )}
