@@ -13,7 +13,7 @@ export const AnimatedBars: React.FC<AnimatedBarsProps> = ({ isActive, small = fa
         <div
           key={i}
           className={`
-            w-1 bg-white/70
+            w-1 bg-black dark:bg-white
             transition-all duration-75 rounded-t-sm
             ${isActive ? 'animate-sound-wave' : 'h-1/3'}
           `}
