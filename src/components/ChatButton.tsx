@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Bot, X } from 'lucide-react';
 import { AIChatInput } from './ui/ai-chat';
@@ -16,7 +15,6 @@ const ChatButton = () => {
     shouldShowButton 
   } = useChatButton();
   
-  // Hide on the home page since we already have the chat there
   if (!shouldShowButton) {
     return null;
   }
@@ -36,7 +34,7 @@ const ChatButton = () => {
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-white font-medium flex items-center gap-2">
                   <Bot size={18} className="text-white" />
-                  AI Assistant
+                  Farzad's AI
                 </h3>
                 <div className="flex items-center gap-3">
                   <div className="hidden sm:block">
