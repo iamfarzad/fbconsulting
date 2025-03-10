@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+
+import { useState, useEffect, useCallback } from 'react';
 import { useSpeechRecognition } from './useSpeechRecognition';
 import debounce from 'lodash/debounce';
 
@@ -6,24 +7,29 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
   const [aiProcessing, setAiProcessing] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   
-  const debouncedProcessing = debounce((command: string) => {
-    setValue(command);
-    if (command.trim()) {
-      onSend();
-    }
-  }, 300);
+  // Increased debounce delay and memoized with useCallback
+  const debouncedProcessing = useCallback(
+    debounce((command: string) => {
+      setValue(command);
+      if (command.trim()) {
+        onSend();
+      }
+    }, 500), // Increased from 300ms to 500ms for better debouncing
+    [setValue, onSend]
+  );
   
-  const handleCommand = async (command: string) => {
+  // Memoize handleCommand to prevent unnecessary recreations
+  const handleCommand = useCallback(async (command: string) => {
     setAiProcessing(true);
     try {
       await debouncedProcessing(command);
     } finally {
-      // Add a small delay before setting aiProcessing to false
+      // Increased delay before setting aiProcessing to false for smoother transitions
       setTimeout(() => {
         setAiProcessing(false);
-      }, 300);
+      }, 600); // Increased from 300ms to 600ms for smoother state transition
     }
-  };
+  }, [debouncedProcessing]);
   
   const { 
     isListening, 
@@ -32,25 +38,38 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
     voiceError 
   } = useSpeechRecognition(handleCommand);
 
-  // Add animation state management with delay to prevent flickering
+  // Enhanced animation state management with increased durations
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let transcribingTimer: NodeJS.Timeout;
     
     if (isListening) {
-      // Set transcribing state immediately when starting to listen
-      setIsTranscribing(true);
+      // Add a small delay before showing transcribing state to prevent flashing
+      transcribingTimer = setTimeout(() => {
+        setIsTranscribing(true);
+      }, 150); // Small delay for smoother start
     } else {
-      // When stopping listening, delay turning off the UI to allow for animations
-      // and prevent flickering with short recognition attempts
-      timer = setTimeout(() => {
+      // Increased delay when stopping to allow for smoother animations
+      transcribingTimer = setTimeout(() => {
         setIsTranscribing(false);
-      }, 1000); // Increased from 800ms to 1000ms for smoother transitions
+      }, 1500); // Increased from 1000ms to 1500ms for smoother exit
     }
     
+    // Cleanup function to handle component unmount and state changes
     return () => {
-      if (timer) clearTimeout(timer);
+      if (transcribingTimer) {
+        clearTimeout(transcribingTimer);
+      }
+      // Cancel any pending debounced operations
+      debouncedProcessing.cancel();
     };
-  }, [isListening]);
+  }, [isListening, debouncedProcessing]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      debouncedProcessing.cancel();
+    };
+  }, [debouncedProcessing]);
 
   return {
     isListening,
