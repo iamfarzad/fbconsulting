@@ -1,12 +1,14 @@
 
 import React from 'react';
-import { Bot, X } from 'lucide-react';
+import { Bot, X, Sparkles } from 'lucide-react';
 import { AIChatInput } from './ui/ai-chat';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChatButton } from '@/hooks/useChatButton';
+import { useNavigate } from 'react-router-dom';
 
 const ChatButton = () => {
   const { isOpen, toggleChat, shouldShowButton } = useChatButton();
+  const navigate = useNavigate();
   
   // Hide on the home page since we already have the chat there
   if (!shouldShowButton) {
@@ -39,6 +41,19 @@ const ChatButton = () => {
               </div>
               
               <AIChatInput placeholderText="Ask me anything about our AI services..." />
+              
+              <div className="mt-3 text-xs text-center">
+                <button
+                  onClick={() => {
+                    toggleChat();
+                    navigate('/animated-chat');
+                  }}
+                  className="text-teal hover:text-teal/80 flex items-center justify-center gap-1 mx-auto"
+                >
+                  <Sparkles size={12} />
+                  Try our animated chat experience
+                </button>
+              </div>
             </div>
           </motion.div>
         )}

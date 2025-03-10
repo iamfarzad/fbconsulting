@@ -25,6 +25,9 @@ const Hero = () => {
       case 'services':
         navigate('/services');
         break;
+      case 'animated chat':
+        navigate('/animated-chat');
+        break;
       default:
         break;
     }
@@ -52,6 +55,20 @@ const Hero = () => {
           </h1>
           
           <AIChatInput />
+          
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+            className="mt-4 text-sm"
+          >
+            <button 
+              onClick={() => navigate('/animated-chat')}
+              className="text-teal hover:underline text-sm"
+            >
+              Try our new animated chat experience →
+            </button>
+          </motion.div>
         </div>
         
         <div className="mt-8 flex justify-center">
