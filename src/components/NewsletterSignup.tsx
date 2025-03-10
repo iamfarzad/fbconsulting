@@ -63,8 +63,8 @@ const NewsletterSignup: React.FC<NewsletterSignupProps> = ({
   };
 
   return (
-    <div className={`py-8 ${className}`}>
-      <div className="flex flex-col gap-4">
+    <div className={`w-full max-w-xl mx-auto py-6 ${className}`}>
+      <div className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
           <Mail className="h-5 w-5 text-primary" />
           <h3 className="text-xl font-semibold">{title}</h3>
@@ -72,7 +72,7 @@ const NewsletterSignup: React.FC<NewsletterSignupProps> = ({
         
         <p className="text-muted-foreground">{description}</p>
         
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 mt-2">
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 mt-1">
           <Input
             type="email"
             value={email}
@@ -87,7 +87,7 @@ const NewsletterSignup: React.FC<NewsletterSignupProps> = ({
           </Button>
         </form>
         
-        <p className="text-xs text-muted-foreground mt-2">
+        <p className="text-xs text-muted-foreground">
           By subscribing, you agree to our Privacy Policy and consent to receive updates from our company.
         </p>
       </div>
