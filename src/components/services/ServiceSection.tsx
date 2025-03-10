@@ -1,7 +1,6 @@
 
 import React from 'react';
 import ServiceDetail from '@/components/ServiceDetail';
-import { LucideIcon } from 'lucide-react';
 
 interface ServiceSectionProps {
   id: string;
