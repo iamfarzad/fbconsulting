@@ -12,7 +12,7 @@ interface VoiceButtonProps {
 export const VoiceButton: React.FC<VoiceButtonProps> = ({ isListening, onClick, isExpanded }) => {
   return (
     <motion.button 
-      className={`p-3 rounded-full ${isListening ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'} transition-colors ${!isExpanded && 'animate-subtle-bounce'}`}
+      className={`p-3 rounded-full transition-colors ${isListening ? 'bg-black text-white dark:bg-white dark:text-black' : 'bg-black/10 text-black dark:bg-white/10 dark:text-white'} ${!isExpanded && 'animate-subtle-bounce'}`}
       onClick={onClick}
       aria-label={isListening ? "Stop listening" : "Start voice commands"}
       whileHover={{ scale: 1.05 }}

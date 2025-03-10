@@ -1,33 +1,36 @@
 
-/* Bento grid styles */
+/* Bento grid styles - simplified */
 .bento-grid {
   @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
 }
 
 .bento-card {
-  @apply relative overflow-hidden rounded-xl bg-glass-card glassmorphism shadow-bento transition-all duration-300 hover:shadow-glass-hover;
+  @apply relative overflow-hidden rounded-md border border-border bg-white dark:bg-black transition-all duration-300;
 }
 
 .bento-card:hover {
-  @apply animate-hover-lift;
+  @apply -translate-y-1;
 }
 
-/* Retro futuristic styling */
-.retro-grid {
-  background-size: 50px 50px;
+/* Container and spacing */
+.section-container {
+  @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.section-spacing {
+  @apply py-12 md:py-16 lg:py-20;
+}
+
+/* Simple background patterns */
+.subtle-grid {
+  background-size: 40px 40px;
   background-image:
-    linear-gradient(to right, rgba(0, 196, 180, 0.1) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 196, 180, 0.1) 1px, transparent 1px);
+    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
 }
 
-.retro-gradient-bg {
-  @apply bg-retro-gradient bg-[size:200%_200%] animate-gradient-shift;
-}
-
-/* Background patterns */
-.bg-grid-pattern {
-  background-size: 50px 50px;
+.dark .subtle-grid {
   background-image:
-    linear-gradient(to right, rgba(46, 26, 71, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(46, 26, 71, 0.05) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
 }

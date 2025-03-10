@@ -54,16 +54,43 @@
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+  
+  /* Standardized typography */
+  h1, .h1 {
+    @apply text-3xl md:text-4xl font-semibold leading-tight tracking-tight;
+  }
+  
+  h2, .h2 {
+    @apply text-2xl md:text-3xl font-semibold leading-tight tracking-tight;
+  }
+  
+  h3, .h3 {
+    @apply text-xl md:text-2xl font-medium leading-snug;
+  }
+  
+  h4, .h4 {
+    @apply text-lg font-medium leading-snug;
+  }
+  
+  p, .body {
+    @apply text-base leading-relaxed;
+  }
+  
+  .body-sm {
+    @apply text-sm leading-relaxed;
+  }
 }
 
+/* Simplified glass styling */
 .glass {
-  @apply bg-white/10 backdrop-blur-lg border border-white/20;
+  @apply bg-white/10 backdrop-blur-md border border-white/20;
 }
 
 .frosted-glass {
-  @apply bg-white/5 backdrop-blur-xl border border-white/10;
+  @apply bg-white/5 backdrop-blur-md border border-white/10;
 }
 
+/* Simplified animation */
 .animate-subtle-bounce {
   animation: subtle-bounce 2s ease-in-out infinite;
 }

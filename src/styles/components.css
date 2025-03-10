@@ -4,18 +4,22 @@
 @import './text-styles.css';
 @import './voice-ui.css';
 
-/* Additional component styles that don't fit in the specialized files */
-.hover-glow:hover {
-  box-shadow: 0 0 15px rgba(0, 196, 180, 0.5);
+/* Simplified component styles */
+.hover-lift {
+  @apply transition-transform duration-300;
 }
 
-/* Neo button styling */
-.neo-button {
-  @apply bg-teal text-deep-purple font-medium transition-all;
-  box-shadow: 0 4px 10px rgba(0, 196, 180, 0.3);
+.hover-lift:hover {
+  transform: translateY(-4px);
 }
 
-.neo-button:hover {
-  box-shadow: 0 6px 15px rgba(0, 196, 180, 0.4);
-  transform: translateY(-2px);
+/* Simple button styling */
+.simple-button {
+  @apply bg-black text-white dark:bg-white dark:text-black font-medium transition-all;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.simple-button:hover {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
 }

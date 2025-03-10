@@ -20,8 +20,8 @@ const Hero = () => {
         
         <div className="flex flex-col items-center w-full max-w-3xl mx-auto p-4 space-y-8">
           <motion.h1 
-            className="text-4xl md:text-5xl font-bold text-foreground"
-            initial={{ opacity: 0, y: 20 }}
+            className="text-4xl md:text-5xl font-semibold text-foreground"
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
@@ -30,7 +30,7 @@ const Hero = () => {
           
           <motion.p
             className="text-lg text-muted-foreground text-center max-w-lg"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
@@ -39,7 +39,7 @@ const Hero = () => {
           
           <motion.div 
             className="w-full"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
           >
@@ -51,14 +51,14 @@ const Hero = () => {
       {/* Voice UI */}
       <VoiceUI />
       
-      {/* Scroll indicator */}
+      {/* Simplified scroll indicator */}
       <motion.div 
         className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-        animate={{ y: [0, 10, 0] }}
+        animate={{ y: [0, 5, 0] }}
         transition={{ repeat: Infinity, duration: 2 }}
       >
-        <div className="w-8 h-12 rounded-full border-2 border-foreground/20 flex items-start justify-center p-2">
-          <div className="w-1 h-3 rounded-full bg-foreground/40"></div>
+        <div className="w-6 h-9 rounded-full border-2 border-foreground/20 flex items-start justify-center p-1">
+          <div className="w-1 h-2 rounded-full bg-foreground/40"></div>
         </div>
       </motion.div>
     </section>

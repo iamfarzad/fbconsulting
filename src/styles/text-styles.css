@@ -1,18 +1,15 @@
 
-/* Text gradient */
+/* Text gradient - simplified */
 .text-gradient {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70;
 }
 
-/* New 2025 design styles */
+/* Simplified color variations */
 .text-gradient-teal {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-teal-500 to-teal-400;
 }
 
-.text-gradient-retro {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-teal-500;
-}
-
-.text-gradient-neon {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-primary;
+/* Minimal text highlighting options */
+.text-highlight {
+  @apply bg-primary/10 px-1 py-0.5 rounded;
 }
