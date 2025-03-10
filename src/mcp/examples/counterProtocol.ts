@@ -1,5 +1,5 @@
 
-import { Protocol, Message } from '../core/types';
+import { Protocol, Message, Context } from '../core/types';
 
 // Define the model shape
 export interface CounterModel {
@@ -7,7 +7,7 @@ export interface CounterModel {
 }
 
 // Define context with dependencies
-export interface CounterContext {
+export interface CounterContext extends Context {
   minValue: number;
   maxValue: number;
 }
