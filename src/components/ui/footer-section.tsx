@@ -56,7 +56,7 @@ function Footerdemo() {
             </nav>
           </div>
           <div>
-            <h3 className="mb-4 text-lg font-semibold">Contact Us</h3>
+            <h3 className="mb-4 text-lg font-semibold">Contact Me</h3>
             <address className="space-y-2 text-sm not-italic">
               <p>Email: hello@farzadbayat.com</p>
               <p>Schedule: <a href="#" className="text-primary hover:underline">Book a call</a></p>
@@ -87,7 +87,7 @@ function Footerdemo() {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Send us an email</p>
+                    <p>Send me an email</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -100,7 +100,7 @@ function Footerdemo() {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Check our GitHub</p>
+                    <p>Check my GitHub</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

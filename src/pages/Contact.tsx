@@ -77,7 +77,7 @@ const Contact = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <SEO 
         title="Contact & Book a Consultation | F.B Consulting"
-        description="Schedule a free consultation to discuss your business automation needs or send a message to learn more about our AI automation services."
+        description="Schedule a free consultation to discuss your business automation needs or send me a message to learn more about my AI automation services."
         structuredData={contactStructuredData}
       />
       
