@@ -21,23 +21,23 @@ export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
       className={cn(
         "p-3 rounded-lg mb-3 max-w-[80%]",
         isUser 
-          ? "ml-auto bg-teal text-deep-purple" 
-          : "mr-auto bg-deep-purple text-neon-white"
+          ? "ml-auto bg-white text-black" 
+          : "mr-auto bg-black text-white"
       )}
     >
       <div className="flex items-start gap-2">
         {!isUser && (
-          <div className="p-1.5 bg-deep-purple/50 rounded-full mt-0.5">
-            <Bot size={16} className="text-teal" />
+          <div className="p-1.5 bg-black/50 rounded-full mt-0.5">
+            <Bot size={16} className="text-white" />
           </div>
         )}
         <div>
-          <p className={isUser ? "text-deep-purple" : "text-neon-white"}>
+          <p className={isUser ? "text-black" : "text-white"}>
             {message.content}
           </p>
           <div className={cn(
             "text-xs mt-1",
-            isUser ? "text-deep-purple/70" : "text-neon-white/70"
+            isUser ? "text-black/70" : "text-white/70"
           )}>
             {new Date(message.timestamp).toLocaleTimeString([], { 
               hour: '2-digit', 
@@ -46,8 +46,8 @@ export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
           </div>
         </div>
         {isUser && (
-          <div className="p-1.5 bg-teal/30 rounded-full mt-0.5">
-            <CircleUserRound size={16} className="text-deep-purple" />
+          <div className="p-1.5 bg-white/30 rounded-full mt-0.5">
+            <CircleUserRound size={16} className="text-black" />
           </div>
         )}
       </div>
