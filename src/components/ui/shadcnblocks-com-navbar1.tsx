@@ -1,3 +1,4 @@
+
 import { Book, Menu, Sunset, Trees, Zap, Moon, Sun } from "lucide-react";
 
 import {
@@ -22,7 +23,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Switch } from "@/components/ui/switch";
+import { Toggle } from "@/components/ui/toggle";
 import { Label } from "@/components/ui/label";
 import {
   Tooltip,
@@ -34,7 +35,7 @@ import {
 // Dark mode toggle interface
 interface DarkModeToggle {
   isDarkMode: boolean;
-  onToggle: (checked: boolean) => void;
+  onToggle: (pressed: boolean) => void;
 }
 
 interface MenuItem {
@@ -177,17 +178,27 @@ const Navbar1 = ({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="flex items-center space-x-2">
-                      <Sun className="h-4 w-4" />
-                      <Switch
-                        id="dark-mode"
-                        checked={darkModeToggle.isDarkMode}
-                        onCheckedChange={darkModeToggle.onToggle}
-                      />
-                      <Moon className="h-4 w-4" />
-                      <Label htmlFor="dark-mode" className="sr-only">
-                        Toggle dark mode
-                      </Label>
+                    <div className="flex items-center">
+                      <Toggle
+                        variant="outline"
+                        className="group size-9 data-[state=on]:bg-transparent data-[state=on]:hover:bg-muted"
+                        pressed={darkModeToggle.isDarkMode}
+                        onPressedChange={darkModeToggle.onToggle}
+                        aria-label={`Switch to ${darkModeToggle.isDarkMode ? "light" : "dark"} mode`}
+                      >
+                        <Moon
+                          size={16}
+                          strokeWidth={2}
+                          className="shrink-0 scale-0 opacity-0 transition-all group-data-[state=on]:scale-100 group-data-[state=on]:opacity-100"
+                          aria-hidden="true"
+                        />
+                        <Sun
+                          size={16}
+                          strokeWidth={2}
+                          className="absolute shrink-0 scale-100 opacity-100 transition-all group-data-[state=on]:scale-0 group-data-[state=on]:opacity-0"
+                          aria-hidden="true"
+                        />
+                      </Toggle>
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
@@ -209,16 +220,26 @@ const Navbar1 = ({
             </a>
             <div className="flex items-center gap-2">
               {darkModeToggle && (
-                <div className="flex items-center space-x-2 mr-2">
-                  <Sun className="h-4 w-4" />
-                  <Switch
-                    id="dark-mode-mobile"
-                    checked={darkModeToggle.isDarkMode}
-                    onCheckedChange={darkModeToggle.onToggle}
-                    className="data-[state=checked]:bg-primary"
+                <Toggle
+                  variant="outline"
+                  className="group size-9 data-[state=on]:bg-transparent data-[state=on]:hover:bg-muted mr-2"
+                  pressed={darkModeToggle.isDarkMode}
+                  onPressedChange={darkModeToggle.onToggle}
+                  aria-label={`Switch to ${darkModeToggle.isDarkMode ? "light" : "dark"} mode`}
+                >
+                  <Moon
+                    size={16}
+                    strokeWidth={2}
+                    className="shrink-0 scale-0 opacity-0 transition-all group-data-[state=on]:scale-100 group-data-[state=on]:opacity-100"
+                    aria-hidden="true"
                   />
-                  <Moon className="h-4 w-4" />
-                </div>
+                  <Sun
+                    size={16}
+                    strokeWidth={2}
+                    className="absolute shrink-0 scale-100 opacity-100 transition-all group-data-[state=on]:scale-0 group-data-[state=on]:opacity-0"
+                    aria-hidden="true"
+                  />
+                </Toggle>
               )}
               <Sheet>
                 <SheetTrigger asChild>

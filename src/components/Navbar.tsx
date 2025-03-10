@@ -2,9 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { ShadcnblocksNavbarDemo } from '@/components/ui/shadcnblocks-navbar-demo';
 import { cn } from '@/lib/utils';
-import { Switch } from '@/components/ui/switch';
 import { Moon, Sun } from 'lucide-react';
-import { Label } from '@/components/ui/label';
+import { Toggle } from '@/components/ui/toggle';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -42,11 +41,11 @@ const Navbar = () => {
     };
   }, [scrolled]);
 
-  const toggleDarkMode = (checked: boolean) => {
-    setIsDarkMode(checked);
-    localStorage.setItem('theme', checked ? 'dark' : 'light');
+  const toggleDarkMode = (pressed: boolean) => {
+    setIsDarkMode(pressed);
+    localStorage.setItem('theme', pressed ? 'dark' : 'light');
     
-    if (checked) {
+    if (pressed) {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
