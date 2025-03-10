@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -45,7 +44,7 @@ function Footerdemo() {
                 Services
               </a>
               <a href="/about" className="block transition-colors hover:text-primary">
-                About Us
+                About Me
               </a>
               <a href="/blog" className="block transition-colors hover:text-primary">
                 Blog
