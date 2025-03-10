@@ -6,6 +6,7 @@ import { ChatInput } from "./ai-chat/ChatInput";
 import { ChatMessageList } from "./ai-chat/ChatMessageList";
 import { useMessages } from "@/hooks/useMessages";
 import { useSuggestedResponse } from "@/hooks/useSuggestedResponse";
+import { LeadInfo } from "@/services/copilotService";
 
 interface AIChatInputProps {
   placeholderText?: string;
@@ -13,14 +14,32 @@ interface AIChatInputProps {
 
 export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatInputProps) {
   const [showMessages, setShowMessages] = useState(false);
-  const { messages, addMessage, clearMessages, isLoading } = useMessages();
-  const { suggestedResponse } = useSuggestedResponse(messages);
+  const { messages, addUserMessage, addAssistantMessage, clearMessages } = useMessages();
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Create a mock LeadInfo object for suggestions
+  const mockLeadInfo: LeadInfo = {
+    interests: messages.map(m => m.content).join(" "),
+    lastInteraction: Date.now(),
+    type: 'prospect'
+  };
+  
+  const suggestedResponse = useSuggestedResponse(mockLeadInfo);
   const [inputValue, setInputValue] = useState("");
 
   const handleSend = async () => {
     if (!inputValue.trim()) return;
     
-    addMessage(inputValue);
+    setIsLoading(true);
+    try {
+      addUserMessage(inputValue);
+      // Simulate AI response delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      addAssistantMessage("This is a mock response. Replace with actual AI response logic.");
+    } finally {
+      setIsLoading(false);
+    }
+    
     setInputValue("");
     
     // Show messages container when first message is sent
