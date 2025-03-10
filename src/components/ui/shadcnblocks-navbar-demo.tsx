@@ -1,6 +1,19 @@
 
 import { Book, Sunset, Trees, Zap } from "lucide-react";
 import { Navbar1 } from "./shadcnblocks-com-navbar1";
+import { Moon, Sun } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+
+// Define the dark mode toggle props
+interface DarkModeToggle {
+  isDarkMode: boolean;
+  onToggle: (checked: boolean) => void;
+}
+
+// Update the props for ShadcnblocksNavbarDemo
+interface ShadcnblocksNavbarDemoProps {
+  darkModeToggle?: DarkModeToggle;
+}
 
 const demoData = {
   logo: {
@@ -95,6 +108,11 @@ const demoData = {
   },
 };
 
-export function ShadcnblocksNavbarDemo() {
-  return <Navbar1 {...demoData} />;
+export function ShadcnblocksNavbarDemo({ darkModeToggle }: ShadcnblocksNavbarDemoProps) {
+  return (
+    <Navbar1 
+      {...demoData} 
+      darkModeToggle={darkModeToggle}
+    />
+  );
 }

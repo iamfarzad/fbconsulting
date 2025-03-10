@@ -1,4 +1,4 @@
-import { Book, Menu, Sunset, Trees, Zap } from "lucide-react";
+import { Book, Menu, Sunset, Trees, Zap, Moon, Sun } from "lucide-react";
 
 import {
   Accordion,
@@ -22,6 +22,20 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+// Dark mode toggle interface
+interface DarkModeToggle {
+  isDarkMode: boolean;
+  onToggle: (checked: boolean) => void;
+}
 
 interface MenuItem {
   title: string;
@@ -47,6 +61,7 @@ interface Navbar1Props {
     text: string;
     url: string;
   };
+  darkModeToggle?: DarkModeToggle;
 }
 
 const Navbar1 = ({
@@ -138,6 +153,7 @@ const Navbar1 = ({
     text: "Contact Us",
     url: "/contact",
   },
+  darkModeToggle,
 }: Navbar1Props) => {
   return (
     <section className="py-4">
@@ -156,7 +172,30 @@ const Navbar1 = ({
               </NavigationMenu>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-4">
+            {darkModeToggle && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center space-x-2">
+                      <Sun className="h-4 w-4" />
+                      <Switch
+                        id="dark-mode"
+                        checked={darkModeToggle.isDarkMode}
+                        onCheckedChange={darkModeToggle.onToggle}
+                      />
+                      <Moon className="h-4 w-4" />
+                      <Label htmlFor="dark-mode" className="sr-only">
+                        Toggle dark mode
+                      </Label>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Toggle dark mode</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
             <Button asChild size="sm">
               <a href={ctaButton.url}>{ctaButton.text}</a>
             </Button>
@@ -168,52 +207,66 @@ const Navbar1 = ({
               <img src={logo.src} className="w-8" alt={logo.alt} />
               <span className="text-lg font-semibold">{logo.title}</span>
             </a>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Menu className="size-4" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle>
-                    <a href={logo.url} className="flex items-center gap-2">
-                      <img src={logo.src} className="w-8" alt={logo.alt} />
-                      <span className="text-lg font-semibold">
-                        {logo.title}
-                      </span>
-                    </a>
-                  </SheetTitle>
-                </SheetHeader>
-                <div className="my-6 flex flex-col gap-6">
-                  <Accordion
-                    type="single"
-                    collapsible
-                    className="flex w-full flex-col gap-4"
-                  >
-                    {menu.map((item) => renderMobileMenuItem(item))}
-                  </Accordion>
-                  <div className="border-t py-4">
-                    <div className="grid grid-cols-2 justify-start">
-                      {mobileExtraLinks.map((link, idx) => (
-                        <a
-                          key={idx}
-                          className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-accent-foreground"
-                          href={link.url}
-                        >
-                          {link.name}
-                        </a>
-                      ))}
+            <div className="flex items-center gap-2">
+              {darkModeToggle && (
+                <div className="flex items-center space-x-2 mr-2">
+                  <Sun className="h-4 w-4" />
+                  <Switch
+                    id="dark-mode-mobile"
+                    checked={darkModeToggle.isDarkMode}
+                    onCheckedChange={darkModeToggle.onToggle}
+                    className="data-[state=checked]:bg-primary"
+                  />
+                  <Moon className="h-4 w-4" />
+                </div>
+              )}
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <Menu className="size-4" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>
+                      <a href={logo.url} className="flex items-center gap-2">
+                        <img src={logo.src} className="w-8" alt={logo.alt} />
+                        <span className="text-lg font-semibold">
+                          {logo.title}
+                        </span>
+                      </a>
+                    </SheetTitle>
+                  </SheetHeader>
+                  <div className="my-6 flex flex-col gap-6">
+                    <Accordion
+                      type="single"
+                      collapsible
+                      className="flex w-full flex-col gap-4"
+                    >
+                      {menu.map((item) => renderMobileMenuItem(item))}
+                    </Accordion>
+                    <div className="border-t py-4">
+                      <div className="grid grid-cols-2 justify-start">
+                        {mobileExtraLinks.map((link, idx) => (
+                          <a
+                            key={idx}
+                            className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-accent-foreground"
+                            href={link.url}
+                          >
+                            {link.name}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      <Button asChild>
+                        <a href={ctaButton.url}>{ctaButton.text}</a>
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-3">
-                    <Button asChild>
-                      <a href={ctaButton.url}>{ctaButton.text}</a>
-                    </Button>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+                </SheetContent>
+              </Sheet>
+            </div>
           </div>
         </div>
       </div>

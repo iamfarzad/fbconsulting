@@ -2,11 +2,28 @@
 import React, { useEffect, useState } from 'react';
 import { ShadcnblocksNavbarDemo } from '@/components/ui/shadcnblocks-navbar-demo';
 import { cn } from '@/lib/utils';
+import { Switch } from '@/components/ui/switch';
+import { Moon, Sun } from 'lucide-react';
+import { Label } from '@/components/ui/label';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
+    // Set initial dark mode based on user preference or system preference
+    const storedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    const initialDarkMode = storedTheme === 'dark' || (!storedTheme && systemPrefersDark);
+    setIsDarkMode(initialDarkMode);
+    
+    if (initialDarkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+
     const handleScroll = () => {
       const isScrolled = window.scrollY > 10;
       if (isScrolled !== scrolled) {
@@ -25,6 +42,17 @@ const Navbar = () => {
     };
   }, [scrolled]);
 
+  const toggleDarkMode = (checked: boolean) => {
+    setIsDarkMode(checked);
+    localStorage.setItem('theme', checked ? 'dark' : 'light');
+    
+    if (checked) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
+
   return (
     <header
       className={cn(
@@ -32,7 +60,12 @@ const Navbar = () => {
         scrolled ? 'bg-background/90 backdrop-blur-md shadow-md' : 'bg-transparent'
       )}
     >
-      <ShadcnblocksNavbarDemo />
+      <ShadcnblocksNavbarDemo 
+        darkModeToggle={{
+          isDarkMode,
+          onToggle: toggleDarkMode
+        }}
+      />
     </header>
   );
 };
