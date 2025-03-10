@@ -2,6 +2,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
 
 interface DisplayCardProps {
@@ -24,25 +25,28 @@ function DisplayCard({
   titleClassName,
 }: DisplayCardProps) {
   return (
-    <div
+    <motion.div
+      whileHover={{ y: -5, transition: { duration: 0.2 } }}
       className={cn(
-        "relative flex h-auto min-h-[180px] w-full select-none flex-col justify-between rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-black px-5 py-4 transition-all duration-300",
-        "hover:shadow-sm",
+        "relative flex h-auto min-h-[180px] w-full select-none flex-col justify-between rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-black p-6 transition-all duration-300",
+        "hover:shadow-md hover:border-black/20 dark:hover:border-white/20",
         "[&>*]:flex [&>*]:items-center [&>*]:gap-2",
         className
       )}
     >
       <div>
-        <span className={cn("relative inline-block rounded-full bg-black/5 dark:bg-white/5 p-2", iconClassName)}>
+        <span className={cn("relative inline-flex rounded-full p-3 bg-black/5 dark:bg-white/5", iconClassName)}>
           {icon}
         </span>
-        <p className={cn("text-lg font-medium text-black dark:text-white", titleClassName)}>
+        <p className={cn("text-lg font-semibold text-black dark:text-white", titleClassName)}>
           {title}
         </p>
       </div>
       <p className="text-base text-black/80 dark:text-white/80">{description}</p>
-      <p className="text-sm text-black/60 dark:text-white/60">{date}</p>
-    </div>
+      <p className="text-sm font-medium text-black/60 dark:text-white/60 bg-black/5 dark:bg-white/5 px-3 py-1 rounded-full self-start">
+        {date}
+      </p>
+    </motion.div>
   );
 }
 
@@ -53,13 +57,13 @@ interface DisplayCardsProps {
 export default function DisplayCards({ cards }: DisplayCardsProps) {
   const defaultCards = [
     {
-      className: "bg-white dark:bg-black hover:-translate-y-1",
+      className: "bg-white dark:bg-black",
     },
     {
-      className: "bg-white dark:bg-black hover:-translate-y-1",
+      className: "bg-white dark:bg-black",
     },
     {
-      className: "bg-white dark:bg-black hover:-translate-y-1",
+      className: "bg-white dark:bg-black",
     },
   ];
 
