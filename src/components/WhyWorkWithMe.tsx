@@ -6,7 +6,7 @@ import AnimatedText from './AnimatedText';
 
 const WhyWorkWithMe = () => {
   return (
-    <section id="why-me" className="py-20 px-4">
+    <section id="why-me" className="py-20 px-4 relative z-10">
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-16">
           <AnimatedText

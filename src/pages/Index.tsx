@@ -83,10 +83,35 @@ const Index = () => {
               <DisplayCards cards={featuredServices} />
             </div>
           </div>
-          <PainPoints />
-          <ServicesList />
-          <WhyWorkWithMe />
-          <Testimonials />
+          
+          {/* PainPoints section - Adding dotted pattern */}
+          <div className="relative">
+            <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-25" />
+            <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
+            <PainPoints />
+          </div>
+          
+          {/* ServicesList section - Adding dotted pattern */}
+          <div className="relative">
+            <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-25" />
+            <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
+            <ServicesList />
+          </div>
+          
+          {/* WhyWorkWithMe section - Adding dotted pattern */}
+          <div className="relative">
+            <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-25" />
+            <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
+            <WhyWorkWithMe />
+          </div>
+          
+          {/* Testimonials section - Adding dotted pattern */}
+          <div className="relative">
+            <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-25" />
+            <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none"></div>
+            <Testimonials />
+          </div>
+          
           <ContactCTA />
         </main>
         <Footer />

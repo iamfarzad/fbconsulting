@@ -38,7 +38,7 @@ interface TestimonialsProps {
 
 const Testimonials: React.FC<TestimonialsProps> = ({ id }) => {
   return (
-    <section id={id} className="py-20 px-4 scroll-mt-24">
+    <section id={id} className="py-20 px-4 scroll-mt-24 relative z-10">
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-12">
           <AnimatedText

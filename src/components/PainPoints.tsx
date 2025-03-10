@@ -33,7 +33,7 @@ const PainPoints = () => {
   };
 
   return (
-    <section className="py-16 px-4 bg-gradient-to-b from-background to-deep-purple/5">
+    <section className="py-16 px-4 bg-gradient-to-b from-background to-deep-purple/5 relative z-10">
       <div className="container mx-auto max-w-4xl">
         <div className="text-center mb-12">
           <AnimatedText
