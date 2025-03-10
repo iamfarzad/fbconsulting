@@ -63,15 +63,16 @@ function AnimatedIcons({ icons }: { icons: AnimatedCardProps["icons"] }) {
   ])
 
   useEffect(() => {
-    // Modified to use a more type-safe approach for the animation
+    // Create an animation sequence that works with the type constraints
     if (sequence.length > 0) {
-      const animation = animate(sequence as any);
-      animation.repeat(Infinity);
-      animation.repeatDelay(1);
-      
-      return () => {
-        animation.stop();
-      };
+      // Use the animate function with the proper configuration
+      animate(
+        sequence as any, 
+        {
+          repeat: Infinity,
+          repeatDelay: 1
+        }
+      );
     }
   }, [sequence]);
 
