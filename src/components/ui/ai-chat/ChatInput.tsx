@@ -2,8 +2,10 @@
 import React, { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { ArrowUpIcon, Eraser, Loader2, PlusIcon } from "lucide-react";
+import { ArrowUpIcon, Loader2, Mic, MicOff, PlusIcon } from "lucide-react";
 import { useAutoResizeTextarea } from "@/hooks/useAutoResizeTextarea";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
+import { AnimatedBars } from "@/components/ui/AnimatedBars";
 
 interface ChatInputProps {
   value: string;
@@ -32,6 +34,14 @@ export function ChatInput({
     minHeight: 60,
     maxHeight: 200,
   });
+  
+  const handleCommand = (command: string) => {
+    // For now, just set the transcribed text as the input value
+    setValue(command);
+    adjustHeight();
+  };
+  
+  const { isListening, transcript, toggleListening } = useSpeechRecognition(handleCommand);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -91,6 +101,13 @@ export function ChatInput({
             disabled={isLoading}
           />
         </div>
+        
+        {/* Transcription display */}
+        {isListening && transcript && (
+          <div className="px-4 py-2 text-xs text-black/70 italic">
+            "{transcript}"
+          </div>
+        )}
 
         <div className="flex items-center justify-between p-3">
           <div className="flex items-center gap-2">
@@ -101,7 +118,7 @@ export function ChatInput({
                 onClick={onClear}
                 disabled={isLoading}
               >
-                <Eraser className="w-4 h-4 text-black" />
+                <Loader2 className="w-4 h-4 text-black" />
                 <span className="text-xs text-black hidden group-hover:inline transition-opacity">
                   Clear
                 </span>
@@ -120,6 +137,29 @@ export function ChatInput({
                 Suggestion
               </button>
             )}
+            
+            {/* Voice button */}
+            <button
+              type="button"
+              onClick={toggleListening}
+              className={`p-2 rounded-lg transition-colors ${
+                isListening 
+                  ? "bg-black text-white" 
+                  : "text-black/70 hover:bg-black/10"
+              }`}
+              disabled={isLoading}
+            >
+              {isListening ? (
+                <div className="flex items-center gap-1">
+                  <MicOff className="w-4 h-4" />
+                  <AnimatedBars isActive={true} small={true} />
+                </div>
+              ) : (
+                <Mic className="w-4 h-4" />
+              )}
+            </button>
+            
+            {/* Send button */}
             <button
               type="button"
               className={cn(

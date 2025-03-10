@@ -3,7 +3,6 @@ import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { AIChatInput } from './ui/ai-chat';
 import LocationGreeting from './LocationGreeting';
-import VoiceUI from './VoiceUI';
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -47,9 +46,6 @@ const Hero = () => {
           </motion.div>
         </div>
       </div>
-      
-      {/* Voice UI */}
-      <VoiceUI />
       
       {/* Simplified scroll indicator */}
       <motion.div 

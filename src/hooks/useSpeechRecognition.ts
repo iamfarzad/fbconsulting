@@ -12,21 +12,23 @@ export const useSpeechRecognition = (onCommand: (command: string) => void = () =
       const SpeechRecognitionConstructor = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SpeechRecognitionConstructor) {
         recognitionRef.current = new SpeechRecognitionConstructor();
-        recognitionRef.current.continuous = false;
-        recognitionRef.current.interimResults = false;
+        recognitionRef.current.continuous = true;
+        recognitionRef.current.interimResults = true;
         
         recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
-          const transcript = event.results[0][0].transcript.toLowerCase();
+          const transcript = event.results[0][0].transcript;
           setTranscript(transcript);
           
-          if (transcript.includes('show me your work') || transcript.includes('portfolio')) {
-            onCommand('portfolio');
-          } else if (transcript.includes('tell me more') || transcript.includes('about')) {
-            onCommand('about');
-          } else if (transcript.includes('contact') || transcript.includes('get in touch')) {
-            onCommand('contact');
-          } else if (transcript.includes('services')) {
-            onCommand('services');
+          // Check if the result is final
+          if (event.results[0].isFinal) {
+            onCommand(transcript);
+            // Reset the transcript
+            setTranscript('');
+            // Auto-stop after getting a final result
+            if (recognitionRef.current) {
+              recognitionRef.current.stop();
+              setIsListening(false);
+            }
           }
         };
         
@@ -53,6 +55,8 @@ export const useSpeechRecognition = (onCommand: (command: string) => void = () =
       recognitionRef.current.stop();
       setIsListening(false);
     } else {
+      // Reset transcript when starting new recording
+      setTranscript('');
       recognitionRef.current.start();
       setIsListening(true);
     }
