@@ -1,6 +1,6 @@
 
-// This is a redirection to maintain backward compatibility
-// All code has been moved to the current ai-chat.tsx implementation
-import { AIChatInput } from "./ai-chat";
+// This is a redirect component that points to the new AI chat implementation
+// This file is maintained for backward compatibility
+import { AIChatInput } from './ai-chat';
 
-export { AIChatInput };
+export default AIChatInput;

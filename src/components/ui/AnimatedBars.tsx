@@ -18,16 +18,29 @@ export const AnimatedBars: React.FC<AnimatedBarsProps> = ({ isActive, small = fa
     }
     
     let animationFrame: number;
+    let isAnimating = true;
+    
     const updateHeights = () => {
+      if (!isAnimating) return;
+      
       setHeights(prev => 
         prev.map(() => isActive ? Math.max(33, Math.floor(Math.random() * 100)) : 33)
       );
-      animationFrame = requestAnimationFrame(updateHeights);
+      
+      // Use consistent timing for smoother animation
+      animationFrame = requestAnimationFrame(() => {
+        setTimeout(updateHeights, 150); // More consistent timing than RAF alone
+      });
     };
     
-    updateHeights();
+    // Start animation with a small delay to prevent visual glitches
+    const startTimeout = setTimeout(() => {
+      updateHeights();
+    }, 50);
     
     return () => {
+      isAnimating = false;
+      clearTimeout(startTimeout);
       if (animationFrame) {
         cancelAnimationFrame(animationFrame);
       }
@@ -39,10 +52,7 @@ export const AnimatedBars: React.FC<AnimatedBarsProps> = ({ isActive, small = fa
       {heights.map((height, i) => (
         <div
           key={i}
-          className={`
-            w-1 bg-black dark:bg-white
-            transition-all duration-75 rounded-t-sm
-          `}
+          className="w-1 bg-black dark:bg-white transition-all duration-100 rounded-t-sm"
           style={{ 
             height: `${height}%`,
             animationDelay: `${i * 0.1}s`

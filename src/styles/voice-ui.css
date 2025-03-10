@@ -1,18 +1,61 @@
 
-/* Voice UI */
-.voice-ui-btn {
-  @apply fixed bottom-6 right-6 w-12 h-12 rounded-full bg-teal text-white flex items-center justify-center shadow-xl z-50 hover:scale-110 transition-transform duration-300;
+/* Voice UI specific styles */
+
+/* Animation for voice bars */
+@keyframes voice-pulse {
+  0%, 100% { 
+    opacity: 0.8;
+    transform: scaleY(1);
+  }
+  50% { 
+    opacity: 1;
+    transform: scaleY(1.2);
+  }
 }
 
-.voice-ui-active {
-  @apply animate-pulse-slow;
+.voice-bar {
+  animation: voice-pulse 1.5s ease-in-out infinite;
 }
 
-.voice-waveform {
-  @apply h-6 w-20 bg-teal opacity-70 rounded-full overflow-hidden;
+.voice-bar:nth-child(2) {
+  animation-delay: 0.2s;
 }
 
-.waveform-bar {
-  @apply inline-block w-1 bg-white mx-[2px] rounded-full;
-  animation: waveform 1.2s ease-in-out infinite;
+.voice-bar:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+.voice-bar:nth-child(4) {
+  animation-delay: 0.6s;
+}
+
+/* Voice button styles */
+.voice-button {
+  @apply flex items-center justify-center rounded-full transition-all duration-300;
+  @apply hover:bg-black/10 dark:hover:bg-white/10;
+}
+
+.voice-button.active {
+  @apply bg-black text-white dark:bg-white dark:text-black;
+  @apply animate-pulse;
+}
+
+/* Voice feedback container */
+.voice-feedback {
+  @apply rounded-lg bg-black p-4 text-white;
+  @apply transition-all duration-500 ease-in-out;
+  @apply shadow-lg border border-white/20;
+}
+
+/* Transcription text animation */
+.transcription-text {
+  @apply transition-all duration-300;
+}
+
+.transcription-text.active {
+  @apply text-white font-medium;
+}
+
+.transcription-text.inactive {
+  @apply text-white/70;
 }

@@ -15,13 +15,21 @@ export const ChatMessageList = ({ messages, showMessages }: ChatMessageListProps
   const containerRef = useRef<HTMLDivElement>(null);
   
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ 
+        behavior: "smooth", 
+        block: "end" 
+      });
+    }
   };
   
-  // Enhanced scrolling behavior
+  // Scroll to bottom when messages change
   useEffect(() => {
     if (messages.length > 0) {
-      // Delay slightly to ensure DOM update is complete
+      // Immediate scroll for better UX
+      messagesEndRef.current?.scrollIntoView({ block: "end" });
+      
+      // Then smooth scroll after a small delay to ensure rendering is complete
       const timer = setTimeout(() => {
         scrollToBottom();
       }, 100);
@@ -30,23 +38,14 @@ export const ChatMessageList = ({ messages, showMessages }: ChatMessageListProps
     }
   }, [messages]);
   
-  // Also scroll when a new message is added
+  // Also scroll when visibility changes
   useEffect(() => {
-    const container = containerRef.current;
-    if (container) {
-      // Use Intersection Observer to detect if the container is in view
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          // If not fully visible, scroll into view
-          if (!entry.isIntersecting) {
-            container.scrollIntoView({ behavior: "smooth", block: "nearest" });
-          }
-        },
-        { threshold: 0.5 }
-      );
+    if (showMessages) {
+      const timer = setTimeout(() => {
+        scrollToBottom();
+      }, 300); // Allow animation to complete
       
-      observer.observe(container);
-      return () => observer.disconnect();
+      return () => clearTimeout(timer);
     }
   }, [showMessages]);
 

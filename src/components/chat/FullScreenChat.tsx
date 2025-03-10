@@ -16,6 +16,7 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({ onMinimize }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
+      transition={{ type: 'spring', damping: 25 }}
       className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md"
     >
       <div className="relative w-full h-full max-w-7xl mx-auto px-4">
@@ -42,7 +43,7 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({ onMinimize }) => {
               </p>
             </div>
             
-            <div className="flex-1 p-6 overflow-hidden">
+            <div className="flex-1 p-6 overflow-hidden flex flex-col">
               <AIChatInput placeholderText="Ask about our AI services..." />
             </div>
           </div>

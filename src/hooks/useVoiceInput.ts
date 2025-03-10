@@ -16,7 +16,11 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
         await onSend();
       }
     } finally {
-      setAiProcessing(false);
+      // Add a small delay before setting aiProcessing to false
+      // to ensure smooth transitions
+      setTimeout(() => {
+        setAiProcessing(false);
+      }, 300);
     }
   };
   
@@ -39,7 +43,7 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
       // and prevent flickering with short recognition attempts
       timer = setTimeout(() => {
         setIsTranscribing(false);
-      }, 800); // Increased from 500ms to 800ms for smoother transitions
+      }, 1000); // Increased from 800ms to 1000ms for smoother transitions
     }
     
     return () => {
