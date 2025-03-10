@@ -16,7 +16,6 @@ import NorwegianPainPoints from '@/components/NorwegianPainPoints';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Faq3 } from "@/components/ui/faq3";
 import { motion } from 'framer-motion';
-import VoiceDemo from '@/components/VoiceDemo';
 
 const Index = () => {
   console.log("Index page rendering");
@@ -160,11 +159,6 @@ const Index = () => {
               <DisplayCards cards={featuredServices} />
             </div>
           </section>
-          
-          {/* Voice demo section */}
-          <div id="voice-demo">
-            <VoiceDemo />
-          </div>
           
           {/* Conditionally show Norwegian pain points for Norwegian language */}
           <NorwegianPainPoints isVisible={isNorwegian} />
