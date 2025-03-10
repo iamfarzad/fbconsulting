@@ -32,9 +32,13 @@ const testimonialData: Testimonial[] = [
   }
 ];
 
-const Testimonials: React.FC = () => {
+interface TestimonialsProps {
+  id?: string;
+}
+
+const Testimonials: React.FC<TestimonialsProps> = ({ id }) => {
   return (
-    <section className="py-20 px-4">
+    <section id={id} className="py-20 px-4 scroll-mt-24">
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-12">
           <AnimatedText

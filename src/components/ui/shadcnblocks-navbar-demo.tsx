@@ -64,7 +64,7 @@ const demoData = {
           title: "Testimonials",
           description: "What our clients say about our services",
           icon: <Sunset className="size-5 shrink-0" />,
-          url: "/#testimonials",
+          url: "/services#testimonials",
         },
         {
           title: "FAQ",
@@ -79,12 +79,12 @@ const demoData = {
       url: "/services#pricing",
     },
     {
-      title: "Blog",
-      url: "/blog",
+      title: "Contact",
+      url: "/contact",
     },
   ],
   mobileExtraLinks: [
-    { name: "Testimonials", url: "/#testimonials" },
+    { name: "Testimonials", url: "/services#testimonials" },
     { name: "Contact", url: "/contact" },
     { name: "Privacy", url: "/privacy" },
     { name: "Terms", url: "/terms" },
