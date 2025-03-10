@@ -13,9 +13,9 @@ const Navbar = () => {
   useEffect(() => {
     // Set initial dark mode based on user preference or system preference
     const storedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
-    const initialDarkMode = storedTheme === 'dark' || (!storedTheme && systemPrefersDark);
+    // Default to light mode if no stored preference
+    const initialDarkMode = storedTheme === 'dark';
     setIsDarkMode(initialDarkMode);
     
     if (initialDarkMode) {
