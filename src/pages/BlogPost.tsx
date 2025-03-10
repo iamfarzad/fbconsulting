@@ -44,7 +44,7 @@ const BlogPost = () => {
     },
     "publisher": {
       "@type": "Organization",
-      "name": "AI Automation Ally",
+      "name": "F.B Consulting",
       "logo": {
         "@type": "ImageObject",
         "url": `${window.location.origin}/og-image.png`
@@ -60,7 +60,7 @@ const BlogPost = () => {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <SEO 
-        title={`${post.title} | AI Automation Ally Blog`}
+        title={`${post.title} | F.B Consulting Blog`}
         description={post.excerpt || `Read about ${post.title} in our AI automation blog`}
         ogType="article"
         ogImage={post.featuredImage || ""}

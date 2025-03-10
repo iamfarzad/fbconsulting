@@ -43,7 +43,7 @@ const Services = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEO 
-        title="AI Automation Services | Business Process Optimization"
+        title="AI Automation Services | F.B Consulting"
         description="Explore our specialized AI automation services: strategy consulting, chatbots, workflow automation, data insights, and custom AI development for businesses."
         structuredData={servicesStructuredData}
       />
@@ -80,7 +80,7 @@ const servicesStructuredData = {
       "description": "Get a customized roadmap for integrating AI into your business operations, with clear implementation steps and ROI projections.",
       "provider": {
         "@type": "ProfessionalService",
-        "name": "AI Automation Ally"
+        "name": "F.B Consulting"
       }
     },
     {
@@ -90,7 +90,7 @@ const servicesStructuredData = {
       "description": "Implement intelligent AI assistants that can handle customer inquiries, support requests, and internal knowledge management.",
       "provider": {
         "@type": "ProfessionalService",
-        "name": "AI Automation Ally"
+        "name": "F.B Consulting"
       }
     },
     {
@@ -100,7 +100,7 @@ const servicesStructuredData = {
       "description": "Connect your applications and systems to eliminate manual data entry, reduce errors, and streamline operations.",
       "provider": {
         "@type": "ProfessionalService",
-        "name": "AI Automation Ally"
+        "name": "F.B Consulting"
       }
     },
     {
@@ -110,7 +110,7 @@ const servicesStructuredData = {
       "description": "Transform your raw business data into actionable intelligence through automated analysis and reporting.",
       "provider": {
         "@type": "ProfessionalService",
-        "name": "AI Automation Ally"
+        "name": "F.B Consulting"
       }
     },
     {
@@ -120,7 +120,7 @@ const servicesStructuredData = {
       "description": "Tailored solutions for your unique business challenges using cutting-edge AI technologies.",
       "provider": {
         "@type": "ProfessionalService",
-        "name": "AI Automation Ally"
+        "name": "F.B Consulting"
       }
     }
   ]

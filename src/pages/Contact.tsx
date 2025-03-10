@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Calendar, Clock, Mail, MessageSquare, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -60,10 +61,10 @@ const Contact = () => {
   const contactStructuredData = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    "name": "AI Automation Ally",
+    "name": "F.B Consulting",
     "description": "Expert AI automation consulting services",
     "url": window.location.origin,
-    "email": "contact@aiautomationally.com",
+    "email": "hello@farzadbayat.com",
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "+1-555-123-4567",
@@ -75,7 +76,7 @@ const Contact = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEO 
-        title="Contact & Book a Consultation | AI Automation Ally"
+        title="Contact & Book a Consultation | F.B Consulting"
         description="Schedule a free consultation to discuss your business automation needs or send a message to learn more about our AI automation services."
         structuredData={contactStructuredData}
       />
@@ -180,7 +181,7 @@ const Contact = () => {
           <div className="mt-16 text-center">
             <h3 className="text-xl font-bold mb-4">Prefer email?</h3>
             <p className="text-muted-foreground">
-              You can reach me directly at <a href="mailto:contact@aiautomationally.com" className="text-teal font-medium hover:underline">contact@aiautomationally.com</a>
+              You can reach me directly at <a href="mailto:hello@farzadbayat.com" className="text-teal font-medium hover:underline">hello@farzadbayat.com</a>
             </p>
           </div>
         </div>

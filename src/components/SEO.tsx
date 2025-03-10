@@ -36,7 +36,7 @@ const SEO: React.FC<SEOProps> = ({
       <meta property="og:url" content={pageUrl} />
       <meta property="og:type" content={ogType} />
       <meta property="og:image" content={imageUrl} />
-      <meta property="og:site_name" content="AI Automation Ally" />
+      <meta property="og:site_name" content="F.B Consulting" />
       
       {/* Twitter Card tags */}
       <meta name="twitter:card" content="summary_large_image" />
