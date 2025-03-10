@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -29,7 +28,14 @@ const About = () => {
   };
   
   return <div className="min-h-screen flex flex-col bg-background">
-      <SEO title="About - AI Automation Ally | Expert Consultant" description="Learn about my 10+ years of experience helping businesses leverage AI and automation technology to reduce costs, streamline operations, and drive growth." ogType="website" structuredData={personStructuredData} />
+      <SEO 
+        title="About - AI Automation Ally | Expert Consultant" 
+        description="Learn about my 10+ years of experience helping businesses leverage AI and automation technology to reduce costs, streamline operations, and drive growth." 
+        ogType="website" 
+        structuredData={personStructuredData}
+        keywords="AI automation expert, business process optimization, startup AI consultant, workflow automation specialist, AI consultant, machine learning expert, AI workflow automation, AI-powered business optimization, AI strategy consultant, business automation expert, AI transformation, AI-driven business optimization"
+      />
+      
       
       <Navbar />
       
@@ -129,11 +135,21 @@ const About = () => {
               animationFillMode: 'forwards'
             }}>
                 <h3 className="text-xl font-semibold mb-3">Business Philosophy</h3>
-                <p className="mb-3">
-                  I believe that AI should be accessible to businesses of all sizes. My consulting approach focuses on pragmatic solutions that deliver immediate value while building toward long-term transformation.
+                <p className="mb-3 font-medium">
+                  AI Should Solve Real Business Problems—Not Just Be a Trend
                 </p>
+                <p className="mb-4">
+                  I believe AI should be practical, accessible, and results-driven—not just a buzzword. My approach is built on clear, ROI-focused automation strategies that deliver measurable impact.
+                </p>
+                <div className="mb-4">
+                  <ul className="list-disc pl-5 space-y-1">
+                    <li>Pragmatic AI Adoption – AI should save time, reduce costs, and boost efficiency from day one.</li>
+                    <li>Custom-Tailored Solutions – No generic advice—every recommendation is based on your business needs, data, and goals.</li>
+                    <li>Long-Term Transformation – AI isn’t just about automation; it’s about building a smarter, more agile business.</li>
+                  </ul>
+                </div>
                 <p>
-                  Every recommendation I make is backed by data and tailored to each client's unique challenges and goals.
+                  Every AI strategy I build is backed by real-world data and designed to drive immediate business value while setting the foundation for long-term AI-driven success.
                 </p>
               </div>
               
@@ -173,4 +189,5 @@ const About = () => {
       <Footer />
     </div>;
 };
+
 export default About;
