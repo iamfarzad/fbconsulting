@@ -19,7 +19,7 @@ const Hero = () => {
       ref={heroRef}
       className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 overflow-hidden pt-16"
     >
-      {/* Animated Grid Pattern Background */}
+      {/* Animated Grid Pattern Background - Now Tilted */}
       <AnimatedGridPattern
         numSquares={30}
         maxOpacity={0.05}
@@ -28,6 +28,7 @@ const Hero = () => {
         className={cn(
           "opacity-70 dark:opacity-50",
           "[mask-image:radial-gradient(900px_circle_at_center,white,transparent)]",
+          "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12", // Added skew for tilt effect
           "z-0"
         )}
       />

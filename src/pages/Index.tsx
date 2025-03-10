@@ -14,6 +14,7 @@ import DisplayCards from '@/components/ui/display-cards';
 import { Bot, MessageSquare, Workflow } from 'lucide-react';
 import NorwegianPainPoints from '@/components/NorwegianPainPoints';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Faq3Demo } from '@/components/ui/faq3-demo';
 
 const Index = () => {
   console.log("Index page rendering");
@@ -95,6 +96,12 @@ const Index = () => {
           <ServicesList />
           <WhyWorkWithMe />
           <Testimonials />
+          
+          {/* FAQ Section */}
+          <div id="faq">
+            <Faq3Demo />
+          </div>
+          
           <ContactCTA />
         </main>
         <Footer />
