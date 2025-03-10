@@ -1,5 +1,4 @@
 
-
 # Changelog
 
 This document tracks the implementation progress of the AI Automation Consulting Website.
@@ -168,7 +167,7 @@ This document tracks the implementation progress of the AI Automation Consulting
 - Removed unnecessary borders and container elements
 - Added subtle gradients for visual interest without complexity
 
-## [1.8.0] - 2025-07-10 (Current Implementation)
+## [1.8.0] - 2025-07-10
 ### Added
 - Full CopilotKit integration while preserving existing UI design
 - Enhanced chatbot with CopilotKit's advanced Textarea capabilities
@@ -187,7 +186,25 @@ This document tracks the implementation progress of the AI Automation Consulting
 - Added lead extraction logic to identify and store user needs
 - Enhanced analytics tracking for AI interactions
 
-## [1.9.0] - Future Release (Planned)
+## [1.9.0] - 2025-07-15
+### Added
+- Comprehensive voice interaction system throughout the application
+- Implemented speech recognition with browser Web Speech API
+- Created voice command processing infrastructure
+- Added visual feedback for voice interactions with animated waveforms
+- Integrated toast notifications for voice command acknowledgment
+- Developed modular voice UI components for reusability
+- Added support for both expanded panel and minimal voice interfaces
+
+### Technical Notes
+- Created TypeScript interfaces for speech recognition types
+- Implemented custom hooks for speech recognition and voice input
+- Added CSS animations for voice activity visualization
+- Designed responsive UI components for voice feedback
+- Added VoiceDemo component to showcase functionality
+- Properly structured components for maintainability
+
+## [2.0.0] - Future Release (Planned)
 ### Planned Features
 - Advanced AI personalities for different service areas
 - Sophisticated lead nurturing based on conversation context
@@ -196,9 +213,6 @@ This document tracks the implementation progress of the AI Automation Consulting
 - Improved lead qualification workflow
 - Context-aware responses based on user browsing history
 - Integration with knowledge base for more accurate responses
-
-## [2.0.0] - Future Release (Planned)
-### Planned Features
 - Complete CopilotKit Frontend Actions implementation
 - CRM integration for seamless lead management
 - Automated follow-up scheduling
@@ -206,4 +220,6 @@ This document tracks the implementation progress of the AI Automation Consulting
 - Advanced analytics dashboard for chatbot performance
 - A/B testing framework for optimizing conversions
 - Custom chatbot training for industry-specific knowledge
-
+- Enhanced voice command capabilities with contextual awareness
+- Voice-driven navigation and form filling
+- Multi-language voice recognition support
