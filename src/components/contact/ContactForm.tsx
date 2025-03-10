@@ -1,12 +1,20 @@
 
 import React, { useState } from 'react';
-import { Mail, MessageSquare, User, ArrowRight } from 'lucide-react';
+import { Mail, MessageSquare, User, ArrowRight, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import { useLeadTracking } from '@/hooks/useAnalytics';
+import { services } from '@/data/servicesData';
 
 const ContactForm = () => {
   const { toast } = useToast();
@@ -14,6 +22,7 @@ const ContactForm = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    service: '',
     message: '',
   });
 
@@ -22,22 +31,25 @@ const ContactForm = () => {
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
+  const handleServiceChange = (value: string) => {
+    setFormData(prev => ({ ...prev, service: value }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // This would normally submit to an API
+    
     toast({
       title: "Message sent!",
       description: "Thanks for reaching out. I'll get back to you soon.",
     });
 
-    // Track the contact form submission as a lead
     trackLead('contact_form', {
       form_location: 'contact_page',
-      email_domain: formData.email.split('@')[1], // Only tracking domain for privacy
+      email_domain: formData.email.split('@')[1],
+      selected_service: formData.service,
     });
     
-    // Reset form
-    setFormData({ name: '', email: '', message: '' });
+    setFormData({ name: '', email: '', service: '', message: '' });
   };
 
   return (
@@ -80,6 +92,32 @@ const ContactForm = () => {
               value={formData.email}
               onChange={handleChange}
             />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="service" className="block text-sm font-medium">
+            Service Interest
+          </label>
+          <div className="relative">
+            <Select 
+              value={formData.service} 
+              onValueChange={handleServiceChange}
+            >
+              <SelectTrigger id="service" className="w-full pl-10">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                  <Briefcase size={18} />
+                </div>
+                <SelectValue placeholder="Select a service" />
+              </SelectTrigger>
+              <SelectContent>
+                {services.map((service, index) => (
+                  <SelectItem key={index} value={service.title}>
+                    {service.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
