@@ -11,7 +11,7 @@ const GlobalImpact = () => {
         
         <div className="mb-8 text-center max-w-2xl mx-auto">
           <p className="text-muted-foreground">
-            Based in Oslo, Norway, I help businesses adapt AI to their specific regional and industry needs, whether in the US, Europe, or Asia. AI should work for any business, anywhere in the world.
+            Based in Oslo, Norway, I've lived and worked across Europe, the Middle East, and Asia. Having experienced diverse business cultures firsthand, I help organizations adapt AI to their specific regional needs—because AI should work for any business, anywhere in the world.
           </p>
         </div>
         
@@ -36,7 +36,19 @@ const GlobalImpact = () => {
               },
               {
                 start: { lat: 59.9139, lng: 10.7522 }, // Oslo
+                end: { lat: 41.0082, lng: 28.9784 }, // Istanbul
+              },
+              {
+                start: { lat: 59.9139, lng: 10.7522 }, // Oslo
+                end: { lat: 25.2048, lng: 55.2708 }, // Dubai
+              },
+              {
+                start: { lat: 59.9139, lng: 10.7522 }, // Oslo
                 end: { lat: 35.6762, lng: 139.6503 }, // Tokyo
+              },
+              {
+                start: { lat: 59.9139, lng: 10.7522 }, // Oslo
+                end: { lat: 22.3193, lng: 114.1694 }, // Hong Kong
               },
               {
                 start: { lat: 59.9139, lng: 10.7522 }, // Oslo
