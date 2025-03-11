@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 
 const ContactInfoCard = () => {
   return (
-    <Card className="overflow-hidden shadow-md border-0 h-full">
+    <Card className="overflow-hidden shadow-md border border-border/50 h-full">
       <div className="bg-gradient-to-br from-violet-500 to-violet-700 text-white p-8">
         <h2 className="text-2xl font-bold mb-8">Get in Touch</h2>
         <div className="space-y-8">
@@ -50,7 +50,7 @@ const ContactInfoCard = () => {
             </div>
             <div>
               <p className="font-medium mb-1">Office Hours</p>
-              <p className="text-white/90">Mon-Fri: 9am-5pm PST</p>
+              <p className="text-white/90">Mon-Fri: 9am-5pm CET</p>
             </div>
           </div>
         </div>

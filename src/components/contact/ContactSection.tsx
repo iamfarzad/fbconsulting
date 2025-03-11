@@ -7,6 +7,10 @@ import BookingCalendarSection from './BookingCalendarSection';
 import { trackEvent } from '@/services/analyticsService';
 
 const ContactSection = () => {
+  React.useEffect(() => {
+    trackEvent('page_view', { section: 'contact' });
+  }, []);
+
   return (
     <section className="pt-28 pb-20">
       <div className="container mx-auto px-4 relative z-10">
@@ -31,6 +35,7 @@ const ContactSection = () => {
 
           {/* Booking Calendar Section */}
           <div className="border-t border-border/30 pt-12">
+            <h3 className="text-xl md:text-2xl font-semibold mb-6 text-center">Schedule a Free Consultation</h3>
             <BookingCalendarSection />
           </div>
         </div>

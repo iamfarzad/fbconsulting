@@ -25,17 +25,10 @@ const BookingCalendarSection = () => {
 
   return (
     <div>
-      <Card className="p-8 border-0 shadow-md bg-white/50 backdrop-blur-sm">
+      <Card className="p-8 border border-border/50 shadow-md bg-white/50 backdrop-blur-sm">
         <div className="text-center mb-8">
           <AnimatedText
-            text="Schedule a Free Consultation"
-            tag="h2"
-            className="text-2xl font-bold mb-2 text-foreground"
-          />
-          <AnimatedText
-            text={showConfirmation 
-              ? "Confirm your booking details" 
-              : "Select a date and time that works for you"}
+            text={showConfirmation ? "Confirm your booking details" : "Select a date and time that works for you"}
             tag="p"
             delay={200}
             className="text-muted-foreground"
