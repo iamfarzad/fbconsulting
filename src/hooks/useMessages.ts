@@ -1,10 +1,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { 
-  AIMessage, 
+  AIMessage
+} from '@/services/chat/messageTypes';
+import {
   saveConversationHistory,
   loadConversationHistory
-} from '@/services/copilotService';
+} from '@/services/storage/localStorageManager';
 import { trackEvent } from '@/services/analyticsService';
 
 export const useMessages = (initialMessages?: AIMessage[]) => {

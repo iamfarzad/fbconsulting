@@ -3,7 +3,7 @@ import React from 'react';
 import { cn } from "@/lib/utils";
 import { Bot, CircleUserRound } from "lucide-react";
 import { motion } from "framer-motion";
-import { AIMessage } from "@/services/copilotService";
+import { AIMessage } from "@/services/chat/messageTypes";
 
 interface MessageProps {
   message: AIMessage;
