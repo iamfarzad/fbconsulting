@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -9,7 +10,6 @@ import ServicesList from '@/components/ServicesList';
 import Testimonials from '@/components/testimonials/Testimonials';
 import WhyWorkWithMe from '@/components/WhyWorkWithMe';
 import Pricing from '@/components/Pricing';
-import ClassesSection from '@/components/classes/ClassesSection';
 
 const Index = () => {
   return (
@@ -24,8 +24,6 @@ const Index = () => {
       <Hero />
       <PainPoints />
       <ServicesList />
-      <ClassesSection />
-      
       <WhyWorkWithMe />
 
       <div id="pricing">
