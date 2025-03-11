@@ -1,4 +1,3 @@
-
 import { Book, Sunset, Trees, Zap } from "lucide-react";
 import { Navbar1 } from "./navbar";
 
@@ -21,10 +20,6 @@ const demoData = {
     title: "F.B Consulting",
   },
   menu: [
-    {
-      title: "Home",
-      url: "/",
-    },
     {
       title: "Services",
       url: "/services",
@@ -56,17 +51,11 @@ const demoData = {
       ],
     },
     {
-      title: "Resources",
-      url: "#",
+      title: "About",
+      url: "/about",
       items: [
         {
-          title: "Blog",
-          description: "Expert insights and case studies",
-          icon: <Book className="size-5 shrink-0" />,
-          url: "/blog",
-        },
-        {
-          title: "About Me",
+          title: "My Story",
           description: "Learn about my mission and expertise",
           icon: <Trees className="size-5 shrink-0" />,
           url: "/about",
@@ -82,26 +71,34 @@ const demoData = {
           description: "Answers to common questions",
           icon: <Zap className="size-5 shrink-0" />,
           url: "/about#faq",
-        },
+        }
       ],
     },
     {
-      title: "Pricing",
-      url: "/services#pricing",
-    },
-    {
-      title: "Contact",
-      url: "/contact",
-    },
+      title: "Resources",
+      url: "#",
+      items: [
+        {
+          title: "Blog",
+          description: "Expert insights and case studies",
+          icon: <Book className="size-5 shrink-0" />,
+          url: "/blog",
+        },
+        {
+          title: "Pricing",
+          description: "Transparent pricing plans for every need",
+          icon: <Zap className="size-5 shrink-0" />,
+          url: "/services#pricing",
+        }
+      ],
+    }
   ],
   mobileExtraLinks: [
-    { name: "Testimonials", url: "/services#testimonials" },
-    { name: "Contact", url: "/contact" },
     { name: "Privacy", url: "/privacy" },
     { name: "Terms", url: "/terms" },
   ],
   ctaButton: {
-    text: "Book a Call",
+    text: "Contact Us",
     url: "/contact",
   },
 };
