@@ -15,7 +15,7 @@ export const cardData = [
       "Business & Technical Expertise – Deep understanding of AI implementation beyond just coding—I focus on business impact."
     ],
     additionalDetails: "Unlike traditional consultants who rely on theoretical frameworks, I've spent years designing, implementing, and refining AI systems that solve real-world business challenges. This hands-on approach allows me to understand both the technical and business aspects of AI implementation.",
-    bulletPointIcon: <Rocket size={16} />,
+    bulletPointIcon: Rocket,
     contactLink: {
       text: "Schedule a Strategy Session",
       url: "/contact"
@@ -37,7 +37,7 @@ export const cardData = [
       "Business Intelligence & AI Strategy – Helping companies use AI for long-term competitive advantage."
     ],
     additionalDetails: "I stay ahead of AI advancements by actively engaging in the latest LLM (Large Language Model) research, AI automation tools, and business applications of artificial intelligence. My approach combines cutting-edge technology with pragmatic business strategy to deliver measurable results.",
-    bulletPointIcon: <Code size={16} />,
+    bulletPointIcon: Code,
     contactLink: {
       text: "Discuss Your AI Needs",
       url: "/contact"
@@ -57,7 +57,7 @@ export const cardData = [
       "Long-Term Transformation – AI isn't just about automation; it's about building a smarter, more agile business."
     ],
     additionalDetails: "Every AI strategy I build is backed by real-world data and designed to drive immediate business value while setting the foundation for long-term AI-driven success. I focus on solutions that can be implemented quickly and scaled effectively as your business grows.",
-    bulletPointIcon: <Building size={16} />,
+    bulletPointIcon: Building,
     contactLink: {
       text: "Book a Free Consultation",
       url: "/contact"
@@ -77,7 +77,7 @@ export const cardData = [
       "Training & Support – I ensure teams understand and leverage AI effectively without needing a technical background."
     ],
     additionalDetails: "AI doesn't have to be overwhelming or complicated. My goal is to make AI automation simple, effective, and tailored to your business. I provide ongoing support to ensure your team can fully leverage the AI solutions we implement together.",
-    bulletPointIcon: <BookOpen size={16} />,
+    bulletPointIcon: BookOpen,
     contactLink: {
       text: "Get in Touch",
       url: "/contact"
@@ -90,5 +90,5 @@ export const timelinePoints = [
   { year: 2018, label: "First AI Startup" },
   { year: 2020, label: "Expanded Consulting" },
   { year: 2022, label: "Advanced LLM Work" },
-  { year: 2023, label: "Present" },
+  { year: 2023, label: "Present" }
 ];

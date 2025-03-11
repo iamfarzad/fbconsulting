@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
@@ -13,14 +12,14 @@ import {
 interface BulletPointProps {
   item: string;
   index: number;
-  bulletPointIcon: React.ReactNode;
+  bulletPointIcon: React.ElementType;
   accentColor: string;
 }
 
 const BulletPoint: React.FC<BulletPointProps> = ({
   item,
   index,
-  bulletPointIcon,
+  bulletPointIcon: Icon,
   accentColor
 }) => {
   const [expanded, setExpanded] = useState(false);
@@ -62,7 +61,7 @@ const BulletPoint: React.FC<BulletPointProps> = ({
     >
       <div className="flex items-start">
         <div className="flex-shrink-0 mt-1 mr-2">
-          {bulletPointIcon}
+          <Icon size={16} />
         </div>
         <div className="flex-grow cursor-pointer" onClick={toggleExpand}>
           <div className="flex items-center justify-between">
