@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { ArrowRight, BriefcaseIcon, UserRound, Clock } from 'lucide-react';
+import { ArrowRight, BriefcaseIcon, UserRound, Clock, Calendar, Mail, Code, MessageSquareQuote } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-export type CardType = 'services' | 'about' | 'timeline';
+export type CardType = 'services' | 'about' | 'timeline' | 'booking' | 'newsletter' | 'skills' | 'testimonials';
 
 interface GraphicCardProps {
   type: CardType;
@@ -23,6 +23,14 @@ export const GraphicCard: React.FC<GraphicCardProps> = ({ type, title, descripti
         return <UserRound className="h-5 w-5" />;
       case 'timeline':
         return <Clock className="h-5 w-5" />;
+      case 'booking':
+        return <Calendar className="h-5 w-5" />;
+      case 'newsletter':
+        return <Mail className="h-5 w-5" />;
+      case 'skills':
+        return <Code className="h-5 w-5" />;
+      case 'testimonials':
+        return <MessageSquareQuote className="h-5 w-5" />;
       default:
         return <BriefcaseIcon className="h-5 w-5" />;
     }
@@ -35,7 +43,15 @@ export const GraphicCard: React.FC<GraphicCardProps> = ({ type, title, descripti
       case 'about':
         return '/about';
       case 'timeline':
-        return '/about'; // Timeline is usually in the About page
+        return '/about#timeline'; // Timeline section in About page
+      case 'booking':
+        return '/contact#booking'; // Booking section in Contact page
+      case 'newsletter':
+        return '/#newsletter'; // Newsletter section in Home page
+      case 'skills':
+        return '/about#skills'; // Skills section in About page
+      case 'testimonials':
+        return '/#testimonials'; // Testimonials section in Home page
       default:
         return '/';
     }

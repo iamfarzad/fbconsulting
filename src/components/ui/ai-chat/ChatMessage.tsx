@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { AIMessage } from "@/services/chat/messageTypes";
 import { GraphicCardCollection } from './GraphicCardCollection';
 import { CardType } from './GraphicCard';
+import { EmailSummaryForm } from './EmailSummaryForm';
 
 interface MessageProps {
   message: AIMessage;
@@ -17,6 +18,9 @@ export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
   
   // Check if message contains card data
   const hasCards = message.content.includes('[[CARD:');
+  
+  // Check if message contains form data
+  const hasEmailSummaryForm = message.content.includes('[[FORM:email-summary]]');
   
   // Extract card data if present
   const extractCards = (content: string): { 
@@ -44,7 +48,11 @@ export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
     return { textContent: textContent.trim(), cards };
   };
   
-  const { textContent, cards } = hasCards ? extractCards(message.content) : { textContent: message.content, cards: [] };
+  const { textContent, cards } = hasCards ? extractCards(message.content) : { textContent: message.content.replace(/\[\[FORM:email-summary\]\]/g, '').trim(), cards: [] };
+  
+  const handleFormSubmitted = () => {
+    console.log('Email summary form submitted');
+  };
   
   return (
     <motion.div
@@ -73,6 +81,13 @@ export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
           {cards.length > 0 && (
             <div className="mt-3">
               <GraphicCardCollection cards={cards} />
+            </div>
+          )}
+          
+          {/* Render email summary form if present */}
+          {hasEmailSummaryForm && !isUser && (
+            <div className="mt-3">
+              <EmailSummaryForm onSubmit={handleFormSubmitted} />
             </div>
           )}
           

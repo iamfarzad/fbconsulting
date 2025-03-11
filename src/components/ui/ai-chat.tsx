@@ -10,6 +10,7 @@ import { LeadInfo } from "@/services/lead/leadExtractor";
 import { generateResponse } from "@/services/chat/responseGenerator";
 import { AnimatePresence, motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "react-router-dom";
 
 interface AIChatInputProps {
   placeholderText?: string;
@@ -21,6 +22,8 @@ export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatIn
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const containerRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const currentPath = location.pathname;
   
   // Create a mock LeadInfo object for suggestions with correct type structure
   const mockLeadInfo: LeadInfo = {
@@ -48,6 +51,12 @@ export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatIn
     return () => window.removeEventListener('resize', calculateContainerHeight);
   }, []);
 
+  // Extract current page from path
+  const getCurrentPage = (): string | undefined => {
+    if (currentPath === '/') return 'home';
+    return currentPath.substring(1); // Remove leading slash
+  };
+
   const handleSend = async () => {
     if (!inputValue.trim()) {
       toast({
@@ -64,11 +73,12 @@ export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatIn
       
       // Create mock lead info from conversation context
       const mockLeadInfo: LeadInfo = {
-        interests: messages.map(m => m.content),
+        interests: [...messages.map(m => m.content), inputValue],
         stage: 'discovery'
       };
       
       // Generate AI response with possible graphic cards
+      const currentPage = getCurrentPage();
       const aiResponse = generateResponse(inputValue, mockLeadInfo);
       
       // Simulate AI response delay
