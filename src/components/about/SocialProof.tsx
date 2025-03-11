@@ -8,59 +8,72 @@ interface SocialProofProps {
 }
 
 const SocialProof: React.FC<SocialProofProps> = ({ accentColor }) => {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.3,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { 
+      opacity: 0, 
+      y: 20,
+      scale: 0.8 
+    },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 10
+      }
+    },
+  };
+
+  const statItems = [
+    { value: 7, label: "Years Experience" },
+    { value: 30, label: "Projects" },
+    { value: 95, label: "Success Rate", suffix: "%" }
+  ];
+
   return (
-    <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-      <motion.div 
-        className="p-2 bg-background rounded-md"
-        initial={{ opacity: 0, scale: 0.8 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.2 }}
-      >
-        <motion.p 
-          className={`text-xl font-bold text-${accentColor}`}
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, type: "spring" }}
+    <motion.div 
+      className="mt-3 grid grid-cols-3 gap-2 text-center"
+      variants={containerVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-50px" }}
+    >
+      {statItems.map((item, index) => (
+        <motion.div
+          key={index}
+          className="p-2 bg-background rounded-md hover:shadow-lg transition-shadow"
+          variants={itemVariants}
+          whileHover={{ 
+            scale: 1.05,
+            transition: { type: "spring", stiffness: 400, damping: 10 }
+          }}
         >
-          <CountUp end={7} duration={2} />+
-        </motion.p>
-        <p className="text-xs">Years Experience</p>
-      </motion.div>
-      
-      <motion.div 
-        className="p-2 bg-background rounded-md"
-        initial={{ opacity: 0, scale: 0.8 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        <motion.p 
-          className={`text-xl font-bold text-${accentColor}`}
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, type: "spring" }}
-        >
-          <CountUp end={30} duration={2} />+
-        </motion.p>
-        <p className="text-xs">Projects</p>
-      </motion.div>
-      
-      <motion.div 
-        className="p-2 bg-background rounded-md"
-        initial={{ opacity: 0, scale: 0.8 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.4 }}
-      >
-        <motion.p 
-          className={`text-xl font-bold text-${accentColor}`}
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, type: "spring" }}
-        >
-          <CountUp end={95} duration={2} />%
-        </motion.p>
-        <p className="text-xs">Success Rate</p>
-      </motion.div>
-    </div>
+          <motion.p 
+            className={`text-xl font-bold text-${accentColor}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 + index * 0.2 }}
+          >
+            <CountUp end={item.value} duration={2} />
+            {item.suffix || "+"}
+          </motion.p>
+          <p className="text-xs">{item.label}</p>
+        </motion.div>
+      ))}
+    </motion.div>
   );
 };
 
