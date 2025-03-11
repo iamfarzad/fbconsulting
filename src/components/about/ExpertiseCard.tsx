@@ -4,14 +4,14 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, LucideIcon } from 'lucide-react';
 import BulletPoint from './BulletPoint';
 import SocialProof from './SocialProof';
 
 interface ExpertiseCardProps {
   title: string;
   subtitle?: string;
-  icon: React.ReactNode;
+  icon: React.ElementType; // Changed from React.ReactNode to React.ElementType
   iconBgClass: string;
   iconColor: string;
   accentColor: string;
@@ -30,7 +30,7 @@ interface ExpertiseCardProps {
 const ExpertiseCard: React.FC<ExpertiseCardProps> = ({
   title,
   subtitle,
-  icon,
+  icon: IconComponent, // Renamed to IconComponent to clarify it's a component
   iconBgClass,
   iconColor,
   accentColor,
@@ -67,7 +67,8 @@ const ExpertiseCard: React.FC<ExpertiseCardProps> = ({
         <CardContent className="p-6">
           <div className="flex items-start mb-4">
             <div className={`mr-4 p-2 rounded-full ${iconBgClass} ${iconColor}`}>
-              {icon}
+              {/* Render the IconComponent properly */}
+              <IconComponent size={24} />
             </div>
             <div>
               <h3 className={`text-xl font-semibold mb-1 group-hover:text-${accentColor} transition-colors duration-300`}>
