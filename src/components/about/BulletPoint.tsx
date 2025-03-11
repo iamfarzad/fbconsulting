@@ -1,8 +1,14 @@
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface BulletPointProps {
   item: string;
@@ -62,14 +68,23 @@ const BulletPoint: React.FC<BulletPointProps> = ({
           <div className="flex items-center justify-between">
             <span className="text-sm">{item}</span>
             <div className="flex items-center space-x-1">
-              <motion.button
-                className={`p-1 rounded-full focus:outline-none text-${accentColor}/70 hover:text-${accentColor}`}
-                onClick={copyToClipboard}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {copied ? <Check size={14} /> : <Copy size={14} />}
-              </motion.button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <motion.button
+                      className={`p-1 rounded-full focus:outline-none text-${accentColor}/70 hover:text-${accentColor}`}
+                      onClick={copyToClipboard}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {copied ? <Check size={14} /> : <Copy size={14} />}
+                    </motion.button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Copy to clipboard</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               {expanded ? (
                 <ChevronUp size={14} className={`text-${accentColor}`} />
               ) : (
@@ -77,17 +92,43 @@ const BulletPoint: React.FC<BulletPointProps> = ({
               )}
             </div>
           </div>
-          {expanded && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="mt-2 text-xs text-muted-foreground bg-muted/50 p-2 rounded"
-            >
-              This is additional information about "{item}". Click to expand or collapse this section for more details about this specific area of expertise.
-            </motion.div>
-          )}
+          <AnimatePresence>
+            {expanded && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ 
+                  opacity: 1, 
+                  height: "auto",
+                  transition: {
+                    height: {
+                      duration: 0.3,
+                      ease: "easeOut"
+                    },
+                    opacity: {
+                      duration: 0.2,
+                      delay: 0.1
+                    }
+                  }
+                }}
+                exit={{ 
+                  opacity: 0, 
+                  height: 0,
+                  transition: {
+                    height: {
+                      duration: 0.3,
+                      ease: "easeIn"
+                    },
+                    opacity: {
+                      duration: 0.2
+                    }
+                  }
+                }}
+                className="mt-2 text-xs text-muted-foreground bg-muted/50 p-2 rounded"
+              >
+                This is additional information about "{item}". Click to expand or collapse this section for more details about this specific area of expertise.
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </motion.li>
