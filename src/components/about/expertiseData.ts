@@ -1,4 +1,5 @@
-import { Brain, Workflow, LineChart, Smartphone } from "lucide-react";
+
+import { Brain, Workflow, LineChart, Smartphone, ArrowRight, Check, Target, Zap } from "lucide-react";
 import { ExpertiseCardProps } from "./ExpertiseCard";
 
 export const cardData: ExpertiseCardProps[] = [
@@ -15,7 +16,9 @@ export const cardData: ExpertiseCardProps[] = [
       projectsCompleted: 50,
       successRate: 95,
       clientSatisfaction: 98
-    }
+    },
+    bulletPointIcon: Check,
+    learnMore: "Learn more about AI Strategy"
   },
   {
     title: "Workflow Automation",
@@ -30,7 +33,9 @@ export const cardData: ExpertiseCardProps[] = [
       processesAutomated: 200,
       efficiencyGain: 75,
       costReduction: 40
-    }
+    },
+    bulletPointIcon: Zap,
+    learnMore: "Explore automation solutions"
   },
   {
     title: "Data Analytics & Insights",
@@ -45,7 +50,9 @@ export const cardData: ExpertiseCardProps[] = [
       dataPointsAnalyzed: "1M+",
       insightsGenerated: "500+",
       accuracyRate: 97
-    }
+    },
+    bulletPointIcon: Target,
+    learnMore: "Discover data analytics services"
   },
   {
     title: "Mobile & Web Solutions",
@@ -60,7 +67,9 @@ export const cardData: ExpertiseCardProps[] = [
       appsDelivered: 75,
       userSatisfaction: 96,
       returnClients: 85
-    }
+    },
+    bulletPointIcon: ArrowRight,
+    learnMore: "See our development approach"
   }
 ];
 
