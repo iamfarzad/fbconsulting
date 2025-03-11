@@ -79,12 +79,6 @@ const Index = () => {
           : "Yes, we provide ongoing support and maintenance for all our AI solutions. Our support packages include regular updates, performance monitoring, and technical assistance to ensure your AI systems continue to perform optimally.",
       },
     ],
-    supportHeading: isNorwegian ? "Har du fortsatt spørsmål?" : "Still have questions?",
-    supportDescription: isNorwegian
-      ? "Våre AI-spesialister er klare til å hjelpe deg med å finne den perfekte automatiseringsløsningen for din bedrift. Ta kontakt for en gratis konsultasjon."
-      : "Our AI specialists are ready to help you find the perfect automation solution for your business. Get in touch for a free consultation.",
-    supportButtonText: isNorwegian ? "Kontakt Vårt Team" : "Contact Our Team",
-    supportButtonUrl: "/contact",
   };
 
   const personStructuredData = getPersonStructuredData();
