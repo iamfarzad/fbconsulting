@@ -21,7 +21,7 @@ export const renderMenuItem = (item: MenuItem) => {
       <NavigationMenuItem key={item.title} className="text-muted-foreground">
         <NavigationMenuTrigger>{item.title}</NavigationMenuTrigger>
         <NavigationMenuContent>
-          <ul className="w-80 p-3">
+          <ul className="w-80 p-3 bg-background/95 backdrop-blur-sm border border-border/30 shadow-md">
             <NavigationMenuLink>
               {item.items.map((subItem) => (
                 <li key={subItem.title}>

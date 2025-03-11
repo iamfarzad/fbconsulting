@@ -1,3 +1,4 @@
+
 import { Book, Sunset, Trees, Zap } from "lucide-react";
 import { Navbar1 } from "./navbar";
 
@@ -64,7 +65,7 @@ const demoData = {
           title: "Testimonials",
           description: "What our clients say about our services",
           icon: <Sunset className="size-5 shrink-0" />,
-          url: "/services#testimonials",
+          url: "/about#testimonials",
         },
         {
           title: "FAQ",
@@ -76,7 +77,7 @@ const demoData = {
     },
     {
       title: "Resources",
-      url: "#",
+      url: "/resources",
       items: [
         {
           title: "Blog",
