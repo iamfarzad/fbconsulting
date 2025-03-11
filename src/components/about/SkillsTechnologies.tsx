@@ -1,7 +1,6 @@
 
 import React from 'react';
 import AnimatedText from '@/components/AnimatedText';
-import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { 
   Brain, 
@@ -9,16 +8,17 @@ import {
   LineChart, 
   Database, 
   Workflow, 
-  Code
+  Code,
+  Sparkles
 } from "lucide-react";
-import FeatureCard from '@/components/FeatureCard';
 
-// Simpler, more focused skills data
+// Enhanced skills data with more visually appealing structure
 const SKILLS_DATA = [
   {
     title: "AI & Machine Learning",
     description: "Building intelligent systems that learn and adapt",
-    icon: <Brain className="h-6 w-6 text-primary" />,
+    icon: Brain,
+    color: "from-purple-500 to-purple-300",
     bulletPoints: [
       "Custom GPT model training & fine-tuning",
       "Machine learning & predictive analytics",
@@ -28,7 +28,8 @@ const SKILLS_DATA = [
   {
     title: "Workflow Automation",
     description: "Streamlining business processes with AI",
-    icon: <Workflow className="h-6 w-6 text-primary" />,
+    icon: Workflow,
+    color: "from-blue-500 to-blue-300",
     bulletPoints: [
       "Process analysis and optimization",
       "Custom automation solution development",
@@ -38,7 +39,8 @@ const SKILLS_DATA = [
   {
     title: "Data Analytics",
     description: "Transforming data into actionable insights",
-    icon: <LineChart className="h-6 w-6 text-primary" />,
+    icon: LineChart,
+    color: "from-green-500 to-green-300",
     bulletPoints: [
       "Business intelligence dashboards",
       "Predictive modeling & forecasting",
@@ -48,7 +50,8 @@ const SKILLS_DATA = [
   {
     title: "Conversational AI",
     description: "Creating natural language interfaces",
-    icon: <Bot className="h-6 w-6 text-primary" />,
+    icon: Bot,
+    color: "from-yellow-500 to-yellow-300",
     bulletPoints: [
       "Custom chatbot development",
       "Virtual assistants & AI Copilots",
@@ -58,7 +61,8 @@ const SKILLS_DATA = [
   {
     title: "Database & Systems",
     description: "Building robust data infrastructure",
-    icon: <Database className="h-6 w-6 text-primary" />,
+    icon: Database,
+    color: "from-red-500 to-red-300",
     bulletPoints: [
       "Database design & optimization",
       "API development & integration",
@@ -68,7 +72,8 @@ const SKILLS_DATA = [
   {
     title: "Development",
     description: "Creating custom software solutions",
-    icon: <Code className="h-6 w-6 text-primary" />,
+    icon: Code,
+    color: "from-teal-500 to-teal-300",
     bulletPoints: [
       "Web application development",
       "Mobile app development",
@@ -77,65 +82,100 @@ const SKILLS_DATA = [
   }
 ];
 
+const SkillCard = ({ 
+  title, 
+  description, 
+  icon: Icon, 
+  color, 
+  bulletPoints,
+  index 
+}) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      viewport={{ once: true, margin: "-100px" }}
+      whileHover={{ y: -5, boxShadow: "0 10px 30px rgba(0,0,0,0.1)" }}
+      className="relative overflow-hidden rounded-xl border border-primary/10 bg-white/5 backdrop-blur-sm p-6 transition-all duration-300"
+    >
+      {/* Background gradient */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-5 transition-opacity duration-300 group-hover:opacity-10`} />
+      
+      {/* Icon with gradient background */}
+      <div className={`flex items-center justify-center w-12 h-12 rounded-lg mb-4 bg-gradient-to-br ${color} bg-opacity-10`}>
+        <Icon className="h-6 w-6 text-primary" />
+      </div>
+      
+      <h3 className="text-xl font-semibold mb-2">{title}</h3>
+      <p className="text-muted-foreground mb-4">{description}</p>
+      
+      <ul className="space-y-2">
+        {bulletPoints.map((point, i) => (
+          <motion.li 
+            key={i} 
+            initial={{ opacity: 0, x: -10 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: (index * 0.1) + (i * 0.1) }}
+            viewport={{ once: true }}
+            className="flex items-start gap-2"
+          >
+            <span className="text-primary mt-1">•</span>
+            <span className="text-sm">{point}</span>
+          </motion.li>
+        ))}
+      </ul>
+    </motion.div>
+  );
+};
+
 const SkillsTechnologies = () => {
   return (
-    <section className="py-16 px-4 bg-muted/30">
-      <div className="container mx-auto max-w-6xl">
-        <AnimatedText 
-          text="Skills & Technologies" 
-          tag="h2" 
-          className="text-3xl font-bold mb-4 text-center"
-        />
+    <section className="py-24 relative overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 bg-gradient-to-b from-muted/30 via-muted/10 to-background/0 pointer-events-none z-0" />
+      <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none z-0" />
+      
+      <div className="container mx-auto max-w-6xl px-4 relative z-10">
+        <div className="text-center mb-16">
+          <div className="flex justify-center mb-4">
+            <div className="bg-primary/10 p-3 rounded-full">
+              <Sparkles className="w-6 h-6 text-primary" />
+            </div>
+          </div>
+          
+          <AnimatedText 
+            text="Skills & Technologies" 
+            tag="h2" 
+            className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70"
+          />
+          
+          <motion.div 
+            className="w-20 h-1 bg-gradient-to-r from-primary/80 to-primary/30 mx-auto rounded-full mb-6"
+            initial={{ width: 0 }}
+            whileInView={{ width: 80 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            viewport={{ once: true }}
+          />
+          
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Specialized expertise in AI and automation technologies to help businesses transform their operations and achieve measurable results.
+          </p>
+        </div>
         
-        <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-12">
-          Specialized expertise in AI and automation technologies to help businesses transform their operations and achieve measurable results.
-        </p>
-        
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.1 }}
-          variants={{
-            hidden: { opacity: 0 },
-            visible: {
-              opacity: 1,
-              transition: {
-                staggerChildren: 0.1
-              }
-            }
-          }}
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {SKILLS_DATA.map((skill, index) => (
-            <motion.div
+            <SkillCard
               key={index}
-              variants={{
-                hidden: { opacity: 0, y: 20 },
-                visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
-              }}
-            >
-              <FeatureCard
-                title={skill.title}
-                icon={skill.icon}
-                description={
-                  <div>
-                    <p className="mb-3">{skill.description}</p>
-                    <ul className="space-y-2">
-                      {skill.bulletPoints.map((point, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <span className="text-primary mt-1">•</span>
-                          <span className="text-sm">{point}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                }
-                className="h-full"
-                hoverEffect={true}
-              />
-            </motion.div>
+              title={skill.title}
+              description={skill.description}
+              icon={skill.icon}
+              color={skill.color}
+              bulletPoints={skill.bulletPoints}
+              index={index}
+            />
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   );

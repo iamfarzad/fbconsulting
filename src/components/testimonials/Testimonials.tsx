@@ -1,18 +1,19 @@
 
 import React from 'react';
-import TestimonialCard from './TestimonialCard';
+import { motion } from 'framer-motion';
 import AnimatedText from '@/components/AnimatedText';
 import { Testimonial } from '@/types/blog';
-import { motion } from 'framer-motion';
+import EnhancedTestimonialCard from './EnhancedTestimonialCard';
+import { MessageSquareQuote } from 'lucide-react';
 
-// Example testimonial data - in a real app this would come from an API
+// Enhanced testimonial data with more details
 const testimonialData: Testimonial[] = [
   {
     id: '1',
     name: 'Sarah Johnson',
     company: 'TechInnovate',
     role: 'CTO',
-    content: "AI automation reduced our response times by 65% and improved customer satisfaction.",
+    content: "The AI automation solutions provided have revolutionized our customer service. Response times dropped by 65% and customer satisfaction scores are at an all-time high. The implementation was smooth and the ongoing support has been exceptional.",
     rating: 5
   },
   {
@@ -20,7 +21,7 @@ const testimonialData: Testimonial[] = [
     name: 'Michael Chen',
     company: 'FinanceFlow',
     role: 'Operations Director',
-    content: "What took days now happens in minutes—our operations run 10x faster.",
+    content: "What previously took our team days to complete now happens in minutes. Our operations are running 10x faster with far fewer errors. The AI workflow automation has completely transformed how we process financial data and reports.",
     rating: 5
   },
   {
@@ -28,7 +29,7 @@ const testimonialData: Testimonial[] = [
     name: 'Alicia Rodriguez',
     company: 'RetailPro',
     role: 'Marketing Manager',
-    content: "AI-powered insights helped us improve marketing effectiveness by 40%.",
+    content: "The AI-powered marketing insights have been a game changer. We've increased our conversion rates by 40% by targeting the right customers with the right offers at the right time. The data analytics capabilities are truly impressive.",
     rating: 4
   }
 ];
@@ -39,33 +40,54 @@ interface TestimonialsProps {
 
 const Testimonials: React.FC<TestimonialsProps> = ({ id }) => {
   return (
-    <section id={id} className="py-20 px-4 scroll-mt-24 relative z-10 bg-gradient-to-b from-background to-background/70">
-      <div className="container mx-auto max-w-6xl">
+    <section id={id} className="py-24 relative z-10 overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/80 to-background/40 pointer-events-none" />
+      <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none" />
+      
+      <div className="container mx-auto max-w-6xl px-4">
         <motion.div 
-          className="text-center mb-12"
+          className="text-center mb-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, margin: "-100px" }}
         >
+          <div className="flex justify-center mb-4">
+            <div className="bg-primary/10 p-3 rounded-full">
+              <MessageSquareQuote className="w-6 h-6 text-primary" />
+            </div>
+          </div>
+          
           <AnimatedText
-            text="What Clients Say"
+            text="What Our Clients Say"
             tag="h2"
-            className="text-3xl md:text-4xl font-bold mb-4 text-gradient-teal"
+            className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70"
           />
-          <div className="w-20 h-1 bg-teal/30 mx-auto rounded-full my-4"></div>
+          
+          <motion.div 
+            className="w-20 h-1 bg-gradient-to-r from-primary/80 to-primary/30 mx-auto rounded-full mb-6"
+            initial={{ width: 0 }}
+            whileInView={{ width: 80 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            viewport={{ once: true }}
+          />
+          
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Don't just take our word for it. Here's what our clients have experienced with our AI automation solutions.
+          </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {testimonialData.map((testimonial, index) => (
             <motion.div
               key={testimonial.id}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              viewport={{ once: true }}
+              viewport={{ once: true, margin: "-100px" }}
             >
-              <TestimonialCard testimonial={testimonial} />
+              <EnhancedTestimonialCard testimonial={testimonial} index={index} />
             </motion.div>
           ))}
         </div>

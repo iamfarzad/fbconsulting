@@ -6,6 +6,7 @@ import ExpertiseCard from './ExpertiseCard';
 import ScrollProgress from './ScrollProgress';
 import BackgroundCTA from './BackgroundCTA';
 import { cardData } from './expertiseData';
+import { Briefcase } from 'lucide-react';
 
 const BackgroundExperience = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -20,9 +21,10 @@ const BackgroundExperience = () => {
   const patternScale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.05, 1]);
 
   return (
-    <section ref={containerRef} className="relative py-16 px-4 bg-gradient-to-b from-muted/30 to-background overflow-hidden">
+    <section ref={containerRef} className="relative py-24 overflow-hidden">
       <ScrollProgress targetRef={containerRef} />
       
+      {/* Background Elements */}
       <motion.div 
         style={{ 
           opacity: patternOpacity,
@@ -31,23 +33,40 @@ const BackgroundExperience = () => {
         }}
         className="absolute inset-0 bg-grid-pattern pointer-events-none z-0"
       />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/70 to-background/90 pointer-events-none z-0" />
       
-      <div className="container mx-auto max-w-6xl relative z-10">
+      <div className="container mx-auto max-w-6xl px-4 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, margin: "-100px" }}
+          className="text-center mb-16"
         >
+          <div className="flex justify-center mb-4">
+            <div className="bg-primary/10 p-3 rounded-full">
+              <Briefcase className="w-6 h-6 text-primary" />
+            </div>
+          </div>
+          
           <AnimatedText 
             text="What I Do" 
             tag="h2" 
-            className="text-3xl font-bold mb-4 text-center" 
+            className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70" 
           />
+          
+          <motion.div 
+            className="w-20 h-1 bg-gradient-to-r from-primary/80 to-primary/30 mx-auto rounded-full mb-6"
+            initial={{ width: 0 }}
+            whileInView={{ width: 80 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            viewport={{ once: true }}
+          />
+          
           <AnimatedText 
             text="I help businesses use AI to get clear results. My work falls into four key areas:" 
             tag="p" 
-            className="text-xl text-muted-foreground text-center mb-12" 
+            className="text-xl text-muted-foreground max-w-3xl mx-auto" 
           />
         </motion.div>
         
@@ -55,7 +74,7 @@ const BackgroundExperience = () => {
           className="grid grid-cols-1 md:grid-cols-2 gap-8"
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, amount: 0.1 }}
+          viewport={{ once: true, margin: "-100px" }}
           variants={{
             hidden: { opacity: 0 },
             visible: {
@@ -68,10 +87,17 @@ const BackgroundExperience = () => {
           }}
         >
           {cardData.map((card, index) => (
-            <ExpertiseCard 
+            <motion.div
               key={index}
-              {...card}
-            />
+              variants={{
+                hidden: { opacity: 0, y: 50 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+              }}
+            >
+              <ExpertiseCard 
+                {...card}
+              />
+            </motion.div>
           ))}
         </motion.div>
         
@@ -79,7 +105,7 @@ const BackgroundExperience = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
-          viewport={{ once: true }}
+          viewport={{ once: true, margin: "-100px" }}
         >
           <BackgroundCTA />
         </motion.div>
