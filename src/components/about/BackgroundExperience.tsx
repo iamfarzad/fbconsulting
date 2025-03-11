@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import AnimatedText from '@/components/AnimatedText';
 import { motion, useScroll, useTransform } from 'framer-motion';
