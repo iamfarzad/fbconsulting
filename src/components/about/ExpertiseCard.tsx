@@ -4,21 +4,21 @@ import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp, LucideIcon } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import BulletPoint from './BulletPoint';
 import SocialProof from './SocialProof';
 
 interface ExpertiseCardProps {
   title: string;
   subtitle?: string;
-  icon: React.ElementType; // Changed from React.ReactNode to React.ElementType
+  icon: React.ElementType; // Icon component type
   iconBgClass: string;
   iconColor: string;
   accentColor: string;
   description: string;
   bulletPoints: string[];
   additionalDetails?: string;
-  bulletPointIcon: React.ReactNode;
+  bulletPointIcon: React.ElementType; // Changed to ElementType to match BulletPoint
   index: number;
   contactLink?: {
     text: string;
@@ -30,7 +30,7 @@ interface ExpertiseCardProps {
 const ExpertiseCard: React.FC<ExpertiseCardProps> = ({
   title,
   subtitle,
-  icon: IconComponent, // Renamed to IconComponent to clarify it's a component
+  icon: IconComponent,
   iconBgClass,
   iconColor,
   accentColor,
@@ -67,7 +67,6 @@ const ExpertiseCard: React.FC<ExpertiseCardProps> = ({
         <CardContent className="p-6">
           <div className="flex items-start mb-4">
             <div className={`mr-4 p-2 rounded-full ${iconBgClass} ${iconColor}`}>
-              {/* Render the IconComponent properly */}
               <IconComponent size={24} />
             </div>
             <div>
