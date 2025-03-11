@@ -1,20 +1,16 @@
-
-import { Book, Brain, Cpu, Database, LineChart, Network, Shield, Smartphone } from "lucide-react";
+import { Brain, Workflow, LineChart, Smartphone } from "lucide-react";
 import { ExpertiseCardProps } from "./ExpertiseCard";
 
 export const cardData: ExpertiseCardProps[] = [
   {
     title: "AI Strategy & Consultation",
-    description: "Developing comprehensive AI adoption strategies tailored to business needs",
+    description: "Helping businesses create clear, actionable plans for AI adoption",
     icon: Brain,
     bulletPoints: [
-      "Custom AI roadmap development",
-      "ROI analysis and implementation planning",
-      "Technology stack assessment",
-      "Risk assessment and mitigation strategies"
+      "Create clear plans for AI adoption",
+      "Analyze ROI and map out implementation",
+      "Assess your tech stack and plan for change"
     ],
-    bulletPointIcon: Shield,
-    learnMore: "Learn more about our strategic consulting approach",
     stats: {
       projectsCompleted: 50,
       successRate: 95,
@@ -23,16 +19,13 @@ export const cardData: ExpertiseCardProps[] = [
   },
   {
     title: "Workflow Automation",
-    description: "Streamlining business processes with intelligent automation",
-    icon: Cpu,
+    description: "Streamlining operations and eliminating manual processes",
+    icon: Workflow,
     bulletPoints: [
-      "Process analysis and optimization",
-      "Custom automation solution development",
-      "Integration with existing systems",
-      "Performance monitoring and optimization"
+      "Identify and automate manual processes",
+      "Integrate systems for smoother operations",
+      "Improve quality and free up your team's time"
     ],
-    bulletPointIcon: Network,
-    learnMore: "Discover our workflow automation solutions",
     stats: {
       processesAutomated: 200,
       efficiencyGain: 75,
@@ -44,13 +37,10 @@ export const cardData: ExpertiseCardProps[] = [
     description: "Transforming raw data into actionable business intelligence",
     icon: LineChart,
     bulletPoints: [
-      "Advanced data analytics",
-      "Predictive modeling",
-      "Business intelligence dashboards",
-      "Custom reporting solutions"
+      "Turn raw data into actionable intelligence",
+      "Set up real-time dashboards and reporting",
+      "Provide clear trends and insights for better decisions"
     ],
-    bulletPointIcon: Database,
-    learnMore: "Explore our data analytics capabilities",
     stats: {
       dataPointsAnalyzed: "1M+",
       insightsGenerated: "500+",
@@ -62,13 +52,10 @@ export const cardData: ExpertiseCardProps[] = [
     description: "Building intelligent applications for modern businesses",
     icon: Smartphone,
     bulletPoints: [
-      "AI-powered app development",
-      "Progressive web applications",
-      "Cross-platform solutions",
-      "Smart UI/UX design"
+      "Build smart applications that work across platforms",
+      "Design interfaces that drive user engagement",
+      "Deliver solutions that meet your business needs"
     ],
-    bulletPointIcon: Book,
-    learnMore: "View our application development portfolio",
     stats: {
       appsDelivered: 75,
       userSatisfaction: 96,

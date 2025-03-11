@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import ExpertiseCard from './ExpertiseCard';
 import ScrollProgress from './ScrollProgress';
 import BackgroundCTA from './BackgroundCTA';
-import { cardData, timelinePoints } from './expertiseData';
+import { cardData } from './expertiseData';
 
 const BackgroundExperience = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -15,29 +15,14 @@ const BackgroundExperience = () => {
     offset: ["start end", "end start"]
   });
   
-  // Background pattern animation based on scroll
   const patternOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.05, 0.1, 0.05]);
   const patternRotation = useTransform(scrollYProgress, [0, 1], [0, 10]);
   const patternScale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.05, 1]);
-  
-  // Card appearance variants for staggered animation
-  const cardContainerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.3
-      }
-    }
-  };
 
   return (
     <section ref={containerRef} className="relative py-16 px-4 bg-gradient-to-b from-muted/30 to-background overflow-hidden">
-      {/* Scroll progress indicator */}
       <ScrollProgress targetRef={containerRef} />
       
-      {/* Animated background pattern */}
       <motion.div 
         style={{ 
           opacity: patternOpacity,
@@ -47,7 +32,7 @@ const BackgroundExperience = () => {
         className="absolute inset-0 bg-grid-pattern pointer-events-none z-0"
       />
       
-      <div className="container mx-auto max-w-5xl relative z-10">
+      <div className="container mx-auto max-w-6xl relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -55,19 +40,32 @@ const BackgroundExperience = () => {
           viewport={{ once: true }}
         >
           <AnimatedText 
-            text="My Background" 
+            text="What I Do" 
             tag="h2" 
-            className="text-3xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground/80 to-foreground" 
+            className="text-3xl font-bold mb-4 text-center" 
+          />
+          <AnimatedText 
+            text="I help businesses use AI to get clear results. My work falls into four key areas:" 
+            tag="p" 
+            className="text-xl text-muted-foreground text-center mb-12" 
           />
         </motion.div>
         
-        {/* Expertise cards with staggered animation */}
         <motion.div 
           className="grid grid-cols-1 md:grid-cols-2 gap-8"
-          variants={cardContainerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.1 }}
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.2,
+                delayChildren: 0.3
+              }
+            }
+          }}
         >
           {cardData.map((card, index) => (
             <ExpertiseCard 
