@@ -6,7 +6,8 @@ import { ChatInput } from "./ai-chat/ChatInput";
 import { ChatMessageList } from "./ai-chat/ChatMessageList";
 import { useMessages } from "@/hooks/useMessages";
 import { useSuggestedResponse } from "@/hooks/useSuggestedResponse";
-import { LeadInfo } from "@/services/copilotService";
+import { LeadInfo } from "@/services/lead/leadExtractor";
+import { generateResponse } from "@/services/chat/responseGenerator";
 import { AnimatePresence, motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 
@@ -60,9 +61,21 @@ export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatIn
     setIsLoading(true);
     try {
       addUserMessage(inputValue);
+      
+      // Create mock lead info from conversation context
+      const mockLeadInfo: LeadInfo = {
+        interests: messages.map(m => m.content),
+        stage: 'discovery'
+      };
+      
+      // Generate AI response with possible graphic cards
+      const aiResponse = generateResponse(inputValue, mockLeadInfo);
+      
       // Simulate AI response delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      addAssistantMessage("This is a mock response. Replace with actual AI response logic.");
+      
+      // Add the response to the chat
+      addAssistantMessage(aiResponse);
     } catch (error) {
       toast({
         title: "Error sending message",

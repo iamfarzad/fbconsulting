@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 import { Bot, CircleUserRound } from "lucide-react";
 import { motion } from "framer-motion";
 import { AIMessage } from "@/services/chat/messageTypes";
+import { GraphicCardCollection } from './GraphicCardCollection';
+import { CardType } from './GraphicCard';
 
 interface MessageProps {
   message: AIMessage;
@@ -12,6 +14,37 @@ interface MessageProps {
 
 export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
   const isUser = message.role === 'user';
+  
+  // Check if message contains card data
+  const hasCards = message.content.includes('[[CARD:');
+  
+  // Extract card data if present
+  const extractCards = (content: string): { 
+    textContent: string, 
+    cards: Array<{ type: CardType; title: string; description: string }> 
+  } => {
+    const cards: Array<{ type: CardType; title: string; description: string }> = [];
+    let textContent = content;
+    
+    // Extract card data from message content
+    const cardRegex = /\[\[CARD:(\w+):([^:]+):([^\]]+)\]\]/g;
+    let match;
+    
+    while ((match = cardRegex.exec(content)) !== null) {
+      const type = match[1] as CardType;
+      const title = match[2];
+      const description = match[3];
+      
+      cards.push({ type, title, description });
+      
+      // Remove the card data from the text content
+      textContent = textContent.replace(match[0], '');
+    }
+    
+    return { textContent: textContent.trim(), cards };
+  };
+  
+  const { textContent, cards } = hasCards ? extractCards(message.content) : { textContent: message.content, cards: [] };
   
   return (
     <motion.div
@@ -33,8 +66,16 @@ export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
         )}
         <div>
           <p className={isUser ? "text-black" : "text-white"}>
-            {message.content}
+            {textContent}
           </p>
+          
+          {/* Render cards if present */}
+          {cards.length > 0 && (
+            <div className="mt-3">
+              <GraphicCardCollection cards={cards} />
+            </div>
+          )}
+          
           <div className={cn(
             "text-xs mt-1",
             isUser ? "text-black/70" : "text-white/70"

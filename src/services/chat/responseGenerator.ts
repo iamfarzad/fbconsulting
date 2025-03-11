@@ -1,59 +1,100 @@
 
 import { LeadInfo } from '../lead/leadExtractor';
 
-// Generate a response based on the current lead information and conversation
-export const generateSuggestedResponse = (leadInfo: LeadInfo): string | null => {
-  // If we reached the booking stage, suggest booking a call
-  if (leadInfo.stage === 'ready-to-book') {
-    return 'Would you like to schedule a consultation call where we can discuss your needs in more detail?';
-  }
-  
-  // If we're at the interested stage, suggest a service
-  if (leadInfo.stage === 'interested' && leadInfo.interests?.length) {
-    return `Based on your interest in ${leadInfo.interests[0]}, I'd recommend starting with a consultation to see how we can customize this service for your specific needs.`;
-  }
-  
-  // If we're at qualification and know a challenge but don't have interests yet
-  if (leadInfo.stage === 'qualification' && leadInfo.challenges?.length && !leadInfo.interests?.length) {
-    return `I see you're facing challenges with ${leadInfo.challenges[0]}. Would you like to know how our AI automation solutions can help address this?`;
-  }
-  
-  // If we're at discovery and don't know much yet
-  if (leadInfo.stage === 'discovery' && !leadInfo.name) {
-    return "To better understand how I can help you, could you tell me a bit about yourself and your business?";
-  }
-  
-  // No suggestion needed
-  return null;
+// Function to determine the persona based on conversation and lead data
+export const determinePersona = (leadInfo: LeadInfo): string => {
+  // Default to helper persona
+  return 'helper';
 };
 
-// Determine the persona to use based on the user's interests and page
-export const determinePersona = (
-  leadInfo: LeadInfo,
-  currentPage?: string
-): 'strategist' | 'technical' | 'consultant' | 'general' => {
-  // If on a specific page, use that persona
-  if (currentPage === 'services') {
-    return 'consultant';
+// Function to generate a suggested response based on lead info
+export const generateSuggestedResponse = (leadInfo: LeadInfo): string | null => {
+  // If we have interests, suggest a response based on the first interest
+  if (leadInfo.interests && leadInfo.interests.length > 0) {
+    const lastInterest = leadInfo.interests[leadInfo.interests.length - 1].toLowerCase();
+    
+    if (lastInterest.includes('service') || lastInterest.includes('help') || lastInterest.includes('offer')) {
+      return "I'm interested in learning more about your services.";
+    }
+    
+    if (lastInterest.includes('cost') || lastInterest.includes('price')) {
+      return "Can you tell me about your pricing options?";
+    }
+    
+    if (lastInterest.includes('contact') || lastInterest.includes('talk')) {
+      return "I'd like to schedule a consultation.";
+    }
   }
   
-  if (currentPage === 'blog') {
-    return 'strategist';
+  // Default suggestion
+  return "Can you tell me more about how your AI solutions work?";
+};
+
+// Function to check if message contains information request keywords
+const containsInfoRequest = (message: string): boolean => {
+  const lowercaseMsg = message.toLowerCase();
+  
+  return (
+    lowercaseMsg.includes('service') || 
+    lowercaseMsg.includes('about you') || 
+    lowercaseMsg.includes('experience') ||
+    lowercaseMsg.includes('timeline') ||
+    lowercaseMsg.includes('background') ||
+    lowercaseMsg.includes('what do you do')
+  );
+};
+
+// Function to generate graphic cards based on user query
+export const generateGraphicCards = (message: string): string => {
+  const lowercaseMsg = message.toLowerCase();
+  let cardContent = '';
+  
+  if (lowercaseMsg.includes('service') || lowercaseMsg.includes('what do you do') || lowercaseMsg.includes('offer')) {
+    cardContent += '[[CARD:services:AI Automation Services:Explore our range of AI solutions for business automation and growth.]]';
   }
   
-  // Based on detected interests
-  if (leadInfo.interests?.includes('AI Strategy')) {
-    return 'strategist';
+  if (lowercaseMsg.includes('about') || lowercaseMsg.includes('background') || lowercaseMsg.includes('who')) {
+    cardContent += '[[CARD:about:About Us:Learn about our experience and expertise in AI development.]]';
   }
   
-  if (leadInfo.interests?.some(i => 
-    i === 'Workflow Automation' || 
-    i === 'AI Chatbots' || 
-    i === 'Data Analysis'
-  )) {
-    return 'technical';
+  if (lowercaseMsg.includes('timeline') || lowercaseMsg.includes('experience') || lowercaseMsg.includes('history')) {
+    cardContent += '[[CARD:timeline:Our Journey:View our professional timeline and key achievements over the years.]]';
   }
   
-  // Default to general
-  return 'general';
+  return cardContent;
+};
+
+// Generate an AI response based on the user message and lead info
+export const generateResponse = (message: string, leadInfo: LeadInfo): string => {
+  const lowercaseMsg = message.toLowerCase();
+  let response = '';
+  
+  // Check for information requests that would benefit from graphic cards
+  if (containsInfoRequest(message)) {
+    const cardContent = generateGraphicCards(message);
+    
+    if (lowercaseMsg.includes('service')) {
+      response = "I'd be happy to tell you about our services. We offer AI automation, chatbot development, data analysis, and custom AI solutions. You can explore more details by clicking the card below:";
+    } else if (lowercaseMsg.includes('about') || lowercaseMsg.includes('who')) {
+      response = "We're a team of AI specialists with expertise in creating custom solutions for businesses. You can learn more about us by clicking the card below:";
+    } else if (lowercaseMsg.includes('timeline') || lowercaseMsg.includes('experience')) {
+      response = "Our team has over 10 years of combined experience in AI development. You can view our journey and key milestones by clicking the card below:";
+    } else {
+      response = "Here's some information that might help you:";
+    }
+    
+    return response + "\n\n" + cardContent;
+  }
+  
+  // Default responses for common queries
+  if (lowercaseMsg.includes('hello') || lowercaseMsg.includes('hi ')) {
+    return "Hello! I'm your AI assistant. How can I help you today? I can tell you about our services, our background, or how we can help your business grow with AI.";
+  }
+  
+  if (lowercaseMsg.includes('thank')) {
+    return "You're welcome! Is there anything else you'd like to know about our AI services or expertise?";
+  }
+  
+  // General fallback response
+  return "Thank you for your message. I'd be happy to help you with that. Is there anything specific about our AI services or expertise you'd like to know more about?";
 };
