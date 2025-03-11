@@ -17,6 +17,33 @@ interface BulletPointProps {
   accentColor: string;
 }
 
+// Define additional information for each bullet point
+const additionalInfo: Record<string, string> = {
+  // AI Strategy
+  "Custom AI roadmap development": "We develop personalized AI implementation plans tailored to your business goals, industry challenges, and technological readiness. Each roadmap includes milestone planning, resource allocation, and ROI projections.",
+  "ROI analysis and implementation planning": "Our comprehensive analysis identifies tangible and intangible benefits, cost structures, and expected timelines for AI investment returns, supported by industry benchmarks and case studies.",
+  "Technology stack assessment": "We evaluate your existing infrastructure against AI requirements, identifying integration paths, potential bottlenecks, and recommending optimal cloud or on-premise solutions.",
+  "Risk assessment and mitigation strategies": "We provide a thorough analysis of technical, ethical, and business risks, with detailed mitigation plans and governance frameworks to ensure AI compliance and security.",
+  
+  // Workflow Automation
+  "Process analysis and optimization": "We map your existing workflows, identify inefficiencies, and redesign processes before implementing automation, reducing costs by up to 40% and increasing throughput.",
+  "Custom automation solution development": "Our team builds tailor-made solutions using RPA, AI, and integration technologies to automate complex business processes while maintaining compliance and audit trails.",
+  "Integration with existing systems": "Seamlessly connect new automation tools with your CRM, ERP, and legacy systems using API-first architecture and middleware solutions that minimize disruption.",
+  "Performance monitoring and optimization": "Deploy continuous monitoring dashboards that track KPIs, alert on issues, and identify further optimization opportunities through ML-powered process mining.",
+  
+  // Data Analytics
+  "Advanced data analytics": "Leverage predictive modeling, cluster analysis, and anomaly detection to uncover hidden patterns and opportunities within your business data.",
+  "Predictive modeling": "Build forward-looking models using regression analysis, time series forecasting, and machine learning algorithms trained on your historical data for accurate projections.",
+  "Business intelligence dashboards": "Create intuitive, interactive visualizations that transform complex data into actionable insights, customized for different stakeholders and decision-making needs.",
+  "Custom reporting solutions": "Develop automated, scheduled reports with drill-down capabilities that deliver the right information to the right people at the right time.",
+  
+  // Mobile & Web Solutions
+  "AI-powered app development": "Create intelligent applications with embedded machine learning capabilities, natural language processing, and computer vision that learn and improve over time.",
+  "Progressive web applications": "Build responsive, offline-capable web apps that offer near-native mobile experiences without the friction of app store downloads.",
+  "Cross-platform solutions": "Develop once and deploy everywhere with technologies like React Native, ensuring consistent experiences across iOS, Android, and web platforms.",
+  "Smart UI/UX design": "Design intuitive, accessible interfaces based on user research, behavioral analytics, and AI-driven personalization to maximize engagement and conversion."
+};
+
 const BulletPoint: React.FC<BulletPointProps> = ({
   item,
   index,
@@ -146,7 +173,7 @@ const BulletPoint: React.FC<BulletPointProps> = ({
                 }}
                 className={`mt-2 text-xs text-muted-foreground bg-${accentColor}/5 p-2 rounded-md border border-${accentColor}/10`}
               >
-                This is additional information about "{item}". Click to expand or collapse this section for more details about this specific area of expertise.
+                {additionalInfo[item] || `Additional details about ${item} will be added soon. This feature provides in-depth information about our expertise in this area.`}
               </motion.div>
             )}
           </AnimatePresence>
