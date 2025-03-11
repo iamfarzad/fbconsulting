@@ -24,13 +24,13 @@ const BookingCalendarSection = () => {
   };
 
   return (
-    <div className="mt-16">
-      <Card className="p-8 border-0 shadow-md bg-white/50">
+    <div>
+      <Card className="p-8 border-0 shadow-md bg-white/50 backdrop-blur-sm">
         <div className="text-center mb-8">
           <AnimatedText
             text="Schedule a Free Consultation"
             tag="h2"
-            className="text-2xl font-bold mb-2"
+            className="text-2xl font-bold mb-2 text-foreground"
           />
           <AnimatedText
             text={showConfirmation 
@@ -44,10 +44,10 @@ const BookingCalendarSection = () => {
         
         {showConfirmation ? (
           <div className="max-w-2xl mx-auto">
-            <div className="bg-teal-50 rounded-lg p-6 mb-6 border border-teal-100">
+            <div className="bg-violet-50 rounded-lg p-6 mb-6 border border-violet-100">
               <div className="flex items-center justify-center mb-4">
-                <CalendarCheck size={28} className="text-teal-600 mr-2" />
-                <h3 className="text-lg font-medium text-teal-700">Booking Summary</h3>
+                <CalendarCheck size={28} className="text-violet-600 mr-2" />
+                <h3 className="text-lg font-medium text-violet-700">Booking Summary</h3>
               </div>
               
               <div className="space-y-4">
@@ -84,7 +84,7 @@ const BookingCalendarSection = () => {
                 </Button>
                 
                 <Button
-                  className="bg-teal-600 hover:bg-teal-700 text-white"
+                  className="bg-violet-600 hover:bg-violet-700 text-white"
                   disabled={!bookingDetails.date || !bookingDetails.time}
                 >
                   Confirm Booking
@@ -93,7 +93,7 @@ const BookingCalendarSection = () => {
             </div>
           </div>
         ) : (
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-4xl mx-auto">
             <BookingCalendar onBookingSelected={handleBookingSelected} />
           </div>
         )}

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Mail, MessageSquare, User, ArrowRight, Briefcase } from 'lucide-react';
+import { Mail, MessageSquare, User, ArrowRight, Briefcase, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -53,76 +53,76 @@ const ContactForm = () => {
   };
 
   return (
-    <Card className="lg:col-span-3 p-8 shadow-md border-0">
-      <h2 className="text-2xl font-bold mb-6">Send a Message</h2>
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="space-y-2">
-          <label htmlFor="name" className="block text-sm font-medium">
-            Your Name
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
-              <User size={18} />
+    <Card className="p-8 shadow-md border-0 bg-white/50 backdrop-blur-sm">
+      <h2 className="text-2xl font-bold mb-6 text-foreground">Send a Message</h2>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <label htmlFor="name" className="block text-sm font-medium text-foreground/80">
+              Your Name
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                <User size={18} />
+              </div>
+              <Input 
+                id="name" 
+                placeholder="John Doe" 
+                className="pl-10" 
+                required 
+                value={formData.name}
+                onChange={handleChange}
+              />
             </div>
-            <Input 
-              id="name" 
-              placeholder="John Doe" 
-              className="pl-10" 
-              required 
-              value={formData.name}
-              onChange={handleChange}
-            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="email" className="block text-sm font-medium text-foreground/80">
+              Email Address
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                <Mail size={18} />
+              </div>
+              <Input 
+                id="email" 
+                type="email" 
+                placeholder="your.email@example.com" 
+                className="pl-10" 
+                required 
+                value={formData.email}
+                onChange={handleChange}
+              />
+            </div>
           </div>
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium">
-            Email Address
-          </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
-              <Mail size={18} />
-            </div>
-            <Input 
-              id="email" 
-              type="email" 
-              placeholder="your.email@example.com" 
-              className="pl-10" 
-              required 
-              value={formData.email}
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="service" className="block text-sm font-medium">
+          <label htmlFor="service" className="block text-sm font-medium text-foreground/80">
             Service Interest
           </label>
-          <div className="relative">
-            <Select 
-              value={formData.service} 
-              onValueChange={handleServiceChange}
-            >
-              <SelectTrigger id="service" className="w-full pl-10">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
-                  <Briefcase size={18} />
-                </div>
-                <SelectValue placeholder="Select a service" />
-              </SelectTrigger>
-              <SelectContent>
-                {services.map((service, index) => (
-                  <SelectItem key={index} value={service.title}>
-                    {service.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select 
+            value={formData.service} 
+            onValueChange={handleServiceChange}
+          >
+            <SelectTrigger id="service" className="w-full pl-10 relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                <Briefcase size={18} />
+              </div>
+              <SelectValue placeholder="Select a service" />
+            </SelectTrigger>
+            <SelectContent>
+              {services.map((service, index) => (
+                <SelectItem key={index} value={service.title}>
+                  {service.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="message" className="block text-sm font-medium">
+          <label htmlFor="message" className="block text-sm font-medium text-foreground/80">
             Message
           </label>
           <div className="relative">
@@ -132,7 +132,7 @@ const ContactForm = () => {
             <Textarea 
               id="message" 
               placeholder="How can I help with your AI automation needs?"
-              className="pl-10 min-h-[150px]"
+              className="pl-10 min-h-[150px] resize-none"
               required
               value={formData.message}
               onChange={handleChange}
@@ -140,7 +140,10 @@ const ContactForm = () => {
           </div>
         </div>
 
-        <Button type="submit" className="w-full bg-teal-600 hover:bg-teal-700 text-white flex items-center gap-2 rounded-md">
+        <Button 
+          type="submit" 
+          className="w-full bg-violet-600 hover:bg-violet-700 text-white flex items-center gap-2 justify-center rounded-md"
+        >
           Send Message
           <ArrowRight size={16} />
         </Button>

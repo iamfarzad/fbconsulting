@@ -15,17 +15,24 @@ const ContactSection = () => {
           subtitle="Book a consultation or send me a message"
         />
 
-        <div className="mt-12">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="mt-12 space-y-12">
+          {/* Main Contact Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
             {/* Contact Card - Left Column */}
-            <ContactInfoCard />
+            <div className="md:col-span-4">
+              <ContactInfoCard />
+            </div>
 
-            {/* Contact Form - Center Column */}
-            <ContactForm />
+            {/* Contact Form - Right Column */}
+            <div className="md:col-span-8">
+              <ContactForm />
+            </div>
           </div>
 
           {/* Booking Calendar Section */}
-          <BookingCalendarSection />
+          <div className="border-t border-border/30 pt-12">
+            <BookingCalendarSection />
+          </div>
         </div>
       </div>
     </section>
