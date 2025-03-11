@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Check, Package, Code, Building } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import AnimatedText from './AnimatedText';
@@ -18,8 +18,7 @@ const pricingData = [
       "90-minute virtual consultation"
     ],
     popular: false,
-    callToAction: "Book a Session",
-    icon: <Package className="w-5 h-5 text-primary" />
+    callToAction: "Book a Session"
   },
   {
     title: "Implementation Package",
@@ -31,8 +30,7 @@ const pricingData = [
       "Staff training + 30 days support"
     ],
     popular: true,
-    callToAction: "Get Started",
-    icon: <Code className="w-5 h-5 text-primary" />
+    callToAction: "Get Started"
   },
   {
     title: "Enterprise Partnership",
@@ -44,8 +42,7 @@ const pricingData = [
       "Priority development & maintenance"
     ],
     popular: false,
-    callToAction: "Contact for Quote",
-    icon: <Building className="w-5 h-5 text-primary" />
+    callToAction: "Contact for Quote"
   }
 ];
 
@@ -91,9 +88,7 @@ const Pricing = () => {
               )}
               <CardHeader>
                 <CardTitle className="text-2xl flex items-center gap-2">
-                  <div className="p-2 rounded-lg bg-primary/10 flex items-center justify-center">
-                    {plan.icon}
-                  </div>
+                  <span className="text-teal">📌</span>
                   {plan.title}
                 </CardTitle>
                 <div className="mt-4 flex items-baseline">
@@ -108,7 +103,7 @@ const Pricing = () => {
                 <ul className="space-y-3 mt-4">
                   {plan.features.map((feature, featureIndex) => (
                     <li key={featureIndex} className="flex items-start gap-2">
-                      <Check className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                      <span className="text-teal">🔹</span>
                       <span>{feature}</span>
                     </li>
                   ))}
