@@ -4,13 +4,16 @@ import { useLocation } from 'react-router-dom';
 import React from 'react';
 import { 
   LeadInfo, 
-  extractLeadInfo,
-  determinePersona,
+  extractLeadInfo 
+} from '@/services/lead/leadExtractor';
+import { determinePersona } from '@/services/chat/responseGenerator';
+import {
   saveLeadInfo,
   loadLeadInfo
-} from '@/services/copilotService';
+} from '@/services/storage/localStorageManager';
 import { trackEvent } from '@/services/analyticsService';
 import { useToast } from './use-toast';
+import { useLeadStage } from './useLeadStage';
 
 export const useLeadInfo = (initialLeadInfo?: LeadInfo) => {
   const { toast } = useToast();
@@ -21,6 +24,9 @@ export const useLeadInfo = (initialLeadInfo?: LeadInfo) => {
   const [leadInfo, setLeadInfo] = useState<LeadInfo>(() => {
     return initialLeadInfo || loadLeadInfo();
   });
+  
+  // Use our new hook for lead stage management
+  const { processMessageForStage } = useLeadStage(leadInfo);
   
   // State for current persona
   const [currentPersona, setCurrentPersona] = useState<'strategist' | 'technical' | 'consultant' | 'general'>(
@@ -41,7 +47,11 @@ export const useLeadInfo = (initialLeadInfo?: LeadInfo) => {
   
   // Update lead info based on a message
   const updateLeadInfo = useCallback((message: string) => {
-    const updatedLeadInfo = extractLeadInfo(message, leadInfo);
+    // First extract basic lead info
+    const extractedLeadInfo = extractLeadInfo(message, leadInfo);
+    
+    // Then process for stage updates
+    const updatedLeadInfo = processMessageForStage(message, extractedLeadInfo);
     
     // Only update if there are changes
     if (JSON.stringify(updatedLeadInfo) !== JSON.stringify(leadInfo)) {
@@ -58,7 +68,7 @@ export const useLeadInfo = (initialLeadInfo?: LeadInfo) => {
     }
     
     return updatedLeadInfo;
-  }, [leadInfo, toast]);
+  }, [leadInfo, processMessageForStage, toast]);
   
   // Clear lead info
   const clearLeadInfo = useCallback(() => {

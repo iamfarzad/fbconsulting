@@ -3,7 +3,8 @@
 // This maintains backward compatibility with existing code
 
 // Lead extraction
-export { LeadInfo, extractLeadInfo } from './lead/leadExtractor';
+export { extractLeadInfo } from './lead/leadExtractor';
+export type { LeadInfo } from './lead/leadExtractor';
 
 // Lead stage management
 export { determineLeadStage, updateLeadStage } from './lead/leadStageManager';
@@ -12,7 +13,7 @@ export { determineLeadStage, updateLeadStage } from './lead/leadStageManager';
 export { generateSuggestedResponse, determinePersona } from './chat/responseGenerator';
 
 // Message types
-export { AIMessage } from './chat/messageTypes';
+export type { AIMessage } from './chat/messageTypes';
 
 // Storage management
 export {

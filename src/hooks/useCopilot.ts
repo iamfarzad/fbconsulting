@@ -1,7 +1,8 @@
 
 import { useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { LeadInfo, AIMessage } from '@/services/copilotService';
+import { LeadInfo } from '@/services/lead/leadExtractor';
+import { AIMessage } from '@/services/chat/messageTypes';
 import { useToast } from './use-toast';
 import { useMessages } from './useMessages';
 import { useLeadInfo } from './useLeadInfo';
