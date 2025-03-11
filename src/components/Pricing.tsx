@@ -88,7 +88,6 @@ const Pricing = () => {
               )}
               <CardHeader>
                 <CardTitle className="text-2xl flex items-center gap-2">
-                  <span className="text-teal">📌</span>
                   {plan.title}
                 </CardTitle>
                 <div className="mt-4 flex items-baseline">
@@ -103,7 +102,7 @@ const Pricing = () => {
                 <ul className="space-y-3 mt-4">
                   {plan.features.map((feature, featureIndex) => (
                     <li key={featureIndex} className="flex items-start gap-2">
-                      <span className="text-teal">🔹</span>
+                      <Check className="w-5 h-5 text-primary" />
                       <span>{feature}</span>
                     </li>
                   ))}

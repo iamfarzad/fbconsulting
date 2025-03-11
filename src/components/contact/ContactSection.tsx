@@ -8,7 +8,11 @@ import { trackEvent } from '@/services/analyticsService';
 
 const ContactSection = () => {
   React.useEffect(() => {
-    trackEvent('page_view', { section: 'contact' });
+    trackEvent({
+      action: 'page_view', 
+      category: 'navigation', 
+      label: 'contact'
+    });
   }, []);
 
   return (
