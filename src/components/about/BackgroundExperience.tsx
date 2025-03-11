@@ -1,9 +1,9 @@
+
 import React, { useRef } from 'react';
 import AnimatedText from '@/components/AnimatedText';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import ExpertiseCard from './ExpertiseCard';
 import ScrollProgress from './ScrollProgress';
-import TimelineProgress from './TimelineProgress';
 import BackgroundCTA from './BackgroundCTA';
 import { cardData, timelinePoints } from './expertiseData';
 

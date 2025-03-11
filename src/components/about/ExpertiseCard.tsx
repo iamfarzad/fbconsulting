@@ -39,6 +39,7 @@ const ExpertiseCard: React.FC<ExpertiseCardProps> = ({
   return (
     <motion.div
       variants={cardVariants}
+      whileHover={{ scale: 1.02 }}
       className="group relative p-6 bg-background/50 backdrop-blur-sm rounded-xl border border-primary/10 hover:border-primary/20 transition-all duration-300"
     >
       {/* Glow effect */}
@@ -59,8 +60,10 @@ const ExpertiseCard: React.FC<ExpertiseCardProps> = ({
           {bulletPoints.map((point, index) => (
             <BulletPoint 
               key={index}
-              text={point}
-              icon={BulletIcon}
+              item={point}
+              index={index}
+              bulletPointIcon={BulletIcon}
+              accentColor="primary"
             />
           ))}
         </ul>
