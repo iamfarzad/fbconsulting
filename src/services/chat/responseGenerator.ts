@@ -1,10 +1,17 @@
-
 import { LeadInfo } from '../lead/leadExtractor';
 
 // Function to determine the persona based on conversation and lead data
-export const determinePersona = (leadInfo: LeadInfo): string => {
+export const determinePersona = (leadInfo: LeadInfo, currentPage?: string): 'strategist' | 'technical' | 'consultant' | 'general' => {
   // Default to helper persona
-  return 'helper';
+  if (currentPage === 'services') {
+    return 'consultant';
+  } else if (currentPage === 'about') {
+    return 'strategist';
+  } else if (currentPage?.includes('blog')) {
+    return 'technical';
+  }
+  
+  return 'general';
 };
 
 // Function to generate a suggested response based on lead info
