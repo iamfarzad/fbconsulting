@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import AnimatedText from '@/components/AnimatedText';
 import { motion, useScroll, useTransform } from 'framer-motion';
@@ -10,6 +9,7 @@ import { cardData, timelinePoints } from './expertiseData';
 
 const BackgroundExperience = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start end", "end start"]
@@ -20,7 +20,7 @@ const BackgroundExperience = () => {
   const patternRotation = useTransform(scrollYProgress, [0, 1], [0, 10]);
   const patternScale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.05, 1]);
   
-  // Card appearance variants
+  // Card appearance variants for staggered animation
   const cardContainerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -31,9 +31,9 @@ const BackgroundExperience = () => {
       }
     }
   };
-  
+
   return (
-    <section ref={containerRef} className="py-16 px-4 bg-gradient-to-b from-muted/30 to-background relative overflow-hidden">
+    <section ref={containerRef} className="relative py-16 px-4 bg-gradient-to-b from-muted/30 to-background overflow-hidden">
       {/* Scroll progress indicator */}
       <ScrollProgress targetRef={containerRef} />
       
@@ -61,9 +61,6 @@ const BackgroundExperience = () => {
           />
         </motion.div>
         
-        {/* Timeline */}
-        <TimelineProgress timelinePoints={timelinePoints} />
-        
         {/* Expertise cards with staggered animation */}
         <motion.div 
           className="grid grid-cols-1 md:grid-cols-2 gap-8"
@@ -75,13 +72,11 @@ const BackgroundExperience = () => {
           {cardData.map((card, index) => (
             <ExpertiseCard 
               key={index}
-              index={index}
               {...card}
             />
           ))}
         </motion.div>
         
-        {/* Call to action */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

@@ -1,175 +1,87 @@
 
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import React from 'react';
+import { LucideIcon } from 'lucide-react';
+import { motion } from 'framer-motion';
 import BulletPoint from './BulletPoint';
-import SocialProof from './SocialProof';
 
-interface ExpertiseCardProps {
+export interface ExpertiseCardProps {
   title: string;
-  subtitle?: string;
-  icon: React.ElementType; // Icon component type
-  iconBgClass: string;
-  iconColor: string;
-  accentColor: string;
   description: string;
+  icon: LucideIcon;
   bulletPoints: string[];
-  additionalDetails?: string;
-  bulletPointIcon: React.ElementType; // Changed to ElementType to match BulletPoint
-  index: number;
-  contactLink?: {
-    text: string;
-    url: string;
+  bulletPointIcon: LucideIcon;
+  learnMore: string;
+  stats?: {
+    [key: string]: number | string;
   };
-  customClass?: string;
 }
 
 const ExpertiseCard: React.FC<ExpertiseCardProps> = ({
   title,
-  subtitle,
-  icon: IconComponent,
-  iconBgClass,
-  iconColor,
-  accentColor,
   description,
+  icon: Icon,
   bulletPoints,
-  additionalDetails,
-  bulletPointIcon,
-  index,
-  contactLink,
-  customClass,
+  bulletPointIcon: BulletIcon,
+  learnMore,
+  stats
 }) => {
-  const [expanded, setExpanded] = useState(false);
-  
-  const toggleExpand = () => {
-    setExpanded(!expanded);
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.5
+      }
+    }
   };
-
-  // Calculate animation delay based on card index
-  const animationDelay = 0.2 + (index * 0.15);
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: animationDelay }}
-      viewport={{ once: true, amount: 0.3 }}
-      whileHover={{ 
-        y: -8, 
-        transition: { duration: 0.3 }
-      }}
+      variants={cardVariants}
+      className="group relative p-6 bg-background/50 backdrop-blur-sm rounded-xl border border-primary/10 hover:border-primary/20 transition-all duration-300"
     >
-      <Card className={cn(
-        "group hover:shadow-xl transition-all duration-500 border border-border/60 backdrop-blur-sm bg-background/80 overflow-hidden",
-        `hover:border-${accentColor}/40 relative`,
-        customClass
-      )}>
-        {/* Glow effect on hover */}
-        <motion.div 
-          className={`absolute inset-0 bg-${accentColor}/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
-          initial={{ opacity: 0 }}
-          whileHover={{ opacity: 1 }}
-        />
-        
-        {/* Accent line on left side */}
-        <div className={`absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-${accentColor}/70 to-${accentColor}/10`}></div>
-        
-        <CardContent className="p-6 relative z-10">
-          <div className="flex items-start mb-4">
-            <motion.div 
-              className={`mr-4 p-2 rounded-full ${iconBgClass} ${iconColor} flex items-center justify-center`}
-              whileHover={{ scale: 1.1, rotate: [0, 5, 0, -5, 0] }}
-              transition={{ duration: 0.5 }}
-            >
-              <IconComponent size={24} />
-            </motion.div>
-            <div>
-              <motion.h3 
-                className={`text-xl font-semibold mb-1 group-hover:text-${accentColor} transition-colors duration-300`}
-                initial={{ opacity: 0.9 }}
-                whileHover={{ scale: 1.01 }}
-              >
-                {title}
-              </motion.h3>
-              <motion.div 
-                className={`h-1 w-16 bg-${accentColor}/20 rounded-full mb-3`}
-                whileHover={{ width: 150 }}
-                transition={{ duration: 0.4 }}
-              />
-              {subtitle && (
-                <p className="mb-3 font-medium group-hover:text-foreground/90 transition-colors">
-                  {subtitle}
-                </p>
-              )}
-            </div>
+      {/* Glow effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl" />
+      
+      {/* Content */}
+      <div className="relative z-10">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 rounded-lg bg-primary/10">
+            <Icon className="w-6 h-6 text-primary" />
           </div>
-          
-          <p className="mb-4 text-foreground/80 group-hover:text-foreground transition-colors duration-300">{description}</p>
-          
-          <div className="mb-4">
-            <ul className="space-y-2">
-              {bulletPoints.map((item, idx) => (
-                <BulletPoint 
-                  key={idx}
-                  item={item}
-                  index={idx}
-                  bulletPointIcon={bulletPointIcon}
-                  accentColor={accentColor}
-                />
-              ))}
-            </ul>
+          <h3 className="text-xl font-semibold">{title}</h3>
+        </div>
+        
+        <p className="text-muted-foreground mb-6">{description}</p>
+        
+        <ul className="space-y-3 mb-6">
+          {bulletPoints.map((point, index) => (
+            <BulletPoint 
+              key={index}
+              text={point}
+              icon={BulletIcon}
+            />
+          ))}
+        </ul>
+        
+        {stats && (
+          <div className="grid grid-cols-2 gap-4 mt-6 p-4 bg-muted/50 rounded-lg">
+            {Object.entries(stats).map(([key, value], index) => (
+              <div key={index} className="text-center">
+                <div className="text-lg font-bold text-primary">{value}</div>
+                <div className="text-xs text-muted-foreground capitalize">
+                  {key.replace(/([A-Z])/g, ' $1').trim()}
+                </div>
+              </div>
+            ))}
           </div>
-          
-          {additionalDetails && (
-            <>
-              <Button 
-                variant="ghost" 
-                className={`text-${accentColor} mb-3 w-full justify-between group-hover:bg-${accentColor}/5 transition-colors duration-300`}
-                onClick={toggleExpand}
-              >
-                {expanded ? "Show Less" : "Learn More"}
-                {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              </Button>
-              
-              <AnimatePresence>
-                {expanded && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className={`mb-4 p-3 bg-muted/30 rounded-md border border-${accentColor}/10`}
-                  >
-                    <p className="text-sm">{additionalDetails}</p>
-                    
-                    {/* Social proof numbers */}
-                    <SocialProof accentColor={accentColor} />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </>
-          )}
-          
-          {contactLink && (
-            <motion.div 
-              className="mt-4"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Button 
-                variant="outline" 
-                className={`w-full text-${accentColor} border-${accentColor}/30 hover:bg-${accentColor}/10`}
-                onClick={() => window.location.href = contactLink.url}
-              >
-                {contactLink.text}
-              </Button>
-            </motion.div>
-          )}
-        </CardContent>
-      </Card>
+        )}
+        
+        <button className="text-sm text-primary hover:text-primary/80 mt-4 transition-colors">
+          {learnMore} →
+        </button>
+      </div>
     </motion.div>
   );
 };
