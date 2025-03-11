@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 interface ExpertiseCardProps {
   title: string;
   description: string;
-  icon: React.ElementType; // Changed from ReactNode to ElementType
+  icon: React.ReactNode;
   points: string[];
   index: number;
   isInView: boolean;
@@ -22,7 +22,7 @@ interface ExpertiseCardProps {
 const ExpertiseCard = ({
   title,
   description,
-  icon: Icon, // Adjusted to be used as a component
+  icon,
   points,
   index,
   isInView,
@@ -55,7 +55,7 @@ const ExpertiseCard = ({
       <CardContent className="p-6">
         <div className="flex items-start mb-4">
           <div className={`mr-4 p-2 rounded-full ${iconBgClass} ${iconTextClass}`}>
-            <Icon size={20} /> {/* Now properly used as a component */}
+            {icon}
           </div>
           <div>
             <h3 className={`text-xl font-semibold mb-1 group-hover:${iconTextClass} transition-colors duration-300`}>
@@ -82,7 +82,7 @@ const ExpertiseCard = ({
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: idx * 0.1 + index * 0.2 }}
             >
-              <Icon className={`w-4 h-4 ${iconTextClass} mr-2 mt-1 shrink-0`} />
+              {icon.type({ className: `w-4 h-4 ${iconTextClass} mr-2 mt-1 shrink-0` })}
               <span className="text-sm flex-1">{point}</span>
               <button
                 onClick={() => handleCopyPoint(point)}
