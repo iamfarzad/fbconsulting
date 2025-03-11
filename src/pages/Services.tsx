@@ -65,9 +65,11 @@ const Services = () => {
       {/* Show standard pain points for everyone */}
       <PainPoints />
       
-      <ServicesContent />
-      
+      {/* Display the services offerings in a bento grid layout */}
       <ServicesList />
+      
+      {/* Show detailed information about each service */}
+      <ServicesContent />
       
       <WhyWorkWithMe />
       
