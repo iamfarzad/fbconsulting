@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -57,23 +57,48 @@ const ExpertiseCard: React.FC<ExpertiseCardProps> = ({
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: animationDelay }}
       viewport={{ once: true, amount: 0.3 }}
+      whileHover={{ 
+        y: -8, 
+        transition: { duration: 0.3 }
+      }}
     >
       <Card className={cn(
-        "group hover:shadow-lg transition-all duration-500 border border-border/60 backdrop-blur-sm bg-background/80 overflow-hidden",
-        `hover:border-${accentColor}/20 hover:-translate-y-1`,
+        "group hover:shadow-xl transition-all duration-500 border border-border/60 backdrop-blur-sm bg-background/80 overflow-hidden",
+        `hover:border-${accentColor}/40 relative`,
         customClass
       )}>
-        <div className={`absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-${accentColor}/40 to-${accentColor}/10`}></div>
-        <CardContent className="p-6">
+        {/* Glow effect on hover */}
+        <motion.div 
+          className={`absolute inset-0 bg-${accentColor}/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
+          initial={{ opacity: 0 }}
+          whileHover={{ opacity: 1 }}
+        />
+        
+        {/* Accent line on left side */}
+        <div className={`absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-${accentColor}/70 to-${accentColor}/10`}></div>
+        
+        <CardContent className="p-6 relative z-10">
           <div className="flex items-start mb-4">
-            <div className={`mr-4 p-2 rounded-full ${iconBgClass} ${iconColor}`}>
+            <motion.div 
+              className={`mr-4 p-2 rounded-full ${iconBgClass} ${iconColor} flex items-center justify-center`}
+              whileHover={{ scale: 1.1, rotate: [0, 5, 0, -5, 0] }}
+              transition={{ duration: 0.5 }}
+            >
               <IconComponent size={24} />
-            </div>
+            </motion.div>
             <div>
-              <h3 className={`text-xl font-semibold mb-1 group-hover:text-${accentColor} transition-colors duration-300`}>
+              <motion.h3 
+                className={`text-xl font-semibold mb-1 group-hover:text-${accentColor} transition-colors duration-300`}
+                initial={{ opacity: 0.9 }}
+                whileHover={{ scale: 1.01 }}
+              >
                 {title}
-              </h3>
-              <div className={`h-1 w-16 bg-${accentColor}/20 rounded-full mb-3 group-hover:w-32 transition-all duration-500`}></div>
+              </motion.h3>
+              <motion.div 
+                className={`h-1 w-16 bg-${accentColor}/20 rounded-full mb-3`}
+                whileHover={{ width: 150 }}
+                transition={{ duration: 0.4 }}
+              />
               {subtitle && (
                 <p className="mb-3 font-medium group-hover:text-foreground/90 transition-colors">
                   {subtitle}
@@ -82,7 +107,7 @@ const ExpertiseCard: React.FC<ExpertiseCardProps> = ({
             </div>
           </div>
           
-          <p className="mb-4">{description}</p>
+          <p className="mb-4 text-foreground/80 group-hover:text-foreground transition-colors duration-300">{description}</p>
           
           <div className="mb-4">
             <ul className="space-y-2">
@@ -102,33 +127,35 @@ const ExpertiseCard: React.FC<ExpertiseCardProps> = ({
             <>
               <Button 
                 variant="ghost" 
-                className={`text-${accentColor} mb-3 w-full justify-between`}
+                className={`text-${accentColor} mb-3 w-full justify-between group-hover:bg-${accentColor}/5 transition-colors duration-300`}
                 onClick={toggleExpand}
               >
-                Learn More
+                {expanded ? "Show Less" : "Learn More"}
                 {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               </Button>
               
-              {expanded && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="mb-4 p-3 bg-muted/30 rounded-md"
-                >
-                  <p className="text-sm">{additionalDetails}</p>
-                  
-                  {/* Social proof numbers */}
-                  <SocialProof accentColor={accentColor} />
-                </motion.div>
-              )}
+              <AnimatePresence>
+                {expanded && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className={`mb-4 p-3 bg-muted/30 rounded-md border border-${accentColor}/10`}
+                  >
+                    <p className="text-sm">{additionalDetails}</p>
+                    
+                    {/* Social proof numbers */}
+                    <SocialProof accentColor={accentColor} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </>
           )}
           
           {contactLink && (
             <motion.div 
-              className="mt-2"
+              className="mt-4"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >

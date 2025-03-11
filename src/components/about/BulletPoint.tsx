@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
@@ -55,23 +56,34 @@ const BulletPoint: React.FC<BulletPointProps> = ({
 
   return (
     <motion.li 
-      className="group-hover:translate-x-1 transition-transform duration-300 ease-in-out"
-      style={{ transitionDelay: `${index * 50}ms` }}
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.1 }}
       whileHover={{ x: 5 }}
+      className="group"
     >
       <div className="flex items-start">
-        <div className="flex-shrink-0 mt-1 mr-2">
+        <motion.div 
+          className={`flex-shrink-0 mt-1 mr-2 text-${accentColor}`}
+          whileHover={{ scale: 1.2, rotate: 5 }}
+          transition={{ type: "spring", stiffness: 300, damping: 10 }}
+        >
           <Icon size={16} />
-        </div>
+        </motion.div>
         <div className="flex-grow cursor-pointer" onClick={toggleExpand}>
           <div className="flex items-center justify-between">
-            <span className="text-sm">{item}</span>
-            <div className="flex items-center space-x-1">
+            <motion.span 
+              className="text-sm font-medium"
+              whileHover={{ color: `var(--${accentColor})` }}
+            >
+              {item}
+            </motion.span>
+            <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <motion.button
-                      className={`p-1 rounded-full focus:outline-none text-${accentColor}/70 hover:text-${accentColor}`}
+                      className={`p-1 rounded-full focus:outline-none text-${accentColor}/70 hover:text-${accentColor} hover:bg-${accentColor}/10`}
                       onClick={copyToClipboard}
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
@@ -84,11 +96,21 @@ const BulletPoint: React.FC<BulletPointProps> = ({
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              {expanded ? (
-                <ChevronUp size={14} className={`text-${accentColor}`} />
-              ) : (
-                <ChevronDown size={14} className={`text-${accentColor}`} />
-              )}
+              <motion.button
+                className={`p-1 rounded-full focus:outline-none text-${accentColor}/70 hover:text-${accentColor} hover:bg-${accentColor}/10`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleExpand();
+                }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {expanded ? (
+                  <ChevronUp size={14} className={`text-${accentColor}`} />
+                ) : (
+                  <ChevronDown size={14} className={`text-${accentColor}`} />
+                )}
+              </motion.button>
             </div>
           </div>
           <AnimatePresence>
@@ -122,7 +144,7 @@ const BulletPoint: React.FC<BulletPointProps> = ({
                     }
                   }
                 }}
-                className="mt-2 text-xs text-muted-foreground bg-muted/50 p-2 rounded"
+                className={`mt-2 text-xs text-muted-foreground bg-${accentColor}/5 p-2 rounded-md border border-${accentColor}/10`}
               >
                 This is additional information about "{item}". Click to expand or collapse this section for more details about this specific area of expertise.
               </motion.div>

@@ -1,3 +1,4 @@
+
 import React, { useRef } from 'react';
 import AnimatedText from '@/components/AnimatedText';
 import { motion, useScroll, useTransform } from 'framer-motion';
@@ -19,6 +20,18 @@ const BackgroundExperience = () => {
   const patternRotation = useTransform(scrollYProgress, [0, 1], [0, 10]);
   const patternScale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.05, 1]);
   
+  // Card appearance variants
+  const cardContainerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.3
+      }
+    }
+  };
+  
   return (
     <section ref={containerRef} className="py-16 px-4 bg-gradient-to-b from-muted/30 to-background relative overflow-hidden">
       {/* Scroll progress indicator */}
@@ -35,17 +48,30 @@ const BackgroundExperience = () => {
       />
       
       <div className="container mx-auto max-w-5xl relative z-10">
-        <AnimatedText 
-          text="My Background" 
-          tag="h2" 
-          className="text-3xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground/80 to-foreground" 
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          <AnimatedText 
+            text="My Background" 
+            tag="h2" 
+            className="text-3xl font-bold mb-8 text-center bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground/80 to-foreground" 
+          />
+        </motion.div>
         
         {/* Timeline */}
         <TimelineProgress timelinePoints={timelinePoints} />
         
-        {/* Expertise cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Expertise cards with staggered animation */}
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 gap-8"
+          variants={cardContainerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+        >
           {cardData.map((card, index) => (
             <ExpertiseCard 
               key={index}
@@ -53,10 +79,17 @@ const BackgroundExperience = () => {
               {...card}
             />
           ))}
-        </div>
+        </motion.div>
         
         {/* Call to action */}
-        <BackgroundCTA />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+          viewport={{ once: true }}
+        >
+          <BackgroundCTA />
+        </motion.div>
       </div>
     </section>
   );

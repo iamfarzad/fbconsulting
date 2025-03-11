@@ -1,7 +1,25 @@
 
 import { Brain, BookMarked, Lightbulb, Users, Code, Rocket, Building, BookOpen } from 'lucide-react';
 
-export const cardData = [
+export interface ExpertiseCardData {
+  title: string;
+  subtitle?: string;
+  icon: React.ElementType;
+  iconBgClass: string;
+  iconColor: string;
+  accentColor: string;
+  description: string;
+  bulletPoints: string[];
+  additionalDetails?: string;
+  bulletPointIcon: React.ElementType;
+  contactLink?: {
+    text: string;
+    url: string;
+  };
+  customClass?: string;
+}
+
+export const cardData: ExpertiseCardData[] = [
   {
     title: "Self-Taught AI Expert & Startup Founder",
     icon: Brain,
