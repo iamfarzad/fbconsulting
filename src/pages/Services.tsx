@@ -13,6 +13,7 @@ import ServiceDetails from '@/components/services/ServiceDetails';
 import Pricing from '@/components/Pricing';
 import Testimonials from '@/components/testimonials/Testimonials';
 import { useLanguage } from '@/contexts/LanguageContext';
+import ClassesSection from '@/components/classes/ClassesSection';
 
 const Services = () => {
   console.log("Services page rendering");
@@ -62,6 +63,8 @@ const Services = () => {
       <ServicesList />
       
       <ServiceDetails />
+      
+      <ClassesSection />
       
       <WhyWorkWithMe />
       
