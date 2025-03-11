@@ -109,20 +109,24 @@ const Index = () => {
           {/* Hero Section */}
           <Hero />
           
-          {/* About Content */}
-          <AboutHero />
-          <GlobalImpact />
-          <AIJourney />
-          <BackgroundExperience />
-          <SkillsTechnologies />
+          {/* About section - Moving to an explicit section with ID */}
+          <section id="about" className="relative z-10">
+            <AboutHero />
+            <GlobalImpact />
+            <AIJourney />
+            <BackgroundExperience />
+            <SkillsTechnologies />
+          </section>
           
           {/* Testimonials */}
-          <Testimonials />
+          <section id="testimonials">
+            <Testimonials />
+          </section>
           
           {/* FAQ Section */}
-          <div id="faq">
+          <section id="faq">
             <Faq3 {...faqData} />
-          </div>
+          </section>
           
           <ContactCTA />
         </main>
