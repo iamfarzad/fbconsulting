@@ -1,3 +1,4 @@
+
 import { LeadInfo } from '../lead/leadExtractor';
 
 // Function to determine the persona based on conversation and lead data
@@ -51,20 +52,71 @@ const containsInfoRequest = (message: string): boolean => {
   );
 };
 
+// Function to check if user is explicitly asking about services
+const isAskingAboutServices = (message: string): boolean => {
+  const lowercaseMsg = message.toLowerCase();
+  
+  return (
+    (lowercaseMsg.includes('service') && (
+      lowercaseMsg.includes('what') || 
+      lowercaseMsg.includes('tell me about') || 
+      lowercaseMsg.includes('show me') ||
+      lowercaseMsg.includes('list') ||
+      lowercaseMsg.includes('explain')
+    )) ||
+    lowercaseMsg.includes('what do you offer') ||
+    lowercaseMsg.includes('what services do you') ||
+    lowercaseMsg.includes('what do you do')
+  );
+};
+
+// Function to check if user is explicitly asking about background/about
+const isAskingAboutBackground = (message: string): boolean => {
+  const lowercaseMsg = message.toLowerCase();
+  
+  return (
+    (lowercaseMsg.includes('about') && (
+      lowercaseMsg.includes('you') || 
+      lowercaseMsg.includes('your') || 
+      lowercaseMsg.includes('tell me')
+    )) ||
+    lowercaseMsg.includes('who are you') ||
+    lowercaseMsg.includes('background') ||
+    lowercaseMsg.includes('experience') ||
+    lowercaseMsg.includes('tell me about yourself')
+  );
+};
+
+// Function to check if user is explicitly asking about timeline/history
+const isAskingAboutTimeline = (message: string): boolean => {
+  const lowercaseMsg = message.toLowerCase();
+  
+  return (
+    lowercaseMsg.includes('timeline') ||
+    lowercaseMsg.includes('history') ||
+    (lowercaseMsg.includes('experience') && (
+      lowercaseMsg.includes('how much') || 
+      lowercaseMsg.includes('how long') || 
+      lowercaseMsg.includes('years')
+    )) ||
+    lowercaseMsg.includes('journey') ||
+    lowercaseMsg.includes('career path')
+  );
+};
+
 // Function to generate graphic cards based on user query
 export const generateGraphicCards = (message: string): string => {
-  const lowercaseMsg = message.toLowerCase();
   let cardContent = '';
   
-  if (lowercaseMsg.includes('service') || lowercaseMsg.includes('what do you do') || lowercaseMsg.includes('offer')) {
+  if (isAskingAboutServices(message)) {
     cardContent += '[[CARD:services:AI Automation Services:Explore our range of AI solutions for business automation and growth.]]';
   }
   
-  if (lowercaseMsg.includes('about') || lowercaseMsg.includes('background') || lowercaseMsg.includes('who')) {
+  if (isAskingAboutBackground(message)) {
     cardContent += '[[CARD:about:About Us:Learn about our experience and expertise in AI development.]]';
   }
   
-  if (lowercaseMsg.includes('timeline') || lowercaseMsg.includes('experience') || lowercaseMsg.includes('history')) {
+  if (isAskingAboutTimeline(message)) {
     cardContent += '[[CARD:timeline:Our Journey:View our professional timeline and key achievements over the years.]]';
   }
   
@@ -76,15 +128,15 @@ export const generateResponse = (message: string, leadInfo: LeadInfo): string =>
   const lowercaseMsg = message.toLowerCase();
   let response = '';
   
-  // Check for information requests that would benefit from graphic cards
-  if (containsInfoRequest(message)) {
+  // Check if user is explicitly asking for information that would benefit from graphic cards
+  if (isAskingAboutServices(message) || isAskingAboutBackground(message) || isAskingAboutTimeline(message)) {
     const cardContent = generateGraphicCards(message);
     
-    if (lowercaseMsg.includes('service')) {
+    if (isAskingAboutServices(message)) {
       response = "I'd be happy to tell you about our services. We offer AI automation, chatbot development, data analysis, and custom AI solutions. You can explore more details by clicking the card below:";
-    } else if (lowercaseMsg.includes('about') || lowercaseMsg.includes('who')) {
+    } else if (isAskingAboutBackground(message)) {
       response = "We're a team of AI specialists with expertise in creating custom solutions for businesses. You can learn more about us by clicking the card below:";
-    } else if (lowercaseMsg.includes('timeline') || lowercaseMsg.includes('experience')) {
+    } else if (isAskingAboutTimeline(message)) {
       response = "Our team has over 10 years of combined experience in AI development. You can view our journey and key milestones by clicking the card below:";
     } else {
       response = "Here's some information that might help you:";
