@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Check, Calendar } from 'lucide-react';
+import { ArrowRight, Check, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { trackEvent } from '@/services/analyticsService';
 
@@ -107,28 +107,34 @@ const ServiceDetails = () => {
                 <span className="text-teal">{service.number}. </span>
                 <span className="ml-2 text-gradient-teal">{service.title}</span>
               </h2>
-              <p className="text-lg text-muted-foreground mb-6">
-                <span className="text-teal">📌</span> {service.description}
+              <p className="text-lg text-muted-foreground mb-6 border-l-4 border-teal pl-4 py-2 bg-teal/5">
+                {service.description}
               </p>
             </div>
             
-            <div className="mb-8">
-              <ul className="space-y-3">
-                {service.benefits.map((benefit, i) => (
-                  <li key={i} className="flex items-start gap-3">
-                    <span className="text-teal mt-1">🔹</span>
-                    <span>{benefit}</span>
-                  </li>
-                ))}
-              </ul>
+            <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+              {service.benefits.map((benefit, i) => (
+                <motion.div 
+                  key={i} 
+                  className="flex items-start gap-3 p-3 rounded-lg bg-background/60 hover:bg-background/80 transition-colors"
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  <Check className="text-teal mt-1 h-5 w-5 flex-shrink-0" />
+                  <span>{benefit}</span>
+                </motion.div>
+              ))}
             </div>
             
             <Button 
               onClick={() => handleCTA(service.title, service.cta)}
-              className="px-6 py-2 rounded-full flex items-center gap-2"
+              className="px-6 py-2 rounded-full flex items-center gap-2 bg-gradient-to-r from-teal to-teal/80 hover:from-teal/90 hover:to-teal text-white"
             >
               <Calendar size={18} />
               {service.cta}
+              <ArrowRight size={16} className="ml-1 animate-pulse-slow" />
             </Button>
           </motion.div>
         ))}

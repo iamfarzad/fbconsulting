@@ -17,7 +17,7 @@ const HeroContent = () => {
         />
         <AnimatedText 
           text="With AI Automation" 
-          className="text-white/90 block" 
+          className="text-gradient-teal block" 
           tag="span"
           delay={100}
         />

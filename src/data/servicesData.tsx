@@ -50,7 +50,7 @@ export const services = [
     title: "Not sure what you need?",
     description: "Book a free consultation to discuss your unique business challenges and find the right AI solution.",
     icon: <Sparkles className="w-6 h-6" />,
-    className: "border-dashed",
+    className: "border-dashed bg-gradient-to-b from-background/40 to-background/20",
     hoverAnimation: <ConsultationAnimation />
   }
 ];
