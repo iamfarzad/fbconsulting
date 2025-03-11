@@ -11,7 +11,7 @@ const ServicesContent: React.FC = () => {
       <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-20" />
       <div className="container mx-auto max-w-6xl px-4 relative z-10">
         <PageHeader
-          title="Our AI Services"
+          title="My AI Services"
           subtitle="Comprehensive solutions tailored to your business needs"
         />
         
@@ -37,7 +37,7 @@ const ServicesContent: React.FC = () => {
           <ServiceSection
             id="chatbots"
             title="Chatbots & Virtual Assistants"
-            description="Implement intelligent AI assistants that can handle customer inquiries, support requests, and internal knowledge management."
+            description="I implement intelligent AI assistants that can handle customer inquiries, support requests, and internal knowledge management."
             benefits={[
               "24/7 customer support automation",
               "Personalized user experiences",
@@ -55,7 +55,7 @@ const ServicesContent: React.FC = () => {
           <ServiceSection
             id="workflow"
             title="Workflow Automation"
-            description="Connect your applications and systems to eliminate manual data entry, reduce errors, and streamline operations."
+            description="I connect your applications and systems to eliminate manual data entry, reduce errors, and streamline operations."
             benefits={[
               "End-to-end process automation",
               "Reduced operational costs",
@@ -73,7 +73,7 @@ const ServicesContent: React.FC = () => {
           <ServiceSection
             id="data-insights"
             title="AI Data Insights"
-            description="Transform your raw business data into actionable intelligence through automated analysis and reporting."
+            description="I transform your raw business data into actionable intelligence through automated analysis and reporting."
             benefits={[
               "Automated data collection and processing",
               "Real-time analytics dashboards",
@@ -91,7 +91,7 @@ const ServicesContent: React.FC = () => {
           <ServiceSection
             id="custom-development"
             title="Custom AI Development"
-            description="Tailored solutions for your unique business challenges using cutting-edge AI technologies."
+            description="I create tailored solutions for your unique business challenges using cutting-edge AI technologies."
             benefits={[
               "Custom-built AI solutions",
               "Integration with existing systems",

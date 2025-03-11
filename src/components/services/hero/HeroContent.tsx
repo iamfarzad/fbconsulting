@@ -31,7 +31,7 @@ const HeroContent = () => {
       
       <p className="text-xl text-white/80 mb-8 max-w-xl opacity-0 animate-fade-in-up" 
          style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}>
-        We build custom AI solutions that automate repetitive tasks, enhance decision-making, and drive efficiency across your organization.
+        I build custom AI solutions that automate repetitive tasks, enhance decision-making, and drive efficiency across your organization.
       </p>
       
       <HeroActions />

@@ -30,19 +30,19 @@ export const services = [
   },
   {
     title: "Workflow Automation",
-    description: "Connect apps, automate tasks, and eliminate manual work with custom automation solutions.",
+    description: "I connect apps, automate tasks, and eliminate manual work with custom automation solutions.",
     icon: <Workflow className="w-6 h-6" />,
     hoverAnimation: <WorkflowAnimation />
   },
   {
     title: "AI Data Insights",
-    description: "Leverage AI to analyze your business data and make smarter decisions with automated reporting.",
+    description: "I leverage AI to analyze your business data and make smarter decisions with automated reporting.",
     icon: <BarChart3 className="w-6 h-6" />,
     hoverAnimation: <DataInsightsAnimation />
   },
   {
     title: "Custom AI Development",
-    description: "Build tailored AI solutions for your specific business challenges with custom development.",
+    description: "I build tailored AI solutions for your specific business challenges with custom development.",
     icon: <Code className="w-6 h-6" />,
     hoverAnimation: <CustomDevAnimation />
   },

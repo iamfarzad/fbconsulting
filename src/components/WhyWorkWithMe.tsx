@@ -46,7 +46,7 @@ const WhyWorkWithMe = () => {
           <div className="opacity-0 animate-fade-in-up" style={{ animationDelay: '500ms', animationFillMode: 'forwards' }}>
             <FeatureCard
               title="ROI-Driven Approach"
-              description="Focus on automation that delivers measurable returns, whether through time savings, cost reduction, or revenue growth."
+              description="I focus on automation that delivers measurable returns, whether through time savings, cost reduction, or revenue growth."
               icon={<Target className="w-6 h-6" />}
               className="h-full"
               glassmorphism={false}
@@ -59,7 +59,7 @@ const WhyWorkWithMe = () => {
             "AI is no longer a luxury—it's a competitive advantage."
           </p>
           <p className="text-muted-foreground">
-            Let's put it to work for your business.
+            Let me put it to work for your business.
           </p>
         </div>
       </div>

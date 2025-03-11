@@ -17,10 +17,10 @@ const ServicesList = () => {
           className="text-center mb-12"
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gradient-teal font-futuristic">
-            Our AI Services Portfolio
+            My AI Services Portfolio
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-            Explore our comprehensive range of AI automation solutions designed to transform your business operations
+            Explore my comprehensive range of AI automation solutions designed to transform your business operations
           </p>
         </motion.div>
         
