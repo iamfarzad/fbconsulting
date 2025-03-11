@@ -4,8 +4,15 @@ import AnimatedText from '@/components/AnimatedText';
 import { Button } from '@/components/ui/button';
 import DotPattern from '@/components/ui/dot-pattern';
 import { Calendar } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const AboutHero = () => {
+  const navigate = useNavigate();
+  
+  const handleBookConsultation = () => {
+    navigate('/contact');
+  };
+  
   return (
     <section className="py-20 px-4 relative">
       <DotPattern width={16} height={16} cx={8} cy={8} cr={1.5} className="opacity-25" />
@@ -24,7 +31,11 @@ const AboutHero = () => {
               <p className="mb-6">
                 My approach combines deep technical expertise with business acumen, ensuring that AI solutions deliver measurable ROI and solve real business problems.
               </p>
-              <Button size="lg" className="rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2">
+              <Button 
+                size="lg" 
+                className="rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
+                onClick={handleBookConsultation}
+              >
                 <Calendar size={20} />
                 Book a Free Consultation
               </Button>

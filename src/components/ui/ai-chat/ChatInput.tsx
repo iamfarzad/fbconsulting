@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -30,7 +31,7 @@ export function ChatInput({
   showMessages,
   hasMessages,
   suggestedResponse,
-  placeholder
+  placeholder = "Ask me anything about AI automation for your business...",
 }: ChatInputProps) {
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
     minHeight: 60,

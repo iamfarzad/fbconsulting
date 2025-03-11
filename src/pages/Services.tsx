@@ -9,10 +9,17 @@ import SEO from '@/components/SEO';
 import ServicesHero from '@/components/services/ServicesHero';
 import ServicesContent from '@/components/services/ServicesContent';
 import { useLocation } from 'react-router-dom';
+import PainPoints from '@/components/PainPoints';
+import ServicesList from '@/components/ServicesList';
+import WhyWorkWithMe from '@/components/WhyWorkWithMe';
+import NorwegianPainPoints from '@/components/NorwegianPainPoints';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const Services = () => {
   console.log("Services page rendering");
   const location = useLocation();
+  const { language } = useLanguage();
+  const isNorwegian = language === 'no';
   
   useEffect(() => {
     // Remove previous class first if exists
@@ -52,7 +59,17 @@ const Services = () => {
       
       <ServicesHero />
       
+      {/* Conditionally show Norwegian pain points for Norwegian language */}
+      <NorwegianPainPoints isVisible={isNorwegian} />
+      
+      {/* Show standard pain points for everyone */}
+      <PainPoints />
+      
       <ServicesContent />
+      
+      <ServicesList />
+      
+      <WhyWorkWithMe />
       
       <div id="pricing">
         <Pricing />

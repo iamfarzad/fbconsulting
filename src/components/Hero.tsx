@@ -71,7 +71,7 @@ const Hero = () => {
                   transition={{ delay: 0.7, duration: 0.6 }}
                 ></motion.span>
               </span>
-            ) : t('hero_title')}
+            ) : "How can AI automation help your business?"}
           </motion.h1>
           
           <motion.p
@@ -80,7 +80,7 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
-            {t('hero_subtitle')}
+            {isNorwegian ? t('hero_subtitle') : "Ask me anything about AI automation, workflow optimization, or how to reduce costs with intelligent systems"}
           </motion.p>
           
           <motion.div 
