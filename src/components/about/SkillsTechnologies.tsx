@@ -2,170 +2,140 @@
 import React from 'react';
 import AnimatedText from '@/components/AnimatedText';
 import { cn } from "@/lib/utils";
-import {
-  Sparkles,
-  Bot,
-  BrainCircuit,
-  Cloud,
-  Workflow,
-  MessagesSquare,
-  Network,
-  Database
+import { motion } from "framer-motion";
+import { 
+  Brain, 
+  Bot, 
+  LineChart, 
+  Database, 
+  Workflow, 
+  Code
 } from "lucide-react";
+import FeatureCard from '@/components/FeatureCard';
 
-// Skills data organized in the new format
+// Simpler, more focused skills data
 const SKILLS_DATA = [
   {
-    title: "OpenAI Fine-Tuning",
-    description: "Trained custom GPT models for specialized business applications.",
-    icon: <Sparkles className="w-6 h-6" />,
-    category: "AI & Machine Learning"
-  },
-  {
-    title: "ChatGPT Custom Model Training",
-    description: "Developed tailored AI assistants with domain-specific expertise.",
-    icon: <BrainCircuit className="w-6 h-6" />,
-    category: "AI & Machine Learning"
-  },
-  {
-    title: "Synthetic Data Generation",
-    description: "Created privacy-first datasets to improve AI model performance.",
-    icon: <Database className="w-6 h-6" />,
-    category: "AI & Machine Learning"
-  },
-  {
-    title: "Machine Learning & Predictive Analytics",
-    description: "Built AI-driven insights platforms for automation and decision-making.",
-    icon: <BrainCircuit className="w-6 h-6" />,
-    category: "AI & Machine Learning"
-  },
-  {
-    title: "Microsoft Azure AI Foundry",
-    description: "Built and deployed scalable AI models using Microsoft's enterprise AI tools.",
-    icon: <Cloud className="w-6 h-6" />,
-    category: "AI-Powered Business Automation"
-  },
-  {
-    title: "Azure OpenAI Services",
-    description: "Integrated OpenAI's GPT models into business workflows via Azure's AI stack.",
-    icon: <Cloud className="w-6 h-6" />,
-    category: "AI-Powered Business Automation"
-  },
-  {
-    title: "Copilot Integration",
-    description: "Developed AI-powered automation assistants for enterprise productivity.",
-    icon: <Bot className="w-6 h-6" />,
-    category: "AI-Powered Business Automation"
-  },
-  {
-    title: "Conversational AI",
-    description: "Developed AI chatbots for mental wellness and business automation.",
-    icon: <MessagesSquare className="w-6 h-6" />,
-    category: "Chatbots & AI Assistants"
-  },
-  {
-    title: "Virtual Assistants & AI Copilots",
-    description: "Built AI-powered productivity tools using ChatGPT & Microsoft Copilot.",
-    icon: <Bot className="w-6 h-6" />,
-    category: "Chatbots & AI Assistants"
-  },
-  {
-    title: "LLM Prompt Engineering",
-    description: "Optimized GPT-based assistants for maximum accuracy and efficiency.",
-    icon: <Sparkles className="w-6 h-6" />,
-    category: "Chatbots & AI Assistants"
-  },
-  {
-    title: "Systems Integration & API Development",
-    description: "Connected AI models to databases, cloud services, and automation tools.",
-    icon: <Network className="w-6 h-6" />,
-    category: "Data, Cloud & Systems Integration"
+    title: "AI & Machine Learning",
+    description: "Building intelligent systems that learn and adapt",
+    icon: <Brain className="h-6 w-6 text-primary" />,
+    bulletPoints: [
+      "Custom GPT model training & fine-tuning",
+      "Machine learning & predictive analytics",
+      "Synthetic data generation"
+    ]
   },
   {
     title: "Workflow Automation",
-    description: "Eliminated manual workflows with AI in mental health and content creation.",
-    icon: <Workflow className="w-6 h-6" />,
-    category: "Data, Cloud & Systems Integration"
+    description: "Streamlining business processes with AI",
+    icon: <Workflow className="h-6 w-6 text-primary" />,
+    bulletPoints: [
+      "Process analysis and optimization",
+      "Custom automation solution development",
+      "Performance monitoring systems"
+    ]
   },
-];
-
-const FeatureSkill = ({
-  title,
-  description,
-  icon,
-  index,
-}: {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  index: number;
-}) => {
-  return (
-    <div
-      className={cn(
-        "flex flex-col lg:border-r py-10 relative group/feature dark:border-neutral-800",
-        (index === 0 || index === 4 || index === 8) && "lg:border-l dark:border-neutral-800",
-        index < 4 && "lg:border-b dark:border-neutral-800",
-        (index >= 4 && index < 8) && "lg:border-b dark:border-neutral-800"
-      )}
-    >
-      {index < 8 && (
-        <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-t from-primary/5 to-transparent pointer-events-none" />
-      )}
-      {index >= 8 && (
-        <div className="opacity-0 group-hover/feature:opacity-100 transition duration-200 absolute inset-0 h-full w-full bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-      )}
-      <div className="mb-4 relative z-10 px-6 text-primary">
-        {icon}
-      </div>
-      <div className="text-lg font-bold mb-2 relative z-10 px-6">
-        <div className="absolute left-0 inset-y-0 h-6 group-hover/feature:h-8 w-1 rounded-tr-full rounded-br-full bg-muted group-hover/feature:bg-primary transition-all duration-200 origin-center" />
-        <span className="group-hover/feature:translate-x-2 transition duration-200 inline-block text-foreground">
-          {title}
-        </span>
-      </div>
-      <p className="text-sm text-muted-foreground max-w-xs relative z-10 px-6">
-        {description}
-      </p>
-    </div>
-  );
-};
-
-// Group skills by category
-const groupedSkills = SKILLS_DATA.reduce((acc, skill) => {
-  if (!acc[skill.category]) {
-    acc[skill.category] = [];
+  {
+    title: "Data Analytics",
+    description: "Transforming data into actionable insights",
+    icon: <LineChart className="h-6 w-6 text-primary" />,
+    bulletPoints: [
+      "Business intelligence dashboards",
+      "Predictive modeling & forecasting",
+      "Data visualization & reporting"
+    ]
+  },
+  {
+    title: "Conversational AI",
+    description: "Creating natural language interfaces",
+    icon: <Bot className="h-6 w-6 text-primary" />,
+    bulletPoints: [
+      "Custom chatbot development",
+      "Virtual assistants & AI Copilots",
+      "LLM prompt engineering & optimization"
+    ]
+  },
+  {
+    title: "Database & Systems",
+    description: "Building robust data infrastructure",
+    icon: <Database className="h-6 w-6 text-primary" />,
+    bulletPoints: [
+      "Database design & optimization",
+      "API development & integration",
+      "Cloud infrastructure setup"
+    ]
+  },
+  {
+    title: "Development",
+    description: "Creating custom software solutions",
+    icon: <Code className="h-6 w-6 text-primary" />,
+    bulletPoints: [
+      "Web application development",
+      "Mobile app development",
+      "AI-integrated software solutions"
+    ]
   }
-  acc[skill.category].push(skill);
-  return acc;
-}, {} as Record<string, typeof SKILLS_DATA>);
+];
 
 const SkillsTechnologies = () => {
   return (
-    <section className="py-16 px-4">
-      <div className="container mx-auto max-w-7xl">
+    <section className="py-16 px-4 bg-muted/30">
+      <div className="container mx-auto max-w-6xl">
         <AnimatedText 
           text="Skills & Technologies" 
           tag="h2" 
-          className="text-3xl font-bold mb-8 text-center"
+          className="text-3xl font-bold mb-4 text-center"
         />
         
-        {Object.entries(groupedSkills).map(([category, skills], categoryIndex) => (
-          <div key={category} className="mb-16">
-            <h3 className="text-xl font-semibold mb-6">{category}</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 relative z-10">
-              {skills.map((skill, index) => (
-                <FeatureSkill 
-                  key={skill.title} 
-                  title={skill.title} 
-                  description={skill.description} 
-                  icon={skill.icon} 
-                  index={index + (categoryIndex * 4)} 
-                />
-              ))}
-            </div>
-          </div>
-        ))}
+        <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-12">
+          Specialized expertise in AI and automation technologies to help businesses transform their operations and achieve measurable results.
+        </p>
+        
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.1
+              }
+            }
+          }}
+        >
+          {SKILLS_DATA.map((skill, index) => (
+            <motion.div
+              key={index}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+              }}
+            >
+              <FeatureCard
+                title={skill.title}
+                icon={skill.icon}
+                description={
+                  <div>
+                    <p className="mb-3">{skill.description}</p>
+                    <ul className="space-y-2">
+                      {skill.bulletPoints.map((point, i) => (
+                        <li key={i} className="flex items-start gap-2">
+                          <span className="text-primary mt-1">•</span>
+                          <span className="text-sm">{point}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                }
+                className="h-full"
+                hoverEffect={true}
+              />
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
     </section>
   );
