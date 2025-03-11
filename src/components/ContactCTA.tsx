@@ -49,15 +49,12 @@ const ContactCTA = () => {
         <div className="bg-white/20 backdrop-blur-md rounded-2xl p-8 md:p-12 shadow-glass border border-white/20">
           <div className="text-center mb-8">
             <AnimatedText
-              text={isNorwegian ? "Klar til å Transformere Din Norske Bedrift?" : "Ready to Automate and Scale?"}
+              text="Ready to Automate and Scale?"
               tag="h2"
               className="text-3xl md:text-4xl font-bold mb-4 text-gradient-teal"
             />
             <AnimatedText
-              text={isNorwegian 
-                ? "La oss diskutere skreddersydde AI-løsninger som overholder norske forskrifter"
-                : "Let's discuss how AI automation can transform your business operations"
-              }
+              text="Let's discuss how AI automation can transform your business."
               tag="p"
               delay={200}
               className="text-xl text-muted-foreground max-w-2xl mx-auto"
@@ -71,7 +68,7 @@ const ContactCTA = () => {
               onClick={handleBookClick}
             >
               <Calendar size={20} />
-              {t('book_consultation')}
+              Book a Free Consultation
             </Button>
             
             <Button 
@@ -81,13 +78,13 @@ const ContactCTA = () => {
               onClick={handleContactClick}
             >
               <Mail size={20} />
-              {t('contact_me')}
+              Contact Me
             </Button>
           </div>
           
           <div className="mt-8 text-center text-muted-foreground">
             <p>
-              {t('no_obligation')}
+              No obligations, just a conversation about your business needs.
             </p>
           </div>
         </div>

@@ -3,23 +3,21 @@ import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ContactCTA from '@/components/ContactCTA';
-import Testimonials from '@/components/testimonials/Testimonials';
-import Pricing from '@/components/Pricing';
 import SEO from '@/components/SEO';
 import ServicesHero from '@/components/services/ServicesHero';
-import ServicesContent from '@/components/services/ServicesContent';
 import { useLocation } from 'react-router-dom';
-import PainPoints from '@/components/PainPoints';
+import BusinessChallenges from '@/components/services/BusinessChallenges';
 import ServicesList from '@/components/ServicesList';
 import WhyWorkWithMe from '@/components/WhyWorkWithMe';
-import NorwegianPainPoints from '@/components/NorwegianPainPoints';
+import ServiceDetails from '@/components/services/ServiceDetails';
+import Pricing from '@/components/Pricing';
+import Testimonials from '@/components/testimonials/Testimonials';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const Services = () => {
   console.log("Services page rendering");
   const location = useLocation();
   const { language } = useLanguage();
-  const isNorwegian = language === 'no';
   
   useEffect(() => {
     // Remove previous class first if exists
@@ -51,7 +49,7 @@ const Services = () => {
     <div className="min-h-screen flex flex-col bg-background">
       <SEO 
         title="AI Automation Services | F.B Consulting"
-        description="Explore our specialized AI automation services: strategy consulting, chatbots, workflow automation, data insights, and custom AI development for businesses."
+        description="I provide customized AI automation services: strategy consulting, chatbots, workflow automation, data insights, and custom AI development for businesses."
         structuredData={servicesStructuredData}
       />
       
@@ -59,17 +57,11 @@ const Services = () => {
       
       <ServicesHero />
       
-      {/* Conditionally show Norwegian pain points for Norwegian language */}
-      <NorwegianPainPoints isVisible={isNorwegian} />
+      <BusinessChallenges />
       
-      {/* Show standard pain points for everyone */}
-      <PainPoints />
-      
-      {/* Display the services offerings in a bento grid layout */}
       <ServicesList />
       
-      {/* Show detailed information about each service */}
-      <ServicesContent />
+      <ServiceDetails />
       
       <WhyWorkWithMe />
       

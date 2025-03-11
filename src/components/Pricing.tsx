@@ -2,20 +2,20 @@
 import React from 'react';
 import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import AnimatedText from './AnimatedText';
+import { useNavigate } from 'react-router-dom';
+import { trackEvent } from '@/services/analyticsService';
 
 const pricingData = [
   {
     title: "Strategy Session",
     price: "499",
-    description: "One-time consultation to identify AI automation opportunities",
+    description: "One-time consultation",
     features: [
-      "Business process assessment",
-      "AI opportunity identification",
-      "ROI calculation",
-      "Implementation recommendations",
-      "90-minute virtual session"
+      "AI opportunity assessment",
+      "ROI calculation & recommendations",
+      "90-minute virtual consultation"
     ],
     popular: false,
     callToAction: "Book a Session"
@@ -23,13 +23,11 @@ const pricingData = [
   {
     title: "Implementation Package",
     price: "2,499",
-    description: "Custom AI solution implementation for a specific business process",
+    description: "AI solution development",
     features: [
-      "Full solution development",
-      "System integration",
-      "Testing and validation",
-      "Staff training",
-      "30 days of support"
+      "AI solution development",
+      "Full system integration & testing",
+      "Staff training + 30 days support"
     ],
     popular: true,
     callToAction: "Get Started"
@@ -37,13 +35,11 @@ const pricingData = [
   {
     title: "Enterprise Partnership",
     price: "Custom",
-    description: "Ongoing AI automation support for enterprise clients",
+    description: "Dedicated AI automation support",
     features: [
       "Multiple automation projects",
-      "Dedicated support team",
-      "Quarterly strategy sessions",
-      "Custom development",
-      "Priority maintenance"
+      "Dedicated AI automation support",
+      "Priority development & maintenance"
     ],
     popular: false,
     callToAction: "Contact for Quote"
@@ -51,17 +47,31 @@ const pricingData = [
 ];
 
 const Pricing = () => {
+  const navigate = useNavigate();
+  
+  const handlePricingCTA = (plan: string, cta: string) => {
+    trackEvent({
+      action: 'click',
+      category: 'cta',
+      label: 'pricing_cta',
+      plan_name: plan,
+      cta_text: cta
+    });
+    
+    navigate('/contact');
+  };
+  
   return (
     <section id="pricing" className="py-20 px-4 bg-slate-50 dark:bg-slate-900">
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-16">
           <AnimatedText
-            text="Transparent Pricing"
+            text="Pricing & Engagement Plans"
             tag="h2"
             className="text-3xl md:text-4xl font-bold mb-4"
           />
           <AnimatedText
-            text="Choose the right plan for your business automation needs"
+            text="Transparent pricing to fit your AI automation needs"
             tag="p"
             delay={200}
             className="text-xl text-muted-foreground max-w-2xl mx-auto"
@@ -77,25 +87,23 @@ const Pricing = () => {
                 </div>
               )}
               <CardHeader>
-                <CardTitle className="text-2xl">{plan.title}</CardTitle>
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <span className="text-teal">📌</span>
+                  {plan.title}
+                </CardTitle>
                 <div className="mt-4 flex items-baseline">
                   <span className="text-4xl font-extrabold">
                     {plan.price.startsWith("Custom") ? "" : "$"}
                     {plan.price}
                   </span>
-                  {!plan.price.startsWith("Custom") && (
-                    <span className="ml-1 text-sm text-muted-foreground">
-                      starting price
-                    </span>
-                  )}
                 </div>
-                <CardDescription className="mt-2">{plan.description}</CardDescription>
+                <p className="mt-2 text-muted-foreground">{plan.description}</p>
               </CardHeader>
               <CardContent className="flex-grow">
                 <ul className="space-y-3 mt-4">
                   {plan.features.map((feature, featureIndex) => (
                     <li key={featureIndex} className="flex items-start gap-2">
-                      <Check className="min-w-5 h-5 text-primary mt-0.5" />
+                      <span className="text-teal">🔹</span>
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -105,6 +113,7 @@ const Pricing = () => {
                 <Button 
                   className="w-full" 
                   variant={plan.popular ? "default" : "outline"}
+                  onClick={() => handlePricingCTA(plan.title, plan.callToAction)}
                 >
                   {plan.callToAction}
                 </Button>
@@ -114,18 +123,11 @@ const Pricing = () => {
         </div>
         
         <div className="mt-16 text-center max-w-3xl mx-auto">
-          <AnimatedText
-            text="Need something more specific?"
-            tag="h3"
-            className="text-xl font-semibold mb-3"
-          />
-          <AnimatedText
-            text="Contact me for custom pricing tailored to your specific project requirements and business goals."
-            tag="p"
-            delay={200}
-            className="text-muted-foreground mb-6"
-          />
-          <Button variant="outline" size="lg">
+          <Button 
+            variant="outline" 
+            size="lg"
+            onClick={() => handlePricingCTA("Custom", "Request Custom Quote")}
+          >
             Request Custom Quote
           </Button>
         </div>

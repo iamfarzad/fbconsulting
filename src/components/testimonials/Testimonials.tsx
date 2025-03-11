@@ -11,7 +11,7 @@ const testimonialData: Testimonial[] = [
     name: 'Sarah Johnson',
     company: 'TechInnovate',
     role: 'CTO',
-    content: "The AI automation solutions transformed our customer service operations. We've reduced response times by 65% while improving customer satisfaction scores.",
+    content: "AI automation reduced our response times by 65% and improved customer satisfaction.",
     rating: 5
   },
   {
@@ -19,7 +19,7 @@ const testimonialData: Testimonial[] = [
     name: 'Michael Chen',
     company: 'FinanceFlow',
     role: 'Operations Director',
-    content: "Implementing AI for our document processing workflows was a game-changer. What took days now happens in minutes with greater accuracy.",
+    content: "What took days now happens in minutes—our operations run 10x faster.",
     rating: 5
   },
   {
@@ -27,7 +27,7 @@ const testimonialData: Testimonial[] = [
     name: 'Alicia Rodriguez',
     company: 'RetailPro',
     role: 'Marketing Manager',
-    content: "The customer insights we've gained through AI analysis have completely changed how we approach our marketing strategies. We're seeing a 40% increase in campaign effectiveness.",
+    content: "AI-powered insights helped us improve marketing effectiveness by 40%.",
     rating: 4
   }
 ];
@@ -45,12 +45,6 @@ const Testimonials: React.FC<TestimonialsProps> = ({ id }) => {
             text="What Clients Say"
             tag="h2"
             className="text-3xl md:text-4xl font-bold mb-4"
-          />
-          <AnimatedText
-            text="Real results from businesses like yours"
-            tag="p"
-            delay={200}
-            className="text-xl text-muted-foreground max-w-2xl mx-auto"
           />
         </div>
 
