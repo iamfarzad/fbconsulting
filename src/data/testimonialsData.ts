@@ -1,59 +1,54 @@
 
-export interface Testimonial {
-  id: string;
-  name: string;
-  role: string;
-  company: string;
-  content: string;
-  projectType: string;
-  result: string;
-  avatar?: string;
-}
+import { Testimonial } from '@/types/blog';
 
+// Use the existing Testimonial interface from types/blog.ts
 export const testimonials: Testimonial[] = [
   {
     id: '1',
     name: 'Sarah Johnson',
-    role: 'CTO',
     company: 'TechInnovate',
-    content: 'Working with this team completely transformed our customer service. Their AI automation solution reduced response times by 65% and increased customer satisfaction scores by 40%. The ROI we've seen has been incredible.',
-    projectType: 'Customer Service Automation',
-    result: 'Reduced response times by 65%',
+    role: 'CTO',
+    content: "The AI automation solutions provided have revolutionized our customer service. Response times dropped by 65% and customer satisfaction scores are at an all-time high. The implementation was smooth and the ongoing support has been exceptional.",
+    rating: 5
   },
   {
     id: '2',
     name: 'Michael Chen',
-    role: 'Director of Operations',
     company: 'FinanceFlow',
-    content: 'We approached them to help streamline our financial document processing. The custom AI solution they built now handles the work of what used to take a team of 5 people, with higher accuracy and 10x faster processing. A game-changer for our operations.',
-    projectType: 'Document Processing Automation',
-    result: 'Operations running 10x faster with fewer errors',
+    role: 'Operations Director',
+    content: "What previously took our team days to complete now happens in minutes. Our operations are running 10x faster with far fewer errors. The AI workflow automation has completely transformed how we process financial data and reports.",
+    rating: 5
   },
   {
     id: '3',
     name: 'Alicia Rodriguez',
-    role: 'VP of E-commerce',
     company: 'RetailPro',
-    content: 'Their AI-powered recommendation engine completely revolutionized our online shopping experience. We've seen conversion rates increase by 40% and average order value up by 25%. The insights from their system have been invaluable.',
-    projectType: 'E-commerce Personalization',
-    result: 'Conversion rates increased by 40%',
+    role: 'Marketing Manager',
+    content: "The AI-powered marketing insights have been a game changer. We've increased our conversion rates by 40% by targeting the right customers with the right offers at the right time. The data analytics capabilities are truly impressive.",
+    rating: 4
   },
   {
     id: '4',
     name: 'David Patel',
-    role: 'Head of Marketing',
     company: 'GrowthBrand',
-    content: 'The conversational AI chatbot they developed for our lead generation has transformed our marketing approach. We're now capturing 3x more qualified leads at a 50% lower cost per acquisition. Highly recommended for any marketing team.',
-    projectType: 'Marketing Chatbot',
-    result: '3x more qualified leads at 50% lower cost',
+    role: 'Head of Marketing',
+    content: "The conversational AI chatbot developed for our lead generation has transformed our marketing approach. We're now capturing 3x more qualified leads at a 50% lower cost per acquisition. Highly recommended for any marketing team.",
+    rating: 5
   },
   {
     id: '5',
     name: 'Emma Larson',
-    role: 'CEO',
     company: 'HealthTech Solutions',
-    content: 'Their AI consultation completely changed our approach to patient management. The custom solution they designed has reduced administrative time by 70% and allowed our staff to focus on patient care instead of paperwork.',
-    projectType: 'Healthcare Process Optimization',
-    result: 'Reduced administrative time by 70%',
+    role: 'CEO',
+    content: "The AI consultation completely changed our approach to patient management. The custom solution designed has reduced administrative time by 70% and allowed our staff to focus on patient care instead of paperwork.",
+    rating: 5
   }
 ];
+
+// Function to get testimonials
+export const getTestimonials = () => testimonials;
+
+// Function to get a single testimonial by ID
+export const getTestimonialById = (id: string): Testimonial | undefined => {
+  return testimonials.find(testimonial => testimonial.id === id);
+};
