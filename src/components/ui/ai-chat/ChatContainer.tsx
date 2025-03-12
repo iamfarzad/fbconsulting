@@ -1,4 +1,3 @@
-
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChatMessageList } from "./ChatMessageList";
@@ -73,6 +72,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
               messages={messages} 
               showMessages={showMessages} 
               isFullScreen={isFullScreen}
+              isLoading={isLoading}
             />
             
             {messages.length > 0 && !isFullScreen && (
