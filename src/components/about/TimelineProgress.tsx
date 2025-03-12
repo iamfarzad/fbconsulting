@@ -3,20 +3,28 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 interface TimelinePoint {
-  year: number;
-  label: string;
+  year: string | number;
+  title?: string;
+  label?: string;
+  description?: string;
+  icon?: string;
 }
 
 interface TimelineProgressProps {
-  timelinePoints: TimelinePoint[];
+  timelinePoints?: TimelinePoint[];
+  items?: TimelinePoint[];
+  accentColor?: string;
 }
 
-const TimelineProgress: React.FC<TimelineProgressProps> = ({ timelinePoints }) => {
+const TimelineProgress: React.FC<TimelineProgressProps> = ({ timelinePoints, items, accentColor = 'primary' }) => {
+  // Use items if provided, otherwise use timelinePoints
+  const points = items || timelinePoints || [];
+  
   return (
     <div className="hidden lg:block mb-12 relative">
-      <div className="absolute left-0 right-0 h-1 bg-muted top-5"></div>
+      <div className={`absolute left-0 right-0 h-1 bg-muted top-5`}></div>
       <div className="flex justify-between relative">
-        {timelinePoints.map((point, index) => (
+        {points.map((point, index) => (
           <motion.div 
             key={index}
             className="flex flex-col items-center"
@@ -26,7 +34,7 @@ const TimelineProgress: React.FC<TimelineProgressProps> = ({ timelinePoints }) =
             viewport={{ once: true }}
           >
             <motion.div 
-              className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-medium text-sm z-10"
+              className={`w-10 h-10 rounded-full bg-${accentColor} flex items-center justify-center text-white font-medium text-sm z-10`}
               initial={{ scale: 0 }}
               whileInView={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 300, delay: index * 0.1 + 0.2 }}
@@ -39,7 +47,7 @@ const TimelineProgress: React.FC<TimelineProgressProps> = ({ timelinePoints }) =
               whileInView={{ opacity: 1 }}
               transition={{ delay: index * 0.1 + 0.4 }}
             >
-              {point.label}
+              {point.label || point.title || ''}
             </motion.p>
           </motion.div>
         ))}

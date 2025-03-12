@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Copy, Check, ChevronDown, ChevronUp, LucideIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   Tooltip,
@@ -11,10 +11,11 @@ import {
 } from "@/components/ui/tooltip";
 
 interface BulletPointProps {
-  item: string;
-  index: number;
-  bulletPointIcon: React.ElementType;
-  accentColor: string;
+  item?: string;
+  index?: number;
+  bulletPointIcon?: React.ElementType;
+  accentColor?: string;
+  children?: React.ReactNode;
 }
 
 // Define additional information for each bullet point
@@ -46,13 +47,20 @@ const additionalInfo: Record<string, string> = {
 
 const BulletPoint: React.FC<BulletPointProps> = ({
   item,
-  index,
-  bulletPointIcon: Icon,
-  accentColor
+  index = 0,
+  bulletPointIcon: CustomIcon,
+  accentColor = "primary",
+  children
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+  
+  // Use children as item if provided
+  const content = children ? (typeof children === 'string' ? children : '') : item || '';
+  
+  // Use Check icon as default if bulletPointIcon is not provided
+  const Icon = CustomIcon || Check;
 
   const toggleExpand = () => {
     setExpanded(!expanded);
@@ -60,7 +68,7 @@ const BulletPoint: React.FC<BulletPointProps> = ({
 
   const copyToClipboard = (e: React.MouseEvent) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(item).then(
+    navigator.clipboard.writeText(content).then(
       () => {
         setCopied(true);
         toast({
@@ -103,7 +111,7 @@ const BulletPoint: React.FC<BulletPointProps> = ({
               className="text-sm font-medium"
               whileHover={{ color: `var(--${accentColor})` }}
             >
-              {item}
+              {content}
             </motion.span>
             <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <TooltipProvider>
@@ -173,7 +181,7 @@ const BulletPoint: React.FC<BulletPointProps> = ({
                 }}
                 className={`mt-2 text-xs text-muted-foreground bg-${accentColor}/5 p-2 rounded-md border border-${accentColor}/10`}
               >
-                {additionalInfo[item] || `Additional details about ${item} will be added soon. This feature provides in-depth information about our expertise in this area.`}
+                {additionalInfo[content] || `Additional details about ${content} will be added soon. This feature provides in-depth information about our expertise in this area.`}
               </motion.div>
             )}
           </AnimatePresence>

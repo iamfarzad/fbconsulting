@@ -2,6 +2,50 @@
 import { Brain, Workflow, LineChart, Smartphone, ArrowRight, Check, Target, Zap } from "lucide-react";
 import { ExpertiseCardProps } from "./ExpertiseCard";
 
+export interface ExpertiseData {
+  id: string;
+  title: string;
+  titleNo: string;
+  description: string;
+  descriptionNo: string;
+  icon: any;
+}
+
+export const expertiseData: ExpertiseData[] = [
+  {
+    id: "ai-strategy",
+    title: "AI Strategy & Consultation",
+    titleNo: "AI-strategi & Konsultasjon",
+    description: "Helping businesses create clear, actionable plans for AI adoption",
+    descriptionNo: "Hjelper bedrifter med å lage klare, gjennomførbare planer for AI-adopsjon",
+    icon: Brain
+  },
+  {
+    id: "workflow",
+    title: "Workflow Automation",
+    titleNo: "Arbeidsflytautomatisering",
+    description: "Streamlining operations and eliminating manual processes",
+    descriptionNo: "Effektivisering av operasjoner og eliminering av manuelle prosesser",
+    icon: Workflow
+  },
+  {
+    id: "data-analytics",
+    title: "Data Analytics & Insights",
+    titleNo: "Dataanalyse & Innsikt",
+    description: "Transforming raw data into actionable business intelligence",
+    descriptionNo: "Transformerer rådata til handlingsdyktig forretningsintelligens",
+    icon: LineChart
+  },
+  {
+    id: "mobile",
+    title: "Mobile & Web Solutions",
+    titleNo: "Mobile & Webløsninger",
+    description: "Building intelligent applications for modern businesses",
+    descriptionNo: "Bygger intelligente applikasjoner for moderne bedrifter",
+    icon: Smartphone
+  }
+];
+
 export const cardData: ExpertiseCardProps[] = [
   {
     title: "AI Strategy & Consultation",

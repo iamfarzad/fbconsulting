@@ -131,7 +131,10 @@ const AIJourney = () => {
         
         <div className="relative max-w-5xl mx-auto">
           {/* Timeline Progress Component */}
-          <TimelineProgress items={items} accentColor="#fe5a1d" />
+          <TimelineProgress timelinePoints={items.map(item => ({ 
+            year: item.year,
+            label: item.title
+          }))} accentColor="[#fe5a1d]" />
         </div>
       </div>
     </section>
