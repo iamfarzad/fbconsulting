@@ -1,7 +1,5 @@
-
-import { Brain, Workflow, LineChart, Smartphone, ArrowRight, Check, Target, Zap } from "lucide-react";
-import { ExpertiseCardProps } from "./ExpertiseCard";
-import React from "react";
+import { Brain, Workflow, LineChart, Smartphone } from "lucide-react";
+import type { ExpertiseCardProps } from "./ExpertiseCard";
 
 export const expertiseData: ExpertiseCardProps[] = [
   {
