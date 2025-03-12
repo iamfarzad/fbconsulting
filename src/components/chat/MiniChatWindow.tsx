@@ -42,7 +42,7 @@ const MiniChatWindow: React.FC<MiniChatWindowProps> = ({
         </div>
         
         <div className="p-4 pt-0">
-          <AIChatInput autoFullScreen={true} />
+          <AIChatInput autoFullScreen={false} />
         </div>
         
         <div className="p-3 text-center border-t border-white/10">

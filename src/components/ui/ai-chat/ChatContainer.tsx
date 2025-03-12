@@ -17,6 +17,7 @@ interface ChatContainerProps {
   handleClear: () => void;
   toggleFullScreen: () => void;
   placeholder?: string;
+  isFullScreen?: boolean;
 }
 
 export const ChatContainer: React.FC<ChatContainerProps> = ({
@@ -30,7 +31,8 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
   handleSend,
   handleClear,
   toggleFullScreen,
-  placeholder = "Ask me anything..."
+  placeholder = "Ask me anything...",
+  isFullScreen = false
 }) => {
   return (
     <motion.div 
@@ -70,10 +72,10 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
             <ChatMessageList 
               messages={messages} 
               showMessages={showMessages} 
-              isFullScreen={false}
+              isFullScreen={isFullScreen}
             />
             
-            {messages.length > 0 && (
+            {messages.length > 0 && !isFullScreen && (
               <motion.div 
                 className="p-2 text-center"
                 initial={{ opacity: 0 }}

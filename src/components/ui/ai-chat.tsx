@@ -79,6 +79,7 @@ export function AIChatInput({
         handleClear={handleClear}
         toggleFullScreen={toggleFullScreen}
         placeholder={placeholderText}
+        isFullScreen={false}
       />
     </AnimatePresence>
   );
