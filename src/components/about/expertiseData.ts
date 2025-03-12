@@ -1,5 +1,4 @@
 
-import { Brain, Workflow, LineChart, Smartphone } from "lucide-react";
 import type { ExpertiseCardProps } from "./ExpertiseCard";
 
 // We'll use string identifiers instead of JSX in .ts files
@@ -46,6 +45,7 @@ export const expertiseData: ExpertiseCardProps[] = [
   }
 ];
 
+// Preserve the original timeline data
 export const timelinePoints = [
   {
     year: 2024,

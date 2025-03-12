@@ -1,6 +1,4 @@
 
-import { Brain, Workflow, Database, MessageSquare } from 'lucide-react';
-
 export interface SkillCategory {
   title: string;
   icon: string;
