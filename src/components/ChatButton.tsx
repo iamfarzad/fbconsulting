@@ -6,6 +6,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useChatButton } from '@/hooks/useChatButton';
 import FullScreenChat from './chat/FullScreenChat';
 import { AnimatedBars } from './ui/AnimatedBars';
+import { useMessages } from '@/hooks/useMessages';
+import { useSuggestedResponse } from '@/hooks/useSuggestedResponse';
+import { LeadInfo } from '@/services/lead/leadExtractor';
+import { useToast } from '@/hooks/use-toast';
+import { generateResponse } from '@/services/chat/responseGenerator';
+import { useLocation } from 'react-router-dom';
 
 const ChatButton = () => {
   const { 
@@ -15,6 +21,76 @@ const ChatButton = () => {
     toggleFullScreen, 
     shouldShowButton 
   } = useChatButton();
+  
+  const { messages, addUserMessage, addAssistantMessage, clearMessages } = useMessages();
+  const [inputValue, setInputValue] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(false);
+  const { toast } = useToast();
+  const location = useLocation();
+  
+  // Create a mock LeadInfo object for suggestions with correct type structure
+  const mockLeadInfo: LeadInfo = {
+    interests: messages.map(m => m.content),
+    stage: 'discovery'
+  };
+  
+  const suggestedResponse = useSuggestedResponse(mockLeadInfo);
+  
+  // Extract current page from path
+  const getCurrentPage = (): string | undefined => {
+    if (location.pathname === '/') return 'home';
+    return location.pathname.substring(1); // Remove leading slash
+  };
+  
+  const handleSend = async () => {
+    if (!inputValue.trim()) {
+      toast({
+        title: "Message is empty",
+        description: "Please enter a message before sending.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      addUserMessage(inputValue);
+      
+      // Create mock lead info from conversation context
+      const mockLeadInfo: LeadInfo = {
+        interests: [...messages.map(m => m.content), inputValue],
+        stage: 'discovery'
+      };
+      
+      // Generate AI response with possible graphic cards
+      const currentPage = getCurrentPage();
+      const aiResponse = generateResponse(inputValue, mockLeadInfo);
+      
+      // Simulate AI response delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Add the response to the chat
+      addAssistantMessage(aiResponse);
+    } catch (error) {
+      toast({
+        title: "Error sending message",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+    
+    setInputValue("");
+  };
+
+  const handleClear = () => {
+    clearMessages();
+    toast({
+      title: "Chat cleared",
+      description: "All messages have been removed.",
+    });
+  };
   
   if (!shouldShowButton) {
     return null;
@@ -67,7 +143,17 @@ const ChatButton = () => {
         )}
         
         {isOpen && isFullScreen && (
-          <FullScreenChat onMinimize={toggleFullScreen} />
+          <FullScreenChat 
+            onMinimize={toggleFullScreen}
+            initialMessages={messages}
+            onSendMessage={handleSend}
+            inputValue={inputValue}
+            setInputValue={setInputValue}
+            isLoading={isLoading}
+            suggestedResponse={suggestedResponse}
+            onClear={handleClear}
+            placeholderText="Ask me anything about our AI services..."
+          />
         )}
       </AnimatePresence>
       

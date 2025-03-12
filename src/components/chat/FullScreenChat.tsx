@@ -2,15 +2,37 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { AIChatInput } from '../ui/ai-chat';
 import { Button } from '../ui/button';
 import { AnimatedBars } from '../ui/AnimatedBars';
+import { ChatInput } from '../ui/ai-chat/ChatInput';
+import { ChatMessageList } from '../ui/ai-chat/ChatMessageList';
+import { AIMessage } from '@/services/copilotService';
 
 interface FullScreenChatProps {
   onMinimize: () => void;
+  initialMessages?: AIMessage[];
+  onSendMessage: () => void;
+  inputValue: string;
+  setInputValue: (value: string) => void;
+  isLoading: boolean;
+  suggestedResponse: string | null;
+  onClear: () => void;
+  placeholderText?: string;
 }
 
-const FullScreenChat: React.FC<FullScreenChatProps> = ({ onMinimize }) => {
+const FullScreenChat: React.FC<FullScreenChatProps> = ({ 
+  onMinimize,
+  initialMessages = [],
+  onSendMessage,
+  inputValue,
+  setInputValue,
+  isLoading,
+  suggestedResponse,
+  onClear,
+  placeholderText = "Ask about our AI services..."
+}) => {
+  const hasMessages = initialMessages.length > 0;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -44,7 +66,23 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({ onMinimize }) => {
             </div>
             
             <div className="flex-1 p-6 overflow-hidden flex flex-col">
-              <AIChatInput placeholderText="Ask about our AI services..." />
+              {hasMessages && (
+                <div className="mb-6">
+                  <ChatMessageList messages={initialMessages} showMessages={true} />
+                </div>
+              )}
+              
+              <ChatInput
+                value={inputValue}
+                setValue={setInputValue}
+                onSend={onSendMessage}
+                onClear={onClear}
+                isLoading={isLoading}
+                showMessages={true}
+                hasMessages={hasMessages}
+                suggestedResponse={suggestedResponse}
+                placeholder={placeholderText}
+              />
             </div>
           </div>
         </div>
