@@ -35,12 +35,12 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
   return (
     <motion.div 
       ref={containerRef}
-      className="flex flex-col w-full relative" // Ensuring relative positioning
+      className="flex flex-col w-full relative"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.3 }}
     >
-      {/* Messages Container with fixed height and scroll */}
       <AnimatePresence mode="wait">
         {(showMessages || messages.length > 0) && (
           <motion.div
@@ -49,19 +49,23 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
               opacity: 1, 
               height: "auto",
               transition: {
-                height: { type: "spring", damping: 15, stiffness: 300 },
-                opacity: { duration: 0.3 }
+                height: { 
+                  type: "spring", 
+                  damping: 20, 
+                  stiffness: 300 
+                },
+                opacity: { duration: 0.2 }
               }
             }}
             exit={{ 
               opacity: 0, 
               height: 0,
               transition: {
-                height: { duration: 0.3 },
-                opacity: { duration: 0.2 }
+                height: { duration: 0.2 },
+                opacity: { duration: 0.1 }
               }
             }}
-            className="will-change-scroll mb-4 relative" // Added relative position
+            className="will-change-[height,opacity] mb-4 relative"
           >
             <ChatMessageList 
               messages={messages} 
@@ -69,28 +73,33 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
               isFullScreen={false}
             />
             
-            {/* Expand to fullscreen button - more prominent */}
             {messages.length > 0 && (
-              <div className="p-2 text-center">
+              <motion.div 
+                className="p-2 text-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              >
                 <button
-                  onClick={toggleFullScreen}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleFullScreen();
+                  }}
                   className="text-black/70 text-sm hover:text-black bg-black/5 hover:bg-black/10 px-3 py-1.5 rounded-full transition-all"
                 >
-                  Expand to full screen for better experience
+                  Expand to full screen
                 </button>
-              </div>
+              </motion.div>
             )}
           </motion.div>
         )}
       </AnimatePresence>
       
-      {/* Input Container with shadow transition */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ 
-          opacity: 1,
-          transition: { delay: 0.2 }
-        }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.1 }}
         className="relative z-10 bg-background"
       >
         <ChatInput
