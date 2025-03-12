@@ -3,27 +3,20 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 interface TimelinePoint {
-  year: string | number;
-  title?: string;
-  label?: string;
-  description?: string;
-  icon?: string;
+  year: number;
+  label: string;
 }
 
 interface TimelineProgressProps {
-  timelinePoints?: TimelinePoint[];
-  items?: TimelinePoint[];
+  timelinePoints: TimelinePoint[];
 }
 
-const TimelineProgress: React.FC<TimelineProgressProps> = ({ timelinePoints, items }) => {
-  // Use items if provided, otherwise use timelinePoints
-  const points = items || timelinePoints || [];
-  
+const TimelineProgress: React.FC<TimelineProgressProps> = ({ timelinePoints }) => {
   return (
     <div className="hidden lg:block mb-12 relative">
       <div className="absolute left-0 right-0 h-1 bg-muted top-5"></div>
       <div className="flex justify-between relative">
-        {points.map((point, index) => (
+        {timelinePoints.map((point, index) => (
           <motion.div 
             key={index}
             className="flex flex-col items-center"
@@ -46,7 +39,7 @@ const TimelineProgress: React.FC<TimelineProgressProps> = ({ timelinePoints, ite
               whileInView={{ opacity: 1 }}
               transition={{ delay: index * 0.1 + 0.4 }}
             >
-              {point.label || point.title || ''}
+              {point.label}
             </motion.p>
           </motion.div>
         ))}

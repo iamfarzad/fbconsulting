@@ -6,7 +6,6 @@ import ExpertiseCard from './ExpertiseCard';
 import { expertiseData } from './expertiseData';
 import { useLanguage } from '@/contexts/LanguageContext';
 import BulletPoint from './BulletPoint';
-import { Check } from 'lucide-react';
 
 const BackgroundExperience = () => {
   const { t, language } = useLanguage();
@@ -73,7 +72,7 @@ const BackgroundExperience = () => {
                 title={isNorwegian ? expertise.titleNo : expertise.title}
                 description={isNorwegian ? expertise.descriptionNo : expertise.description}
                 icon={expertise.icon}
-                accentColor="[#fe5a1d]"
+                accentColor="#fe5a1d"
               />
             </motion.div>
           ))}
@@ -92,30 +91,26 @@ const BackgroundExperience = () => {
                 {isNorwegian ? 'Min Tilnærming' : 'My Approach'}
               </h3>
               <ul className="space-y-4">
-                <BulletPoint 
-                  item={isNorwegian ? 'Grundig forståelse av din virksomhet og utfordringer' : 'Deep understanding of your business and challenges'}
-                  index={0}
-                  bulletPointIcon={Check}
-                  accentColor="[#fe5a1d]"
-                />
-                <BulletPoint 
-                  item={isNorwegian ? 'Skreddersydde løsninger som adresserer spesifikke behov' : 'Tailored solutions that address specific needs'}
-                  index={1}
-                  bulletPointIcon={Check}
-                  accentColor="[#fe5a1d]"
-                />
-                <BulletPoint 
-                  item={isNorwegian ? 'Fokus på målbare resultater og ROI' : 'Focus on measurable results and ROI'}
-                  index={2}
-                  bulletPointIcon={Check}
-                  accentColor="[#fe5a1d]"
-                />
-                <BulletPoint 
-                  item={isNorwegian ? 'Kontinuerlig optimalisering og støtte' : 'Continuous optimization and support'}
-                  index={3}
-                  bulletPointIcon={Check}
-                  accentColor="[#fe5a1d]"
-                />
+                <BulletPoint>
+                  {isNorwegian
+                    ? 'Grundig forståelse av din virksomhet og utfordringer'
+                    : 'Deep understanding of your business and challenges'}
+                </BulletPoint>
+                <BulletPoint>
+                  {isNorwegian
+                    ? 'Skreddersydde løsninger som adresserer spesifikke behov'
+                    : 'Tailored solutions that address specific needs'}
+                </BulletPoint>
+                <BulletPoint>
+                  {isNorwegian
+                    ? 'Fokus på målbare resultater og ROI'
+                    : 'Focus on measurable results and ROI'}
+                </BulletPoint>
+                <BulletPoint>
+                  {isNorwegian
+                    ? 'Kontinuerlig optimalisering og støtte'
+                    : 'Continuous optimization and support'}
+                </BulletPoint>
               </ul>
             </motion.div>
             
@@ -130,30 +125,26 @@ const BackgroundExperience = () => {
                 {isNorwegian ? 'Hvorfor AI-Automatisering?' : 'Why AI Automation?'}
               </h3>
               <ul className="space-y-4">
-                <BulletPoint 
-                  item={isNorwegian ? 'Reduserer manuelle, repetitive oppgaver med opptil 80%' : 'Reduces manual, repetitive tasks by up to 80%'}
-                  index={0}
-                  bulletPointIcon={Check}
-                  accentColor="[#fe5a1d]"
-                />
-                <BulletPoint 
-                  item={isNorwegian ? 'Forbedrer beslutningsprosesser med datadrevet innsikt' : 'Improves decision-making with data-driven insights'}
-                  index={1}
-                  bulletPointIcon={Check}
-                  accentColor="[#fe5a1d]"
-                />
-                <BulletPoint 
-                  item={isNorwegian ? 'Skalerer operasjoner uten tilsvarende økning i kostnader' : 'Scales operations without proportional cost increases'}
-                  index={2}
-                  bulletPointIcon={Check}
-                  accentColor="[#fe5a1d]"
-                />
-                <BulletPoint 
-                  item={isNorwegian ? 'Frigjør menneskelige ressurser til mer strategisk arbeid' : 'Frees human resources for more strategic work'}
-                  index={3}
-                  bulletPointIcon={Check}
-                  accentColor="[#fe5a1d]"
-                />
+                <BulletPoint>
+                  {isNorwegian
+                    ? 'Reduserer manuelle, repetitive oppgaver med opptil 80%'
+                    : 'Reduces manual, repetitive tasks by up to 80%'}
+                </BulletPoint>
+                <BulletPoint>
+                  {isNorwegian
+                    ? 'Forbedrer beslutningsprosesser med datadrevet innsikt'
+                    : 'Improves decision-making with data-driven insights'}
+                </BulletPoint>
+                <BulletPoint>
+                  {isNorwegian
+                    ? 'Skalerer operasjoner uten tilsvarende økning i kostnader'
+                    : 'Scales operations without proportional cost increases'}
+                </BulletPoint>
+                <BulletPoint>
+                  {isNorwegian
+                    ? 'Frigjør menneskelige ressurser til mer strategisk arbeid'
+                    : 'Frees human resources for more strategic work'}
+                </BulletPoint>
               </ul>
             </motion.div>
           </div>
