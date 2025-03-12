@@ -3,7 +3,7 @@
  * Custom hook for using the Business Intelligence Protocol
  */
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useMCP } from './useMCP';
 import { 
   BusinessData, 
@@ -38,14 +38,17 @@ export function useBusinessIntelligence(
   const protocol = createBusinessIntelligenceProtocol(options.initialData || {});
   const [model, sendMessage] = useMCP(protocol);
   
-  // Track loading state
+  // Track loading state and error
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | undefined>(undefined);
 
   // Lookup LinkedIn profile
   const lookupLinkedIn = useCallback(async (profileUrl: string) => {
     setIsLoading(true);
     try {
       await sendMessage(createLinkedInLookupMessage(profileUrl));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsLoading(false);
     }
@@ -56,6 +59,8 @@ export function useBusinessIntelligence(
     setIsLoading(true);
     try {
       await sendMessage(createWebsiteLookupMessage(websiteUrl));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setIsLoading(false);
     }
@@ -84,9 +89,6 @@ export function useBusinessIntelligence(
     setContactInfo,
     clearData,
     isLoading,
-    error: model.error
+    error
   };
 }
-
-// Need to import useState
-import { useState } from 'react';
