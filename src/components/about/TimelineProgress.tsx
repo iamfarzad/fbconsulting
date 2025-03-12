@@ -13,16 +13,15 @@ interface TimelinePoint {
 interface TimelineProgressProps {
   timelinePoints?: TimelinePoint[];
   items?: TimelinePoint[];
-  accentColor?: string;
 }
 
-const TimelineProgress: React.FC<TimelineProgressProps> = ({ timelinePoints, items, accentColor = 'primary' }) => {
+const TimelineProgress: React.FC<TimelineProgressProps> = ({ timelinePoints, items }) => {
   // Use items if provided, otherwise use timelinePoints
   const points = items || timelinePoints || [];
   
   return (
     <div className="hidden lg:block mb-12 relative">
-      <div className={`absolute left-0 right-0 h-1 bg-muted top-5`}></div>
+      <div className="absolute left-0 right-0 h-1 bg-muted top-5"></div>
       <div className="flex justify-between relative">
         {points.map((point, index) => (
           <motion.div 
@@ -34,7 +33,7 @@ const TimelineProgress: React.FC<TimelineProgressProps> = ({ timelinePoints, ite
             viewport={{ once: true }}
           >
             <motion.div 
-              className={`w-10 h-10 rounded-full bg-${accentColor} flex items-center justify-center text-white font-medium text-sm z-10`}
+              className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-medium text-sm z-10"
               initial={{ scale: 0 }}
               whileInView={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 300, delay: index * 0.1 + 0.2 }}

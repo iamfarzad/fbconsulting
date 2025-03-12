@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import AnimatedText from '@/components/AnimatedText';
@@ -130,11 +129,10 @@ const AIJourney = () => {
         </div>
         
         <div className="relative max-w-5xl mx-auto">
-          {/* Timeline Progress Component */}
-          <TimelineProgress timelinePoints={items.map(item => ({ 
+          <TimelineProgress items={items.map(item => ({ 
             year: item.year,
             label: item.title
-          }))} accentColor="[#fe5a1d]" />
+          }))} />
         </div>
       </div>
     </section>
