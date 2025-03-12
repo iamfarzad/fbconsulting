@@ -39,7 +39,10 @@ export function useChatButton() {
     
     // If this is the first time opening chat, go to full screen
     if (!hasInteracted) {
-      setIsFullScreen(true);
+      // Add a small delay to ensure smooth transition
+      setTimeout(() => {
+        setIsFullScreen(true);
+      }, 100);
       setHasInteracted(true);
       localStorage.setItem('hasInteractedWithChat', 'true');
     }
@@ -108,6 +111,7 @@ export function useChatButton() {
         description: "Please try again later.",
         variant: "destructive",
       });
+      console.error("Chat button error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -124,10 +128,14 @@ export function useChatButton() {
     });
   }, [clearMessages, toast]);
   
-  // Always go to full screen after first message
+  // Always go to full screen after first message with a small delay
   useEffect(() => {
     if (messages.length > 0 && isOpen && !isFullScreen) {
-      toggleFullScreen();
+      const timer = setTimeout(() => {
+        toggleFullScreen();
+      }, 300);
+      
+      return () => clearTimeout(timer);
     }
   }, [messages.length, isOpen, isFullScreen, toggleFullScreen]);
   

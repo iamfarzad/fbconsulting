@@ -35,7 +35,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
   return (
     <motion.div 
       ref={containerRef}
-      className="flex flex-col w-full relative"
+      className="flex flex-col w-full relative" // Ensuring relative positioning
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
@@ -61,7 +61,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
                 opacity: { duration: 0.2 }
               }
             }}
-            className="will-change-scroll mb-4"
+            className="will-change-scroll mb-4 relative" // Added relative position
           >
             <ChatMessageList 
               messages={messages} 

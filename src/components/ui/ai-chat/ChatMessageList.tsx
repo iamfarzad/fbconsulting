@@ -22,10 +22,12 @@ export const ChatMessageList = ({
   // Improved scroll behavior with guaranteed scroll-to-bottom
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ 
-        behavior, 
-        block: "end" 
-      });
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ 
+          behavior, 
+          block: "end" 
+        });
+      }, 10);
     }
   };
   
@@ -69,7 +71,8 @@ export const ChatMessageList = ({
         minHeight: '120px',
         maxHeight: isFullScreen ? '100%' : '400px', // Allow full height in full screen mode
         scrollbarGutter: 'stable',
-        scrollBehavior: 'smooth'
+        scrollBehavior: 'smooth',
+        position: 'relative' // Added explicit position
       }}
     >
       <AnimatePresence>
