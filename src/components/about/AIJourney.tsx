@@ -130,9 +130,10 @@ const AIJourney = () => {
         </div>
         
         <div className="relative max-w-5xl mx-auto">
-          <TimelineProgress items={items.map(item => ({ 
+          <TimelineProgress timelinePoints={items.map(item => ({ 
             year: item.year,
-            label: item.title
+            title: item.title,
+            description: item.description
           }))} />
         </div>
       </div>
