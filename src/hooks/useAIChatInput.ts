@@ -26,9 +26,9 @@ export function useAIChatInput() {
   
   const suggestedResponse = useSuggestedResponse(mockLeadInfo);
 
-  // Calculate container height based on content
+  // Calculate container height based on content - added safety checks
   const calculateContainerHeight = () => {
-    if (containerRef.current) {
+    if (containerRef.current && typeof window !== 'undefined') {
       // Update max-height based on viewport if needed
       const vh = window.innerHeight;
       const maxHeight = Math.min(vh * 0.7, 600); // 70% of viewport height or 600px, whichever is smaller
@@ -36,12 +36,23 @@ export function useAIChatInput() {
     }
   };
 
-  // Update container height on window resize
+  // Update container height on window resize with cleanup
   useEffect(() => {
     calculateContainerHeight();
-    window.addEventListener('resize', calculateContainerHeight);
-    return () => window.removeEventListener('resize', calculateContainerHeight);
+    
+    // Safety check for window
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', calculateContainerHeight);
+      return () => window.removeEventListener('resize', calculateContainerHeight);
+    }
   }, []);
+
+  // Show messages container when first message is sent
+  useEffect(() => {
+    if (messages.length > 0 && !showMessages) {
+      setShowMessages(true);
+    }
+  }, [messages.length, showMessages]);
 
   // Extract current page from path
   const getCurrentPage = (): string | undefined => {
@@ -88,6 +99,7 @@ export function useAIChatInput() {
         description: "Please try again later.",
         variant: "destructive",
       });
+      console.error("Chat error:", error);
     } finally {
       setIsLoading(false);
     }

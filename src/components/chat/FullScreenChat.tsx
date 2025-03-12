@@ -65,10 +65,14 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
               </p>
             </div>
             
-            <div className="flex-1 p-6 overflow-auto flex flex-col">
+            <div className="flex-1 p-6 overflow-auto flex flex-col relative"> {/* Added relative position */}
               {hasMessages ? (
-                <div className="flex-1 overflow-auto mb-6">
-                  <ChatMessageList messages={initialMessages} showMessages={true} isFullScreen={true} />
+                <div className="flex-1 overflow-auto mb-6 relative"> {/* Added relative position */}
+                  <ChatMessageList 
+                    messages={initialMessages} 
+                    showMessages={true} 
+                    isFullScreen={true} 
+                  />
                 </div>
               ) : (
                 <div className="flex-1 flex items-center justify-center">
@@ -82,7 +86,7 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
                 </div>
               )}
               
-              <div className="mt-auto pt-4">
+              <div className="mt-auto pt-4 relative"> {/* Added relative position */}
                 <ChatInput
                   value={inputValue}
                   setValue={setInputValue}

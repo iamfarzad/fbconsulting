@@ -3,7 +3,7 @@ import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { AIChatInput } from './ui/ai-chat';
 import LocationGreeting from './LocationGreeting';
-import { Flag, Globe } from 'lucide-react';
+import { Flag } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
 import { AnimatedGridPattern } from './ui/animated-grid-pattern';
@@ -84,12 +84,12 @@ const Hero = () => {
           </motion.p>
           
           <motion.div 
-            className="w-full"
+            className="w-full relative" // Added relative position to fix framer-motion warning
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
           >
-            <AIChatInput autoFullScreen={true} />
+            <AIChatInput autoFullScreen={false} /> {/* Changed to false to prevent automatic fullscreen */}
           </motion.div>
         </div>
       </div>

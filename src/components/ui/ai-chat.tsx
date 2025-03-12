@@ -34,27 +34,34 @@ export function AIChatInput({
   
   const isMobile = useIsMobile();
 
-  // Automatically go fullscreen when messages are present - for both mobile and desktop
+  // Automatically go fullscreen when messages are present and autoFullScreen is true
   useEffect(() => {
     if (autoFullScreen && messages.length > 0 && !isFullScreen) {
-      setIsFullScreen(true);
+      // Add a small delay to ensure smooth transition
+      const timer = setTimeout(() => {
+        setIsFullScreen(true);
+      }, 300);
+      
+      return () => clearTimeout(timer);
     }
   }, [messages.length, autoFullScreen, isFullScreen, setIsFullScreen]);
 
   // If in fullscreen mode, show FullScreenChat
   if (isFullScreen) {
     return (
-      <FullScreenChat 
-        onMinimize={toggleFullScreen} 
-        initialMessages={messages}
-        onSendMessage={handleSend}
-        inputValue={inputValue}
-        setInputValue={setInputValue}
-        isLoading={isLoading}
-        suggestedResponse={suggestedResponse}
-        onClear={handleClear}
-        placeholderText={placeholderText}
-      />
+      <AnimatePresence mode="wait">
+        <FullScreenChat 
+          onMinimize={toggleFullScreen} 
+          initialMessages={messages}
+          onSendMessage={handleSend}
+          inputValue={inputValue}
+          setInputValue={setInputValue}
+          isLoading={isLoading}
+          suggestedResponse={suggestedResponse}
+          onClear={handleClear}
+          placeholderText={placeholderText}
+        />
+      </AnimatePresence>
     );
   }
 
