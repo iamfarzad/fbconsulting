@@ -1,4 +1,5 @@
 
+import { BlogPost } from '@/types/blog';
 import { blogPosts } from './blogData';
 
 /**
@@ -16,3 +17,4 @@ export const getBlogPostsByCategory = (category: string): BlogPost[] => {
   if (category === 'all') return blogPosts;
   return blogPosts.filter(post => post.category === category);
 };
+
