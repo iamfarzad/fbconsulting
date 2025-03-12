@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getAllBlogPosts, getBlogCategories } from '@/services/blogService';
+import { getAllBlogPosts, getBlogCategories } from '@/services/blog';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
