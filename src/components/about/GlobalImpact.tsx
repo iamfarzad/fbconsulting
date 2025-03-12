@@ -2,12 +2,40 @@
 import React from 'react';
 import AnimatedText from '@/components/AnimatedText';
 import { WorldMap } from '@/components/ui/world-map';
+import { motion } from 'framer-motion';
+import { Globe } from 'lucide-react';
 
 const GlobalImpact = () => {
   return (
     <section className="py-16 px-4 bg-background relative overflow-hidden">
       <div className="container mx-auto max-w-5xl">
-        <AnimatedText text="Global Impact" tag="h2" className="text-3xl font-bold mb-8 text-center" />
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className="text-center mb-8"
+        >
+          <div className="flex justify-center mb-4">
+            <div className="bg-[#fe5a1d]/10 p-3 rounded-full">
+              <Globe className="w-6 h-6 text-[#fe5a1d]" />
+            </div>
+          </div>
+          
+          <AnimatedText 
+            text="Global Impact" 
+            tag="h2" 
+            className="text-3xl font-bold mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-[#fe5a1d] to-[#fe5a1d]/70" 
+          />
+          
+          <motion.div 
+            className="w-20 h-1 bg-gradient-to-r from-[#fe5a1d]/80 to-[#fe5a1d]/30 mx-auto rounded-full mb-6"
+            initial={{ width: 0 }}
+            whileInView={{ width: 80 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            viewport={{ once: true }}
+          />
+        </motion.div>
         
         <div className="mb-8 text-center max-w-2xl mx-auto">
           <p className="text-muted-foreground">
@@ -15,7 +43,14 @@ const GlobalImpact = () => {
           </p>
         </div>
         
-        <div className="glassmorphism p-6 rounded-xl">
+        <motion.div 
+          className="glassmorphism p-6 rounded-xl"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          viewport={{ once: true }}
+          whileHover={{ y: -5, boxShadow: "0 20px 30px rgba(0, 0, 0, 0.1)" }}
+        >
           <WorldMap
             dots={[
               {
@@ -55,9 +90,9 @@ const GlobalImpact = () => {
                 end: { lat: 1.3521, lng: 103.8198 }, // Singapore
               },
             ]}
-            lineColor="#00BFA6"
+            lineColor="#fe5a1d"
           />
-        </div>
+        </motion.div>
       </div>
     </section>
   );
