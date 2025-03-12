@@ -82,7 +82,7 @@ const NewsletterSignup: React.FC<NewsletterSignupProps> = ({
               required
               aria-label="Email address"
               className="flex-grow h-9"
-              size="sm"
+              // Removed the size="sm" prop that was causing the type error
             />
             <Button type="submit" disabled={isLoading} size="sm">
               {isLoading ? "..." : "Subscribe"}
