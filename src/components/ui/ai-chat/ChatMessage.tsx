@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from "@/lib/utils";
 import { Bot, CircleUserRound } from "lucide-react";
@@ -8,6 +7,8 @@ import { GraphicCardCollection } from './GraphicCardCollection';
 import { EmailSummaryForm } from './EmailSummaryForm';
 import { extractContentFromMessage, FormType } from '@/utils/messageExtractor';
 import NewsletterSignup from '@/components/NewsletterSignup';
+import { extractMediaContent } from '@/utils/mediaExtractor';
+import MessageMedia from './MessageMedia';
 
 interface MessageProps {
   message: AIMessage;
@@ -17,8 +18,9 @@ interface MessageProps {
 export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
   const isUser = message.role === 'user';
   
-  // Use our utility to extract content, cards, and forms
+  // Use our utilities to extract content, cards, forms, and media
   const { textContent, cards, forms } = extractContentFromMessage(message.content);
+  const { media } = extractMediaContent(textContent);
   
   // Helper function to render the appropriate form component
   const renderForm = (formType: FormType, formData?: Record<string, string>) => {
@@ -76,6 +78,18 @@ export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
           <p className={isUser ? "text-black" : "text-white"}>
             {textContent}
           </p>
+          
+          {/* Render media content */}
+          {media.length > 0 && (
+            <div className="space-y-2 mt-2">
+              {media.map((item, index) => (
+                <MessageMedia 
+                  key={`media-${index}`} 
+                  media={item}
+                />
+              ))}
+            </div>
+          )}
           
           {/* Render cards if present */}
           {cards.length > 0 && (
