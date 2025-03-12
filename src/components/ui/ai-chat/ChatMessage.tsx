@@ -25,21 +25,34 @@ export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
   // Extract card data if present
   const extractCards = (content: string): { 
     textContent: string, 
-    cards: Array<{ type: CardType; title: string; description: string }> 
+    cards: Array<{ 
+      type: CardType; 
+      title: string; 
+      description: string;
+      variant?: 'default' | 'bordered' | 'minimal';
+    }> 
   } => {
-    const cards: Array<{ type: CardType; title: string; description: string }> = [];
+    const cards: Array<{ 
+      type: CardType; 
+      title: string; 
+      description: string;
+      variant?: 'default' | 'bordered' | 'minimal';
+    }> = [];
+    
     let textContent = content;
     
     // Extract card data from message content
-    const cardRegex = /\[\[CARD:(\w+):([^:]+):([^\]]+)\]\]/g;
+    // Updated regex to optionally include variant
+    const cardRegex = /\[\[CARD:(\w+):([^:]+):([^:]+)(?::(\w+))?\]\]/g;
     let match;
     
     while ((match = cardRegex.exec(content)) !== null) {
       const type = match[1] as CardType;
       const title = match[2];
       const description = match[3];
+      const variant = match[4] as 'default' | 'bordered' | 'minimal' | undefined;
       
-      cards.push({ type, title, description });
+      cards.push({ type, title, description, variant });
       
       // Remove the card data from the text content
       textContent = textContent.replace(match[0], '');
@@ -48,7 +61,10 @@ export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
     return { textContent: textContent.trim(), cards };
   };
   
-  const { textContent, cards } = hasCards ? extractCards(message.content) : { textContent: message.content.replace(/\[\[FORM:email-summary\]\]/g, '').trim(), cards: [] };
+  const { textContent, cards } = hasCards ? extractCards(message.content) : { 
+    textContent: message.content.replace(/\[\[FORM:email-summary\]\]/g, '').trim(), 
+    cards: [] 
+  };
   
   const handleFormSubmitted = () => {
     console.log('Email summary form submitted');
