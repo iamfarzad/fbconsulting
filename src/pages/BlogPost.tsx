@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeftIcon } from 'lucide-react';
@@ -9,7 +8,7 @@ import PostHeader from '@/components/blog/PostHeader';
 import PostContent from '@/components/blog/PostContent';
 import ShareSection from '@/components/blog/ShareSection';
 import RelatedPosts from '@/components/blog/RelatedPosts';
-import { getBlogPostBySlug, getRelatedPosts } from '@/services/blogService';
+import { getBlogPostBySlug, getRelatedPosts } from '@/services/blog';
 import SEO from '@/components/SEO';
 import DotPattern from '@/components/ui/dot-pattern';
 

@@ -1,7 +1,7 @@
-
 import { BlogPost } from '@/types/blog';
 
-const blogPosts: BlogPost[] = [
+// Blog posts data store
+export const blogPosts: BlogPost[] = [
   {
     title: "Revolutionizing Business Processes with AI Automation",
     slug: "revolutionizing-business-processes",
@@ -150,82 +150,3 @@ const blogPosts: BlogPost[] = [
     ]
   }
 ];
-
-/**
- * Returns all blog posts
- */
-export const getAllBlogPosts = (): BlogPost[] => {
-  return blogPosts;
-};
-
-/**
- * Returns a blog post by slug
- */
-export const getBlogPostBySlug = (slug: string): BlogPost | undefined => {
-  return blogPosts.find(post => post.slug === slug);
-};
-
-/**
- * Returns all available blog categories
- */
-export const getBlogCategories = (): string[] => {
-  const categories = blogPosts.map(post => post.category);
-  return [...new Set(categories)]; // Remove duplicates
-};
-
-/**
- * Filters blog posts by category
- */
-export const getBlogPostsByCategory = (category: string): BlogPost[] => {
-  if (category === 'all') return blogPosts;
-  return blogPosts.filter(post => post.category === category);
-};
-
-/**
- * Search blog posts by term
- */
-export const searchBlogPosts = (term: string): BlogPost[] => {
-  const searchTerm = term.toLowerCase();
-  return blogPosts.filter(post => 
-    post.title.toLowerCase().includes(searchTerm) || 
-    post.excerpt?.toLowerCase().includes(searchTerm) ||
-    post.content.toLowerCase().includes(searchTerm)
-  );
-};
-
-/**
- * Sort blog posts by date or popularity (read time as proxy)
- */
-export const sortBlogPosts = (
-  posts: BlogPost[], 
-  field: 'date' | 'popularity' = 'date', 
-  order: 'asc' | 'desc' = 'desc'
-): BlogPost[] => {
-  return [...posts].sort((a, b) => {
-    let comparison = 0;
-    
-    if (field === 'date') {
-      const dateA = new Date(a.date).getTime();
-      const dateB = new Date(b.date).getTime();
-      comparison = dateA - dateB;
-    } else if (field === 'popularity') {
-      // Using read time as a proxy for popularity
-      const timeA = parseInt(a.readTime.split(' ')[0]);
-      const timeB = parseInt(b.readTime.split(' ')[0]);
-      comparison = timeA - timeB;
-    }
-    
-    return order === 'asc' ? comparison : -comparison;
-  });
-};
-
-/**
- * Get related posts for a post
- */
-export const getRelatedPosts = (slug: string): BlogPost[] => {
-  const post = getBlogPostBySlug(slug);
-  if (!post) return [];
-  
-  const relatedSlugs = post.relatedPosts.map(rp => rp.slug);
-  return blogPosts.filter(p => relatedSlugs.includes(p.slug));
-};
