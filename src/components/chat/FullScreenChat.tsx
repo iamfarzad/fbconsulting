@@ -55,12 +55,12 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
       className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-md overflow-hidden"
     >
       <div className="relative w-full h-full max-w-7xl mx-auto px-4 overflow-hidden">
-        <div className="absolute right-4 top-4 z-50">
+        <div className="absolute right-4 top-6 z-50">
           <Button
             variant="outline"
             size="icon"
             onClick={onMinimize}
-            className="rounded-full border-white/30 bg-black/50 hover:bg-black/70"
+            className="rounded-full border-white/30 bg-black/50 hover:bg-black/70 dark:border-white/30 dark:bg-black/50 dark:hover:bg-black/70 dark:text-white"
           >
             <X className="h-4 w-4 text-white" />
           </Button>

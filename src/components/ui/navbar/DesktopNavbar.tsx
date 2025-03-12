@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { NavigationMenu, NavigationMenuList } from "@/components/ui/navigation-menu";
 import { MenuItem, renderMenuItem } from "./MenuItem";
 import { DesktopDarkModeToggle, DarkModeToggleProps } from "./DarkModeToggle";
+import { SearchButton } from "@/components/ui/search/SearchButton";
 
 interface NavbarLogoProps {
   url: string;
@@ -44,6 +45,7 @@ export const DesktopNavbar: React.FC<DesktopNavbarProps> = ({
         </div>
       </div>
       <div className="flex items-center gap-4">
+        <SearchButton variant="ghost" iconOnly />
         {darkModeToggle && (
           <DesktopDarkModeToggle
             isDarkMode={darkModeToggle.isDarkMode}
