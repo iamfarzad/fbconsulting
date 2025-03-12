@@ -89,7 +89,7 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
           >
-            <AIChatInput />
+            <AIChatInput autoFullScreen={true} />
           </motion.div>
         </div>
       </div>

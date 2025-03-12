@@ -11,12 +11,18 @@ import { generateResponse } from "@/services/chat/responseGenerator";
 import { AnimatePresence, motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "react-router-dom";
+import FullScreenChat from "../chat/FullScreenChat";
+import { useMobile } from "@/hooks/use-mobile";
 
 interface AIChatInputProps {
   placeholderText?: string;
+  autoFullScreen?: boolean;
 }
 
-export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatInputProps) {
+export function AIChatInput({ 
+  placeholderText = "Ask me anything...",
+  autoFullScreen = false 
+}: AIChatInputProps) {
   const [showMessages, setShowMessages] = useState(false);
   const { messages, addUserMessage, addAssistantMessage, clearMessages } = useMessages();
   const [isLoading, setIsLoading] = useState(false);
@@ -24,6 +30,8 @@ export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatIn
   const containerRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const currentPath = location.pathname;
+  const isMobile = useMobile();
+  const [isFullScreen, setIsFullScreen] = useState(false);
   
   // Create a mock LeadInfo object for suggestions with correct type structure
   const mockLeadInfo: LeadInfo = {
@@ -56,6 +64,13 @@ export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatIn
     if (currentPath === '/') return 'home';
     return currentPath.substring(1); // Remove leading slash
   };
+
+  // Automatically go fullscreen when first message is entered on mobile if autoFullScreen is true
+  useEffect(() => {
+    if (autoFullScreen && isMobile && messages.length > 0 && !isFullScreen) {
+      setIsFullScreen(true);
+    }
+  }, [messages.length, isMobile, autoFullScreen, isFullScreen]);
 
   const handleSend = async () => {
     if (!inputValue.trim()) {
@@ -113,6 +128,27 @@ export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatIn
     });
   };
 
+  const toggleFullScreen = () => {
+    setIsFullScreen(prev => !prev);
+  };
+
+  // If in fullscreen mode, show FullScreenChat
+  if (isFullScreen) {
+    return (
+      <FullScreenChat 
+        onMinimize={toggleFullScreen} 
+        initialMessages={messages}
+        onSendMessage={handleSend}
+        inputValue={inputValue}
+        setInputValue={setInputValue}
+        isLoading={isLoading}
+        suggestedResponse={suggestedResponse}
+        onClear={handleClear}
+        placeholderText={placeholderText}
+      />
+    );
+  }
+
   return (
     <AnimatePresence mode="wait">
       <motion.div 
@@ -149,6 +185,18 @@ export function AIChatInput({ placeholderText = "Ask me anything..." }: AIChatIn
                 messages={messages} 
                 showMessages={showMessages} 
               />
+              
+              {/* Expand to fullscreen button */}
+              {messages.length > 0 && (
+                <div className="p-2 text-center">
+                  <button
+                    onClick={toggleFullScreen}
+                    className="text-black/70 text-sm hover:text-black transition-colors"
+                  >
+                    Expand to full screen
+                  </button>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
