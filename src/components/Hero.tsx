@@ -100,12 +100,12 @@ const Hero = () => {
           </motion.p>
           
           <motion.div 
-            className="w-full relative" // Added relative position to fix framer-motion warning
+            className="w-full relative"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
           >
-            <AIChatInput autoFullScreen={false} /> {/* Changed to false to prevent automatic fullscreen */}
+            <AIChatInput autoFullScreen={false} />
           </motion.div>
           
           <motion.div
@@ -117,11 +117,11 @@ const Hero = () => {
             <Button 
               size="lg" 
               onClick={handleConsultationClick}
-              className="rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
+              className="rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300 group bg-[#fe5a1d] hover:bg-[#fe5a1d]/90 text-white"
             >
-              <Calendar className="mr-2 h-5 w-5 text-[#fe5a1d] group-hover:scale-110 transition-all duration-300" />
+              <Calendar className="mr-2 h-5 w-5 text-white group-hover:scale-110 transition-all duration-300" />
               Book Free Consultation
-              <ArrowRight className="ml-2 h-4 w-4 text-[#fe5a1d] group-hover:translate-x-1 transition-transform duration-300" />
+              <ArrowRight className="ml-2 h-4 w-4 text-white group-hover:translate-x-1 transition-transform duration-300" />
             </Button>
           </motion.div>
         </div>

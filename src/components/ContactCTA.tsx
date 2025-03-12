@@ -58,7 +58,7 @@ const ContactCTA = () => {
             <AnimatedText
               text={isNorwegian ? "Klar til å automatisere og skalere?" : "Ready to Automate and Scale?"}
               tag="h2"
-              className="text-3xl md:text-4xl font-bold mb-4 text-gradient-teal"
+              className="text-3xl md:text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#fe5a1d] to-[#fe5a1d]/70"
             />
             <AnimatedText
               text={isNorwegian ? "La oss diskutere hvordan AI-automatisering kan transformere virksomheten din." : "Let's discuss how AI automation can transform your business."}
@@ -71,12 +71,12 @@ const ContactCTA = () => {
           <div className="flex flex-col md:flex-row gap-4 justify-center items-center mt-8">
             <Button 
               size="lg" 
-              className="rounded-full px-8 py-6 text-lg w-full md:w-auto flex items-center gap-2 justify-center shadow-md hover:shadow-lg transition-all duration-300 group bg-gradient-to-r from-[#fe5a1d] to-[#fe5a1d]/90 hover:from-[#fe5a1d]/90 hover:to-[#fe5a1d] text-white"
+              className="rounded-full px-8 py-6 text-lg w-full md:w-auto flex items-center gap-2 justify-center shadow-md hover:shadow-lg transition-all duration-300 group bg-[#fe5a1d] hover:bg-[#fe5a1d]/90 text-white"
               onClick={handleBookClick}
             >
-              <Calendar size={20} className="group-hover:scale-110 transition-transform duration-300" />
+              <Calendar size={20} className="text-white group-hover:scale-110 transition-transform duration-300" />
               {isNorwegian ? "Book en gratis konsultasjon" : "Book a Free Consultation"}
-              <ArrowRight size={16} className="ml-1 group-hover:translate-x-1 transition-transform duration-300" />
+              <ArrowRight size={16} className="ml-1 text-white group-hover:translate-x-1 transition-transform duration-300" />
             </Button>
             
             <Button 
