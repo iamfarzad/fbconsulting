@@ -6,7 +6,7 @@ export const skillsData = [
     id: 'ai',
     name: 'Artificial Intelligence',
     nameNo: 'Kunstig Intelligens',
-    icon: '🧠',
+    icon: <BrainCircuit className="w-5 h-5" />,
     skills: [
       { name: 'Custom GPT Model Training', nameNo: 'Tilpasset GPT-modellopplæring', level: 95 },
       { name: 'Predictive Analytics', nameNo: 'Prediktiv Analyse', level: 90 },
@@ -19,7 +19,7 @@ export const skillsData = [
     id: 'automation',
     name: 'Workflow Automation',
     nameNo: 'Arbeidsflytautomatisering',
-    icon: '⚙️',
+    icon: <Workflow className="w-5 h-5" />,
     skills: [
       { name: 'Process Analysis', nameNo: 'Prosessanalyse', level: 95 },
       { name: 'Custom Workflow Development', nameNo: 'Tilpasset Arbeidsflytutvikling', level: 90 },
@@ -32,7 +32,7 @@ export const skillsData = [
     id: 'data',
     name: 'Data Analytics',
     nameNo: 'Dataanalyse',
-    icon: '📊',
+    icon: <Database className="w-5 h-5" />,
     skills: [
       { name: 'Business Intelligence Dashboards', nameNo: 'Forretningsintelligens-dashboards', level: 92 },
       { name: 'Predictive Modeling', nameNo: 'Prediktiv Modellering', level: 90 },
@@ -45,7 +45,7 @@ export const skillsData = [
     id: 'conversational',
     name: 'Conversational AI',
     nameNo: 'Konversasjons-AI',
-    icon: '💬',
+    icon: <Mic className="w-5 h-5" />,
     skills: [
       { name: 'Custom Chatbot Development', nameNo: 'Tilpasset Chatbotutvikling', level: 95 },
       { name: 'AI Copilots', nameNo: 'AI-kopiloter', level: 90 },
