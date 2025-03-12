@@ -8,20 +8,20 @@ import { ChatMessage } from "./ChatMessage";
 interface ChatMessageListProps {
   messages: AIMessage[];
   showMessages: boolean;
-  isFullScreen?: boolean; // Added new prop to determine if in full screen mode
+  isFullScreen?: boolean; // Already had this prop
 }
 
 export const ChatMessageList = ({ 
   messages, 
   showMessages, 
-  isFullScreen = false // Default to false
+  isFullScreen = false
 }: ChatMessageListProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
   // Improved scroll behavior with guaranteed scroll-to-bottom
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
-    if (messagesEndRef.current) {
+    if (messagesEndRef.current && !isFullScreen) { // Don't scroll if in full screen
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ 
           behavior, 
@@ -31,9 +31,9 @@ export const ChatMessageList = ({
     }
   };
   
-  // Scroll to bottom when messages change - enhanced with immediate scroll first
+  // Scroll to bottom when messages change - only if not in full screen
   useEffect(() => {
-    if (messages.length > 0) {
+    if (messages.length > 0 && !isFullScreen) {
       // Immediate scroll for better UX to avoid content jumping
       scrollToBottom("auto");
       
@@ -44,11 +44,11 @@ export const ChatMessageList = ({
       
       return () => clearTimeout(timer);
     }
-  }, [messages]);
+  }, [messages, isFullScreen]);
   
-  // Scroll when visibility changes with enhanced timing
+  // Scroll when visibility changes - only if not in full screen
   useEffect(() => {
-    if (showMessages) {
+    if (showMessages && !isFullScreen) {
       // Allow animation to complete before scrolling
       const timer = setTimeout(() => {
         scrollToBottom("smooth");
@@ -56,7 +56,7 @@ export const ChatMessageList = ({
       
       return () => clearTimeout(timer);
     }
-  }, [showMessages]);
+  }, [showMessages, isFullScreen]);
 
   if (!showMessages && messages.length === 0) {
     return null;
@@ -72,7 +72,8 @@ export const ChatMessageList = ({
         maxHeight: isFullScreen ? '100%' : '400px', // Allow full height in full screen mode
         scrollbarGutter: 'stable',
         scrollBehavior: 'smooth',
-        position: 'relative' // Added explicit position
+        position: 'relative', // Added explicit position
+        overflowY: isFullScreen ? 'visible' : 'auto' // Disable scrolling in full screen mode
       }}
     >
       <AnimatePresence>
