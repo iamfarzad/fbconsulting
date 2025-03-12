@@ -1,8 +1,22 @@
 
-import React from 'react';
 import { BrainCircuit, Workflow, Database, Mic } from 'lucide-react';
+import { LucideIcon } from 'lucide-react';
 
-export const skillsData = [
+interface Skill {
+  name: string;
+  nameNo: string;
+  level: number;
+}
+
+interface SkillCategory {
+  id: string;
+  name: string;
+  nameNo: string;
+  icon: LucideIcon;
+  skills: Skill[];
+}
+
+export const skillsData: SkillCategory[] = [
   {
     id: 'ai',
     name: 'Artificial Intelligence',
