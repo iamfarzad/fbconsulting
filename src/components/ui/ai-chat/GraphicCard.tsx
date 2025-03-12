@@ -10,9 +10,15 @@ interface GraphicCardProps {
   type: CardType;
   title: string;
   description: string;
+  variant?: 'default' | 'bordered' | 'minimal';
 }
 
-export const GraphicCard: React.FC<GraphicCardProps> = ({ type, title, description }) => {
+export const GraphicCard: React.FC<GraphicCardProps> = ({ 
+  type, 
+  title, 
+  description, 
+  variant = 'default' 
+}) => {
   const navigate = useNavigate();
   
   const getIcon = () => {
@@ -60,18 +66,36 @@ export const GraphicCard: React.FC<GraphicCardProps> = ({ type, title, descripti
   const handleClick = () => {
     navigate(getPath());
   };
+
+  // Get card styles based on variant
+  const getCardStyles = () => {
+    const baseStyles = "overflow-hidden rounded-lg shadow-lg cursor-pointer transition-all duration-300 mb-2 max-w-xs";
+    
+    switch (variant) {
+      case 'bordered':
+        return `${baseStyles} bg-black text-white border-2 border-white/30 hover:border-[#fe5a1d]/70`;
+      case 'minimal':
+        return `${baseStyles} bg-white/5 backdrop-blur-sm text-white border border-white/10 hover:border-[#fe5a1d]/50`;
+      default:
+        return `${baseStyles} bg-black text-white border border-white/20 hover:shadow-xl hover:border-[#fe5a1d]/40`;
+    }
+  };
   
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-black text-white overflow-hidden rounded-lg border border-white/20 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 mb-2 max-w-xs"
+      className={getCardStyles()}
       onClick={handleClick}
+      whileHover={{ 
+        y: -5,
+        transition: { duration: 0.2 }
+      }}
     >
       <div className="p-3">
         <div className="flex items-center gap-2 mb-2">
-          <div className="p-1.5 bg-white/10 rounded-full">
+          <div className="p-1.5 bg-white/10 rounded-full group-hover:bg-[#fe5a1d]/10">
             {getIcon()}
           </div>
           <h3 className="font-medium">{title}</h3>
@@ -79,9 +103,9 @@ export const GraphicCard: React.FC<GraphicCardProps> = ({ type, title, descripti
         
         <p className="text-sm text-white/70 mb-2">{description}</p>
         
-        <div className="flex items-center justify-end text-xs text-white/60 hover:text-white transition-colors">
+        <div className="flex items-center justify-end text-xs text-white/60 hover:text-[#fe5a1d] transition-colors group">
           <span className="mr-1">View</span>
-          <ArrowRight className="h-3 w-3" />
+          <ArrowRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
         </div>
       </div>
     </motion.div>
