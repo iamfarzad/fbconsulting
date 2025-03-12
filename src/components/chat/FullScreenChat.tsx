@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { Button } from '../ui/button';
@@ -33,15 +33,28 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
 }) => {
   const hasMessages = initialMessages.length > 0;
 
+  // Prevent body scrolling when fullscreen chat is open
+  useEffect(() => {
+    // Save the current overflow style
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    // Prevent scrolling on the body
+    document.body.style.overflow = 'hidden';
+    
+    // Restore original overflow style when component unmounts
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md"
+      className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-md overflow-hidden"
     >
-      <div className="relative w-full h-full max-w-7xl mx-auto px-4">
+      <div className="relative w-full h-full max-w-7xl mx-auto px-4 overflow-hidden">
         <div className="absolute right-4 top-4 z-50">
           <Button
             variant="outline"
@@ -53,8 +66,8 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
           </Button>
         </div>
         
-        <div className="h-full pt-20 pb-10 flex flex-col">
-          <div className="flex flex-col flex-grow h-full max-w-4xl mx-auto">
+        <div className="h-full pt-20 pb-10 flex flex-col overflow-hidden">
+          <div className="flex flex-col flex-grow h-full max-w-4xl mx-auto overflow-hidden">
             <div className="p-6 text-center mb-4">
               <h2 className="text-2xl font-semibold text-white mb-2">Chat with AI Assistant</h2>
               <div className="flex justify-center">
@@ -65,9 +78,9 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
               </p>
             </div>
             
-            <div className="flex-1 p-6 overflow-visible flex flex-col relative"> {/* Changed from overflow-auto to overflow-visible */}
+            <div className="flex-1 p-6 flex flex-col relative overflow-hidden">
               {hasMessages ? (
-                <div className="flex-1 overflow-visible mb-6 relative"> {/* Changed from overflow-auto to overflow-visible */}
+                <div className="flex-1 mb-6 relative overflow-auto">
                   <ChatMessageList 
                     messages={initialMessages} 
                     showMessages={true} 

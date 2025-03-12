@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAIChatInput } from "./useAIChatInput";
 import { useLocation } from "react-router-dom";
@@ -16,7 +15,13 @@ export function useChatButton() {
     suggestedResponse,
     handleSend,
     handleClear,
+    setIsFullScreen: setAIChatFullScreen
   } = useAIChatInput();
+
+  // Keep both isFullScreen states synchronized
+  useEffect(() => {
+    setAIChatFullScreen(isFullScreen);
+  }, [isFullScreen, setAIChatFullScreen]);
 
   // Reset states when route changes
   useEffect(() => {
