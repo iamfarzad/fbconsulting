@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ArrowRight, BriefcaseIcon, UserRound, Clock, Calendar, Mail, Code, MessageSquareQuote } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -49,21 +48,39 @@ export const GraphicCard: React.FC<GraphicCardProps> = ({
       case 'about':
         return '/about';
       case 'timeline':
-        return '/about#timeline'; // Timeline section in About page
+        return '/about#ai-journey'; // Corrected anchor for Timeline section
       case 'booking':
-        return '/contact#booking'; // Booking section in Contact page
+        return '/contact#booking-calendar'; // Corrected anchor for Booking section
       case 'newsletter':
-        return '/#newsletter'; // Newsletter section in Home page
+        return '/#newsletter-signup'; // Corrected anchor for Newsletter section
       case 'skills':
-        return '/about#skills'; // Skills section in About page
+        return '/about#skills-technologies'; // Corrected anchor for Skills section
       case 'testimonials':
-        return '/#testimonials'; // Testimonials section in Home page
+        return '/#testimonials-section'; // Corrected anchor for Testimonials section
       default:
         return '/';
     }
   };
   
   const handleClick = () => {
+    const path = getPath();
+    
+    // Check if this is a hash link on the same page
+    if (path.includes('#')) {
+      const [basePath, hash] = path.split('#');
+      const currentPath = window.location.pathname;
+      
+      // If we're already on the right page, just scroll to the element
+      if (basePath === '' || currentPath === basePath) {
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+          return;
+        }
+      }
+    }
+    
+    // Otherwise navigate to the new page
     navigate(getPath());
   };
 
