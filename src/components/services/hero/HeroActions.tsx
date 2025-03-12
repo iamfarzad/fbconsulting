@@ -40,7 +40,7 @@ const HeroActions = () => {
          style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}>
       <Button 
         size="lg" 
-        className="neo-button rounded-full bg-white text-black hover:bg-white/90"
+        className="neo-button rounded-full bg-white text-black hover:bg-white/90 dark:bg-white dark:text-black dark:hover:bg-white/90"
         onClick={handleExploreServices}
       >
         <Workflow className="mr-2 h-5 w-5" />
@@ -50,7 +50,7 @@ const HeroActions = () => {
       <Button 
         variant="outline" 
         size="lg" 
-        className="neo-button rounded-full border-white text-white hover:bg-white/10"
+        className="neo-button rounded-full border-white text-white hover:bg-white/10 dark:border-white dark:text-white dark:hover:bg-white/10"
         onClick={handleScheduleConsultation}
       >
         Schedule Consultation

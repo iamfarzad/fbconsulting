@@ -22,10 +22,10 @@ export function SendButton({
     <button
       type="button"
       className={cn(
-        "px-1.5 py-1.5 rounded-lg text-sm transition-colors border hover:border-black flex items-center justify-between gap-1",
+        "px-1.5 py-1.5 rounded-lg text-sm transition-colors border hover:border-foreground flex items-center justify-between gap-1",
         hasContent && !isLoading
-          ? "bg-black text-white border-black"
-          : "text-black/80 border-black/30",
+          ? "bg-black text-white dark:bg-white dark:text-black border-black dark:border-white"
+          : "text-foreground border-foreground/30",
         (isLoading || aiProcessing) && "opacity-50 cursor-not-allowed"
       )}
       onClick={onClick}
@@ -38,8 +38,8 @@ export function SendButton({
           className={cn(
             "w-4 h-4",
             hasContent && !isLoading
-              ? "text-white"
-              : "text-black/80"
+              ? "text-white dark:text-black"
+              : "text-foreground"
           )}
         />
       )}

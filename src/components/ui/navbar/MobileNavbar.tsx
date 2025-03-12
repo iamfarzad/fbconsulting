@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Menu } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -13,6 +13,8 @@ import { Accordion } from "@/components/ui/accordion";
 import { MenuItem } from "./MenuItem";
 import { renderMobileMenuItem } from "./MobileMenuItem";
 import { MobileDarkModeToggle, DarkModeToggleProps } from "./DarkModeToggle";
+import { SearchButton } from "@/components/ui/search/SearchButton";
+import { SearchBar } from "@/components/ui/search/SearchBar";
 
 interface NavbarLogoProps {
   url: string;
@@ -50,6 +52,7 @@ export const MobileNavbar: React.FC<MobileNavbarProps> = ({
           <span className="text-lg font-semibold">{logo.title}</span>
         </a>
         <div className="flex items-center gap-2">
+          <SearchButton variant="ghost" iconOnly size="icon" />
           {darkModeToggle && (
             <MobileDarkModeToggle
               isDarkMode={darkModeToggle.isDarkMode}
@@ -73,7 +76,10 @@ export const MobileNavbar: React.FC<MobileNavbarProps> = ({
                   </a>
                 </SheetTitle>
               </SheetHeader>
-              <div className="my-6 flex flex-col gap-6">
+              <div className="mt-4 mb-6">
+                <SearchBar onSearch={() => {}} className="w-full" />
+              </div>
+              <div className="flex flex-col gap-6">
                 <Accordion
                   type="single"
                   collapsible
