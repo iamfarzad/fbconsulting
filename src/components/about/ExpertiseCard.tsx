@@ -1,10 +1,9 @@
 
 import React from 'react';
-import { LucideIcon } from 'lucide-react';
 import BulletPoint from './BulletPoint';
 import { motion } from 'framer-motion';
 
-interface ExpertiseCardProps {
+export interface ExpertiseCardProps {
   icon: React.ReactNode;
   title: string;
   description: string;
