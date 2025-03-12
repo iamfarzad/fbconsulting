@@ -3,8 +3,8 @@ import React from 'react';
 import { LucideIcon, Check } from 'lucide-react';
 
 export interface BulletPointProps {
-  item: string;
-  index: number;
+  item?: string;
+  index?: number;
   bulletPointIcon?: LucideIcon;
   accentColor?: string;
   children?: React.ReactNode;
@@ -12,7 +12,7 @@ export interface BulletPointProps {
 
 const BulletPoint: React.FC<BulletPointProps> = ({ 
   item, 
-  index, 
+  index = 0, 
   bulletPointIcon: Icon = Check,
   accentColor = "primary",
   children
