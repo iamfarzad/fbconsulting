@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Brain, Workflow, Database, MessageSquare, Cpu } from 'lucide-react';
+import { Brain, Workflow, Database, MessageSquare } from 'lucide-react';
 
 export interface SkillCategory {
   title: string;
