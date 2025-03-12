@@ -82,8 +82,8 @@ const Faq3 = ({
           className="mx-auto w-full lg:max-w-3xl"
         >
           {items.map((item) => (
-            <AccordionItem key={item.id} value={item.id}>
-              <AccordionTrigger className="transition-opacity duration-200 hover:no-underline hover:opacity-60">
+            <AccordionItem key={item.id} value={item.id} className="border-b border-border/40">
+              <AccordionTrigger className="transition-all duration-200 hover:no-underline hover:text-[#fe5a1d]">
                 <div className="font-medium sm:py-1 lg:py-2 lg:text-lg">
                   {item.question}
                 </div>
