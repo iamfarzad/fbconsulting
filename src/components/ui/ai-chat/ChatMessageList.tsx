@@ -4,59 +4,50 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Bot } from "lucide-react";
 import { AIMessage } from "@/services/copilotService";
 import { ChatMessage } from "./ChatMessage";
+import { TypingIndicator } from "./TypingIndicator";
 
 interface ChatMessageListProps {
   messages: AIMessage[];
   showMessages: boolean;
   isFullScreen?: boolean;
+  isLoading?: boolean;
 }
 
 export const ChatMessageList = ({ 
   messages, 
   showMessages, 
-  isFullScreen = false
+  isFullScreen = false,
+  isLoading = false
 }: ChatMessageListProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // Scroll to bottom function
+  // Enhanced scroll to bottom function
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
-    if (messagesEndRef.current && !isFullScreen) {
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ 
-          behavior, 
-          block: "end" 
-        });
-      }, 10);
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ 
+        behavior, 
+        block: "end" 
+      });
     }
   };
   
-  // Scroll to bottom when messages change
+  // Scroll on new messages or loading state change
   useEffect(() => {
-    if (messages.length > 0 && !isFullScreen) {
-      // Immediate scroll for better UX
-      scrollToBottom("auto");
-      
-      // Then smooth scroll after a small delay
+    if (messages.length > 0 || isLoading) {
+      scrollToBottom("smooth");
+    }
+  }, [messages, isLoading]);
+  
+  // Initial scroll and visibility change scroll
+  useEffect(() => {
+    if (showMessages) {
       const timer = setTimeout(() => {
         scrollToBottom("smooth");
       }, 100);
-      
       return () => clearTimeout(timer);
     }
-  }, [messages, isFullScreen]);
-  
-  // Scroll when visibility changes
-  useEffect(() => {
-    if (showMessages && !isFullScreen) {
-      // Allow animation to complete before scrolling
-      const timer = setTimeout(() => {
-        scrollToBottom("smooth");
-      }, 300);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [showMessages, isFullScreen]);
+  }, [showMessages]);
 
   if (!showMessages && messages.length === 0) {
     return null;
@@ -101,6 +92,17 @@ export const ChatMessageList = ({
                 isLastMessage={index === messages.length - 1}
               />
             ))}
+            <AnimatePresence>
+              {isLoading && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <TypingIndicator />
+                </motion.div>
+              )}
+            </AnimatePresence>
             <div ref={messagesEndRef} />
           </div>
         )}
