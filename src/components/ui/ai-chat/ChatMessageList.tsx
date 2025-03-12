@@ -8,7 +8,7 @@ import { ChatMessage } from "./ChatMessage";
 interface ChatMessageListProps {
   messages: AIMessage[];
   showMessages: boolean;
-  isFullScreen?: boolean; // Already had this prop
+  isFullScreen?: boolean;
 }
 
 export const ChatMessageList = ({ 
@@ -19,9 +19,9 @@ export const ChatMessageList = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // Improved scroll behavior with guaranteed scroll-to-bottom
+  // Scroll to bottom function
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
-    if (messagesEndRef.current && !isFullScreen) { // Don't scroll if in full screen
+    if (messagesEndRef.current && !isFullScreen) {
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ 
           behavior, 
@@ -31,13 +31,13 @@ export const ChatMessageList = ({
     }
   };
   
-  // Scroll to bottom when messages change - only if not in full screen
+  // Scroll to bottom when messages change
   useEffect(() => {
     if (messages.length > 0 && !isFullScreen) {
-      // Immediate scroll for better UX to avoid content jumping
+      // Immediate scroll for better UX
       scrollToBottom("auto");
       
-      // Then smooth scroll after a small delay for animation purposes
+      // Then smooth scroll after a small delay
       const timer = setTimeout(() => {
         scrollToBottom("smooth");
       }, 100);
@@ -46,7 +46,7 @@ export const ChatMessageList = ({
     }
   }, [messages, isFullScreen]);
   
-  // Scroll when visibility changes - only if not in full screen
+  // Scroll when visibility changes
   useEffect(() => {
     if (showMessages && !isFullScreen) {
       // Allow animation to complete before scrolling
@@ -65,15 +65,15 @@ export const ChatMessageList = ({
   return (
     <div 
       ref={containerRef}
-      className={`${isFullScreen ? 'bg-transparent' : 'bg-black/95 backdrop-blur-lg rounded-2xl border border-white/20 shadow-lg'} p-4 overflow-y-auto overscroll-contain`}
+      className={`${isFullScreen ? 'bg-transparent' : 'bg-black/95 backdrop-blur-lg rounded-2xl border border-white/20 shadow-lg'} p-4`}
       style={{
         height: messages.length > 0 ? 'auto' : '200px',
         minHeight: '120px',
-        maxHeight: isFullScreen ? '100%' : '400px', // Allow full height in full screen mode
+        maxHeight: isFullScreen ? '100%' : '400px',
         scrollbarGutter: 'stable',
         scrollBehavior: 'smooth',
-        position: 'relative', // Added explicit position
-        overflowY: isFullScreen ? 'visible' : 'auto' // Disable scrolling in full screen mode
+        position: 'relative',
+        overflowY: isFullScreen ? 'auto' : 'auto'
       }}
     >
       <AnimatePresence>
