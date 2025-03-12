@@ -187,13 +187,13 @@
 ### UI/UX Improvements Needed
 
 1. **GraphicCard Component**:
-- [x] Black and White should remain the dominant color scheme** to maintain a clean, modern aesthetic.  
-- [x] If any color is added, it should be Giants Orange (#fe5a1d, rgb(254,90,29)) but only for small details such as:
-  - [x] Subtle accents (buttons, active states, hover effects)
-  - [x] Small UI highlights (icons, underlines, progress indicators)
-  - [x] Call-to-action emphasis (e.g., "Book a Consultation")
-  - [x] Minimal strokes or outlines in illustrations
-- [x] **Avoid overuse**: No large blocks, no full text in orange, and no background fills in orange to maintain contrast balance.
+   - [x] Black and White should remain the dominant color scheme** to maintain a clean, modern aesthetic.  
+     If any color is added, it should be Giants Orange (#fe5a1d, rgb(254,90,29)) but only for small details such as:
+  - Subtle accents (buttons, active states, hover effects)
+  - Small UI highlights (icons, underlines, progress indicators)
+  - Call-to-action emphasis (e.g., "Book a Consultation")
+  - Minimal strokes or outlines in illustrations
+- Avoid overuse* No large blocks, no full text in orange, and no background fills in orange to maintain contrast balance.
 
 ✅ **Final Decision**: Orange should **only be used minimally** as an accent color.
    - [x] Add customization options for different card appearances
@@ -214,7 +214,7 @@
 
 4. **Missing UI Components**:
    - [x] Implement dedicated search functionality
-   - [ ] Add filtering capabilities for blog content
+   - [x] Add filtering capabilities for blog content
    - [ ] Create user account/profile management UI
    - [ ] Develop additional feedback mechanisms (forms, surveys, ratings)
 
