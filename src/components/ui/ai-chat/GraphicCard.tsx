@@ -67,17 +67,17 @@ export const GraphicCard: React.FC<GraphicCardProps> = ({
     navigate(getPath());
   };
 
-  // Get card styles based on variant
+  // Get card styles based on variant with updated color scheme
   const getCardStyles = () => {
     const baseStyles = "overflow-hidden rounded-lg shadow-lg cursor-pointer transition-all duration-300 mb-2 max-w-xs";
     
     switch (variant) {
       case 'bordered':
-        return `${baseStyles} bg-black text-white border-2 border-white/30 hover:border-[#fe5a1d]/70`;
+        return `${baseStyles} bg-black text-white border-2 border-white/30 hover:border-[#fe5a1d]/30 hover:shadow-[0_0_15px_rgba(254,90,29,0.1)]`;
       case 'minimal':
-        return `${baseStyles} bg-white/5 backdrop-blur-sm text-white border border-white/10 hover:border-[#fe5a1d]/50`;
+        return `${baseStyles} bg-white/5 backdrop-blur-sm text-white border border-white/10 hover:border-[#fe5a1d]/20`;
       default:
-        return `${baseStyles} bg-black text-white border border-white/20 hover:shadow-xl hover:border-[#fe5a1d]/40`;
+        return `${baseStyles} bg-black text-white border border-white/20 hover:border-[#fe5a1d]/20 hover:shadow-xl`;
     }
   };
   
@@ -95,10 +95,10 @@ export const GraphicCard: React.FC<GraphicCardProps> = ({
     >
       <div className="p-3">
         <div className="flex items-center gap-2 mb-2">
-          <div className="p-1.5 bg-white/10 rounded-full group-hover:bg-[#fe5a1d]/10">
+          <div className="p-1.5 bg-white/5 rounded-full group-hover:bg-[#fe5a1d]/5 transition-colors">
             {getIcon()}
           </div>
-          <h3 className="font-medium">{title}</h3>
+          <h3 className="font-medium text-white/90">{title}</h3>
         </div>
         
         <p className="text-sm text-white/70 mb-2">{description}</p>
