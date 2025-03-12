@@ -3,7 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import AnimatedText from '@/components/AnimatedText';
 import { Cpu } from 'lucide-react';
-import { skillsData, SkillCategory } from '@/data/skillsData';
+import { skillsData } from '@/data/skillsData';
 
 const SkillsTechnologies = () => {
   return (
@@ -42,7 +42,7 @@ const SkillsTechnologies = () => {
         </motion.div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Object.entries(skillsData).map(([category, skills], index) => (
+          {Object.entries(skillsData).map(([category, skill], index) => (
             <motion.div
               key={category}
               initial={{ opacity: 0, y: 20 }}
@@ -54,16 +54,16 @@ const SkillsTechnologies = () => {
             >
               <div className="flex items-center mb-4">
                 <div className="bg-[#fe5a1d]/10 p-2 rounded-md mr-3">
-                  {skills.icon}
+                  {skill.icon}
                 </div>
-                <h3 className="font-semibold text-lg">{skills.title}</h3>
+                <h3 className="font-semibold text-lg">{skill.title}</h3>
               </div>
               
               <ul className="space-y-2">
-                {skills.items.map((skill, idx) => (
+                {skill.items.map((item, idx) => (
                   <li key={idx} className="flex items-center">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#fe5a1d] mr-2"></span>
-                    <span className="text-muted-foreground">{skill}</span>
+                    <span className="text-muted-foreground">{item}</span>
                   </li>
                 ))}
               </ul>

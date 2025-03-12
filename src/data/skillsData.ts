@@ -1,4 +1,13 @@
 
+import React from 'react';
+import { Brain, Workflow, Database, MessageSquare, Cpu } from 'lucide-react';
+
+export interface SkillCategory {
+  title: string;
+  icon: React.ReactNode;
+  items: string[];
+}
+
 export interface Skill {
   name: string;
   category: 'ai' | 'automation' | 'data' | 'conversational';
@@ -34,6 +43,53 @@ export const skills: Skill[] = [
   { name: 'Voice UI/UX Design', category: 'conversational', level: 'advanced' },
   { name: 'Multi-modal Conversational Systems', category: 'conversational', level: 'advanced' },
 ];
+
+export const skillsData: Record<string, SkillCategory> = {
+  ai: {
+    title: 'AI Engineering',
+    icon: <Brain className="w-5 h-5 text-[#fe5a1d]" />,
+    items: [
+      'Custom GPT Model Training',
+      'Predictive Analytics',
+      'Synthetic Data Generation',
+      'Machine Learning',
+      'Computer Vision'
+    ]
+  },
+  automation: {
+    title: 'Workflow Automation',
+    icon: <Workflow className="w-5 h-5 text-[#fe5a1d]" />,
+    items: [
+      'Process Analysis',
+      'Custom Workflow Development',
+      'Performance Monitoring',
+      'Robotic Process Automation',
+      'CI/CD Pipeline Integration'
+    ]
+  },
+  data: {
+    title: 'Data Analytics',
+    icon: <Database className="w-5 h-5 text-[#fe5a1d]" />,
+    items: [
+      'Business Intelligence Dashboards',
+      'Predictive Modeling',
+      'Data Visualization',
+      'ETL Pipeline Development',
+      'Data Lake & Warehouse Architecture'
+    ]
+  },
+  conversational: {
+    title: 'Conversational AI',
+    icon: <MessageSquare className="w-5 h-5 text-[#fe5a1d]" />,
+    items: [
+      'Custom Chatbot Development',
+      'AI Copilots',
+      'LLM Optimization',
+      'Voice UI/UX Design',
+      'Multi-modal Conversational Systems'
+    ]
+  }
+};
 
 export const getTechnologyBreakdown = () => {
   return {
