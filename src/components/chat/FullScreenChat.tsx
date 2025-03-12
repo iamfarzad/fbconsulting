@@ -68,7 +68,7 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
             <div className="flex-1 p-6 overflow-auto flex flex-col">
               {hasMessages ? (
                 <div className="flex-1 overflow-auto mb-6">
-                  <ChatMessageList messages={initialMessages} showMessages={true} />
+                  <ChatMessageList messages={initialMessages} showMessages={true} isFullScreen={true} />
                 </div>
               ) : (
                 <div className="flex-1 flex items-center justify-center">

@@ -66,6 +66,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
             <ChatMessageList 
               messages={messages} 
               showMessages={showMessages} 
+              isFullScreen={false}
             />
             
             {/* Expand to fullscreen button - more prominent */}

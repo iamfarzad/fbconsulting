@@ -8,9 +8,14 @@ import { ChatMessage } from "./ChatMessage";
 interface ChatMessageListProps {
   messages: AIMessage[];
   showMessages: boolean;
+  isFullScreen?: boolean; // Added new prop to determine if in full screen mode
 }
 
-export const ChatMessageList = ({ messages, showMessages }: ChatMessageListProps) => {
+export const ChatMessageList = ({ 
+  messages, 
+  showMessages, 
+  isFullScreen = false // Default to false
+}: ChatMessageListProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
@@ -58,11 +63,11 @@ export const ChatMessageList = ({ messages, showMessages }: ChatMessageListProps
   return (
     <div 
       ref={containerRef}
-      className="bg-black/95 backdrop-blur-lg rounded-2xl border border-white/20 p-4 overflow-y-auto overscroll-contain shadow-lg"
+      className={`${isFullScreen ? 'bg-transparent' : 'bg-black/95 backdrop-blur-lg rounded-2xl border border-white/20 shadow-lg'} p-4 overflow-y-auto overscroll-contain`}
       style={{
         height: messages.length > 0 ? 'auto' : '200px',
         minHeight: '120px',
-        maxHeight: '400px',
+        maxHeight: isFullScreen ? '100%' : '400px', // Allow full height in full screen mode
         scrollbarGutter: 'stable',
         scrollBehavior: 'smooth'
       }}
