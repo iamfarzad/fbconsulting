@@ -10,12 +10,14 @@ interface NewsletterSignupProps {
   title?: string;
   description?: string;
   className?: string;
+  compact?: boolean; // Add compact prop
 }
 
 const NewsletterSignup: React.FC<NewsletterSignupProps> = ({
   title = "Subscribe to our Newsletter",
   description = "Stay up to date with the latest AI trends and insights.",
   className,
+  compact = false, // Default to false
 }) => {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -62,6 +64,39 @@ const NewsletterSignup: React.FC<NewsletterSignupProps> = ({
     }, 1500);
   };
 
+  // If compact is true, use a more compact layout
+  if (compact) {
+    return (
+      <div className={`w-full py-3 ${className}`}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 mb-1">
+            <Mail className="h-4 w-4 text-primary" />
+            <h4 className="text-sm font-medium">{title}</h4>
+          </div>
+          <div className="flex gap-2">
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+              aria-label="Email address"
+              className="flex-grow h-9"
+              size="sm"
+            />
+            <Button type="submit" disabled={isLoading} size="sm">
+              {isLoading ? "..." : "Subscribe"}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            By subscribing, you agree to our Privacy Policy.
+          </p>
+        </form>
+      </div>
+    );
+  }
+
+  // Regular (non-compact) version
   return (
     <div className={`w-full max-w-xl mx-auto py-6 ${className}`}>
       <div className="flex flex-col gap-3">
