@@ -1,14 +1,15 @@
 
 /**
  * Business Intelligence Protocol
- * Handles gathering and processing business data from external sources
+ * Protocol for gathering business information from LinkedIn, websites, etc.
  */
 
-import { Protocol, Context, Message, Model } from '../core/types';
-import { MCPClient, mcpClient } from '../services/mcpClient';
+import { Protocol, Handler, Message, Context } from '../core/types';
+import { mcpClient } from '../services/mcpClient';
 
 // Business data model
 export interface BusinessData {
+  // Company information
   companyName?: string;
   companyWebsite?: string;
   companySize?: string;
@@ -16,204 +17,213 @@ export interface BusinessData {
   linkedInProfile?: string;
   description?: string;
   services?: string[];
-  employeeCount?: number;
-  headquarters?: string;
-  founded?: string;
-  contactInfo?: {
-    email?: string;
-    phone?: string;
-  };
-  // Information about the person we're talking to
+  products?: string[];
+  locations?: string[];
+  foundingYear?: number;
+  revenue?: string;
+  
+  // Contact information
   contact?: {
     name?: string;
-    role?: string;
-    department?: string;
+    title?: string;
+    email?: string;
+    phone?: string;
+    linkedIn?: string;
   };
-  lastUpdated?: number;
-  confidenceScore?: number; // 0-1 indicating data reliability
-  source?: string;
-  rawData?: any; // Original data from sources
+  
+  // Technical metadata
+  lastUpdated?: string;
+  rawData?: any;
+  error?: string; // Added error field
 }
 
-// Business Intelligence Context
+// Context for business intelligence operations
 export interface BusinessIntelligenceContext extends Context {
-  mcpClient: MCPClient;
+  mcpClient: typeof mcpClient;
 }
 
-// Message types
-export enum BusinessIntelligenceMessageTypes {
-  LOOKUP_LINKEDIN = 'business/lookup_linkedin',
-  LOOKUP_WEBSITE = 'business/lookup_website',
-  SET_COMPANY_INFO = 'business/set_company_info',
-  SET_CONTACT_INFO = 'business/set_contact_info',
-  CLEAR_DATA = 'business/clear_data',
+// Default context with MCP client
+const defaultContext: BusinessIntelligenceContext = {
+  mcpClient
+};
+
+// Message types for the protocol
+export enum MessageType {
+  LINKEDIN_LOOKUP = 'LINKEDIN_LOOKUP',
+  WEBSITE_LOOKUP = 'WEBSITE_LOOKUP',
+  SET_COMPANY_INFO = 'SET_COMPANY_INFO',
+  SET_CONTACT_INFO = 'SET_CONTACT_INFO',
+  CLEAR_DATA = 'CLEAR_DATA',
+}
+
+// Message payload interfaces
+export interface LinkedInLookupPayload {
+  profileUrl: string;
+}
+
+export interface WebsiteLookupPayload {
+  websiteUrl: string;
 }
 
 // Message creators
-export const createLinkedInLookupMessage = (profileUrl: string): Message => ({
-  type: BusinessIntelligenceMessageTypes.LOOKUP_LINKEDIN,
-  payload: { profileUrl }
-});
+export function createLinkedInLookupMessage(profileUrl: string): Message<LinkedInLookupPayload> {
+  return {
+    type: MessageType.LINKEDIN_LOOKUP,
+    payload: { profileUrl }
+  };
+}
 
-export const createWebsiteLookupMessage = (websiteUrl: string): Message => ({
-  type: BusinessIntelligenceMessageTypes.LOOKUP_WEBSITE,
-  payload: { websiteUrl }
-});
+export function createWebsiteLookupMessage(websiteUrl: string): Message<WebsiteLookupPayload> {
+  return {
+    type: MessageType.WEBSITE_LOOKUP,
+    payload: { websiteUrl }
+  };
+}
 
-export const createSetCompanyInfoMessage = (companyInfo: Partial<BusinessData>): Message => ({
-  type: BusinessIntelligenceMessageTypes.SET_COMPANY_INFO,
-  payload: companyInfo
-});
+export function createSetCompanyInfoMessage(companyInfo: Partial<BusinessData>): Message<Partial<BusinessData>> {
+  return {
+    type: MessageType.SET_COMPANY_INFO,
+    payload: companyInfo
+  };
+}
 
-export const createSetContactInfoMessage = (contactInfo: Partial<BusinessData['contact']>): Message => ({
-  type: BusinessIntelligenceMessageTypes.SET_CONTACT_INFO,
-  payload: contactInfo
-});
+export function createSetContactInfoMessage(contactInfo: Partial<BusinessData['contact']>): Message<Partial<BusinessData['contact']>> {
+  return {
+    type: MessageType.SET_CONTACT_INFO,
+    payload: contactInfo
+  };
+}
 
-export const createClearDataMessage = (): Message => ({
-  type: BusinessIntelligenceMessageTypes.CLEAR_DATA
-});
+export function createClearDataMessage(): Message<void> {
+  return {
+    type: MessageType.CLEAR_DATA
+  };
+}
 
-// Create the business intelligence protocol
-export const createBusinessIntelligenceProtocol = (
-  initialData: Partial<BusinessData> = {}
-): Protocol<BusinessData, BusinessIntelligenceContext> => ({
-  initialModel: {
-    lastUpdated: Date.now(),
-    confidenceScore: 0,
-    ...initialData
-  },
-  context: {
-    mcpClient
-  },
-  handlers: {
-    [BusinessIntelligenceMessageTypes.LOOKUP_LINKEDIN]: async (model, context, message) => {
-      if (!message.payload?.profileUrl) {
-        return { ...model, error: 'No LinkedIn profile URL provided' };
-      }
-
-      try {
-        const response = await context.mcpClient.queryLinkedIn(message.payload.profileUrl);
-        
-        if (!response.success) {
-          return { 
-            ...model, 
-            error: response.error || 'Failed to retrieve LinkedIn data',
-            lastUpdated: Date.now()
-          };
-        }
-
-        // Extract company and contact information from LinkedIn data
-        const data = response.data;
-        const updatedModel: BusinessData = {
+// Protocol handlers
+const handlers: Record<string, Handler<BusinessData, BusinessIntelligenceContext>> = {
+  [MessageType.LINKEDIN_LOOKUP]: async (model, context, message) => {
+    try {
+      const payload = message.payload as LinkedInLookupPayload;
+      
+      console.log(`Looking up LinkedIn profile: ${payload.profileUrl}`);
+      
+      // Call the MCP client to get LinkedIn data
+      const response = await context.mcpClient.queryLinkedIn(payload.profileUrl);
+      
+      if (!response.success) {
+        return {
           ...model,
-          linkedInProfile: message.payload.profileUrl,
-          companyName: data.company?.name || model.companyName,
-          industry: data.company?.industry || model.industry,
-          contact: {
-            ...model.contact,
-            name: data.name || model.contact?.name,
-            role: data.headline || model.contact?.role,
-          },
-          confidenceScore: 0.8, // LinkedIn data is generally reliable
-          lastUpdated: Date.now(),
-          source: 'LinkedIn',
-          rawData: { ...model.rawData, linkedin: data }
-        };
-
-        return updatedModel;
-      } catch (error) {
-        console.error('LinkedIn lookup error:', error);
-        return { 
-          ...model, 
-          error: error instanceof Error ? error.message : 'Unknown error during LinkedIn lookup',
-          lastUpdated: Date.now()
+          error: response.error || 'Failed to retrieve LinkedIn profile data'
         };
       }
-    },
-
-    [BusinessIntelligenceMessageTypes.LOOKUP_WEBSITE]: async (model, context, message) => {
-      if (!message.payload?.websiteUrl) {
-        return { ...model, error: 'No website URL provided' };
-      }
-
-      try {
-        const response = await context.mcpClient.researchWebsite(message.payload.websiteUrl);
-        
-        if (!response.success) {
-          return { 
-            ...model, 
-            error: response.error || 'Failed to retrieve website data',
-            lastUpdated: Date.now()
-          };
-        }
-
-        // Extract company information from website data
-        const data = response.data;
-        const updatedModel: BusinessData = {
-          ...model,
-          companyWebsite: message.payload.websiteUrl,
-          companyName: data.company_name || model.companyName,
-          description: data.description || model.description,
-          industry: data.industry || model.industry,
-          services: data.services || model.services,
-          employeeCount: data.employee_count || model.employeeCount,
-          headquarters: data.headquarters || model.headquarters,
-          founded: data.founded || model.founded,
-          contactInfo: {
-            ...model.contactInfo,
-            email: data.contact_email || model.contactInfo?.email,
-            phone: data.contact_phone || model.contactInfo?.phone,
-          },
-          confidenceScore: 0.7, // Website data is reasonably reliable
-          lastUpdated: Date.now(),
-          source: 'Website',
-          rawData: { ...model.rawData, website: data }
-        };
-
-        return updatedModel;
-      } catch (error) {
-        console.error('Website lookup error:', error);
-        return { 
-          ...model, 
-          error: error instanceof Error ? error.message : 'Unknown error during website lookup',
-          lastUpdated: Date.now()
-        };
-      }
-    },
-
-    [BusinessIntelligenceMessageTypes.SET_COMPANY_INFO]: (model, _, message) => {
-      if (!message.payload) {
-        return model;
-      }
-
+      
+      // Extract relevant data from the response
+      const data = response.data || {};
       return {
         ...model,
-        ...message.payload,
-        lastUpdated: Date.now()
-      };
-    },
-
-    [BusinessIntelligenceMessageTypes.SET_CONTACT_INFO]: (model, _, message) => {
-      if (!message.payload) {
-        return model;
-      }
-
-      return {
-        ...model,
+        companyName: data.company_name || model.companyName,
+        companySize: data.company_size || model.companySize,
+        industry: data.industry || model.industry,
+        linkedInProfile: payload.profileUrl,
         contact: {
           ...model.contact,
-          ...message.payload
+          name: data.name || model.contact?.name,
+          title: data.title || model.contact?.title,
+          linkedIn: payload.profileUrl
         },
-        lastUpdated: Date.now()
+        lastUpdated: new Date().toISOString(),
+        rawData: { ...model.rawData, linkedin: data },
+        error: undefined
       };
-    },
-
-    [BusinessIntelligenceMessageTypes.CLEAR_DATA]: (model) => {
+    } catch (error) {
+      console.error('Error in LinkedIn lookup handler:', error);
       return {
-        confidenceScore: 0,
-        lastUpdated: Date.now()
+        ...model,
+        error: error instanceof Error ? error.message : 'Unknown error during LinkedIn lookup'
       };
     }
+  },
+  
+  [MessageType.WEBSITE_LOOKUP]: async (model, context, message) => {
+    try {
+      const payload = message.payload as WebsiteLookupPayload;
+      
+      console.log(`Researching website: ${payload.websiteUrl}`);
+      
+      // Call the MCP client to get website data
+      const response = await context.mcpClient.researchWebsite(payload.websiteUrl);
+      
+      if (!response.success) {
+        return {
+          ...model,
+          error: response.error || 'Failed to retrieve website data'
+        };
+      }
+      
+      // Extract relevant data from the response
+      const data = response.data || {};
+      return {
+        ...model,
+        companyWebsite: payload.websiteUrl,
+        companyName: data.company_name || model.companyName,
+        description: data.description || model.description,
+        services: data.services || model.services,
+        products: data.products || model.products,
+        industry: data.industry || model.industry,
+        companySize: data.company_size || model.companySize,
+        lastUpdated: new Date().toISOString(),
+        rawData: { ...model.rawData, website: data },
+        error: undefined
+      };
+    } catch (error) {
+      console.error('Error in website lookup handler:', error);
+      return {
+        ...model,
+        error: error instanceof Error ? error.message : 'Unknown error during website lookup'
+      };
+    }
+  },
+  
+  [MessageType.SET_COMPANY_INFO]: (model, _context, message) => {
+    const companyInfo = message.payload as Partial<BusinessData>;
+    return {
+      ...model,
+      ...companyInfo,
+      lastUpdated: new Date().toISOString(),
+      error: undefined
+    };
+  },
+  
+  [MessageType.SET_CONTACT_INFO]: (model, _context, message) => {
+    const contactInfo = message.payload as Partial<BusinessData['contact']>;
+    return {
+      ...model,
+      contact: {
+        ...(model.contact || {}),
+        ...contactInfo
+      },
+      lastUpdated: new Date().toISOString(),
+      error: undefined
+    };
+  },
+  
+  [MessageType.CLEAR_DATA]: (_model, _context, _message) => {
+    return {
+      lastUpdated: new Date().toISOString(),
+      error: undefined
+    };
   }
-});
+};
+
+// Create protocol
+export function createBusinessIntelligenceProtocol(initialData: Partial<BusinessData> = {}): Protocol<BusinessData, BusinessIntelligenceContext> {
+  return {
+    initialModel: {
+      ...initialData,
+      lastUpdated: new Date().toISOString()
+    } as BusinessData,
+    context: defaultContext,
+    handlers
+  };
+}
