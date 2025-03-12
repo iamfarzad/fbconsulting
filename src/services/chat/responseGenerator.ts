@@ -1,3 +1,4 @@
+
 import { LeadInfo } from "@/services/lead/leadExtractor";
 
 // Function to generate AI responses
@@ -35,4 +36,87 @@ export const generateResponse = (userMessage: string, leadInfo: LeadInfo): strin
   
   // Default response if no specific keywords are matched
   return "I'm here to help with your AI automation needs. Feel free to ask about my services, background, or book a consultation.";
+};
+
+// Function to determine the AI persona based on lead info and current page
+export const determinePersona = (
+  leadInfo: LeadInfo, 
+  currentPage?: string
+): 'strategist' | 'technical' | 'consultant' | 'general' => {
+  // Determine persona based on interests if available
+  if (leadInfo.interests && leadInfo.interests.length > 0) {
+    const interests = leadInfo.interests.join(' ').toLowerCase();
+    
+    // Check for technical interests
+    if (
+      interests.includes('code') || 
+      interests.includes('development') || 
+      interests.includes('programming') ||
+      interests.includes('technical') ||
+      interests.includes('technology')
+    ) {
+      return 'technical';
+    }
+    
+    // Check for strategy interests
+    if (
+      interests.includes('strategy') || 
+      interests.includes('planning') || 
+      interests.includes('roadmap') ||
+      interests.includes('vision') ||
+      interests.includes('future')
+    ) {
+      return 'strategist';
+    }
+    
+    // Check for consulting interests
+    if (
+      interests.includes('advice') || 
+      interests.includes('consulting') || 
+      interests.includes('guidance') ||
+      interests.includes('recommend') ||
+      interests.includes('suggestion')
+    ) {
+      return 'consultant';
+    }
+  }
+  
+  // Fallback to page-based personas
+  if (currentPage) {
+    switch (currentPage.toLowerCase()) {
+      case 'services':
+        return 'consultant';
+      case 'about':
+        return 'strategist';
+      case 'contact':
+        return 'consultant';
+      default:
+        return 'general';
+    }
+  }
+  
+  // Default to general persona
+  return 'general';
+};
+
+// Function to generate suggested responses based on lead info
+export const generateSuggestedResponse = (leadInfo: LeadInfo): string | null => {
+  // If we don't have enough lead info yet, don't suggest anything
+  if (!leadInfo || !leadInfo.stage) {
+    return null;
+  }
+  
+  // Provide different suggestions based on lead stage
+  switch (leadInfo.stage) {
+    case 'discovery':
+      return "What specific challenges are you facing with AI implementation?";
+    case 'qualification':
+      return "Would you like to learn more about how our AI solutions could help your business?";
+    case 'interested':
+      return "Would you like to schedule a consultation to discuss your needs in detail?";
+    case 'ready-to-book':
+      return "Great! When would be a good time for a consultation?";
+    default:
+      return "How can I help you with AI automation today?";
+  }
 };
