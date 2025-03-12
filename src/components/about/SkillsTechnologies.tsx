@@ -57,46 +57,43 @@ const SkillsTechnologies = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {skillsData.map((category, index) => {
-            const Icon = category.icon;
-            return (
-              <motion.div
-                key={category.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:shadow-xl hover:border-[#fe5a1d]/20 transition-all duration-300"
-              >
-                <h3 className="text-xl font-bold mb-4 flex items-center">
-                  <span className="mr-3 text-2xl"><Icon className="w-5 h-5" /></span>
-                  {isNorwegian ? category.nameNo : category.name}
-                </h3>
-                
-                <div className="space-y-4">
-                  {category.skills.map((skill, skillIndex) => (
-                    <div key={skillIndex}>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-sm text-white/80">
-                          {isNorwegian && skill.nameNo ? skill.nameNo : skill.name}
-                        </span>
-                        <span className="text-sm text-[#fe5a1d]">{skill.level}%</span>
-                      </div>
-                      <div className="w-full bg-white/10 rounded-full h-2">
-                        <motion.div
-                          className="bg-gradient-to-r from-[#fe5a1d] to-[#fe5a1d]/70 h-2 rounded-full"
-                          style={{ width: '0%' }}
-                          whileInView={{ width: `${skill.level}%` }}
-                          transition={{ duration: 1, delay: 0.3 + skillIndex * 0.1 }}
-                          viewport={{ once: true }}
-                        />
-                      </div>
+          {skillsData.map((category, index) => (
+            <motion.div
+              key={category.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              viewport={{ once: true }}
+              className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-6 hover:shadow-xl hover:border-[#fe5a1d]/20 transition-all duration-300"
+            >
+              <h3 className="text-xl font-bold mb-4 flex items-center">
+                <span className="mr-3 text-2xl">{category.icon}</span>
+                {isNorwegian ? category.nameNo : category.name}
+              </h3>
+              
+              <div className="space-y-4">
+                {category.skills.map((skill, skillIndex) => (
+                  <div key={skillIndex}>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-sm text-white/80">
+                        {isNorwegian && skill.nameNo ? skill.nameNo : skill.name}
+                      </span>
+                      <span className="text-sm text-[#fe5a1d]">{skill.level}%</span>
                     </div>
-                  ))}
-                </div>
-              </motion.div>
-            );
-          })}
+                    <div className="w-full bg-white/10 rounded-full h-2">
+                      <motion.div
+                        className="bg-gradient-to-r from-[#fe5a1d] to-[#fe5a1d]/70 h-2 rounded-full"
+                        style={{ width: '0%' }}
+                        whileInView={{ width: `${skill.level}%` }}
+                        transition={{ duration: 1, delay: 0.3 + skillIndex * 0.1 }}
+                        viewport={{ once: true }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>
