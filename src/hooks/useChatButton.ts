@@ -51,6 +51,7 @@ export function useChatButton() {
     toggleChat,
     toggleFullScreen,
     shouldShowButton,
-    hasInteracted
+    hasInteracted,
+    setIsFullScreen
   };
 }
