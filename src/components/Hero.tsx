@@ -3,16 +3,32 @@ import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { AIChatInput } from './ui/ai-chat';
 import LocationGreeting from './LocationGreeting';
-import { Flag } from 'lucide-react';
+import { Flag, Calendar, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
 import { AnimatedGridPattern } from './ui/animated-grid-pattern';
 import { cn } from '@/lib/utils';
+import { Button } from './ui/button';
+import { useNavigate } from 'react-router-dom';
+import { trackEvent } from '@/services/analyticsService';
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const { t, language } = useLanguage();
   const isNorwegian = language === 'no';
+  const navigate = useNavigate();
+  
+  const handleConsultationClick = () => {
+    trackEvent({
+      action: 'click',
+      category: 'cta',
+      label: 'hero_consultation',
+      cta_location: 'hero',
+      cta_text: 'Book Free Consultation'
+    });
+    
+    navigate('/contact');
+  };
   
   return (
     <section 
@@ -90,6 +106,23 @@ const Hero = () => {
             transition={{ delay: 0.4, duration: 0.5 }}
           >
             <AIChatInput autoFullScreen={false} /> {/* Changed to false to prevent automatic fullscreen */}
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            className="flex justify-center mt-4"
+          >
+            <Button 
+              size="lg" 
+              onClick={handleConsultationClick}
+              className="rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300 group"
+            >
+              <Calendar className="mr-2 h-5 w-5 text-[#fe5a1d] group-hover:scale-110 transition-all duration-300" />
+              Book Free Consultation
+              <ArrowRight className="ml-2 h-4 w-4 text-[#fe5a1d] group-hover:translate-x-1 transition-transform duration-300" />
+            </Button>
           </motion.div>
         </div>
       </div>
