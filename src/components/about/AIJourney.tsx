@@ -1,107 +1,118 @@
 
-import React from "react";
-import { Timeline } from "@/components/ui/timeline";
+import React from 'react';
+import AnimatedText from '@/components/AnimatedText';
+import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
+import { History } from 'lucide-react';
 
-const journeyData = [
+// Timeline data
+const timelineItems = [
   {
-    title: "2024-2025",
-    content: (
-      <div>
-        <h4 className="text-foreground text-base md:text-lg font-semibold mb-2">Talk to Eve (AI Mental Wellness & Burnout Prevention)</h4>
-        <p className="text-muted-foreground text-xs md:text-sm font-normal mb-3">
-          Built an AI-driven mental wellness platform to assess and prevent burnout.
-        </p>
-        <ul className="list-disc pl-5 text-muted-foreground text-xs md:text-sm space-y-1 mb-8">
-          <li>Developed a mind-map-based psychological insights engine for visualizing emotions and mental states.</li>
-          <li>Integrated AI-based surveys, sentiment tracking, and predictive analytics to improve workplace well-being.</li>
-          <li>Uses ChromaDB, Redis, PostgreSQL, and NetworkX for hybrid storage and graph-based AI insights.</li>
-        </ul>
-      </div>
-    ),
+    year: '2016',
+    title: 'First AI Project',
+    description: 'Built my first machine learning system for predictive analytics'
   },
   {
-    title: "2023",
-    content: (
-      <div>
-        <h4 className="text-foreground text-base md:text-lg font-semibold mb-2">ZingZang Lab (AI-Powered Music Creation)</h4>
-        <p className="text-muted-foreground text-xs md:text-sm font-normal mb-3">
-          Developed an AI-driven platform for music production and collaboration.
-        </p>
-        <ul className="list-disc pl-5 text-muted-foreground text-xs md:text-sm space-y-1 mb-8">
-          <li>Integrated AI-assisted vocal coaching, music mixing, and mastering tools.</li>
-          <li>Enabled social media integration for musicians to share music effortlessly.</li>
-        </ul>
-      </div>
-    ),
+    year: '2018',
+    title: 'AI Leadership Role',
+    description: 'Led AI strategy and implementation across business functions'
   },
   {
-    title: "2022",
-    content: (
-      <div>
-        <h4 className="text-foreground text-base md:text-lg font-semibold mb-2">SWAG AI (Lightweight Factory Automation Tool)</h4>
-        <p className="text-muted-foreground text-xs md:text-sm font-normal mb-3">
-          AI-driven automation assistant for industrial workflows.
-        </p>
-        <ul className="list-disc pl-5 text-muted-foreground text-xs md:text-sm space-y-1 mb-8">
-          <li>Used predictive analytics to optimize factory and warehouse operations.</li>
-          <li>Focused on streamlining production processes for manufacturing businesses.</li>
-        </ul>
-      </div>
-    ),
+    year: '2020',
+    title: 'ChatGPT Early Adopter',
+    description: 'Integrated conversational AI to automate customer support workflows'
   },
   {
-    title: "2021",
-    content: (
-      <div>
-        <h4 className="text-foreground text-base md:text-lg font-semibold mb-2">iWriter.ai (AI-Powered Copywriting for SMEs)</h4>
-        <p className="text-muted-foreground text-xs md:text-sm font-normal mb-3">
-          Built an AI-driven copywriting tool designed for small businesses.
-        </p>
-        <ul className="list-disc pl-5 text-muted-foreground text-xs md:text-sm space-y-1 mb-8">
-          <li>Automated the creation of blog posts, ads, and sales copy.</li>
-          <li>Optimized for Norwegian SMEs, helping them improve content marketing with AI.</li>
-        </ul>
-      </div>
-    ),
+    year: '2021',
+    title: 'Enterprise AI Transformation',
+    description: 'Successfully drove enterprise-wide AI implementation saving $1.2M annually'
   },
   {
-    title: "2020",
-    content: (
-      <div>
-        <h4 className="text-foreground text-base md:text-lg font-semibold mb-2">Optix.io (Closed Marketplace for Video Production)</h4>
-        <p className="text-muted-foreground text-xs md:text-sm font-normal mb-3">
-          AI-powered video production marketplace for content creators.
-        </p>
-        <ul className="list-disc pl-5 text-muted-foreground text-xs md:text-sm space-y-1 mb-8">
-          <li>Connected businesses with skilled video editors and animators.</li>
-          <li>Featured automated bidding and job-matching algorithms to optimize project selection.</li>
-        </ul>
-      </div>
-    ),
+    year: '2023',
+    title: 'Launched AI Consulting',
+    description: 'Helping businesses automate workflows and cut costs with AI'
   }
-];
-
-const additionalContributions = [
-  "AI Research & Development – Explored LLMs (Large Language Models) for advanced business automation.",
-  "Knowledge Graphs & AI Systems – Developed graph-based AI models for better decision-making in automation.",
-  "Process Optimization Consulting – Helped businesses streamline workflows using AI automation.",
-  "Global AI Consulting & Tech Strategy – Provided AI automation strategies to startups, SMEs, and enterprises."
 ];
 
 const AIJourney = () => {
   return (
-    <section className="w-full">
-      <Timeline data={journeyData} />
-      
-      <div className="max-w-7xl mx-auto pb-20 px-4 md:px-8 lg:px-10">
-        <h3 className="text-lg md:text-2xl font-semibold mb-4">Additional Contributions & Work</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {additionalContributions.map((contribution, index) => (
-            <div key={index} className="flex items-start gap-2">
-              <span className="text-primary mt-1">✔</span>
-              <p className="text-muted-foreground text-sm">{contribution}</p>
+    <section className="py-20 px-4 bg-background relative overflow-hidden">
+      <div className="container mx-auto max-w-5xl">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className="text-center mb-12"
+        >
+          <div className="flex justify-center mb-4">
+            <div className="bg-[#fe5a1d]/10 p-3 rounded-full">
+              <History className="w-6 h-6 text-[#fe5a1d]" />
             </div>
-          ))}
+          </div>
+          
+          <AnimatedText 
+            text="AI-Driven Startups & Projects Timeline" 
+            tag="h2" 
+            className="text-3xl font-bold mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-[#fe5a1d] to-[#fe5a1d]/70" 
+          />
+          
+          <motion.div 
+            className="w-20 h-1 bg-gradient-to-r from-[#fe5a1d]/80 to-[#fe5a1d]/30 mx-auto rounded-full mb-6"
+            initial={{ width: 0 }}
+            whileInView={{ width: 80 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            viewport={{ once: true }}
+          />
+          
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            My journey in AI spans multiple industries and technologies—from building cognitive platforms to implementing LLM solutions. Each project has sharpened my ability to transform business operations with AI.
+          </p>
+        </motion.div>
+        
+        <div className="relative">
+          {/* Vertical line */}
+          <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#fe5a1d]/80 via-[#fe5a1d]/30 to-[#fe5a1d]/5 transform -translate-x-1/2"></div>
+          
+          {/* Timeline items */}
+          <div className="relative z-10">
+            {timelineItems.map((item, index) => (
+              <motion.div 
+                key={index}
+                initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true, margin: "-100px" }}
+                className={cn(
+                  "flex mb-12 last:mb-0 relative items-center",
+                  index % 2 === 0 ? "justify-end" : "justify-start",
+                  "md:justify-center" // Center on mobile
+                )}
+              >
+                <div 
+                  className={cn(
+                    "md:absolute md:top-1/2 md:transform md:-translate-y-1/2",
+                    index % 2 === 0 ? "md:right-1/2 md:pr-12 text-right" : "md:left-1/2 md:pl-12 text-left",
+                    "md:w-[calc(50%-24px)]"
+                  )}
+                >
+                  <div className="bg-background/50 backdrop-blur-sm p-6 rounded-xl border border-muted 
+                                hover:border-[#fe5a1d]/30 transition-all duration-300 
+                                shadow-sm hover:shadow-md hover:shadow-[#fe5a1d]/5">
+                    <div className="text-[#fe5a1d] font-bold mb-2">{item.year}</div>
+                    <h3 className="font-semibold mb-2">{item.title}</h3>
+                    <p className="text-muted-foreground text-sm">{item.description}</p>
+                  </div>
+                </div>
+                
+                {/* Center node */}
+                <div className="hidden md:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 
+                              w-4 h-4 rounded-full bg-[#fe5a1d] z-10
+                              shadow-[0_0_12px_rgba(254,90,29,0.5)]">
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
