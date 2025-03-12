@@ -5,8 +5,9 @@ import { Bot, CircleUserRound } from "lucide-react";
 import { motion } from "framer-motion";
 import { AIMessage } from "@/services/chat/messageTypes";
 import { GraphicCardCollection } from './GraphicCardCollection';
-import { CardType } from './GraphicCard';
 import { EmailSummaryForm } from './EmailSummaryForm';
+import { extractContentFromMessage, FormType } from '@/utils/messageExtractor';
+import { NewsletterSignup } from '@/components/NewsletterSignup';
 
 interface MessageProps {
   message: AIMessage;
@@ -16,58 +17,41 @@ interface MessageProps {
 export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
   const isUser = message.role === 'user';
   
-  // Check if message contains card data
-  const hasCards = message.content.includes('[[CARD:');
+  // Use our utility to extract content, cards, and forms
+  const { textContent, cards, forms } = extractContentFromMessage(message.content);
   
-  // Check if message contains form data
-  const hasEmailSummaryForm = message.content.includes('[[FORM:email-summary]]');
-  
-  // Extract card data if present
-  const extractCards = (content: string): { 
-    textContent: string, 
-    cards: Array<{ 
-      type: CardType; 
-      title: string; 
-      description: string;
-      variant?: 'default' | 'bordered' | 'minimal';
-    }> 
-  } => {
-    const cards: Array<{ 
-      type: CardType; 
-      title: string; 
-      description: string;
-      variant?: 'default' | 'bordered' | 'minimal';
-    }> = [];
-    
-    let textContent = content;
-    
-    // Extract card data from message content
-    // Updated regex to optionally include variant
-    const cardRegex = /\[\[CARD:(\w+):([^:]+):([^:]+)(?::(\w+))?\]\]/g;
-    let match;
-    
-    while ((match = cardRegex.exec(content)) !== null) {
-      const type = match[1] as CardType;
-      const title = match[2];
-      const description = match[3];
-      const variant = match[4] as 'default' | 'bordered' | 'minimal' | undefined;
-      
-      cards.push({ type, title, description, variant });
-      
-      // Remove the card data from the text content
-      textContent = textContent.replace(match[0], '');
+  // Helper function to render the appropriate form component
+  const renderForm = (formType: FormType, formData?: Record<string, string>) => {
+    switch (formType) {
+      case 'email-summary':
+        return <EmailSummaryForm onSubmit={handleFormSubmitted} />;
+      case 'newsletter-signup':
+        return <NewsletterSignup compact={true} />;
+      case 'booking-request':
+        // Future implementation for booking form
+        return (
+          <div className="p-4 bg-black/5 rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              Booking calendar will be available here soon.
+            </p>
+          </div>
+        );
+      case 'contact-form':
+        // Future implementation for contact form
+        return (
+          <div className="p-4 bg-black/5 rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              Contact form will be available here soon.
+            </p>
+          </div>
+        );
+      default:
+        return null;
     }
-    
-    return { textContent: textContent.trim(), cards };
-  };
-  
-  const { textContent, cards } = hasCards ? extractCards(message.content) : { 
-    textContent: message.content.replace(/\[\[FORM:email-summary\]\]/g, '').trim(), 
-    cards: [] 
   };
   
   const handleFormSubmitted = () => {
-    console.log('Email summary form submitted');
+    console.log('Form submitted successfully');
   };
   
   return (
@@ -100,10 +84,14 @@ export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
             </div>
           )}
           
-          {/* Render email summary form if present */}
-          {hasEmailSummaryForm && !isUser && (
-            <div className="mt-3">
-              <EmailSummaryForm onSubmit={handleFormSubmitted} />
+          {/* Render forms if present */}
+          {!isUser && forms.length > 0 && (
+            <div className="mt-3 space-y-3">
+              {forms.map((form, index) => (
+                <div key={`form-${index}`}>
+                  {renderForm(form.type, form.data)}
+                </div>
+              ))}
             </div>
           )}
           
