@@ -10,16 +10,23 @@ import SEO from '@/components/SEO';
 import DotPattern from '@/components/ui/dot-pattern';
 import { TextRevealByWord } from '@/components/ui/text-reveal';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SearchIcon } from 'lucide-react';
+import { FilterButton } from '@/components/ui/filter/FilterButton';
+import { SearchButton } from '@/components/ui/search/SearchButton';
+import { Filter, CalendarRange, Clock, TrendingUp, ArrowUpDown } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 const Blog = () => {
   const allPosts = getAllBlogPosts();
   const categories = getBlogCategories();
   const featuredPost = allPosts[0]; // Just use the first post as featured
-  const regularPosts = allPosts.slice(1);
+  
   const [activeCategory, setActiveCategory] = useState<string>("all");
-
+  const [sortField, setSortField] = useState<'date' | 'popularity'>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [filteredPosts, setFilteredPosts] = useState(allPosts.slice(1));
+  
   useEffect(() => {
     // Remove previous class first if exists
     document.body.classList.remove('page-enter');
@@ -31,9 +38,47 @@ const Blog = () => {
     };
   }, []);
 
-  const filteredPosts = activeCategory === "all" 
-    ? regularPosts 
-    : regularPosts.filter(post => post.category === activeCategory);
+  // Apply filters and sorting whenever dependencies change
+  useEffect(() => {
+    let result = allPosts.slice(1); // Exclude featured post
+    
+    // Apply category filter
+    if (activeCategory !== "all") {
+      result = result.filter(post => post.category === activeCategory);
+    }
+    
+    // Apply search filter if there's a search term
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(post => 
+        post.title.toLowerCase().includes(term) || 
+        post.excerpt?.toLowerCase().includes(term) ||
+        post.content.toLowerCase().includes(term)
+      );
+    }
+    
+    // Sort posts based on field and order
+    result.sort((a, b) => {
+      let comparison = 0;
+      
+      if (sortField === 'date') {
+        // Convert dates to timestamps for comparison
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        comparison = dateA - dateB;
+      } else if (sortField === 'popularity') {
+        // For now, we'll use read time as a proxy for popularity
+        // In a real app, this would be views, likes, etc.
+        const timeA = parseInt(a.readTime.split(' ')[0]);
+        const timeB = parseInt(b.readTime.split(' ')[0]);
+        comparison = timeA - timeB;
+      }
+      
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+    
+    setFilteredPosts(result);
+  }, [activeCategory, sortField, sortOrder, searchTerm, allPosts]);
 
   // Blog structured data
   const blogStructuredData = {
@@ -52,6 +97,19 @@ const Blog = () => {
       },
       "url": `${window.location.origin}/blog/${post.slug}`
     }))
+  };
+
+  // Handle search input
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setActiveCategory("all");
+    setSortField('date');
+    setSortOrder('desc');
+    setSearchTerm("");
   };
 
   return (
@@ -76,17 +134,75 @@ const Blog = () => {
         
         {/* Content section starts after the text reveal - adjusted spacing */}
         <div className="container mx-auto px-4 py-8 relative z-10 mt-[-120px] sm:mt-[-100px] md:mt-[-60px]">
-          {/* Search bar - currently just visual */}
-          <div className="max-w-2xl mx-auto mb-12 pt-24 md:pt-16">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <SearchIcon className="h-5 w-5 text-muted-foreground" />
+          {/* Search and filter bar */}
+          <div className="max-w-3xl mx-auto mb-12 pt-24 md:pt-16">
+            <div className="flex flex-col md:flex-row gap-4 mb-4">
+              <div className="relative flex-grow">
+                <input
+                  type="text"
+                  placeholder="Search articles..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  className="block w-full pl-10 pr-3 py-3 border border-input bg-background rounded-full focus:outline-none focus:ring-2 focus:ring-ring/50"
+                />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <SearchButton iconOnly variant="ghost" className="p-0 hover:bg-transparent" />
+                </div>
               </div>
-              <input
-                type="text"
-                placeholder="Search articles..."
-                className="block w-full pl-10 pr-3 py-3 border border-input bg-background rounded-full focus:outline-none focus:ring-2 focus:ring-teal/50"
-              />
+              
+              <div className="flex gap-2">
+                {/* Sort dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="flex items-center gap-2">
+                      <ArrowUpDown className="h-4 w-4" />
+                      <span className="hidden sm:inline">Sort</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Sort By</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      className={sortField === 'date' && sortOrder === 'desc' ? 'bg-muted' : ''}
+                      onClick={() => { setSortField('date'); setSortOrder('desc'); }}
+                    >
+                      <CalendarRange className="h-4 w-4 mr-2" /> Newest First
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className={sortField === 'date' && sortOrder === 'asc' ? 'bg-muted' : ''}
+                      onClick={() => { setSortField('date'); setSortOrder('asc'); }}
+                    >
+                      <CalendarRange className="h-4 w-4 mr-2" /> Oldest First
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className={sortField === 'popularity' && sortOrder === 'desc' ? 'bg-muted' : ''}
+                      onClick={() => { setSortField('popularity'); setSortOrder('desc'); }}
+                    >
+                      <TrendingUp className="h-4 w-4 mr-2" /> Most Popular
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className={sortField === 'popularity' && sortOrder === 'asc' ? 'bg-muted' : ''}
+                      onClick={() => { setSortField('popularity'); setSortOrder('asc'); }}
+                    >
+                      <Clock className="h-4 w-4 mr-2" /> Reading Time (Short to Long)
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                
+                {/* Filters button */}
+                <FilterButton 
+                  buttonText={activeCategory !== "all" ? activeCategory : "Filters"} 
+                  isActive={activeCategory !== "all"}
+                  className="flex items-center gap-2"
+                />
+                
+                {/* Clear filters button - only show if filters are applied */}
+                {(activeCategory !== "all" || sortField !== 'date' || sortOrder !== 'desc' || searchTerm) && (
+                  <Button variant="ghost" onClick={clearFilters} size="sm">
+                    Clear
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -157,25 +273,56 @@ const Blog = () => {
                   ))}
                 </TabsList>
                 
-                <TabsContent value={activeCategory} className="w-full">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {filteredPosts.map((post) => (
-                      <Link to={`/blog/${post.slug}`} key={post.slug} className="group">
-                        <Card className="h-full hover:shadow-md transition-shadow duration-300 frosted-glass">
-                          <CardHeader>
-                            <h3 className="text-xl font-semibold text-gradient-teal">{post.title}</h3>
-                          </CardHeader>
-                          <CardContent>
-                            <p className="text-muted-foreground line-clamp-3">{post.excerpt}</p>
-                          </CardContent>
-                          <CardFooter className="flex items-center justify-between pt-4">
-                            <span className="text-sm">{post.date}</span>
-                            <span className="text-sm text-teal group-hover:underline">Read more</span>
-                          </CardFooter>
-                        </Card>
-                      </Link>
-                    ))}
+                {/* Results count and active filters display */}
+                <div className="flex justify-between items-center mb-6">
+                  <div className="text-sm text-muted-foreground">
+                    Showing {filteredPosts.length} articles
+                    {activeCategory !== "all" && <span> in <span className="font-medium">{activeCategory}</span></span>}
+                    {searchTerm && <span> matching "<span className="font-medium">{searchTerm}</span>"</span>}
                   </div>
+                </div>
+                
+                {/* Display posts */}
+                <TabsContent value={activeCategory} className="w-full">
+                  {filteredPosts.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                      {filteredPosts.map((post) => (
+                        <Link to={`/blog/${post.slug}`} key={post.slug} className="group">
+                          <Card className="h-full hover:shadow-md transition-shadow duration-300 frosted-glass">
+                            <CardHeader>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-medium px-2 py-1 rounded-full bg-primary/10 text-primary">
+                                  {post.category}
+                                </span>
+                                <span className="text-xs text-muted-foreground">{post.date}</span>
+                              </div>
+                              <h3 className="text-xl font-semibold text-gradient-teal">{post.title}</h3>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-muted-foreground line-clamp-3">{post.excerpt}</p>
+                            </CardContent>
+                            <CardFooter className="flex items-center justify-between pt-4">
+                              <div className="flex items-center">
+                                <img 
+                                  src={post.authorAvatar || "/placeholder.svg"}
+                                  alt={post.author}
+                                  className="w-6 h-6 rounded-full mr-2"
+                                />
+                                <span className="text-xs">{post.author}</span>
+                              </div>
+                              <span className="text-sm text-teal group-hover:underline">Read more</span>
+                            </CardFooter>
+                          </Card>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <h3 className="text-xl font-medium mb-2">No articles found</h3>
+                      <p className="text-muted-foreground mb-6">Try adjusting your filters or search terms</p>
+                      <Button onClick={clearFilters}>Clear Filters</Button>
+                    </div>
+                  )}
                 </TabsContent>
               </Tabs>
             </div>
