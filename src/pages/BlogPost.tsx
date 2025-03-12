@@ -50,6 +50,13 @@ const BlogPost = () => {
     );
   }
 
+  // Map BlogPost[] to RelatedPost[] for the RelatedPosts component
+  const relatedBlogPosts = getRelatedPosts(post?.slug || '').map(post => ({
+    id: post.slug || '', // Using slug as id since it's unique
+    title: post.title,
+    slug: post.slug || ''
+  }));
+
   // Create article structured data
   const articleStructuredData = {
     "@context": "https://schema.org",
@@ -76,9 +83,6 @@ const BlogPost = () => {
       "@id": window.location.href
     }
   };
-
-  // Get related posts for this blog post
-  const relatedBlogPosts = getRelatedPosts(post.slug || '');
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
