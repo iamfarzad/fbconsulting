@@ -1,137 +1,107 @@
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import AnimatedText from '@/components/AnimatedText';
-import TimelineProgress from './TimelineProgress';
-import { useLanguage } from '@/contexts/LanguageContext';
+import React from "react";
+import { Timeline } from "@/components/ui/timeline";
 
-// Timeline data
-const timelineItems = [
+const journeyData = [
   {
-    year: '2010',
-    title: 'First AI Project',
-    description: 'Launched my first machine learning project automating data analysis for a financial services company.',
-    icon: '💼'
+    title: "2024-2025",
+    content: (
+      <div>
+        <h4 className="text-foreground text-base md:text-lg font-semibold mb-2">Talk to Eve (AI Mental Wellness & Burnout Prevention)</h4>
+        <p className="text-muted-foreground text-xs md:text-sm font-normal mb-3">
+          Built an AI-driven mental wellness platform to assess and prevent burnout.
+        </p>
+        <ul className="list-disc pl-5 text-muted-foreground text-xs md:text-sm space-y-1 mb-8">
+          <li>Developed a mind-map-based psychological insights engine for visualizing emotions and mental states.</li>
+          <li>Integrated AI-based surveys, sentiment tracking, and predictive analytics to improve workplace well-being.</li>
+          <li>Uses ChromaDB, Redis, PostgreSQL, and NetworkX for hybrid storage and graph-based AI insights.</li>
+        </ul>
+      </div>
+    ),
   },
   {
-    year: '2013',
-    title: 'Natural Language Processing',
-    description: 'Developed an NLP system for a major retail company to analyze customer feedback at scale.',
-    icon: '🔍'
+    title: "2023",
+    content: (
+      <div>
+        <h4 className="text-foreground text-base md:text-lg font-semibold mb-2">ZingZang Lab (AI-Powered Music Creation)</h4>
+        <p className="text-muted-foreground text-xs md:text-sm font-normal mb-3">
+          Developed an AI-driven platform for music production and collaboration.
+        </p>
+        <ul className="list-disc pl-5 text-muted-foreground text-xs md:text-sm space-y-1 mb-8">
+          <li>Integrated AI-assisted vocal coaching, music mixing, and mastering tools.</li>
+          <li>Enabled social media integration for musicians to share music effortlessly.</li>
+        </ul>
+      </div>
+    ),
   },
   {
-    year: '2015',
-    title: 'AI Consulting Firm',
-    description: 'Founded a specialized AI consulting practice focused on business process automation.',
-    icon: '🚀'
+    title: "2022",
+    content: (
+      <div>
+        <h4 className="text-foreground text-base md:text-lg font-semibold mb-2">SWAG AI (Lightweight Factory Automation Tool)</h4>
+        <p className="text-muted-foreground text-xs md:text-sm font-normal mb-3">
+          AI-driven automation assistant for industrial workflows.
+        </p>
+        <ul className="list-disc pl-5 text-muted-foreground text-xs md:text-sm space-y-1 mb-8">
+          <li>Used predictive analytics to optimize factory and warehouse operations.</li>
+          <li>Focused on streamlining production processes for manufacturing businesses.</li>
+        </ul>
+      </div>
+    ),
   },
   {
-    year: '2018',
-    title: 'Voice AI Systems',
-    description: 'Pioneered voice-controlled AI systems for healthcare providers, reducing documentation time by 60%.',
-    icon: '🎤'
+    title: "2021",
+    content: (
+      <div>
+        <h4 className="text-foreground text-base md:text-lg font-semibold mb-2">iWriter.ai (AI-Powered Copywriting for SMEs)</h4>
+        <p className="text-muted-foreground text-xs md:text-sm font-normal mb-3">
+          Built an AI-driven copywriting tool designed for small businesses.
+        </p>
+        <ul className="list-disc pl-5 text-muted-foreground text-xs md:text-sm space-y-1 mb-8">
+          <li>Automated the creation of blog posts, ads, and sales copy.</li>
+          <li>Optimized for Norwegian SMEs, helping them improve content marketing with AI.</li>
+        </ul>
+      </div>
+    ),
   },
   {
-    year: '2020',
-    title: 'GPT Integration',
-    description: 'Early adopter of GPT technology for business applications, creating custom virtual assistants.',
-    icon: '🤖'
-  },
-  {
-    year: '2023',
-    title: 'AI Automation Platform',
-    description: 'Launched a comprehensive AI automation platform serving clients across multiple industries.',
-    icon: '✨'
+    title: "2020",
+    content: (
+      <div>
+        <h4 className="text-foreground text-base md:text-lg font-semibold mb-2">Optix.io (Closed Marketplace for Video Production)</h4>
+        <p className="text-muted-foreground text-xs md:text-sm font-normal mb-3">
+          AI-powered video production marketplace for content creators.
+        </p>
+        <ul className="list-disc pl-5 text-muted-foreground text-xs md:text-sm space-y-1 mb-8">
+          <li>Connected businesses with skilled video editors and animators.</li>
+          <li>Featured automated bidding and job-matching algorithms to optimize project selection.</li>
+        </ul>
+      </div>
+    ),
   }
 ];
 
-// Norwegian timeline data
-const timelineItemsNO = [
-  {
-    year: '2010',
-    title: 'Første AI-prosjekt',
-    description: 'Lanserte mitt første maskinlæringsprosjekt som automatiserte dataanalyse for et finansselskap.',
-    icon: '💼'
-  },
-  {
-    year: '2013',
-    title: 'Naturlig språkbehandling',
-    description: 'Utviklet et NLP-system for en stor detaljhandelsvirksomhet for å analysere kundetilbakemeldinger i stor skala.',
-    icon: '🔍'
-  },
-  {
-    year: '2015',
-    title: 'AI-konsulentfirma',
-    description: 'Grunnla en spesialisert AI-konsulentpraksis fokusert på automatisering av forretningsprosesser.',
-    icon: '🚀'
-  },
-  {
-    year: '2018',
-    title: 'Stemme-AI-systemer',
-    description: 'Pionerte stemmestyrte AI-systemer for helsetjenester, reduserte dokumentasjonstid med 60%.',
-    icon: '🎤'
-  },
-  {
-    year: '2020',
-    title: 'GPT-integrasjon',
-    description: 'Tidlig bruker av GPT-teknologi for forretningsapplikasjoner, skapte tilpassede virtuelle assistenter.',
-    icon: '🤖'
-  },
-  {
-    year: '2023',
-    title: 'AI-automatiseringsplattform',
-    description: 'Lanserte en omfattende AI-automatiseringsplattform som betjener kunder på tvers av flere bransjer.',
-    icon: '✨'
-  }
+const additionalContributions = [
+  "AI Research & Development – Explored LLMs (Large Language Models) for advanced business automation.",
+  "Knowledge Graphs & AI Systems – Developed graph-based AI models for better decision-making in automation.",
+  "Process Optimization Consulting – Helped businesses streamline workflows using AI automation.",
+  "Global AI Consulting & Tech Strategy – Provided AI automation strategies to startups, SMEs, and enterprises."
 ];
 
 const AIJourney = () => {
-  const { language } = useLanguage();
-  const isNorwegian = language === 'no';
-  const items = isNorwegian ? timelineItemsNO : timelineItems;
-  
   return (
-    <section className="py-24 relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black to-black/80 pointer-events-none" />
-      <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none" />
+    <section className="w-full">
+      <Timeline data={journeyData} />
       
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="flex flex-col items-center justify-center text-center mb-16">
-          <motion.div 
-            className="inline-block mb-4 px-4 py-1.5 rounded-full bg-[#fe5a1d]/10 text-[#fe5a1d] text-sm font-medium"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
-          >
-            {isNorwegian ? 'MIN REISE' : 'MY JOURNEY'}
-          </motion.div>
-          
-          <AnimatedText
-            text={isNorwegian ? 'AI-Drevne Prosjekter & Milepæler' : 'AI-Driven Startups & Projects Timeline'}
-            className="text-4xl md:text-5xl font-bold mb-6"
-            tag="h2"
-          />
-          
-          <motion.div 
-            className="max-w-2xl mx-auto text-lg text-white/70"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            <p>
-              {isNorwegian
-                ? 'Se utviklingen av min karriere innen AI-automatisering og hvordan jeg har hjulpet virksomheter med å transformere deres operasjoner.'
-                : 'Track the evolution of my AI automation career and how I\'ve helped businesses transform their operations.'}
-            </p>
-          </motion.div>
-        </div>
-        
-        <div className="relative max-w-5xl mx-auto">
-          {/* Timeline Progress Component */}
-          <TimelineProgress items={items} accentColor="#fe5a1d" />
+      <div className="max-w-7xl mx-auto pb-20 px-4 md:px-8 lg:px-10">
+        <h3 className="text-lg md:text-2xl font-semibold mb-4">Additional Contributions & Work</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {additionalContributions.map((contribution, index) => (
+            <div key={index} className="flex items-start gap-2">
+              <span className="text-primary mt-1">✔</span>
+              <p className="text-muted-foreground text-sm">{contribution}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>

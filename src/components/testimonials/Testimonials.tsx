@@ -54,19 +54,19 @@ const Testimonials: React.FC<TestimonialsProps> = ({ id }) => {
           viewport={{ once: true, margin: "-100px" }}
         >
           <div className="flex justify-center mb-4">
-            <div className="bg-[#fe5a1d]/10 p-3 rounded-full">
-              <MessageSquareQuote className="w-6 h-6 text-[#fe5a1d]" />
+            <div className="bg-primary/10 p-3 rounded-full">
+              <MessageSquareQuote className="w-6 h-6 text-primary" />
             </div>
           </div>
           
           <AnimatedText
             text="What Our Clients Say"
             tag="h2"
-            className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70"
+            className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70"
           />
           
           <motion.div 
-            className="w-20 h-1 bg-gradient-to-r from-[#fe5a1d] to-[#fe5a1d]/30 mx-auto rounded-full mb-6"
+            className="w-20 h-1 bg-gradient-to-r from-primary/80 to-primary/30 mx-auto rounded-full mb-6"
             initial={{ width: 0 }}
             whileInView={{ width: 80 }}
             transition={{ delay: 0.2, duration: 0.4 }}
