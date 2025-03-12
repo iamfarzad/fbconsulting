@@ -7,7 +7,7 @@ import { AIMessage } from "@/services/chat/messageTypes";
 import { GraphicCardCollection } from './GraphicCardCollection';
 import { EmailSummaryForm } from './EmailSummaryForm';
 import { extractContentFromMessage, FormType } from '@/utils/messageExtractor';
-import { NewsletterSignup } from '@/components/NewsletterSignup';
+import NewsletterSignup from '@/components/NewsletterSignup';
 
 interface MessageProps {
   message: AIMessage;
