@@ -96,6 +96,13 @@ const ChatButton = () => {
     return null;
   }
   
+  // Always go to full screen after first message
+  React.useEffect(() => {
+    if (messages.length > 0 && isOpen && !isFullScreen) {
+      toggleFullScreen();
+    }
+  }, [messages.length, isOpen, isFullScreen]);
+  
   return (
     <>
       <AnimatePresence>
@@ -127,7 +134,7 @@ const ChatButton = () => {
               </div>
               
               <div className="p-4 pt-0">
-                <AIChatInput placeholderText="Ask me anything about our AI services..." />
+                <AIChatInput autoFullScreen={true} />
               </div>
               
               <div className="p-3 text-center border-t border-white/10">

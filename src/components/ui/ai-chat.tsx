@@ -12,7 +12,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "react-router-dom";
 import FullScreenChat from "../chat/FullScreenChat";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface AIChatInputProps {
   placeholderText?: string;
@@ -30,7 +30,7 @@ export function AIChatInput({
   const containerRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const currentPath = location.pathname;
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const [isFullScreen, setIsFullScreen] = useState(false);
   
   // Create a mock LeadInfo object for suggestions with correct type structure
@@ -65,12 +65,12 @@ export function AIChatInput({
     return currentPath.substring(1); // Remove leading slash
   };
 
-  // Automatically go fullscreen when first message is entered on mobile if autoFullScreen is true
+  // Automatically go fullscreen when messages are present - for both mobile and desktop
   useEffect(() => {
-    if (autoFullScreen && isMobile && messages.length > 0 && !isFullScreen) {
+    if (autoFullScreen && messages.length > 0 && !isFullScreen) {
       setIsFullScreen(true);
     }
-  }, [messages.length, isMobile, autoFullScreen, isFullScreen]);
+  }, [messages.length, autoFullScreen, isFullScreen]);
 
   const handleSend = async () => {
     if (!inputValue.trim()) {
@@ -186,14 +186,14 @@ export function AIChatInput({
                 showMessages={showMessages} 
               />
               
-              {/* Expand to fullscreen button */}
+              {/* Expand to fullscreen button - more prominent */}
               {messages.length > 0 && (
                 <div className="p-2 text-center">
                   <button
                     onClick={toggleFullScreen}
-                    className="text-black/70 text-sm hover:text-black transition-colors"
+                    className="text-black/70 text-sm hover:text-black bg-black/5 hover:bg-black/10 px-3 py-1.5 rounded-full transition-all"
                   >
-                    Expand to full screen
+                    Expand to full screen for better experience
                   </button>
                 </div>
               )}
