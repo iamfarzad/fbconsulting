@@ -178,7 +178,15 @@
 ### UI/UX Improvements Needed
 
 1. **GraphicCard Component**:
-   - [ ] Enhance design with more visual diversity beyond black and white
+- [ ] Black and White should remain the dominant color scheme** to maintain a clean, modern aesthetic.  
+- If any color is added, it should be Giants Orange (#fe5a1d, rgb(254,90,29)) but only for small details such as:
+  - Subtle accents (buttons, active states, hover effects)
+  - Small UI highlights (icons, underlines, progress indicators)
+  - Call-to-action emphasis (e.g., "Book a Consultation")
+  - Minimal strokes or outlines in illustrations
+- **Avoid overuse**: No large blocks, no full text in orange, and no background fills in orange to maintain contrast balance.
+
+✅ **Final Decision**: Orange should **only be used minimally** as an accent color.
    - [ ] Add customization options for different card appearances
    - [ ] Implement better hover effects for interactivity
    - [ ] Add support for images and rich media content
@@ -268,4 +276,44 @@
 - [ ] **AI Personalities**: Develop multiple AI personas for different contexts
 - [ ] **Advanced Voice Integration**: Enhance voice command capabilities
 - [ ] **Enterprise Features**: Add team collaboration tools and permissions
+
+- [ ] # CopilotKit Implementation Plan for Landing Page https://docs.copilotkit.ai/
+
+## Overview
+This document outlines the implementation plan for integrating **CopilotKit** into the landing page to serve as an AI-powered interactive assistant. The goal is to allow users to:
+
+Ask questions about AI automation services  
+Fill out forms (Newsletter signup, Consultation request)  
+Book meetings directly through the chat  
+View the latest feature updates & timeline  
+Capture leads naturally without disrupting user flow  
+Use **voice commands** to interact with the chatbot  
+Offer users a summary of the conversation via email at the end  
+Provide dynamic access to **About Me, AI services, skills, technologies, and testimonials**
+
+---
+
+##  1. Setup & Installation
+
+### **1.1 Install CopilotKit**
+First, install CopilotKit in the project:
+
+```bash
+npm install @copilotkit/react
+```
+
+### **1.2 Create a CopilotKit Provider**
+Wrap the chat UI inside a `CopilotKit` provider in your main layout:
+
+```tsx
+import { CopilotKit } from "@copilotkit/react";
+import Chatbox from "./Chatbox"; // Existing chat UI
+
+export default function AIChatProvider() {
+  return (
+    <CopilotKit>
+      <Chatbox />
+    </CopilotKit>
+  );
+}
 
