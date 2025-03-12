@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
 import { CounterComponent } from '@/mcp/examples/CounterComponent';
+import { BusinessIntelligenceComponent } from '@/mcp/examples/BusinessIntelligenceComponent';
 import PageHeader from '@/components/PageHeader';
 
 const TestMCP = () => {
@@ -35,10 +36,18 @@ const TestMCP = () => {
                   <li><strong>Protocol:</strong> Defines how messages are processed to update the model</li>
                 </ul>
                 <p className="mb-8">
-                  This example demonstrates a simple counter implemented using the MCP pattern.
+                  These examples demonstrate how MCP can be used to manage application state and interact with external services.
                 </p>
                 
+                <h3 className="text-2xl font-bold mb-4">Basic Counter Example</h3>
                 <CounterComponent initialCount={0} minValue={-10} maxValue={10} />
+                
+                <h3 className="text-2xl font-bold mt-10 mb-4">Business Intelligence Example</h3>
+                <p className="mb-4">
+                  This example demonstrates how to use MCP to connect to external APIs (like Smithery.ai MCP servers)
+                  to gather business intelligence data.
+                </p>
+                <BusinessIntelligenceComponent />
                 
                 <div className="mt-10 p-6 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800">
                   <h3 className="text-xl font-semibold mb-4">Benefits of MCP</h3>
@@ -48,6 +57,7 @@ const TestMCP = () => {
                     <li>Easy to test and debug</li>
                     <li>Facilitates complex state management</li>
                     <li>Works well with React's component model</li>
+                    <li>Enables seamless integration with external services</li>
                   </ul>
                 </div>
               </div>
