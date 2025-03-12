@@ -1,11 +1,13 @@
+
 import { Brain, Workflow, LineChart, Smartphone } from "lucide-react";
 import type { ExpertiseCardProps } from "./ExpertiseCard";
 
+// We'll use string identifiers instead of JSX in .ts files
 export const expertiseData: ExpertiseCardProps[] = [
   {
     title: "AI Strategy & Consultation",
     description: "Helping businesses create clear, actionable plans for AI adoption",
-    icon: <Brain className="w-5 h-5 text-[#fe5a1d]" />,
+    icon: "Brain",
     bulletPoints: [
       "Create clear plans for AI adoption",
       "Analyze ROI and map out implementation",
@@ -15,7 +17,7 @@ export const expertiseData: ExpertiseCardProps[] = [
   {
     title: "Workflow Automation",
     description: "Streamlining operations and eliminating manual processes",
-    icon: <Workflow className="w-5 h-5 text-[#fe5a1d]" />,
+    icon: "Workflow",
     bulletPoints: [
       "Identify and automate manual processes",
       "Integrate systems for smoother operations",
@@ -25,7 +27,7 @@ export const expertiseData: ExpertiseCardProps[] = [
   {
     title: "Data Analytics & Insights",
     description: "Transforming raw data into actionable business intelligence",
-    icon: <LineChart className="w-5 h-5 text-[#fe5a1d]" />,
+    icon: "LineChart",
     bulletPoints: [
       "Turn raw data into actionable intelligence",
       "Set up real-time dashboards and reporting",
@@ -35,7 +37,7 @@ export const expertiseData: ExpertiseCardProps[] = [
   {
     title: "Mobile & Web Solutions",
     description: "Building intelligent applications for modern businesses",
-    icon: <Smartphone className="w-5 h-5 text-[#fe5a1d]" />,
+    icon: "Smartphone",
     bulletPoints: [
       "Build smart applications that work across platforms",
       "Design interfaces that drive user engagement",

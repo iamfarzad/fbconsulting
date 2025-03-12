@@ -2,10 +2,26 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import AnimatedText from '@/components/AnimatedText';
-import { Cpu } from 'lucide-react';
+import { Cpu, Brain, Workflow, Database, MessageSquare } from 'lucide-react';
 import { skillsData } from '@/data/skillsData';
 
 const SkillsTechnologies = () => {
+  // Function to render the correct icon based on the string name
+  const renderIcon = (iconName: string) => {
+    switch(iconName) {
+      case 'Brain':
+        return <Brain className="w-5 h-5 text-[#fe5a1d]" />;
+      case 'Workflow':
+        return <Workflow className="w-5 h-5 text-[#fe5a1d]" />;
+      case 'Database':
+        return <Database className="w-5 h-5 text-[#fe5a1d]" />;
+      case 'MessageSquare':
+        return <MessageSquare className="w-5 h-5 text-[#fe5a1d]" />;
+      default:
+        return <Brain className="w-5 h-5 text-[#fe5a1d]" />;
+    }
+  };
+
   return (
     <section className="py-20 px-4 bg-background relative">
       <div className="container mx-auto max-w-5xl">
@@ -54,7 +70,7 @@ const SkillsTechnologies = () => {
             >
               <div className="flex items-center mb-4">
                 <div className="bg-[#fe5a1d]/10 p-2 rounded-md mr-3">
-                  {skill.icon}
+                  {renderIcon(skill.icon)}
                 </div>
                 <h3 className="font-semibold text-lg">{skill.title}</h3>
               </div>

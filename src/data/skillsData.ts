@@ -1,9 +1,9 @@
-import React from 'react';
+
 import { Brain, Workflow, Database, MessageSquare } from 'lucide-react';
 
 export interface SkillCategory {
   title: string;
-  icon: React.ReactNode;
+  icon: string;
   items: string[];
 }
 
@@ -46,7 +46,7 @@ export const skills: Skill[] = [
 export const skillsData: Record<string, SkillCategory> = {
   ai: {
     title: 'AI Engineering',
-    icon: <Brain className="w-5 h-5 text-[#fe5a1d]" />,
+    icon: 'Brain',
     items: [
       'Custom GPT Model Training',
       'Predictive Analytics',
@@ -57,7 +57,7 @@ export const skillsData: Record<string, SkillCategory> = {
   },
   automation: {
     title: 'Workflow Automation',
-    icon: <Workflow className="w-5 h-5 text-[#fe5a1d]" />,
+    icon: 'Workflow',
     items: [
       'Process Analysis',
       'Custom Workflow Development',
@@ -68,7 +68,7 @@ export const skillsData: Record<string, SkillCategory> = {
   },
   data: {
     title: 'Data Analytics',
-    icon: <Database className="w-5 h-5 text-[#fe5a1d]" />,
+    icon: 'Database',
     items: [
       'Business Intelligence Dashboards',
       'Predictive Modeling',
@@ -79,7 +79,7 @@ export const skillsData: Record<string, SkillCategory> = {
   },
   conversational: {
     title: 'Conversational AI',
-    icon: <MessageSquare className="w-5 h-5 text-[#fe5a1d]" />,
+    icon: 'MessageSquare',
     items: [
       'Custom Chatbot Development',
       'AI Copilots',
