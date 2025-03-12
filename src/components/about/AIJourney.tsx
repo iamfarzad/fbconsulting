@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import AnimatedText from '@/components/AnimatedText';
@@ -10,37 +11,37 @@ const timelineItems = [
     year: '2010',
     title: 'First AI Project',
     description: 'Launched my first machine learning project automating data analysis for a financial services company.',
-    icon: '💼'
+    icon: 'AI'
   },
   {
     year: '2013',
     title: 'Natural Language Processing',
     description: 'Developed an NLP system for a major retail company to analyze customer feedback at scale.',
-    icon: '🔍'
+    icon: 'NLP'
   },
   {
     year: '2015',
     title: 'AI Consulting Firm',
     description: 'Founded a specialized AI consulting practice focused on business process automation.',
-    icon: '🚀'
+    icon: 'Consulting'
   },
   {
     year: '2018',
     title: 'Voice AI Systems',
     description: 'Pioneered voice-controlled AI systems for healthcare providers, reducing documentation time by 60%.',
-    icon: '🎤'
+    icon: 'Voice'
   },
   {
     year: '2020',
     title: 'GPT Integration',
     description: 'Early adopter of GPT technology for business applications, creating custom virtual assistants.',
-    icon: '🤖'
+    icon: 'GPT'
   },
   {
     year: '2023',
     title: 'AI Automation Platform',
     description: 'Launched a comprehensive AI automation platform serving clients across multiple industries.',
-    icon: '✨'
+    icon: 'Platform'
   }
 ];
 
@@ -50,37 +51,37 @@ const timelineItemsNO = [
     year: '2010',
     title: 'Første AI-prosjekt',
     description: 'Lanserte mitt første maskinlæringsprosjekt som automatiserte dataanalyse for et finansselskap.',
-    icon: '💼'
+    icon: 'AI'
   },
   {
     year: '2013',
     title: 'Naturlig språkbehandling',
     description: 'Utviklet et NLP-system for en stor detaljhandelsvirksomhet for å analysere kundetilbakemeldinger i stor skala.',
-    icon: '🔍'
+    icon: 'NLP'
   },
   {
     year: '2015',
     title: 'AI-konsulentfirma',
     description: 'Grunnla en spesialisert AI-konsulentpraksis fokusert på automatisering av forretningsprosesser.',
-    icon: '🚀'
+    icon: 'Consulting'
   },
   {
     year: '2018',
     title: 'Stemme-AI-systemer',
     description: 'Pionerte stemmestyrte AI-systemer for helsetjenester, reduserte dokumentasjonstid med 60%.',
-    icon: '🎤'
+    icon: 'Voice'
   },
   {
     year: '2020',
     title: 'GPT-integrasjon',
     description: 'Tidlig bruker av GPT-teknologi for forretningsapplikasjoner, skapte tilpassede virtuelle assistenter.',
-    icon: '🤖'
+    icon: 'GPT'
   },
   {
     year: '2023',
     title: 'AI-automatiseringsplattform',
     description: 'Lanserte en omfattende AI-automatiseringsplattform som betjener kunder på tvers av flere bransjer.',
-    icon: '✨'
+    icon: 'Platform'
   }
 ];
 

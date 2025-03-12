@@ -1,6 +1,6 @@
 
 import { Brain, Workflow, LineChart, Smartphone, ArrowRight, Check, Target, Zap } from "lucide-react";
-import { ExpertiseCardProps } from "./ExpertiseCard";
+import { LucideIcon } from "lucide-react";
 
 export interface ExpertiseData {
   id: string;
@@ -8,7 +8,20 @@ export interface ExpertiseData {
   titleNo: string;
   description: string;
   descriptionNo: string;
-  icon: any;
+  icon: LucideIcon;
+}
+
+export interface ExpertiseCardProps {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  bulletPoints?: string[];
+  bulletPointIcon?: LucideIcon;
+  learnMore?: string;
+  stats?: {
+    [key: string]: number | string;
+  };
+  accentColor?: string;
 }
 
 export const expertiseData: ExpertiseData[] = [
