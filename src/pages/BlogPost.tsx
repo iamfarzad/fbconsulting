@@ -9,7 +9,7 @@ import PostHeader from '@/components/blog/PostHeader';
 import PostContent from '@/components/blog/PostContent';
 import ShareSection from '@/components/blog/ShareSection';
 import RelatedPosts from '@/components/blog/RelatedPosts';
-import { getBlogPost } from '@/services/blogService';
+import { getBlogPostBySlug, getRelatedPosts } from '@/services/blogService';
 import SEO from '@/components/SEO';
 import DotPattern from '@/components/ui/dot-pattern';
 
@@ -27,8 +27,29 @@ const BlogPost = () => {
     };
   }, []);
   
-  // In a real app, this would check if the post exists and handle loading states
-  const post = getBlogPost(slug || '');
+  // Get the blog post by slug from the service
+  const post = getBlogPostBySlug(slug || '');
+  
+  // If no post is found, we could render a not found message
+  if (!post) {
+    return (
+      <div className="flex flex-col min-h-screen bg-background">
+        <Navbar />
+        <main className="flex-grow pt-24 pb-16 relative">
+          <div className="container px-4 mx-auto relative z-10">
+            <div className="text-center">
+              <h1 className="text-3xl font-bold mb-4">Post Not Found</h1>
+              <p className="mb-6">The blog post you're looking for doesn't exist.</p>
+              <Button asChild>
+                <Link to="/blog">Return to Blog</Link>
+              </Button>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   // Create article structured data
   const articleStructuredData = {
@@ -56,6 +77,9 @@ const BlogPost = () => {
       "@id": window.location.href
     }
   };
+
+  // Get related posts for this blog post
+  const relatedBlogPosts = getRelatedPosts(post.slug || '');
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -97,7 +121,7 @@ const BlogPost = () => {
             
             <ShareSection />
             
-            <RelatedPosts posts={post.relatedPosts} />
+            <RelatedPosts posts={relatedBlogPosts} />
           </article>
         </div>
       </main>
