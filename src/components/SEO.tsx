@@ -8,8 +8,10 @@ interface SEOProps {
   canonicalUrl?: string;
   ogImage?: string;
   ogType?: 'website' | 'article';
-  structuredData?: Record<string, any>;
+  structuredData?: Record<string, any> | Record<string, any>[];
   keywords?: string;
+  author?: string;
+  language?: string;
 }
 
 const SEO: React.FC<SEOProps> = ({
@@ -20,10 +22,37 @@ const SEO: React.FC<SEOProps> = ({
   ogType = 'website',
   structuredData,
   keywords,
+  author = 'AI Automation Consultant',
+  language,
 }) => {
   const siteUrl = typeof window !== 'undefined' ? window.location.origin : '';
   const pageUrl = canonicalUrl || (typeof window !== 'undefined' ? window.location.href : '');
   const imageUrl = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`;
+  
+  // Default organization structured data to be merged with page-specific data
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "@id": `${siteUrl}/#organization`,
+    "name": "F.B Consulting",
+    "url": siteUrl,
+    "logo": `${siteUrl}/og-image.png`,
+    "description": "AI automation consulting services for businesses looking to reduce costs and increase efficiency",
+    "sameAs": [
+      "https://linkedin.com/in/yourprofile", 
+      "https://twitter.com/yourprofile"
+    ]
+  };
+
+  // Combine with page-specific structured data if provided
+  let fullStructuredData = structuredData;
+  if (Array.isArray(structuredData)) {
+    fullStructuredData = [organizationSchema, ...structuredData];
+  } else if (structuredData) {
+    fullStructuredData = [organizationSchema, structuredData];
+  } else {
+    fullStructuredData = [organizationSchema];
+  }
   
   return (
     <Helmet>
@@ -32,6 +61,8 @@ const SEO: React.FC<SEOProps> = ({
       <meta name="description" content={description} />
       <link rel="canonical" href={pageUrl} />
       {keywords && <meta name="keywords" content={keywords} />}
+      {author && <meta name="author" content={author} />}
+      {language && <html lang={language} />}
       
       {/* OpenGraph tags */}
       <meta property="og:title" content={title} />
@@ -48,9 +79,9 @@ const SEO: React.FC<SEOProps> = ({
       <meta name="twitter:image" content={imageUrl} />
       
       {/* Structured data */}
-      {structuredData && (
+      {fullStructuredData && (
         <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
+          {JSON.stringify(fullStructuredData)}
         </script>
       )}
     </Helmet>

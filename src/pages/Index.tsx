@@ -16,6 +16,7 @@ import SkillsTechnologies from '@/components/about/SkillsTechnologies';
 import AIJourney from '@/components/about/AIJourney';
 import { getPersonStructuredData } from '@/components/about/AboutStructuredData';
 import Testimonials from '@/components/testimonials/Testimonials';
+import { getHomePageStructuredData } from '@/services/blog';
 
 const Index = () => {
   console.log("Index page rendering");
@@ -82,16 +83,26 @@ const Index = () => {
   };
 
   const personStructuredData = getPersonStructuredData();
+  const homePageStructuredData = getHomePageStructuredData(isNorwegian);
+  
+  // Combine all structured data for the home page
+  const combinedStructuredData = [
+    personStructuredData,
+    homePageStructuredData
+  ];
 
   return (
     <>
       <SEO
-        title={isNorwegian ? "AI Automatisering for Norske Bedrifter" : "AI Automation Ally - Automate Your Business with AI"}
+        title={isNorwegian ? "AI Automatisering for Norske Bedrifter | F.B Consulting" : "AI Automation Ally - Automate Your Business with AI | F.B Consulting"}
         description={isNorwegian 
-          ? "AI-automatiseringsløsninger skreddersydd for norske bedrifter, sikrer samsvar med lokale forskrifter og adresserer spesifikke markedsbehov."
-          : "Unlock the power of AI to automate your business processes, increase efficiency, and drive growth. Discover tailored AI solutions for your unique needs."}
-        keywords={isNorwegian ? "AI Norge, AI automatisering Norge, GDPR samsvar, Norsk bedriftsautomatisering" : undefined}
-        structuredData={personStructuredData}
+          ? "AI-automatiseringsløsninger skreddersydd for norske bedrifter, sikrer samsvar med lokale forskrifter og adresserer spesifikke markedsbehov. Øk effektiviteten og reduser kostnader med AI."
+          : "Unlock the power of AI to automate your business processes, increase efficiency, and drive growth. Expert AI consulting services for workflow optimization and cost reduction."}
+        keywords={isNorwegian 
+          ? "AI Norge, AI automatisering Norge, GDPR samsvar, Norsk bedriftsautomatisering, virksomhetsautomatisering, AI konsulent Oslo" 
+          : "AI automation, business process automation, AI consulting, workflow optimization, cost reduction, AI implementation, virtual assistants, chatbots"}
+        structuredData={combinedStructuredData}
+        language={isNorwegian ? "no" : "en"}
       />
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
@@ -101,10 +112,13 @@ const Index = () => {
           <div className="fixed inset-0 bg-gradient-to-b from-background via-background to-black/5 pointer-events-none"></div>
           
           {/* Hero Section */}
-          <Hero />
+          <header>
+            <Hero />
+          </header>
           
-          {/* About section - Moving to an explicit section with ID */}
-          <section id="about" className="relative z-10">
+          {/* About section with semantic HTML5 tags */}
+          <section id="about" aria-labelledby="about-heading" className="relative z-10">
+            <h2 id="about-heading" className="sr-only">About</h2>
             <AboutHero />
             <GlobalImpact />
             <AIJourney />
@@ -113,16 +127,22 @@ const Index = () => {
           </section>
           
           {/* Testimonials */}
-          <section id="testimonials">
+          <section id="testimonials" aria-labelledby="testimonials-heading">
+            <h2 id="testimonials-heading" className="sr-only">Testimonials</h2>
             <Testimonials />
           </section>
           
           {/* FAQ Section */}
-          <section id="faq">
+          <section id="faq" aria-labelledby="faq-heading">
+            <h2 id="faq-heading" className="sr-only">Frequently Asked Questions</h2>
             <Faq3 {...faqData} />
           </section>
           
-          <ContactCTA />
+          {/* Contact CTA */}
+          <section id="contact-cta" aria-labelledby="contact-cta-heading">
+            <h2 id="contact-cta-heading" className="sr-only">Contact Us</h2>
+            <ContactCTA />
+          </section>
         </main>
         <Footer />
       </div>
