@@ -8,7 +8,7 @@ import { EmailSummaryForm } from './EmailSummaryForm';
 import { extractContentFromMessage, FormType } from '@/utils/messageExtractor';
 import NewsletterSignup from '@/components/NewsletterSignup';
 import { extractMediaContent } from '@/utils/mediaExtractor';
-import MessageMedia from './MessageMedia';
+import { MessageMedia } from './MessageMedia';
 
 interface MessageProps {
   message: AIMessage;
