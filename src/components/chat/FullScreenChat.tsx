@@ -35,10 +35,10 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      transition={{ type: 'spring', damping: 25 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.3 }}
       className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md"
     >
       <div className="relative w-full h-full max-w-7xl mx-auto px-4">
@@ -53,8 +53,8 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
           </Button>
         </div>
         
-        <div className="h-full pt-20 pb-10 overflow-auto">
-          <div className="bg-transparent h-full max-w-4xl mx-auto flex flex-col">
+        <div className="h-full pt-20 pb-10 flex flex-col">
+          <div className="flex flex-col flex-grow h-full max-w-4xl mx-auto">
             <div className="p-6 text-center mb-4">
               <h2 className="text-2xl font-semibold text-white mb-2">Chat with AI Assistant</h2>
               <div className="flex justify-center">
@@ -65,24 +65,36 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
               </p>
             </div>
             
-            <div className="flex-1 p-6 overflow-hidden flex flex-col">
-              {hasMessages && (
-                <div className="mb-6">
+            <div className="flex-1 p-6 overflow-auto flex flex-col">
+              {hasMessages ? (
+                <div className="flex-1 overflow-auto mb-6">
                   <ChatMessageList messages={initialMessages} showMessages={true} />
+                </div>
+              ) : (
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="text-center text-white/80">
+                    <p className="text-xl font-medium mb-2">How can I help you today?</p>
+                    <p className="max-w-md mx-auto">
+                      I can provide information about AI automation, workflow optimization, 
+                      cost reduction strategies, and customized solutions for your business.
+                    </p>
+                  </div>
                 </div>
               )}
               
-              <ChatInput
-                value={inputValue}
-                setValue={setInputValue}
-                onSend={onSendMessage}
-                onClear={onClear}
-                isLoading={isLoading}
-                showMessages={true}
-                hasMessages={hasMessages}
-                suggestedResponse={suggestedResponse}
-                placeholder={placeholderText}
-              />
+              <div className="mt-auto pt-4">
+                <ChatInput
+                  value={inputValue}
+                  setValue={setInputValue}
+                  onSend={onSendMessage}
+                  onClear={onClear}
+                  isLoading={isLoading}
+                  showMessages={true}
+                  hasMessages={hasMessages}
+                  suggestedResponse={suggestedResponse}
+                  placeholder={placeholderText}
+                />
+              </div>
             </div>
           </div>
         </div>
