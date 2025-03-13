@@ -5,6 +5,7 @@ import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
 import { CounterComponent } from '@/mcp/examples/CounterComponent';
 import { BusinessIntelligenceComponent } from '@/mcp/examples/businessIntelligence/BusinessIntelligenceComponent';
+import { PersonaManagementComponent } from '@/mcp/examples/PersonaManagementComponent';
 import PageHeader from '@/components/PageHeader';
 
 const TestMCP = () => {
@@ -48,6 +49,12 @@ const TestMCP = () => {
                   to gather business intelligence data.
                 </p>
                 <BusinessIntelligenceComponent />
+                
+                <h3 className="text-2xl font-bold mt-10 mb-4">Persona Management Example</h3>
+                <p className="mb-4">
+                  This example shows how MCP can be used to manage AI assistant personas based on user context.
+                </p>
+                <PersonaManagementComponent />
                 
                 <div className="mt-10 p-6 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800">
                   <h3 className="text-xl font-semibold mb-4">Benefits of MCP</h3>
