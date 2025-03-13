@@ -13,7 +13,7 @@ export const BusinessIntelligenceComponent: React.FC = () => {
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [contactName, setContactName] = useState('');
-  const [contactRole, setContactRole] = useState('');
+  const [contactTitle, setContactTitle] = useState('');
 
   // Use our business intelligence hook
   const {
@@ -52,7 +52,10 @@ export const BusinessIntelligenceComponent: React.FC = () => {
   // Handle manual contact info update
   const handleContactUpdate = (e: React.FormEvent) => {
     e.preventDefault();
-    setContactInfo({ name: contactName, role: contactRole });
+    setContactInfo({ 
+      name: contactName, 
+      title: contactTitle 
+    });
   };
 
   return (
@@ -148,15 +151,15 @@ export const BusinessIntelligenceComponent: React.FC = () => {
             />
             <input
               type="text"
-              value={contactRole}
-              onChange={(e) => setContactRole(e.target.value)}
-              placeholder="Contact Role (e.g., CEO, CTO)"
+              value={contactTitle}
+              onChange={(e) => setContactTitle(e.target.value)}
+              placeholder="Contact Title (e.g., CEO, CTO)"
               className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-800"
             />
             <button
               type="submit"
               className="w-full py-2 px-4 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-              disabled={!contactName && !contactRole}
+              disabled={!contactName && !contactTitle}
             >
               Update Contact
             </button>
@@ -213,6 +216,10 @@ export const BusinessIntelligenceComponent: React.FC = () => {
               <div className="flex">
                 <dt className="w-32 text-gray-500 dark:text-gray-400">Name:</dt>
                 <dd>{businessData.contact?.name || 'N/A'}</dd>
+              </div>
+              <div className="flex">
+                <dt className="w-32 text-gray-500 dark:text-gray-400">Title:</dt>
+                <dd>{businessData.contact?.title || 'N/A'}</dd>
               </div>
               <div className="flex">
                 <dt className="w-32 text-gray-500 dark:text-gray-400">Role:</dt>
