@@ -40,16 +40,11 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
   
   return (
     <CopilotKit
-      // Update to use the correct properties based on the API
-      apiConfig={{
-        apiKey: apiKey,
-        baseURL: endpoint,
-      }}
+      apiKey={apiKey}
+      baseURL={endpoint}
       systemMessage={getCurrentPersonaInstructions()}
-      chatOptions={{
-        maxTokens: 2000,
-        temperature: 0.7,
-      }}
+      temperature={0.7}
+      maxTokens={2000}
     >
       {children}
     </CopilotKit>
