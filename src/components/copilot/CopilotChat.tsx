@@ -1,14 +1,14 @@
 
 import React, { useState } from 'react';
 import { CopilotTextarea } from "@copilotkit/react-textarea";
-import { CopilotChatMessage, useCopilotChat } from "@copilotkit/react-core";
+import { useCopilotChat } from "@copilotkit/react-core";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 import { usePersonaManagement } from '../../mcp/hooks/usePersonaManagement';
 
 export const CopilotChat: React.FC = () => {
   const [inputValue, setInputValue] = useState<string>('');
-  const { messages, sendMessage, isLoading } = useCopilotChat();
+  const { chatMessages: messages, sendMessage, isLoading } = useCopilotChat();
   const { personaData } = usePersonaManagement();
   
   const handleSendMessage = () => {
@@ -75,6 +75,11 @@ export const CopilotChat: React.FC = () => {
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask me anything..."
+            autosuggestionsConfig={{
+              enabled: true,
+              showSuggestions: true,
+              suggestionCount: 3
+            }}
           />
           <Button 
             className="rounded-l-none" 
