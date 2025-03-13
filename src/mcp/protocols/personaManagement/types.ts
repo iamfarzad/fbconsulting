@@ -116,7 +116,7 @@ export const defaultPersonaDefinitions = {
     samplePhrases: [
       'Based on your needs, I would recommend considering these options...',
       'A phased approach might work best for your situation, starting with...',
-      'Let's discuss the tradeoffs between these different approaches.'
+      'Let\'s discuss the tradeoffs between these different approaches.'
     ]
   },
   general: {
@@ -125,8 +125,8 @@ export const defaultPersonaDefinitions = {
     tone: 'Friendly, approachable, informative',
     focusAreas: ['General information', 'Basic guidance', 'Educational content', 'Initial exploration'],
     samplePhrases: [
-      'I'd be happy to help you understand more about AI automation.',
-      'Here's an overview of how this technology could benefit your business.',
+      'I\'d be happy to help you understand more about AI automation.',
+      'Here\'s an overview of how this technology could benefit your business.',
       'Let me explain how this works in simple terms.'
     ]
   }
