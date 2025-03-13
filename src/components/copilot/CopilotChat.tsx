@@ -12,13 +12,8 @@ export const CopilotChat: React.FC = () => {
   const { personaData } = usePersonaManagement();
   
   const handleSendMessage = () => {
-    if (inputValue.trim() && !chat.loading) {
-      chat.appendMessage({
-        role: 'user',
-        content: inputValue
-      });
-      
-      chat.submitMessage(inputValue);
+    if (inputValue.trim() && !chat.isLoading) {
+      chat.sendMessage(inputValue);
       setInputValue('');
     }
   };
@@ -42,7 +37,7 @@ export const CopilotChat: React.FC = () => {
       </div>
       
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {chat.chatMessages.map((message, index) => (
+        {chat.messages.map((message, index) => (
           <div 
             key={index}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -59,7 +54,7 @@ export const CopilotChat: React.FC = () => {
           </div>
         ))}
         
-        {chat.loading && (
+        {chat.isLoading && (
           <div className="flex justify-start">
             <div className="max-w-[80%] p-3 rounded-lg bg-muted">
               <div className="flex space-x-2">
@@ -81,14 +76,14 @@ export const CopilotChat: React.FC = () => {
             onKeyDown={handleKeyDown}
             placeholder="Ask me anything..."
             autosuggestionsConfig={{
-              suggestionsCount: 3,
-              suggestionPattern: "**"
+              showSuggestions: true,
+              suggestionCount: 3
             }}
           />
           <Button 
             className="rounded-l-none" 
             onClick={handleSendMessage} 
-            disabled={chat.loading || !inputValue.trim()}
+            disabled={chat.isLoading || !inputValue.trim()}
           >
             <Send size={18} />
           </Button>
