@@ -13,7 +13,10 @@ export const CopilotChat: React.FC = () => {
   
   const handleSendMessage = () => {
     if (inputValue.trim() && !chat.isLoading) {
-      chat.sendMessage(inputValue);
+      chat.appendMessage({
+        content: inputValue,
+        role: "user"
+      });
       setInputValue('');
     }
   };
@@ -76,8 +79,8 @@ export const CopilotChat: React.FC = () => {
             onKeyDown={handleKeyDown}
             placeholder="Ask me anything..."
             autosuggestionsConfig={{
-              showSuggestions: true,
-              suggestionCount: 3
+              enabled: true,
+              count: 3
             }}
           />
           <Button 
