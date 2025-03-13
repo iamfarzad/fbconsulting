@@ -4,8 +4,8 @@
  * Handler for LinkedIn profile lookup operations
  */
 
-import { Message, Handler } from '../../../core/types';
-import { BusinessData, BusinessIntelligenceContext, LinkedInLookupPayload, MessageType } from '../types';
+import { Handler } from '../../../core/types';
+import { BusinessData, BusinessIntelligenceContext, LinkedInLookupPayload } from '../types';
 
 // LinkedIn lookup handler
 export const linkedInLookupHandler: Handler<BusinessData, BusinessIntelligenceContext> = async (model, context, message) => {
