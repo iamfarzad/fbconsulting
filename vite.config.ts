@@ -1,5 +1,6 @@
+
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react-swc'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -11,4 +12,9 @@ export default defineConfig({
   },
   // Add env variable prefixes for Vite to expose them
   envPrefix: ['VITE_', 'AZURE_', 'ELEVENLABS_'],
+  // Server configuration
+  server: {
+    port: 8080,
+    host: '::',
+  }
 })
