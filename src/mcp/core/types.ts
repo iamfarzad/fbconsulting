@@ -19,11 +19,12 @@ export interface Message<T = unknown> {
 }
 
 // Handler: processes messages and produces updated models
+// Updated to allow for both sync and async handlers
 export type Handler<M, C extends Context = Context> = (
   model: Model<M>,
   context: C,
   message: Message
-) => Model<M>;
+) => Model<M> | Promise<Model<M>>;
 
 // Protocol: defines the contract between components
 export interface Protocol<M, C extends Context = Context> {
@@ -33,15 +34,15 @@ export interface Protocol<M, C extends Context = Context> {
 }
 
 // Update function: processes a message through the protocol
-export function update<M, C extends Context = Context>(
+export async function update<M, C extends Context = Context>(
   protocol: Protocol<M, C>,
   model: Model<M>,
   message: Message
-): Model<M> {
+): Promise<Model<M>> {
   const handler = protocol.handlers[message.type];
   if (!handler) {
     console.warn(`No handler found for message type: ${message.type}`);
     return model;
   }
-  return handler(model, protocol.context, message);
+  return await handler(model, protocol.context, message);
 }
