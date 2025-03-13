@@ -13,7 +13,7 @@ import {
   createSetCompanyInfoMessage,
   createSetContactInfoMessage,
   createClearDataMessage
-} from '../protocols/businessIntelligenceProtocol';
+} from '../protocols/businessIntelligence';
 
 // Options for initializing the hook
 interface UseBusinessIntelligenceOptions {
