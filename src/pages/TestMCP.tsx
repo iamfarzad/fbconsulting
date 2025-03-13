@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
 import { CounterComponent } from '@/mcp/examples/CounterComponent';
-import { BusinessIntelligenceComponent } from '@/mcp/examples/BusinessIntelligenceComponent';
+import { BusinessIntelligenceComponent } from '@/mcp/examples/businessIntelligence/BusinessIntelligenceComponent';
 import PageHeader from '@/components/PageHeader';
 
 const TestMCP = () => {
