@@ -22,6 +22,12 @@ export interface BusinessData {
   foundingYear?: number;
   revenue?: string;
   
+  // Additional fields that were missing
+  employeeCount?: string;
+  founded?: string;
+  headquarters?: string;
+  confidenceScore?: number;
+  
   // Contact information
   contact?: {
     name?: string;
@@ -29,12 +35,14 @@ export interface BusinessData {
     email?: string;
     phone?: string;
     linkedIn?: string;
+    role?: string;
+    department?: string;
   };
   
   // Technical metadata
   lastUpdated?: string;
   rawData?: any;
-  error?: string; // Added error field
+  error?: string;
 }
 
 // Context for business intelligence operations
@@ -126,10 +134,16 @@ const handlers: Record<string, Handler<BusinessData, BusinessIntelligenceContext
         companySize: data.company_size || model.companySize,
         industry: data.industry || model.industry,
         linkedInProfile: payload.profileUrl,
+        employeeCount: data.employee_count || model.employeeCount,
+        founded: data.founded || model.founded,
+        headquarters: data.headquarters || model.headquarters,
+        confidenceScore: 0.75, // Default confidence score
         contact: {
           ...model.contact,
           name: data.name || model.contact?.name,
           title: data.title || model.contact?.title,
+          role: data.role || model.contact?.role,
+          department: data.department || model.contact?.department,
           linkedIn: payload.profileUrl
         },
         lastUpdated: new Date().toISOString(),
@@ -172,6 +186,10 @@ const handlers: Record<string, Handler<BusinessData, BusinessIntelligenceContext
         products: data.products || model.products,
         industry: data.industry || model.industry,
         companySize: data.company_size || model.companySize,
+        employeeCount: data.employee_count || model.employeeCount,
+        founded: data.founded || model.founded,
+        headquarters: data.headquarters || model.headquarters,
+        confidenceScore: 0.85, // Default confidence score for website lookup
         lastUpdated: new Date().toISOString(),
         rawData: { ...model.rawData, website: data },
         error: undefined
