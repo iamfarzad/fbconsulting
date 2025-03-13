@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CopilotKit } from "@copilotkit/react-core";
+import { CopilotKit, CopilotKitOptions } from "@copilotkit/react-core";
 import { usePersonaManagement } from '../../mcp/hooks/usePersonaManagement';
 
 interface CopilotProviderProps {
@@ -38,14 +38,17 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
   const apiKey = import.meta.env.VITE_AZURE_API_KEY || '';
   const endpoint = import.meta.env.VITE_AZURE_ENDPOINT || '';
   
+  // Create CopilotKit options object with the correct structure
+  const options: CopilotKitOptions = {
+    baseURL: endpoint,
+    apiKey: apiKey,
+    temperature: 0.7,
+    maxTokens: 2000,
+    systemPrompt: getCurrentPersonaInstructions()
+  };
+  
   return (
-    <CopilotKit
-      apiKey={apiKey}
-      baseURL={endpoint}
-      systemMessage={getCurrentPersonaInstructions()}
-      temperature={0.7}
-      maxTokens={2000}
-    >
+    <CopilotKit options={options}>
       {children}
     </CopilotKit>
   );
