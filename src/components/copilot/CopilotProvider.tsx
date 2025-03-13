@@ -33,14 +33,17 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
       Remember to adjust your responses based on the user's technical level and industry context.
     `;
   };
+
+  // Get the Azure API configuration from environment variables
+  const apiKey = import.meta.env.VITE_AZURE_API_KEY || '';
+  const endpoint = import.meta.env.VITE_AZURE_ENDPOINT || '';
   
   return (
     <CopilotKit
       aiProvider={{
         id: "azure-openai",
-        // Note: In a real implementation these would be environment variables
-        apiKey: "AZURE_API_KEY_PLACEHOLDER",
-        endpoint: "AZURE_ENDPOINT_PLACEHOLDER",
+        apiKey: apiKey,
+        endpoint: endpoint,
       }}
       options={{
         systemMessage: getCurrentPersonaInstructions(),
