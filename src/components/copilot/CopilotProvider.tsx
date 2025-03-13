@@ -40,16 +40,15 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
   
   return (
     <CopilotKit
-      aiProvider={{
-        id: "azure-openai",
+      // Update to use the correct properties based on the API
+      apiConfig={{
         apiKey: apiKey,
-        endpoint: endpoint,
+        baseURL: endpoint,
       }}
-      options={{
-        systemMessage: getCurrentPersonaInstructions(),
-        interfaces: {
-          chatInterface: true,
-        },
+      systemMessage={getCurrentPersonaInstructions()}
+      chatOptions={{
+        maxTokens: 2000,
+        temperature: 0.7,
       }}
     >
       {children}
