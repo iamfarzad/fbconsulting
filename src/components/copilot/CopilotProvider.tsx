@@ -40,7 +40,7 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
   
   return (
     <CopilotKit
-      chatApiConfig={{
+      apiConfig={{
         apiKey: apiKey,
         baseURL: endpoint,
         options: {
