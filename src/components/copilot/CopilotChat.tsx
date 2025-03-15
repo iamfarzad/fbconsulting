@@ -13,10 +13,7 @@ export const CopilotChat: React.FC = () => {
   
   const handleSendMessage = () => {
     if (inputValue.trim() && !chat.isLoading) {
-      chat.appendMessage({
-        content: inputValue,
-        role: "user"
-      });
+      chat.sendMessage(inputValue);
       setInputValue('');
     }
   };
@@ -40,7 +37,7 @@ export const CopilotChat: React.FC = () => {
       </div>
       
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {chat.messages.map((message, index) => (
+        {chat.history.map((message, index) => (
           <div 
             key={index}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -52,7 +49,7 @@ export const CopilotChat: React.FC = () => {
                   : 'bg-muted'
               }`}
             >
-              <div className="whitespace-pre-wrap">{message.content}</div>
+              <div className="whitespace-pre-wrap">{message.message}</div>
             </div>
           </div>
         ))}
@@ -79,7 +76,7 @@ export const CopilotChat: React.FC = () => {
             onKeyDown={handleKeyDown}
             placeholder="Ask me anything..."
             autosuggestionsConfig={{
-              suggestionCount: 3
+              numSuggestions: 3
             }}
           />
           <Button 
