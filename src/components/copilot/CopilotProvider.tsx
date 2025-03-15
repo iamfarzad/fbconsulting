@@ -34,19 +34,13 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
     `;
   };
 
-  // Get the Azure API configuration from environment variables
-  const apiKey = import.meta.env.VITE_AZURE_API_KEY || '';
-  const endpoint = import.meta.env.VITE_AZURE_ENDPOINT || '';
-  
   return (
     <CopilotKit
-      apiKey={apiKey}
-      baseURL={endpoint}
-      chatApiConfig={{
+      chatApiEndpoint="/api/copilot"
+      chatApiConfigOverrides={{
         systemMessage: getCurrentPersonaInstructions(),
         temperature: 0.7,
         maxTokens: 2000,
-        model: "gpt-4"
       }}
     >
       {children}
