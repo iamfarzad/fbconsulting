@@ -40,13 +40,16 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
   
   return (
     <CopilotKit
-      apiConfig={{
-        apiKey: apiKey,
-        baseURL: endpoint,
-        options: {
-          temperature: 0.7,
-          maxTokens: 2000,
-          systemMessage: getCurrentPersonaInstructions()
+      options={{
+        temperature: 0.7,
+        maxTokens: 2000,
+        models: {
+          completion: {
+            model: "gpt-4",
+            apiKey: apiKey,
+            serviceUrl: endpoint,
+            systemPrompt: getCurrentPersonaInstructions()
+          }
         }
       }}
     >

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { CopilotChat } from '@/components/copilot/CopilotChat';
-import { PageHeader } from '@/components/PageHeader';
+import PageHeader from '@/components/PageHeader';
 import { CopilotConfig } from '@/components/copilot/CopilotConfig';
 
 const TestMCP: React.FC = () => {
