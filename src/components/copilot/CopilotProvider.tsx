@@ -36,7 +36,6 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
 
   return (
     <CopilotKit
-      chatApiEndpoint="/api/copilot"
       chatApiConfigOverrides={{
         systemMessage: getCurrentPersonaInstructions(),
         temperature: 0.7,
