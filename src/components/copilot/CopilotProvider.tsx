@@ -35,7 +35,10 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
   };
 
   return (
-    <CopilotKit>
+    <CopilotKit 
+      // Simple configuration without API keys for now
+      // When ready for production, add the appropriate configuration
+    >
       {children}
     </CopilotKit>
   );
