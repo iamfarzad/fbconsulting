@@ -14,26 +14,32 @@ import TestPage from './pages/TestPage';
 import { AnimatePresence } from 'framer-motion';
 import ChatButton from './components/ChatButton';
 import TestMCP from './pages/TestMCP';
+import { LanguageProvider } from './contexts/LanguageContext';
+import { CopilotProvider } from './components/copilot/CopilotProvider';
 
 const App: React.FC = () => {
   return (
     <BrowserRouter>
       <ThemeProvider>
-        <AnimatePresence mode="wait">
-          <Toaster />
-          <ChatButton />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:slug" element={<BlogPost />} />
-            <Route path="/test" element={<TestPage />} />
-            <Route path="/test-mcp" element={<TestMCP />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </AnimatePresence>
+        <LanguageProvider>
+          <CopilotProvider>
+            <AnimatePresence mode="wait">
+              <Toaster />
+              <ChatButton />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/services" element={<Services />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/blog/:slug" element={<BlogPost />} />
+                <Route path="/test" element={<TestPage />} />
+                <Route path="/test-mcp" element={<TestMCP />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AnimatePresence>
+          </CopilotProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </BrowserRouter>
   );
