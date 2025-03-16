@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { CopilotTextarea } from "@copilotkit/react-textarea";
-import { useCopilotChat, ChatMessage } from "@copilotkit/react-core";
+import { useCopilotChat } from "@copilotkit/react-core";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 import { usePersonaManagement } from '../../mcp/hooks/usePersonaManagement';
@@ -13,10 +13,7 @@ export const CopilotChat: React.FC = () => {
   
   const handleSendMessage = () => {
     if (inputValue.trim() && !chat.isLoading) {
-      chat.appendMessage({
-        content: inputValue,
-        role: "user"
-      });
+      chat.sendMessage(inputValue);
       setInputValue('');
     }
   };
@@ -40,7 +37,7 @@ export const CopilotChat: React.FC = () => {
       </div>
       
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {chat.messages.map((message, index) => (
+        {chat.chatHistory.map((message, index) => (
           <div 
             key={index}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
@@ -79,7 +76,7 @@ export const CopilotChat: React.FC = () => {
             onKeyDown={handleKeyDown}
             placeholder="Ask me anything..."
             autosuggestionsConfig={{
-              enabled: true
+              count: 3
             }}
           />
           <Button 
