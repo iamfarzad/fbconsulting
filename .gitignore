@@ -1,4 +1,4 @@
-# Logs
+# Log files
 logs
 *.log
 npm-debug.log*
@@ -7,10 +7,16 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Node dependencies
 node_modules
 dist
 dist-ssr
-*.local
+
+# Ignore local environment files (IMPORTANT)
+.env
+.env.local
+.env.development
+.env.production
 
 # Editor directories and files
 .vscode/*
@@ -22,4 +28,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-*.env
