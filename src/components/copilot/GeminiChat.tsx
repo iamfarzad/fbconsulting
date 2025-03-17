@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
 import { usePersonaManagement } from '../../mcp/hooks/usePersonaManagement';
-import { useGeminiChat } from '@/hooks/useGeminiChat';
+import useGeminiChat from '@/hooks/useGeminiChat';
 
 export const GeminiChat: React.FC = () => {
   const [inputValue, setInputValue] = useState<string>('');
@@ -36,14 +36,15 @@ export const GeminiChat: React.FC = () => {
     }
   };
   
-  const currentPersona = personaData.personaDefinitions[personaData.currentPersona];
+  // Default persona name if not available
+  const currentPersonaName = personaData?.personaDefinitions[personaData?.currentPersona]?.name || "AI Assistant";
   
   return (
     <div className="flex flex-col h-full bg-background border rounded-lg shadow-sm">
       <div className="px-4 py-3 border-b">
         <div className="flex items-center">
           <div className="w-2 h-2 rounded-full bg-green-500 mr-2"></div>
-          <h3 className="font-medium text-sm">AI Assistant - {currentPersona.name}</h3>
+          <h3 className="font-medium text-sm">AI Assistant - {currentPersonaName}</h3>
         </div>
       </div>
       
@@ -103,3 +104,5 @@ export const GeminiChat: React.FC = () => {
     </div>
   );
 };
+
+export default GeminiChat;

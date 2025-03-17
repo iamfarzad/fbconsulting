@@ -3,6 +3,7 @@ import React, { useEffect, useState, createContext, useContext } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ThemeProvider from "./components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
+import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index";
 import Services from "./pages/Services";
 import About from "./pages/About";
@@ -45,31 +46,33 @@ const GeminiAPIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
 const App: React.FC = () => {
   return (
-    <BrowserRouter>
-      <ThemeProvider>
-        <LanguageProvider>
-          <GeminiAPIProvider>
-            <GeminiProvider>
-              <AnimatePresence mode="wait">
-                <Toaster />
-                <ChatButton />
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/services" element={<Services />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/blog/:slug" element={<BlogPost />} />
-                  <Route path="/test" element={<TestPage />} />
-                  <Route path="/test-mcp" element={<TestMCP />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </AnimatePresence>
-            </GeminiProvider>
-          </GeminiAPIProvider>
-        </LanguageProvider>
-      </ThemeProvider>
-    </BrowserRouter>
+    <HelmetProvider>
+      <BrowserRouter>
+        <ThemeProvider>
+          <LanguageProvider>
+            <GeminiAPIProvider>
+              <GeminiProvider>
+                <AnimatePresence mode="wait">
+                  <Toaster />
+                  <ChatButton />
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/services" element={<Services />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/:slug" element={<BlogPost />} />
+                    <Route path="/test" element={<TestPage />} />
+                    <Route path="/test-mcp" element={<TestMCP />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </AnimatePresence>
+              </GeminiProvider>
+            </GeminiAPIProvider>
+          </LanguageProvider>
+        </ThemeProvider>
+      </BrowserRouter>
+    </HelmetProvider>
   );
 };
 

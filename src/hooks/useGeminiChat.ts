@@ -1,135 +1,87 @@
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useGeminiAPI } from '@/App';
-import { PersonaData } from '@/mcp/protocols/personaManagement';
-import { convertToGeminiMessages, sendGeminiChatRequest } from '@/services/gemini/geminiService';
+import { sendGeminiChatRequest, convertToGeminiMessages } from '@/services/gemini/geminiService';
 
-export interface AIMessage {
-  role: 'user' | 'assistant' | 'system' | 'error';
+interface Message {
+  role: 'user' | 'assistant' | 'error';
   content: string;
-  timestamp: number;
 }
 
-export interface UseGeminiChatOptions {
-  personaData: PersonaData;
-  initialMessages?: AIMessage[];
+interface UseGeminiChatProps {
+  personaData?: any;
 }
 
-export function useGeminiChat({ personaData, initialMessages = [] }: UseGeminiChatOptions) {
-  const { apiKey } = useGeminiAPI();
-  const [messages, setMessages] = useState<AIMessage[]>(initialMessages);
+export const useGeminiChat = ({ personaData }: UseGeminiChatProps = {}) => {
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
+  const { apiKey } = useGeminiAPI();
   
-  // Generate system prompt based on persona data
-  const getSystemPrompt = useCallback(() => {
-    const currentPersona = personaData.currentPersona;
-    const personaDetails = personaData.personaDefinitions[currentPersona];
-    
-    return `
-      You are Farzad AI Assistant, an AI consultant built into the landing page of F.B Consulting. 
-      Currently using the "${personaDetails.name}" persona.
-      
-      Tone: ${personaDetails.tone}
-      
-      Focus Areas:
-      ${personaDetails.focusAreas.map(area => `- ${area}`).join('\n')}
-      
-      Additional Context:
-      - User Role: ${personaData.userRole || 'Unknown'}
-      - User Industry: ${personaData.userIndustry || 'Unknown'}
-      - User Technical Level: ${personaData.userTechnicalLevel || 'beginner'}
-      - Current Page: ${personaData.currentPage || '/'}
-      
-      Remember to adjust your responses based on the user's technical level and industry context.
-    `;
-  }, [personaData]);
-
-  // Append a message to the chat and return it
-  const appendMessage = useCallback((message: { 
-    content: string; 
-    role: 'user' | 'assistant' | 'system' | 'error' 
-  }) => {
-    const newMessage: AIMessage = {
-      ...message,
-      timestamp: Date.now()
-    };
-    
-    setMessages(prev => [...prev, newMessage]);
-    
-    // If it's a user message, generate a response
-    if (message.role === 'user') {
-      const updatedMessages = [...messages, newMessage];
-      generateResponse(updatedMessages);
-    }
-    
-    return newMessage;
-  }, [messages]);
-  
-  // Generate a response from Gemini API
-  const generateResponse = useCallback(async (currentMessages: AIMessage[]) => {
-    if (!apiKey) {
-      const errorMessage: AIMessage = {
-        role: 'error',
-        content: 'Gemini API key is not available. Please check your configuration.',
-        timestamp: Date.now()
-      };
-      setMessages(prev => [...prev, errorMessage]);
-      return;
-    }
-    
-    // Cancel any ongoing requests
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    
-    // Create a new abort controller
-    abortControllerRef.current = new AbortController();
-    
-    setIsLoading(true);
-    
-    try {
-      // Convert messages to Gemini format
-      const geminiMessages = convertToGeminiMessages(
-        currentMessages.filter(msg => msg.role !== 'error'), 
-        getSystemPrompt()
-      );
-      
-      // Send request to Gemini API
-      const response = await sendGeminiChatRequest(geminiMessages, apiKey);
-      
-      // Add the response to messages
-      const responseMessage: AIMessage = {
-        role: 'assistant',
-        content: response,
-        timestamp: Date.now()
-      };
-      
-      setMessages(prev => [...prev, responseMessage]);
-    } catch (error) {
-      if (error instanceof Error && error.name !== 'AbortError') {
-        const errorMessage: AIMessage = {
-          role: 'error',
-          content: `Error: ${error.message}`,
-          timestamp: Date.now()
-        };
-        setMessages(prev => [...prev, errorMessage]);
+  // Initialize with a welcome message
+  useEffect(() => {
+    if (personaData && messages.length === 0) {
+      const currentPersona = personaData.personaDefinitions[personaData.currentPersona];
+      if (currentPersona) {
+        setMessages([
+          {
+            role: 'assistant',
+            content: currentPersona.welcomeMessage || 'Hello! How can I help you today?'
+          }
+        ]);
       }
-    } finally {
-      setIsLoading(false);
-      abortControllerRef.current = null;
     }
-  }, [apiKey, getSystemPrompt]);
+  }, [personaData, messages.length]);
   
-  // Clear all messages
-  const clearMessages = useCallback(() => {
-    setMessages([]);
-  }, []);
+  const appendMessage = useCallback(async (message: Message) => {
+    // Add user message to the chat
+    setMessages(prev => [...prev, message]);
+    
+    // If it's a user message, get a response
+    if (message.role === 'user' && apiKey) {
+      setIsLoading(true);
+      
+      try {
+        // Use persona instructions if available
+        let systemPrompt;
+        if (personaData) {
+          const currentPersona = personaData.personaDefinitions[personaData.currentPersona];
+          systemPrompt = currentPersona?.systemInstructions;
+        }
+        
+        // Convert messages to Gemini format
+        const geminiMessages = convertToGeminiMessages(
+          messages.concat(message),
+          systemPrompt
+        );
+        
+        // Get response from Gemini API
+        const responseText = await sendGeminiChatRequest(geminiMessages, apiKey);
+        
+        // Add assistant response to the chat
+        setMessages(prev => [
+          ...prev, 
+          { role: 'assistant', content: responseText }
+        ]);
+      } catch (error) {
+        console.error('Error getting chat response:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Failed to get a response. Please try again.';
+        
+        // Add error message to the chat
+        setMessages(prev => [
+          ...prev, 
+          { role: 'error', content: errorMessage }
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  }, [messages, apiKey, personaData]);
   
   return {
     messages,
     isLoading,
-    appendMessage,
-    clearMessages
+    appendMessage
   };
-}
+};
+
+export default useGeminiChat;
