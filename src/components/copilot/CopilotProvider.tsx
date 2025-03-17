@@ -16,7 +16,7 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
     const personaDetails = personaData.personaDefinitions[currentPersona];
     
     return `
-      You are Farzad AI Assistant, an AI consultant for F.B Consulting. 
+      You are Farzad AI Assistant, an AI consultant built into the landing page of F.B Consulting. 
       Currently using the "${personaDetails.name}" persona.
       
       Tone: ${personaDetails.tone}
@@ -35,9 +35,12 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
   };
 
   return (
-    <CopilotKit 
-      // Simple configuration without API keys for now
-      // When ready for production, add the appropriate configuration
+    <CopilotKit
+      publicApiKey="your-api-key-placeholder" // Replace with actual API key when ready for production
+      runtimeUrl="http://localhost:3000" // Replace with actual runtime URL in production
+      chatOptions={{
+        chatHistorySystemPrompt: getCurrentPersonaInstructions()
+      }}
     >
       {children}
     </CopilotKit>
