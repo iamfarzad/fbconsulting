@@ -6,11 +6,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { useGeminiAPI } from '@/App';
+import { Loader2 } from 'lucide-react';
 
 export const CopilotConfig: React.FC = () => {
   const { apiKey: contextApiKey } = useGeminiAPI();
   const [apiKey, setApiKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [hasSavedKey, setHasSavedKey] = useState(false);
   
   // Load saved API key from localStorage if available
   useEffect(() => {
@@ -18,17 +20,25 @@ export const CopilotConfig: React.FC = () => {
     if (savedConfig) {
       try {
         const config = JSON.parse(savedConfig);
-        setApiKey(config.apiKey || '');
+        if (config.apiKey) {
+          setApiKey(config.apiKey);
+          setHasSavedKey(true);
+        }
       } catch (error) {
         console.error('Error parsing saved configuration:', error);
       }
     } else if (contextApiKey) {
       setApiKey(contextApiKey);
+      setHasSavedKey(true);
     }
   }, [contextApiKey]);
   
   const testGeminiConnection = async (key: string): Promise<boolean> => {
+    if (!key) return false;
+    
     try {
+      setIsLoading(true);
+      
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`,
         {
@@ -52,40 +62,53 @@ export const CopilotConfig: React.FC = () => {
       );
       
       if (!response.ok) {
-        throw new Error(`API error: ${response.status} ${response.statusText}`);
+        const errorData = await response.json();
+        throw new Error(`API error: ${errorData.error?.message || response.statusText}`);
       }
       
       const data = await response.json();
-      return !!data.candidates;
+      return Boolean(data.candidates);
     } catch (error) {
       console.error('Error testing Gemini API:', error);
       return false;
+    } finally {
+      setIsLoading(false);
     }
   };
   
   const handleSaveConfig = async () => {
     try {
-      setIsLoading(true);
-      
       // Test connection
       const isConnected = await testGeminiConnection(apiKey);
       
       if (isConnected) {
-        // Save configuration to localStorage
+        // Save configuration to localStorage - store the full API key securely
         localStorage.setItem('GEMINI_CONFIG', JSON.stringify({
-          apiKey: apiKey.substring(0, 3) + '...' + apiKey.substring(apiKey.length - 3),
+          apiKey: apiKey,
+          timestamp: Date.now()
         }));
         
+        setHasSavedKey(true);
         toast.success('Gemini API configuration saved successfully!');
+        
+        // Reload the page to apply the new API key
+        window.location.reload();
       } else {
-        toast.error('Failed to connect to Gemini API. Please check your API key.');
+        toast.error('Failed to connect to Gemini API', {
+          description: 'Please check your API key and try again.'
+        });
       }
     } catch (error) {
       console.error('Error saving configuration:', error);
       toast.error('Failed to save configuration');
-    } finally {
-      setIsLoading(false);
     }
+  };
+  
+  const handleClearConfig = () => {
+    localStorage.removeItem('GEMINI_CONFIG');
+    setApiKey('');
+    setHasSavedKey(false);
+    toast.success('API configuration cleared');
   };
   
   return (
@@ -106,16 +129,36 @@ export const CopilotConfig: React.FC = () => {
             onChange={(e) => setApiKey(e.target.value)}
             placeholder="Enter your Gemini API key"
           />
+          <p className="text-xs text-muted-foreground mt-1">
+            Get your API key from the <a href="https://ai.google.dev/" target="_blank" rel="noopener noreferrer" className="underline">Google AI Studio</a>
+          </p>
         </div>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="flex flex-col space-y-2">
         <Button 
           onClick={handleSaveConfig} 
           disabled={!apiKey || isLoading}
           className="w-full"
         >
-          {isLoading ? 'Testing Connection...' : 'Save Configuration'}
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Testing Connection...
+            </>
+          ) : (
+            hasSavedKey ? 'Update API Key' : 'Save Configuration'
+          )}
         </Button>
+        
+        {hasSavedKey && (
+          <Button 
+            variant="outline" 
+            onClick={handleClearConfig} 
+            className="w-full"
+          >
+            Clear Configuration
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

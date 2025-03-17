@@ -2,16 +2,22 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { usePersonaManagement } from '../../mcp/hooks/usePersonaManagement';
 import { useGeminiAPI } from '../../App';
+import { toast } from 'sonner';
 
-// Create a context for Gemini-specific functionality
+// Interface for Gemini context
 interface GeminiContextType {
   isInitialized: boolean;
+  isLoading: boolean;
   personaData: any;
+  error: string | null;
 }
 
+// Create a context for Gemini-specific functionality
 const GeminiContext = createContext<GeminiContextType>({
   isInitialized: false,
-  personaData: null
+  isLoading: true,
+  personaData: null,
+  error: null
 });
 
 // Custom hook to access the Gemini context
@@ -25,37 +31,106 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
   const { personaData } = usePersonaManagement();
   const { apiKey } = useGeminiAPI();
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Default persona configuration
+  const defaultPersona = {
+    currentPersona: 'default',
+    personaDefinitions: {
+      default: {
+        name: 'Farzad AI Assistant',
+        welcomeMessage: 'Hello! I\'m Farzad AI Assistant. How can I help you with AI services and automation today?',
+        systemInstructions: `You are Farzad AI Assistant, an AI consultant built into the landing page of F.B Consulting. Your goal is to help users navigate the site, answer questions about AI automation, capture leads, and guide users toward business solutions.
+
+Key Capabilities:
+1. Answer questions about AI services, automation, and consulting  
+2. Help users fill out forms (Newsletter signup, Consultation request)  
+3. Guide users to book a meeting through the chat  
+4. Provide feature updates, site changes, and roadmap progress  
+5. Store user preferences & conversation history for a seamless experience  
+6. Offer a conversation summary via email when the session ends  
+
+Rules:
+- Always refer users to the correct page or function when asked  
+- If a user asks where to find something, guide them using chat links  
+- At the end of a session, ask if they want an email summary  
+- If the user is a potential lead, ask key questions about their needs`
+      }
+    }
+  };
   
   useEffect(() => {
-    if (apiKey) {
+    const initializeGemini = async () => {
+      setIsLoading(true);
+      setError(null);
+      
       try {
-        if (personaData) {
-          console.log("Gemini initialized with persona data:", personaData.currentPersona);
-        } else {
-          console.log("Gemini initialized but no persona data available");
+        if (!apiKey) {
+          setError('No Gemini API key found');
+          console.warn("No Gemini API key found");
+          setIsLoading(false);
+          return;
         }
+        
+        // Test API key with a simple request
+        const testRequestPayload = {
+          contents: [
+            {
+              role: 'user',
+              parts: [{ text: 'Hello, test message.' }]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 10
+          }
+        };
+        
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(testRequestPayload)
+          }
+        );
+        
+        if (!response.ok) {
+          throw new Error(`API test failed: ${response.status} ${response.statusText}`);
+        }
+        
+        console.log("✅ Gemini initialized successfully");
+        if (personaData) {
+          console.log("Using persona data:", personaData.currentPersona);
+        } else {
+          console.log("Using default persona");
+        }
+        
         setIsInitialized(true);
+        toast.success('AI Assistant Ready', {
+          description: 'Gemini AI has been successfully initialized.'
+        });
       } catch (error) {
         console.error("Error initializing Gemini:", error);
+        setError(error instanceof Error ? error.message : 'Unknown error initializing Gemini');
+        toast.error('AI Assistant Error', {
+          description: 'Failed to initialize Gemini AI. Please check your API key.'
+        });
+      } finally {
+        setIsLoading(false);
       }
-    } else {
-      console.warn("No Gemini API key found");
-    }
+    };
+    
+    initializeGemini();
   }, [apiKey, personaData]);
   
   return (
     <GeminiContext.Provider value={{ 
       isInitialized, 
-      personaData: personaData || {
-        currentPersona: 'default',
-        personaDefinitions: {
-          default: {
-            name: 'Default Assistant',
-            welcomeMessage: 'Hello! How can I help you today?',
-            systemInstructions: 'You are a helpful AI assistant.'
-          }
-        }
-      } 
+      isLoading,
+      error,
+      personaData: personaData || defaultPersona
     }}>
       {children}
     </GeminiContext.Provider>
