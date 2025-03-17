@@ -15,7 +15,7 @@ import { AnimatePresence } from "framer-motion";
 import ChatButton from "./components/ChatButton";
 import TestMCP from "./pages/TestMCP";
 import { LanguageProvider } from "./contexts/LanguageContext";
-import { CopilotProvider } from "./components/copilot/CopilotProvider";
+import { GeminiProvider } from "./components/copilot/GeminiProvider";
 
 // Load Gemini API Key from environment variables
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
@@ -48,7 +48,7 @@ const App: React.FC = () => {
     <BrowserRouter>
       <ThemeProvider>
         <LanguageProvider>
-          <CopilotProvider>
+          <GeminiProvider>
             <GeminiAPIProvider>
               <AnimatePresence mode="wait">
                 <Toaster />
@@ -66,7 +66,7 @@ const App: React.FC = () => {
                 </Routes>
               </AnimatePresence>
             </GeminiAPIProvider>
-          </CopilotProvider>
+          </GeminiProvider>
         </LanguageProvider>
       </ThemeProvider>
     </BrowserRouter>
