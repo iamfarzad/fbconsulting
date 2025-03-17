@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, createContext, useContext } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ThemeProvider from "./components/ThemeProvider";
@@ -17,7 +18,7 @@ import { LanguageProvider } from "./contexts/LanguageContext";
 import { CopilotProvider } from "./components/copilot/CopilotProvider";
 
 // Load Gemini API Key from environment variables
-const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 
 // Create a Context for Gemini API
 const GeminiAPIContext = createContext<{ apiKey: string | null }>({ apiKey: null });
@@ -32,7 +33,7 @@ const GeminiAPIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
   useEffect(() => {
     if (!GEMINI_API_KEY) {
-      console.error("⚠️ Missing NEXT_PUBLIC_GEMINI_API_KEY in .env.local");
+      console.error("⚠️ Missing VITE_GEMINI_API_KEY in .env file");
     } else {
       setApiKey(GEMINI_API_KEY);
       console.log("✅ Google Gemini API Key Loaded");
