@@ -8,12 +8,9 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
   const [isTranscribing, setIsTranscribing] = useState(false);
   const processingRef = useRef(false);
   
-  // Improved debounce implementation that won't get recreated on renders
-  const debouncedProcessingRef = useRef<ReturnType<typeof debounce>>();
-  
   // Create debounced function only once
-  useEffect(() => {
-    debouncedProcessingRef.current = debounce((command: string) => {
+  const debouncedProcessingRef = useRef(
+    debounce((command: string) => {
       if (processingRef.current) return;
       
       processingRef.current = true;
@@ -29,21 +26,17 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
         processingRef.current = false;
         setAiProcessing(false);
       }, 800); // Longer delay for smoother transitions
-    }, 700); // Increased debounce delay for better performance
-    
-    // Cleanup debounce on unmount
-    return () => {
-      debouncedProcessingRef.current?.cancel();
-    };
-  }, [setValue, onSend]);
+    }, 700)
+  );
   
   // Memoize handleCommand to prevent unnecessary recreations
   const handleCommand = useCallback(async (command: string) => {
+    console.log('Voice command received:', command);
     setAiProcessing(true);
     
     try {
       // Execute the debounced processing
-      debouncedProcessingRef.current?.(command);
+      debouncedProcessingRef.current(command);
     } catch (error) {
       console.error('Error processing voice command:', error);
       setAiProcessing(false);
@@ -55,7 +48,8 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
     isListening, 
     transcript, 
     toggleListening,
-    voiceError 
+    voiceError,
+    isSupported
   } = useSpeechRecognition(handleCommand);
 
   // Enhanced animation state management with increased durations
@@ -63,21 +57,22 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
     let transcribingTimer: NodeJS.Timeout;
     
     if (isListening) {
+      console.log('Voice listening started, showing transcription UI');
       // Add a small delay before showing transcribing state to prevent flashing
       transcribingTimer = setTimeout(() => {
         setIsTranscribing(true);
       }, 150); // Small delay for smoother start
     } else {
+      console.log('Voice listening ended, hiding transcription UI');
       // Cancel any pending debounced operations when stopping listening
-      debouncedProcessingRef.current?.cancel();
+      debouncedProcessingRef.current.cancel();
       
       // Increased delay when stopping to allow for smoother animations
       transcribingTimer = setTimeout(() => {
         setIsTranscribing(false);
-      }, 1500); // Increased for smoother exit
+      }, 1000); // Increased for smoother exit
     }
     
-    // Cleanup function to handle component unmount and state changes
     return () => {
       if (transcribingTimer) {
         clearTimeout(transcribingTimer);
@@ -88,9 +83,16 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
   // Extra cleanup on unmount
   useEffect(() => {
     return () => {
-      debouncedProcessingRef.current?.cancel();
+      debouncedProcessingRef.current.cancel();
     };
   }, []);
+
+  // Log whenever voice error changes
+  useEffect(() => {
+    if (voiceError) {
+      console.error('Voice input error:', voiceError);
+    }
+  }, [voiceError]);
 
   return {
     isListening,
@@ -98,6 +100,7 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
     toggleListening,
     voiceError,
     aiProcessing,
-    isTranscribing
+    isTranscribing,
+    isVoiceSupported: isSupported
   };
 }

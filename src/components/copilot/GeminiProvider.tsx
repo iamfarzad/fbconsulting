@@ -28,13 +28,35 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
   
   useEffect(() => {
     if (apiKey) {
-      console.log("Gemini initialized with persona data:", personaData.currentPersona);
-      setIsInitialized(true);
+      try {
+        if (personaData) {
+          console.log("Gemini initialized with persona data:", personaData.currentPersona);
+        } else {
+          console.log("Gemini initialized but no persona data available");
+        }
+        setIsInitialized(true);
+      } catch (error) {
+        console.error("Error initializing Gemini:", error);
+      }
+    } else {
+      console.warn("No Gemini API key found");
     }
   }, [apiKey, personaData]);
   
   return (
-    <GeminiContext.Provider value={{ isInitialized, personaData }}>
+    <GeminiContext.Provider value={{ 
+      isInitialized, 
+      personaData: personaData || {
+        currentPersona: 'default',
+        personaDefinitions: {
+          default: {
+            name: 'Default Assistant',
+            welcomeMessage: 'Hello! How can I help you today?',
+            systemInstructions: 'You are a helpful AI assistant.'
+          }
+        }
+      } 
+    }}>
       {children}
     </GeminiContext.Provider>
   );
