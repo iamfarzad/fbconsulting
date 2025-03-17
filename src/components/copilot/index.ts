@@ -1,22 +1,16 @@
 
 // Export components
-export { CopilotProvider } from './CopilotProvider';
-export { CopilotChat } from './CopilotChat';
+export { GeminiProvider } from './GeminiProvider';
+export { GeminiChat } from './GeminiChat';
 
-// Re-export necessary CopilotKit types and hooks for easier access
-export { useCopilotChat, useCopilotAction } from '@copilotkit/react-core';
-
-// Utility function to initialize the Copilot with Azure OpenAI
-export const initializeCopilot = (options: {
+// Utility function to initialize Gemini
+export const initializeGemini = (options: {
   apiKey: string;
-  endpoint: string;
-  deploymentName?: string;
 }) => {
-  // Here we would normally set up configuration or initialize services
   // This is just a placeholder structure for now
-  console.log('Initializing CopilotKit with Azure OpenAI', options);
+  console.log('Initializing Gemini with API key', options.apiKey ? 'Valid API key provided' : 'No API key');
   return {
-    isInitialized: true,
+    isInitialized: !!options.apiKey,
     options
   };
 };
