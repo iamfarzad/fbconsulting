@@ -1,8 +1,8 @@
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useGeminiAPI } from '@/App';
 import { PersonaData } from '@/mcp/protocols/personaManagement';
-import { convertToGeminiMessages, sendGeminiChatRequest, GeminiMessage } from '@/services/gemini/geminiService';
+import { convertToGeminiMessages, sendGeminiChatRequest } from '@/services/gemini/geminiService';
 
 export interface AIMessage {
   role: 'user' | 'assistant' | 'system' | 'error';
@@ -45,8 +45,11 @@ export function useGeminiChat({ personaData, initialMessages = [] }: UseGeminiCh
     `;
   }, [personaData]);
 
-  // Append a message to the chat
-  const appendMessage = useCallback((message: { content: string; role: 'user' | 'assistant' | 'system' | 'error' }) => {
+  // Append a message to the chat and return it
+  const appendMessage = useCallback((message: { 
+    content: string; 
+    role: 'user' | 'assistant' | 'system' | 'error' 
+  }) => {
     const newMessage: AIMessage = {
       ...message,
       timestamp: Date.now()
@@ -56,7 +59,8 @@ export function useGeminiChat({ personaData, initialMessages = [] }: UseGeminiCh
     
     // If it's a user message, generate a response
     if (message.role === 'user') {
-      generateResponse([...messages, newMessage]);
+      const updatedMessages = [...messages, newMessage];
+      generateResponse(updatedMessages);
     }
     
     return newMessage;
@@ -65,10 +69,12 @@ export function useGeminiChat({ personaData, initialMessages = [] }: UseGeminiCh
   // Generate a response from Gemini API
   const generateResponse = useCallback(async (currentMessages: AIMessage[]) => {
     if (!apiKey) {
-      appendMessage({
+      const errorMessage: AIMessage = {
         role: 'error',
-        content: 'Gemini API key is not available. Please check your configuration.'
-      });
+        content: 'Gemini API key is not available. Please check your configuration.',
+        timestamp: Date.now()
+      };
+      setMessages(prev => [...prev, errorMessage]);
       return;
     }
     
@@ -84,28 +90,36 @@ export function useGeminiChat({ personaData, initialMessages = [] }: UseGeminiCh
     
     try {
       // Convert messages to Gemini format
-      const geminiMessages = convertToGeminiMessages(currentMessages, getSystemPrompt());
+      const geminiMessages = convertToGeminiMessages(
+        currentMessages.filter(msg => msg.role !== 'error'), 
+        getSystemPrompt()
+      );
       
       // Send request to Gemini API
       const response = await sendGeminiChatRequest(geminiMessages, apiKey);
       
       // Add the response to messages
-      appendMessage({
+      const responseMessage: AIMessage = {
         role: 'assistant',
-        content: response
-      });
+        content: response,
+        timestamp: Date.now()
+      };
+      
+      setMessages(prev => [...prev, responseMessage]);
     } catch (error) {
       if (error instanceof Error && error.name !== 'AbortError') {
-        appendMessage({
+        const errorMessage: AIMessage = {
           role: 'error',
-          content: `Error: ${error.message}`
-        });
+          content: `Error: ${error.message}`,
+          timestamp: Date.now()
+        };
+        setMessages(prev => [...prev, errorMessage]);
       }
     } finally {
       setIsLoading(false);
       abortControllerRef.current = null;
     }
-  }, [apiKey, appendMessage, getSystemPrompt]);
+  }, [apiKey, getSystemPrompt]);
   
   // Clear all messages
   const clearMessages = useCallback(() => {

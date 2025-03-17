@@ -7,7 +7,6 @@ export { GeminiChat } from './GeminiChat';
 export const initializeGemini = (options: {
   apiKey: string;
 }) => {
-  // This is just a placeholder structure for now
   console.log('Initializing Gemini with API key', options.apiKey ? 'Valid API key provided' : 'No API key');
   return {
     isInitialized: !!options.apiKey,
