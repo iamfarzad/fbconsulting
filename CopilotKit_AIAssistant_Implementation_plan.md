@@ -1,27 +1,26 @@
-# CopilotKit AI Assistant Implementation Plan
 
-## 🚀 Phase 1: Model Deployment on Azure AI Foundry
+# Google Gemini AI Assistant Implementation Plan
 
-### Goal: Deploy AI model to power the chatbot on the website.
+## 🚀 Phase 1: Setup Gemini API Access
 
-✅ **Step 1.1 – Deploy GPT-4o on Azure AI Foundry**  
-- Go to **Azure AI Foundry > Models + Endpoints**  
-- Deploy **GPT-4o (latest version: `2024-11-20`)**  
-- Set **Tokens per Minute Limit**: **450K**  
-- Set **Content Filter**: `DefaultV2`  
-- Copy **API Endpoint & Authentication Key** for later use  
+### Goal: Configure Google Gemini API to power the chatbot on the website.
 
-📍 **Output**: ✅ **AI Model Successfully Deployed**  
+✅ **Step 1.1 – Set Up Google AI Studio Account**  
+- Create/login to a [Google AI Studio](https://ai.google.dev/) account  
+- Generate an API key from the Google AI Studio dashboard
+- Store the API key in your environment variables as `VITE_GEMINI_API_KEY`
+- Verify API access by making a test request to the Gemini API
+
+📍 **Output**: ✅ **Google Gemini API Ready for Integration**  
 
 ---
 
-## 🔹 Phase 2: Model Instructions & Context Setup
+## 🔹 Phase 2: Gemini API Configuration
 
-### Goal: Configure **GPT-4o** in Azure AI Foundry with correct role, site knowledge, and response behavior.
+### Goal: Configure **Gemini AI** with the correct system prompt, instructions, and response behavior.
 
-✅ **Step 2.1 – Add System Instructions in Azure AI Foundry**  
-- Navigate to **Models + Endpoints > GPT-4o > Instructions**  
-- Add the following:
+✅ **Step 2.1 – Create System Instructions for Gemini**  
+- Create comprehensive system instructions that will be sent with each request:
 
 ```plaintext
 You are **Farzad AI Assistant**, an AI consultant built into the landing page of F.B Consulting. Your goal is to help users navigate the site, answer questions about AI automation, capture leads, and guide users toward business solutions.
@@ -41,152 +40,218 @@ You are **Farzad AI Assistant**, an AI consultant built into the landing page of
 ✅ If the user is a potential lead, **ask key questions** about their needs  
 ```
 
-📍 **Output**: ✅ **AI Model Now Understands Site Structure & Can Guide Users Effectively**  
+📍 **Output**: ✅ **Gemini AI Configured with Effective Instructions**  
 
 ---
 
-## 🔹 Phase 3: CopilotKit Integration with Chatbox
+## 🔹 Phase 3: Chat Interface Integration
 
-### Goal: Connect Azure AI model to CopilotKit and power the website chat.
+### Goal: Connect Gemini API to the website's chat interface.
 
-✅ **Step 3.1 – Install CopilotKit**
-Run this in your project:
-```bash
-npm install @copilotkit/react
+✅ **Step 3.1 – Implement Gemini API Service**
+- Create a service to handle communication with the Gemini API:
+
+```typescript
+// src/services/gemini/geminiService.ts
+
+interface GeminiMessage {
+  role: 'user' | 'model';
+  parts: { text: string }[];
+}
+
+export async function sendGeminiChatRequest(messages: GeminiMessage[], apiKey: string) {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: messages,
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 1024,
+        }
+      }),
+    }
+  );
+  
+  const data = await response.json();
+  return data.candidates[0].content.parts[0].text;
+}
 ```
 
-✅ **Step 3.2 – Connect AI Model to Chatbox**
-Modify your **Chat Provider** to use **CopilotKit** with the deployed AI model:
+✅ **Step 3.2 – Create Chat Hook and Components**
+- Implement a React hook that uses the Gemini service:
+
+```typescript
+// src/hooks/useGeminiChat.ts
+
+export const useGeminiChat = () => {
+  const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { apiKey } = useGeminiAPI();
+  
+  const sendMessage = async (content) => {
+    if (!apiKey) return;
+    setIsLoading(true);
+    
+    // Add user message
+    const userMessage = { role: 'user', content };
+    setMessages(prev => [...prev, userMessage]);
+    
+    // Prepare messages for Gemini format
+    const geminiMessages = convertToGeminiMessages(
+      [...messages, userMessage], 
+      systemPrompt
+    );
+    
+    try {
+      // Get response from Gemini API
+      const responseText = await sendGeminiChatRequest(geminiMessages, apiKey);
+      
+      // Add assistant response
+      setMessages(prev => [
+        ...prev, 
+        { role: 'assistant', content: responseText }
+      ]);
+    } catch (error) {
+      console.error('Error getting chat response:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  return { messages, isLoading, sendMessage };
+};
+```
+
+📍 **Output**: ✅ **Functional Chat Interface Using Gemini API**  
+
+---
+
+## 🔹 Phase 4: Lead Qualification System
+
+### Goal: Implement a system to capture and qualify leads through the chat.
+
+✅ **Step 4.1 – Implement Lead Extraction Logic**  
+- Create a service to extract lead information from chat conversations:
+
+```typescript
+// Extract user information and pain points from chat
+export function extractLeadInfo(messages) {
+  const userMessages = messages.filter(msg => msg.role === 'user');
+  
+  // Simple extraction logic - can be enhanced with ML/classification
+  const extractedInfo = {
+    name: findName(userMessages),
+    email: findEmail(userMessages),
+    companyName: findCompanyName(userMessages),
+    painPoints: extractPainPoints(userMessages),
+    leadStage: determineLeadStage(userMessages)
+  };
+  
+  return extractedInfo;
+}
+```
+
+✅ **Step 4.2 – Store and Retrieve Lead Information**
+- Implement local storage for lead persistence between sessions:
+
+```typescript
+export function saveLeadInfo(leadInfo) {
+  localStorage.setItem('lead_info', JSON.stringify(leadInfo));
+}
+
+export function loadLeadInfo() {
+  const data = localStorage.getItem('lead_info');
+  return data ? JSON.parse(data) : null;
+}
+```
+
+📍 **Output**: ✅ **Lead Information Extraction and Storage System**  
+
+---
+
+## 🔹 Phase 5: Voice Input Integration
+
+### Goal: Enable voice input for the chat interface.
+
+✅ **Step 5.1 – Implement Speech Recognition**
+- Use the Web Speech API for voice input:
+
+```typescript
+export function useSpeechRecognition(onResult) {
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState('');
+  
+  const toggleListening = useCallback(() => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  }, [isListening]);
+  
+  const startListening = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (!SpeechRecognition) {
+      console.error('Speech recognition not supported');
+      return;
+    }
+    
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    
+    // Add recognition event handlers...
+    
+    recognition.start();
+    setIsListening(true);
+  };
+  
+  return { isListening, transcript, toggleListening };
+}
+```
+
+✅ **Step 5.2 – Integrate Voice Controls into Chat**
+- Add voice control buttons and indicators to the chat UI:
 
 ```tsx
-import { CopilotKit } from "@copilotkit/react";
-import Chatbox from "./Chatbox";
-
-export default function AIChatProvider() {
+const VoiceControls = ({ onToggleVoice, isListening }) => {
   return (
-    <CopilotKit
-      aiConfig={{
-        model: "gpt-4o",
-        instructions: `
-        You are Farzad AI Assistant, an AI consultant built into the landing page of F.B Consulting. Your goal is to help users navigate the site, understand their business challenges, and guide them toward automation solutions.
-        
-        🎯 **Key Capabilities**:
-        - Identify user pain points and suggest AI automation solutions
-        - Ask strategic questions to gather insights on user needs
-        - Help users book meetings & fill out forms
-        - Provide site updates & changelog information
-        - Offer email summaries at the end of conversations
-
-        🔍 **Lead Qualification Questions**:
-        1️⃣ "What are the biggest challenges you're facing in your business?"
-        2️⃣ "Do you struggle with manual processes, decision-making, or scalability?"
-        3️⃣ "Are there specific tasks you wish could be automated?"
-        4️⃣ "What’s your biggest bottleneck right now?"
-        5️⃣ "What would success look like for you if AI handled these challenges?"
-        
-        🚀 **Final Step**:
-        If the user agrees, prompt them to enter their email, and send a summary including:
-        - Their pain points
-        - Suggested AI solutions
-        - Next steps to book a call or start a free AI audit
-        
-        ⚠️ **Rules**:
-        - Ask open-ended questions first before offering solutions
-        - Store responses in conversation history
-        - End with an email summary option
-        - Keep responses professional yet friendly
-        `,
-      }}
+    <button 
+      onClick={onToggleVoice}
+      className={`voice-button ${isListening ? 'listening' : ''}`}
     >
-      <Chatbox />
-    </CopilotKit>
+      {isListening ? <MicrophoneIcon /> : <MicrophoneOffIcon />}
+      <span className="sr-only">
+        {isListening ? 'Stop listening' : 'Start listening'}
+      </span>
+      
+      {isListening && <AnimatedBars />}
+    </button>
   );
-}
+};
 ```
 
-📍 **Output**: ✅ **AI Chatbox Now Live on Website**  
-
----
-
-## 🔹 Phase 4: Lead Capture & Pain Point Analysis
-
-### Goal: Ensure **AI Assistant captures user pain points & automates lead emails**.
-
-✅ **Step 4.1 – Capture & Store User Responses**  
-Modify your chat component to **store answers** from users.
-
-```tsx
-import { useState } from "react";
-import { CopilotKit } from "@copilotkit/react";
-
-export default function Chatbox() {
-  const [userPainPoints, setUserPainPoints] = useState([]);
-
-  function handleUserResponse(response) {
-    setUserPainPoints((prev) => [...prev, response]); // Store pain points
-  }
-
-  function handleEmailRequest() {
-    const emailContent = `
-      Hi [User Name],
-
-      Based on our conversation, here are the key challenges you mentioned:
-      ${userPainPoints.map((point, index) => `${index + 1}. ${point}`).join("\n")}
-
-      ✅ Here’s how AI can help:
-      - Automate [relevant pain points]
-      - Optimize workflows to save time
-      - Enhance data-driven decision-making
-
-      Would you like to discuss this further? Feel free to book a free consultation here: [Booking Link].
-
-      Best,
-      Farzad AI Assistant
-    `;
-
-    sendEmail(userEmail, "Your AI Automation Strategy", emailContent); // Send email
-  }
-
-  return (
-    <CopilotKit>
-      <div className="chatbox">
-        <button onClick={handleEmailRequest}>Send Summary Email</button>
-      </div>
-    </CopilotKit>
-  );
-}
-```
-
-📍 **Output**: ✅ **User Pain Points Are Captured & Sent as Email Summaries**  
-
----
-
-## 🔹 Phase 5: Dataset Creation & Fine-Tuning
-
-### Goal: Train the model on **custom data** for better personalization.
-
-✅ **Step 5.1 – Prepare JSON Dataset**  
-- Create a JSONL file with real conversations for **fine-tuning**:
-
-```json
-{"messages": [{"role": "system", "content": "You are Farzad AI Assistant..."}, {"role": "user", "content": "How can AI help my business?"}, {"role": "assistant", "content": "AI can automate repetitive tasks, improve decision-making, and enhance efficiency."}]}
-```
-
-✅ **Step 5.2 – Upload JSONL for Fine-Tuning**  
-- **Azure AI Foundry → Fine-Tuning → Upload JSONL File**  
-- **Train Model** & **Test Improved Performance**  
-
-📍 **Output**: ✅ **Fine-Tuned AI Model for Better Lead Capture & Automation**  
+📍 **Output**: ✅ **Voice Input for Gemini AI Chat Interface**  
 
 ---
 
 ## **🎯 Final Checklist**
-✅ **Deploy AI Model on Azure**  
-✅ **Set Instructions & Context in Azure**  
-✅ **Integrate CopilotKit for Chat**  
-✅ **Enable Lead Capture & Email Summaries**  
-✅ **Train AI on Real User Data**  
+✅ **Set up Google Gemini API access**  
+✅ **Configure Gemini with system instructions**  
+✅ **Create chat interface components**  
+✅ **Implement lead capture and qualification**  
+✅ **Add voice input capabilities**  
 
 ---
 
+## 📚 Additional Resources
+
+- [Google Gemini API Documentation](https://ai.google.dev/docs)
+- [Web Speech API Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API)
+- [React State Management Best Practices](https://react.dev/learn/managing-state)
 
