@@ -61,8 +61,6 @@ export async function sendGeminiChatRequest(
     throw new Error('Gemini API key is not available');
   }
 
-  console.log('Starting Gemini API request with key length:', apiKey.length);
-
   // Construct the request payload
   const payload: GeminiChatRequest = {
     contents: messages,
@@ -84,8 +82,6 @@ export async function sendGeminiChatRequest(
         body: JSON.stringify(payload),
       }
     );
-
-    console.log('Gemini API response status:', response.status);
     
     if (!response.ok) {
       const errorData = await response.json();
