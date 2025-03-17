@@ -21,6 +21,7 @@ export const GeminiChat: React.FC = () => {
   
   const handleSendMessage = () => {
     if (inputValue.trim() && !isLoading) {
+      console.log("Sending message to Gemini:", inputValue);
       appendMessage({
         role: "user",
         content: inputValue
@@ -49,6 +50,14 @@ export const GeminiChat: React.FC = () => {
       </div>
       
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.length === 0 && (
+          <div className="flex items-center justify-center h-full">
+            <p className="text-muted-foreground text-center">
+              No messages yet. Start a conversation!
+            </p>
+          </div>
+        )}
+        
         {messages.map((message, index) => (
           <div 
             key={index}

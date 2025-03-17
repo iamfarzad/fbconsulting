@@ -17,6 +17,7 @@ import ChatButton from "./components/ChatButton";
 import TestMCP from "./pages/TestMCP";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { GeminiProvider } from "./components/copilot/GeminiProvider";
+import { toast } from "sonner";
 
 // Load Gemini API Key from environment variables
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
@@ -35,9 +36,15 @@ const GeminiAPIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   useEffect(() => {
     if (!GEMINI_API_KEY) {
       console.error("⚠️ Missing VITE_GEMINI_API_KEY in .env file");
+      toast.error("Missing Gemini API Key", {
+        description: "Please add a VITE_GEMINI_API_KEY to your .env file for AI chat to work."
+      });
     } else {
       setApiKey(GEMINI_API_KEY);
       console.log("✅ Google Gemini API Key Loaded");
+      toast.success("AI Services Connected", {
+        description: "Gemini API is ready to use for chat functionality."
+      });
     }
   }, []);
 

@@ -61,6 +61,8 @@ export async function sendGeminiChatRequest(
     throw new Error('Gemini API key is not available');
   }
 
+  console.log('Starting Gemini API request with key length:', apiKey.length);
+
   // Construct the request payload
   const payload: GeminiChatRequest = {
     contents: messages,
@@ -83,8 +85,11 @@ export async function sendGeminiChatRequest(
       }
     );
 
+    console.log('Gemini API response status:', response.status);
+    
     if (!response.ok) {
       const errorData = await response.json();
+      console.error('Gemini API error:', errorData);
       throw new Error(`Gemini API error: ${errorData.error?.message || response.statusText}`);
     }
 
@@ -96,7 +101,8 @@ export async function sendGeminiChatRequest(
       return textResponse || '';
     }
     
-    return '';
+    console.error('No text found in Gemini response:', data);
+    return 'Sorry, I could not generate a response at this time.';
   } catch (error) {
     console.error('Error calling Gemini API:', error);
     throw error;

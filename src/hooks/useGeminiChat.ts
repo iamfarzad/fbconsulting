@@ -20,14 +20,18 @@ export const useGeminiChat = ({ personaData }: UseGeminiChatProps = {}) => {
   // Initialize with a welcome message
   useEffect(() => {
     if (personaData && messages.length === 0) {
-      const currentPersona = personaData.personaDefinitions[personaData.currentPersona];
-      if (currentPersona) {
-        setMessages([
-          {
-            role: 'assistant',
-            content: currentPersona.welcomeMessage || 'Hello! How can I help you today?'
-          }
-        ]);
+      try {
+        const currentPersona = personaData.personaDefinitions[personaData.currentPersona];
+        if (currentPersona) {
+          setMessages([
+            {
+              role: 'assistant',
+              content: currentPersona.welcomeMessage || 'Hello! How can I help you today?'
+            }
+          ]);
+        }
+      } catch (error) {
+        console.error('Error initializing chat with persona:', error);
       }
     }
   }, [personaData, messages.length]);
@@ -44,8 +48,12 @@ export const useGeminiChat = ({ personaData }: UseGeminiChatProps = {}) => {
         // Use persona instructions if available
         let systemPrompt;
         if (personaData) {
-          const currentPersona = personaData.personaDefinitions[personaData.currentPersona];
-          systemPrompt = currentPersona?.systemInstructions;
+          try {
+            const currentPersona = personaData.personaDefinitions[personaData.currentPersona];
+            systemPrompt = currentPersona?.systemInstructions;
+          } catch (error) {
+            console.error('Error getting persona instructions:', error);
+          }
         }
         
         // Convert messages to Gemini format
@@ -54,8 +62,12 @@ export const useGeminiChat = ({ personaData }: UseGeminiChatProps = {}) => {
           systemPrompt
         );
         
+        console.log('Sending messages to Gemini API:', geminiMessages);
+        
         // Get response from Gemini API
         const responseText = await sendGeminiChatRequest(geminiMessages, apiKey);
+        
+        console.log('Received response from Gemini API:', responseText);
         
         // Add assistant response to the chat
         setMessages(prev => [
