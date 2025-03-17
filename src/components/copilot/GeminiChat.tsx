@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";
@@ -10,12 +10,20 @@ export const GeminiChat: React.FC = () => {
   const [inputValue, setInputValue] = useState<string>('');
   const { personaData } = usePersonaManagement();
   const { messages, isLoading, appendMessage } = useGeminiChat({ personaData });
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
   
   const handleSendMessage = () => {
     if (inputValue.trim() && !isLoading) {
       appendMessage({
-        content: inputValue,
-        role: "user"
+        role: "user",
+        content: inputValue
       });
       setInputValue('');
     }
@@ -49,7 +57,9 @@ export const GeminiChat: React.FC = () => {
               className={`max-w-[80%] p-3 rounded-lg ${
                 message.role === 'user' 
                   ? 'bg-primary text-primary-foreground' 
-                  : 'bg-muted'
+                  : message.role === 'error'
+                    ? 'bg-destructive text-destructive-foreground'
+                    : 'bg-muted'
               }`}
             >
               <div className="whitespace-pre-wrap">{message.content}</div>
@@ -68,6 +78,7 @@ export const GeminiChat: React.FC = () => {
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
       
       <div className="border-t p-4">
@@ -78,6 +89,7 @@ export const GeminiChat: React.FC = () => {
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask me anything..."
+            disabled={isLoading}
           />
           <Button 
             className="rounded-l-none" 

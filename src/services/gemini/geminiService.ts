@@ -1,6 +1,4 @@
 
-import { useGeminiAPI } from '@/App';
-
 // Types for Gemini API requests and responses
 export interface GeminiMessage {
   role: 'user' | 'model';
@@ -127,10 +125,12 @@ export function convertToGeminiMessages(messages: any[], systemPrompt?: string):
   
   // Convert the rest of the messages
   messages.forEach((msg: any) => {
-    geminiMessages.push({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.content }]
-    });
+    if (msg.role === 'user' || msg.role === 'assistant') {
+      geminiMessages.push({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.content }]
+      });
+    }
   });
   
   return geminiMessages;

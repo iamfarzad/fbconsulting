@@ -48,8 +48,8 @@ const App: React.FC = () => {
     <BrowserRouter>
       <ThemeProvider>
         <LanguageProvider>
-          <GeminiProvider>
-            <GeminiAPIProvider>
+          <GeminiAPIProvider>
+            <GeminiProvider>
               <AnimatePresence mode="wait">
                 <Toaster />
                 <ChatButton />
@@ -65,8 +65,8 @@ const App: React.FC = () => {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </AnimatePresence>
-            </GeminiAPIProvider>
-          </GeminiProvider>
+            </GeminiProvider>
+          </GeminiAPIProvider>
         </LanguageProvider>
       </ThemeProvider>
     </BrowserRouter>

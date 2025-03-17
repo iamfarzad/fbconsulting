@@ -7,8 +7,11 @@ interface GeminiProviderProps {
 }
 
 export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
-  // We don't need to initialize anything here since we're using the GeminiAPI context from App.tsx
-  // This component is kept for consistency with the previous structure and future enhancements
+  const { personaData } = usePersonaManagement();
+  
+  // We're using the GeminiAPIContext from App.tsx for API key management
+  // This component is kept for consistency with the overall architecture
+  // and to potentially add more Gemini-specific context in the future
   
   return <>{children}</>;
 };
