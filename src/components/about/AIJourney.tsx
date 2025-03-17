@@ -4,33 +4,64 @@ import AnimatedText from '@/components/AnimatedText';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { History } from 'lucide-react';
+import { Timeline } from '../ui/timeline';
 
 // Timeline data
-const timelineItems = [
+const timelineData = [
   {
-    year: '2016',
-    title: 'First AI Project',
-    description: 'Built my first machine learning system for predictive analytics'
+    title: '2016',
+    content: (
+      <div className="bg-background/50 backdrop-blur-sm p-6 rounded-xl border border-muted 
+                    hover:border-[#fe5a1d]/30 transition-all duration-300 
+                    shadow-sm hover:shadow-md hover:shadow-[#fe5a1d]/5">
+        <div className="text-[#fe5a1d] font-bold mb-2">First AI Project</div>
+        <p className="text-muted-foreground text-sm">Built my first machine learning system for predictive analytics</p>
+      </div>
+    )
   },
   {
-    year: '2018',
-    title: 'AI Leadership Role',
-    description: 'Led AI strategy and implementation across business functions'
+    title: '2018',
+    content: (
+      <div className="bg-background/50 backdrop-blur-sm p-6 rounded-xl border border-muted 
+                    hover:border-[#fe5a1d]/30 transition-all duration-300 
+                    shadow-sm hover:shadow-md hover:shadow-[#fe5a1d]/5">
+        <div className="text-[#fe5a1d] font-bold mb-2">AI Leadership Role</div>
+        <p className="text-muted-foreground text-sm">Led AI strategy and implementation across business functions</p>
+      </div>
+    )
   },
   {
-    year: '2020',
-    title: 'ChatGPT Early Adopter',
-    description: 'Integrated conversational AI to automate customer support workflows'
+    title: '2020',
+    content: (
+      <div className="bg-background/50 backdrop-blur-sm p-6 rounded-xl border border-muted 
+                    hover:border-[#fe5a1d]/30 transition-all duration-300 
+                    shadow-sm hover:shadow-md hover:shadow-[#fe5a1d]/5">
+        <div className="text-[#fe5a1d] font-bold mb-2">ChatGPT Early Adopter</div>
+        <p className="text-muted-foreground text-sm">Integrated conversational AI to automate customer support workflows</p>
+      </div>
+    )
   },
   {
-    year: '2021',
-    title: 'Enterprise AI Transformation',
-    description: 'Successfully drove enterprise-wide AI implementation saving $1.2M annually'
+    title: '2021',
+    content: (
+      <div className="bg-background/50 backdrop-blur-sm p-6 rounded-xl border border-muted 
+                    hover:border-[#fe5a1d]/30 transition-all duration-300 
+                    shadow-sm hover:shadow-md hover:shadow-[#fe5a1d]/5">
+        <div className="text-[#fe5a1d] font-bold mb-2">Enterprise AI Transformation</div>
+        <p className="text-muted-foreground text-sm">Successfully drove enterprise-wide AI implementation saving $1.2M annually</p>
+      </div>
+    )
   },
   {
-    year: '2023',
-    title: 'Launched AI Consulting',
-    description: 'Helping businesses automate workflows and cut costs with AI'
+    title: '2023',
+    content: (
+      <div className="bg-background/50 backdrop-blur-sm p-6 rounded-xl border border-muted 
+                    hover:border-[#fe5a1d]/30 transition-all duration-300 
+                    shadow-sm hover:shadow-md hover:shadow-[#fe5a1d]/5">
+        <div className="text-[#fe5a1d] font-bold mb-2">Launched AI Consulting</div>
+        <p className="text-muted-foreground text-sm">Helping businesses automate workflows and cut costs with AI</p>
+      </div>
+    )
   }
 ];
 
@@ -70,50 +101,7 @@ const AIJourney = () => {
           </p>
         </motion.div>
         
-        <div className="relative">
-          {/* Vertical line */}
-          <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#fe5a1d]/80 via-[#fe5a1d]/30 to-[#fe5a1d]/5 transform -translate-x-1/2"></div>
-          
-          {/* Timeline items */}
-          <div className="relative z-10">
-            {timelineItems.map((item, index) => (
-              <motion.div 
-                key={index}
-                initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true, margin: "-100px" }}
-                className={cn(
-                  "flex mb-12 last:mb-0 relative items-center",
-                  index % 2 === 0 ? "justify-end" : "justify-start",
-                  "md:justify-center" // Center on mobile
-                )}
-              >
-                <div 
-                  className={cn(
-                    "md:absolute md:top-1/2 md:transform md:-translate-y-1/2",
-                    index % 2 === 0 ? "md:right-1/2 md:pr-12 text-right" : "md:left-1/2 md:pl-12 text-left",
-                    "md:w-[calc(50%-24px)]"
-                  )}
-                >
-                  <div className="bg-background/50 backdrop-blur-sm p-6 rounded-xl border border-muted 
-                                hover:border-[#fe5a1d]/30 transition-all duration-300 
-                                shadow-sm hover:shadow-md hover:shadow-[#fe5a1d]/5">
-                    <div className="text-[#fe5a1d] font-bold mb-2">{item.year}</div>
-                    <h3 className="font-semibold mb-2">{item.title}</h3>
-                    <p className="text-muted-foreground text-sm">{item.description}</p>
-                  </div>
-                </div>
-                
-                {/* Center node */}
-                <div className="hidden md:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 
-                              w-4 h-4 rounded-full bg-[#fe5a1d] z-10
-                              shadow-[0_0_12px_rgba(254,90,29,0.5)]">
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
+        <Timeline data={timelineData} />
       </div>
     </section>
   );
