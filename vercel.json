@@ -7,7 +7,6 @@
       "runtime": "@vercel/python@3.1.0",
       "maxDuration": 60,
       "memory": 1024,
-      "regions": ["fra1"],
       "experimental": {
         "fluidCompute": true
       }
