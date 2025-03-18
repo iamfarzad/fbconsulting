@@ -7,21 +7,22 @@ import { AnimatedBars } from '../ui/AnimatedBars';
 import { ChatInput } from '../ui/ai-chat/ChatInput';
 import { ChatMessageList } from '../ui/ai-chat/ChatMessageList';
 import { AIMessage } from '@/services/copilotService';
+import { UploadedFile } from '@/hooks/useFileUpload';
 
 interface FullScreenChatProps {
   onMinimize: () => void;
   initialMessages?: AIMessage[];
-  onSendMessage: (images?: { mimeType: string; data: string }[]) => void;
+  onSendMessage: (files?: { mimeType: string; data: string; name: string; type: string }[]) => void;
   inputValue: string;
   setInputValue: (value: string) => void;
   isLoading: boolean;
   suggestedResponse: string | null;
   onClear: () => void;
   placeholderText?: string;
-  // Image-related props
-  images?: { mimeType: string; data: string; preview: string }[];
-  uploadImage?: (file: File) => Promise<void>;
-  removeImage?: (index: number) => void;
+  // File-related props
+  files?: UploadedFile[];
+  uploadFile?: (file: File) => Promise<void>;
+  removeFile?: (index: number) => void;
   isUploading?: boolean;
 }
 
@@ -35,10 +36,10 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
   suggestedResponse,
   onClear,
   placeholderText = "Ask about our AI services...",
-  // Image-related props with defaults
-  images = [],
-  uploadImage,
-  removeImage,
+  // File-related props with defaults
+  files = [],
+  uploadFile,
+  removeFile,
   isUploading = false
 }) => {
   const hasMessages = initialMessages.length > 0;
@@ -120,9 +121,9 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
                   hasMessages={hasMessages}
                   suggestedResponse={suggestedResponse}
                   placeholder={placeholderText}
-                  images={images}
-                  onUploadImage={uploadImage}
-                  onRemoveImage={removeImage}
+                  files={files}
+                  onUploadFile={uploadFile}
+                  onRemoveFile={removeFile}
                   isUploading={isUploading}
                 />
               </div>

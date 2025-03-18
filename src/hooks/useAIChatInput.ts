@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useMessages } from "./useMessages";
 import { useSuggestedResponse } from "./useSuggestedResponse";
-import { useFileUpload } from "@/hooks/useFileUpload";
+import { useFileUpload, UploadedFile } from "@/hooks/useFileUpload";
 import { useChatUIState } from "./chat/useChatUIState";
 import { useChatInitialization } from "./chat/useChatInitialization";
 import { useChatMessageHandler } from "./chat/useChatMessageHandler";

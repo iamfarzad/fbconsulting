@@ -30,10 +30,11 @@ export function AIChatInput({
     handleSend,
     handleClear,
     setIsFullScreen,
-    // Image upload props
-    images,
-    uploadImage,
-    removeImage,
+    // File upload props
+    files,
+    uploadFile,
+    removeFile,
+    clearFiles,
     isUploading
   } = useAIChatInput();
   
@@ -65,10 +66,10 @@ export function AIChatInput({
           suggestedResponse={suggestedResponse}
           onClear={handleClear}
           placeholderText={placeholderText}
-          // Pass image props
-          images={images}
-          uploadImage={uploadImage}
-          removeImage={removeImage}
+          // Pass file props
+          files={files}
+          uploadFile={uploadFile}
+          removeFile={removeFile}
           isUploading={isUploading}
         />
       </AnimatePresence>
@@ -90,10 +91,10 @@ export function AIChatInput({
         toggleFullScreen={toggleFullScreen}
         placeholder={placeholderText}
         isFullScreen={false}
-        // Pass image props
-        images={images}
-        uploadImage={uploadImage}
-        removeImage={removeImage}
+        // Pass file props
+        files={files}
+        uploadFile={uploadFile}
+        removeFile={removeFile}
         isUploading={isUploading}
       />
     </AnimatePresence>
