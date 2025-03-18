@@ -18,7 +18,7 @@ export const useGeminiChatHandler = () => {
     voiceError,
     isVoiceSupported
   } = useVoiceInput(setInputValue, () => {
-    if (inputValue.trim()) {
+    if (transcript.trim()) {
       handleSendMessage();
     }
   });
@@ -29,6 +29,12 @@ export const useGeminiChatHandler = () => {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (transcript && !isListening) {
+      setInputValue(transcript);
+    }
+  }, [transcript, isListening]);
   
   const handleSendMessage = () => {
     if (inputValue.trim() && !isLoading) {

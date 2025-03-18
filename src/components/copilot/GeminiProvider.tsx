@@ -3,7 +3,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { usePersonaManagement } from '../../mcp/hooks/usePersonaManagement';
 import { useGeminiAPI } from '../../App';
 import { toast } from 'sonner';
-import { GoogleGenerativeAI } from '@google/genai';
+import { GoogleGenerativeAI, GenerativeModel } from '@google/genai';
+import { initializeGemini } from '@/services/gemini/geminiService';
 
 // Interface for Gemini context
 interface GeminiContextType {
@@ -11,6 +12,7 @@ interface GeminiContextType {
   isLoading: boolean;
   personaData: any;
   error: string | null;
+  model: GenerativeModel | null;
 }
 
 // Create a context for Gemini-specific functionality
@@ -18,7 +20,8 @@ const GeminiContext = createContext<GeminiContextType>({
   isInitialized: false,
   isLoading: true,
   personaData: null,
-  error: null
+  error: null,
+  model: null
 });
 
 // Custom hook to access the Gemini context
@@ -34,6 +37,7 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [model, setModel] = useState<GenerativeModel | null>(null);
   
   // Default persona configuration
   const defaultPersona = {
@@ -62,7 +66,7 @@ Rules:
   };
   
   useEffect(() => {
-    const initializeGemini = async () => {
+    const initializeGeminiModel = async () => {
       setIsLoading(true);
       setError(null);
       
@@ -74,17 +78,33 @@ Rules:
           return;
         }
         
+        // Get the model configuration from localStorage
+        const savedConfig = localStorage.getItem('GEMINI_CONFIG');
+        let modelName = "gemini-2.0-pro-001"; // Default model
+        
+        if (savedConfig) {
+          try {
+            const config = JSON.parse(savedConfig);
+            if (config.modelName) {
+              modelName = config.modelName;
+            }
+          } catch (error) {
+            console.error('Error parsing saved configuration:', error);
+          }
+        }
+        
         // Initialize the Gemini API with the SDK
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-pro-001" });
+        const geminiModel = genAI.getGenerativeModel({ model: modelName });
+        setModel(geminiModel);
         
         // Test API key with a simple generation
         try {
-          const result = await model.generateContent("Hello, this is a test message.");
-          const response = await result.response.text();
+          const result = await geminiModel.generateContent("Hello, this is a test message.");
+          const response = result.response.text();
           
           if (response) {
-            console.log("✅ Gemini initialized successfully");
+            console.log(`✅ Gemini initialized successfully with model: ${modelName}`);
             if (personaData) {
               console.log("Using persona data:", personaData.currentPersona);
             } else {
@@ -93,7 +113,7 @@ Rules:
             
             setIsInitialized(true);
             toast.success('AI Assistant Ready', {
-              description: 'Gemini AI has been successfully initialized.'
+              description: `Gemini ${modelName} has been successfully initialized.`
             });
           } else {
             throw new Error("Empty response from Gemini API test");
@@ -113,7 +133,7 @@ Rules:
       }
     };
     
-    initializeGemini();
+    initializeGeminiModel();
   }, [apiKey, personaData]);
   
   return (
@@ -121,7 +141,8 @@ Rules:
       isInitialized, 
       isLoading,
       error,
-      personaData: personaData || defaultPersona
+      personaData: personaData || defaultPersona,
+      model
     }}>
       {children}
     </GeminiContext.Provider>

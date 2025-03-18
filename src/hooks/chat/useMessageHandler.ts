@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { sendGeminiChatRequest, convertToGeminiMessages } from '@/services/gemini/geminiService';
+import { sendGeminiChatRequest, convertToGeminiMessages, GeminiConfig } from '@/services/gemini/geminiService';
 import { AIMessage } from '@/services/chat/messageTypes';
 
 interface UseMessageHandlerProps {
@@ -10,6 +10,7 @@ interface UseMessageHandlerProps {
   setLoadingState: (loading: boolean) => void;
   handleError: (error: string) => void;
   getSystemPrompt?: () => string | undefined;
+  modelName?: string;
 }
 
 export const useMessageHandler = ({
@@ -18,7 +19,8 @@ export const useMessageHandler = ({
   addMessage,
   setLoadingState,
   handleError,
-  getSystemPrompt
+  getSystemPrompt,
+  modelName = 'gemini-2.0-pro-001'
 }: UseMessageHandlerProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -45,8 +47,14 @@ export const useMessageHandler = ({
       const systemPrompt = getSystemPrompt?.();
       const geminiMessages = convertToGeminiMessages(messages.concat(userMessage), systemPrompt);
       
+      // Create config with API key and model name
+      const config: GeminiConfig = {
+        apiKey,
+        model: modelName
+      };
+      
       // Send the messages to the Gemini API
-      const response = await sendGeminiChatRequest(geminiMessages, apiKey);
+      const response = await sendGeminiChatRequest(geminiMessages, config);
       
       // Add the AI's response to the messages array
       addMessage({
