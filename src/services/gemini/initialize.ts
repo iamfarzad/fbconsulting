@@ -13,9 +13,12 @@ export function initializeGemini(config: GeminiConfig): GenerativeModel {
     throw new Error('Gemini API key is required');
   }
   
+  // Create the GenerativeAI instance with the API key
   const genAI = new GenerativeAI(config.apiKey);
+  
+  // Get the model with the specified configuration
   return genAI.getGenerativeModel({ 
-    model: config.model || "gemini-pro",
+    model: config.model || "gemini-1.5-pro", // Update to the latest model version
     generationConfig: {
       temperature: config.temperature ?? DEFAULT_CONFIG.temperature,
       topP: config.topP ?? DEFAULT_CONFIG.topP,

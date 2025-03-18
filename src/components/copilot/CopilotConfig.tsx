@@ -18,7 +18,7 @@ import {
 export const CopilotConfig: React.FC = () => {
   const { apiKey: contextApiKey } = useGeminiAPI();
   const [apiKey, setApiKey] = useState('');
-  const [modelName, setModelName] = useState('gemini-pro');
+  const [modelName, setModelName] = useState('gemini-1.5-pro');
   const [isLoading, setIsLoading] = useState(false);
   const [hasSavedKey, setHasSavedKey] = useState(false);
   
@@ -119,7 +119,7 @@ export const CopilotConfig: React.FC = () => {
   const handleClearConfig = () => {
     localStorage.removeItem('GEMINI_CONFIG');
     setApiKey('');
-    setModelName('gemini-pro');
+    setModelName('gemini-1.5-pro');
     setHasSavedKey(false);
     toast.success('API configuration cleared');
   };
@@ -154,10 +154,11 @@ export const CopilotConfig: React.FC = () => {
               <SelectValue placeholder="Select Gemini model" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="gemini-pro">Gemini Pro</SelectItem>
-              <SelectItem value="gemini-pro-vision">Gemini Pro Vision</SelectItem>
               <SelectItem value="gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
               <SelectItem value="gemini-1.5-flash">Gemini 1.5 Flash</SelectItem>
+              <SelectItem value="gemini-1.5-pro-vision">Gemini 1.5 Pro Vision</SelectItem>
+              <SelectItem value="gemini-pro">Gemini Pro (Legacy)</SelectItem>
+              <SelectItem value="gemini-pro-vision">Gemini Pro Vision (Legacy)</SelectItem>
             </SelectContent>
           </Select>
           <p className="text-xs text-muted-foreground mt-1">

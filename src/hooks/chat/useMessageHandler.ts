@@ -20,7 +20,7 @@ export const useMessageHandler = ({
   setLoadingState,
   handleError,
   getSystemPrompt,
-  modelName = 'gemini-pro'
+  modelName = 'gemini-1.5-pro'
 }: UseMessageHandlerProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
 

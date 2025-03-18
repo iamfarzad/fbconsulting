@@ -19,7 +19,7 @@ export async function sendMultimodalRequest(
     // Initialize the Gemini vision model
     const model = initializeGemini({
       ...config,
-      model: "gemini-pro-vision" // Use the vision model for multimodal
+      model: "gemini-1.5-pro-vision" // Update to the latest vision model
     });
     
     // Create a content array with text and images

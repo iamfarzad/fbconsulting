@@ -8,7 +8,7 @@ export const initializeGemini = (options: {
   apiKey: string;
   model?: string;
 }) => {
-  const modelName = options.model || 'gemini-2.0-pro-001';
+  const modelName = options.model || 'gemini-1.5-pro';
   console.log('Initializing Gemini with model:', modelName);
   
   localStorage.setItem('GEMINI_CONFIG', JSON.stringify({
