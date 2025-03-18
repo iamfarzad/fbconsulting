@@ -1,7 +1,7 @@
 
-import { useCallback } from 'react';
-import { AIMessage } from '@/services/chat/messageTypes';
+import { useState } from 'react';
 import { sendGeminiChatRequest, convertToGeminiMessages } from '@/services/gemini/geminiService';
+import { AIMessage } from '@/services/chat/messageTypes';
 
 interface UseMessageHandlerProps {
   messages: AIMessage[];
@@ -9,7 +9,7 @@ interface UseMessageHandlerProps {
   addMessage: (message: AIMessage) => void;
   setLoadingState: (loading: boolean) => void;
   handleError: (error: string) => void;
-  getSystemPrompt: () => string | undefined;
+  getSystemPrompt?: () => string | undefined;
 }
 
 export const useMessageHandler = ({
@@ -20,54 +20,48 @@ export const useMessageHandler = ({
   handleError,
   getSystemPrompt
 }: UseMessageHandlerProps) => {
-  const sendMessage = useCallback(async (content: string) => {
-    if (!content.trim()) return;
-    if (!apiKey) {
-      handleError('API key is not available. Please configure your Gemini API key.');
-      return;
-    }
+  const [isGenerating, setIsGenerating] = useState(false);
 
+  const sendMessage = async (content: string) => {
+    if (isGenerating) return;
+    if (!content.trim()) return;
+    
+    // Add the user message to the messages array
     const userMessage: AIMessage = {
       role: 'user',
       content,
       timestamp: Date.now()
     };
-
     addMessage(userMessage);
+    
+    setIsGenerating(true);
     setLoadingState(true);
-
+    
     try {
-      const systemPrompt = getSystemPrompt();
-      const geminiMessages = convertToGeminiMessages(
-        messages.concat(userMessage),
-        systemPrompt
-      );
-
-      const responseText = await sendGeminiChatRequest(geminiMessages, apiKey);
-
-      const assistantMessage: AIMessage = {
+      if (!apiKey) {
+        throw new Error('API key is missing. Please set your API key in the settings.');
+      }
+      
+      const systemPrompt = getSystemPrompt?.();
+      const geminiMessages = convertToGeminiMessages(messages.concat(userMessage), systemPrompt);
+      
+      // Send the messages to the Gemini API
+      const response = await sendGeminiChatRequest(geminiMessages, apiKey);
+      
+      // Add the AI's response to the messages array
+      addMessage({
         role: 'assistant',
-        content: responseText,
+        content: response || 'I apologize, but I was unable to generate a response.',
         timestamp: Date.now()
-      };
-
-      addMessage(assistantMessage);
+      });
     } catch (error) {
-      console.error('Error getting chat response:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to get a response. Please try again.';
-
-      const errorMsg: AIMessage = {
-        role: 'error',
-        content: errorMessage,
-        timestamp: Date.now()
-      };
-
-      addMessage(errorMsg);
-      handleError(errorMessage);
+      console.error('Error sending message:', error);
+      handleError(error instanceof Error ? error.message : 'Unknown error sending message');
     } finally {
+      setIsGenerating(false);
       setLoadingState(false);
     }
-  }, [messages, apiKey, addMessage, setLoadingState, handleError, getSystemPrompt]);
+  };
 
   return { sendMessage };
 };

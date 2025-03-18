@@ -1,6 +1,6 @@
 
 import { 
-  GenerativeModel, 
+  GoogleGenerativeAI, 
   HarmCategory, 
   HarmBlockThreshold 
 } from '@google/genai';
@@ -46,8 +46,8 @@ export async function sendGeminiChatRequest(
   }
 
   // Initialize the Gemini API
-  const genAI = { getGenerativeModel: (options: any) => new GenerativeModel(options) };
-  const model = genAI.getGenerativeModel({ modelName: "gemini-1.5-pro", apiKey });
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
   try {
     // Format the history for the SDK chat format
