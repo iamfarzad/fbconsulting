@@ -26,6 +26,9 @@ export function useChatInitialization() {
             apiKey,
             model: 'gemini-2.0-vision'
           });
+          
+          console.log("✅ Gemini chat initialized successfully");
+          return true;
         }
       } catch (error) {
         console.error('Error initializing multimodal chat:', error);
@@ -35,6 +38,10 @@ export function useChatInitialization() {
           variant: "destructive",
         });
       }
+    }
+    
+    if (!apiKey) {
+      console.log("⚠️ No Gemini API key found, using mock responses");
     }
     
     return !!apiKey;
