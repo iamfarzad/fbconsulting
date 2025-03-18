@@ -83,7 +83,7 @@ Rules:
         
         // Get the model configuration from localStorage
         const savedConfig = localStorage.getItem('GEMINI_CONFIG');
-        let modelName = "gemini-2.0-pro-001"; // Default model
+        let modelName = "gemini-pro"; // Default model
         
         if (savedConfig) {
           try {

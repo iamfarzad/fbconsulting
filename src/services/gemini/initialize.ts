@@ -15,7 +15,7 @@ export function initializeGemini(config: GeminiConfig): GenerativeModel {
   
   const genAI = new GenerativeAI(config.apiKey);
   return genAI.getGenerativeModel({ 
-    model: config.model || "gemini-2.0-pro-001",
+    model: config.model || "gemini-pro",
     generationConfig: {
       temperature: config.temperature ?? DEFAULT_CONFIG.temperature,
       topP: config.topP ?? DEFAULT_CONFIG.topP,

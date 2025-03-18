@@ -37,7 +37,7 @@ export const useGeminiChat = ({
         const parsedConfig = JSON.parse(config);
         return {
           apiKey: parsedConfig.apiKey,
-          modelName: parsedConfig.modelName || 'gemini-2.0-pro-001'
+          modelName: parsedConfig.modelName || 'gemini-pro'
         };
       }
     } catch (error) {
@@ -45,7 +45,7 @@ export const useGeminiChat = ({
     }
     return {
       apiKey: null,
-      modelName: 'gemini-2.0-pro-001'
+      modelName: 'gemini-pro'
     };
   };
   
