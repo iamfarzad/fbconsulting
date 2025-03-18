@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { LeadInfo } from '@/services/lead/leadExtractor';
@@ -10,7 +9,7 @@ interface UseChatMessageHandlerProps {
   addUserMessage: (message: string) => void;
   addAssistantMessage: (message: string) => void;
   setShowMessages: (show: boolean) => void;
-  clearImages: () => void;
+  clearFiles: () => void;  // Add this to fix the TypeScript error
   messages: any[];
 }
 
@@ -21,7 +20,7 @@ export function useChatMessageHandler({
   addUserMessage,
   addAssistantMessage,
   setShowMessages,
-  clearImages,
+  clearFiles,
   messages
 }: UseChatMessageHandlerProps) {
   const [inputValue, setInputValue] = useState("");
@@ -44,8 +43,8 @@ export function useChatMessageHandler({
   } = useMessageProcessor();
 
   // Send a message
-  const handleSend = async (images: { mimeType: string, data: string, preview: string }[] = []) => {
-    if (!inputValue.trim() && images.length === 0) {
+  const handleSend = async (files: { mimeType: string, data: string, name: string, type: string }[] = []) => {
+    if (!inputValue.trim() && files.length === 0) {
       toast({
         title: "Message is empty",
         description: "Please enter a message or add an image before sending.",
@@ -64,18 +63,27 @@ export function useChatMessageHandler({
       // Check if we have an API key for Gemini
       if (hasApiKey()) {
         try {
-          if (images && images.length > 0) {
-            // Process multimodal messages with images
+          if (files && files.length > 0) {
+            // Process multimodal messages with files
             if (multimodalChatRef.current) {
-              const imageData = images.map(img => ({
-                mimeType: img.mimeType,
-                data: img.data
-              }));
+              const imageData = files
+                .filter(file => file.type === 'image')
+                .map(img => ({
+                  mimeType: img.mimeType,
+                  data: img.data
+                }));
               
               aiResponse = await multimodalChatRef.current.sendMessage(inputValue, imageData);
             } else {
               // Fallback to direct API call
-              aiResponse = await processMultimodalMessage(inputValue, images, getApiKey());
+              const imageData = files
+                .filter(file => file.type === 'image')
+                .map(img => ({
+                  mimeType: img.mimeType,
+                  data: img.data
+                }));
+              
+              aiResponse = await processMultimodalMessage(inputValue, imageData, getApiKey());
             }
           } else {
             // For text-only messages, also use Gemini if available
@@ -138,7 +146,7 @@ export function useChatMessageHandler({
     }
     
     setInputValue("");
-    clearImages();
+    clearFiles();
     
     // Fixed: We're using setShowMessages directly, not checking showMessages
     setShowMessages(true);
