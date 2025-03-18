@@ -1,12 +1,15 @@
 
-import React from 'react';
-import { Bot } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Bot, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import FullScreenChat from './chat/FullScreenChat';
 import { useChatButton } from '@/hooks/useChatButton';
 import MiniChatWindow from './chat/MiniChatWindow';
+import { useLocation } from 'react-router-dom';
 
 const ChatButton = () => {
+  const location = useLocation();
+  
   // Use our enhanced chat button hook for all functionality
   const { 
     isOpen, 
@@ -19,9 +22,12 @@ const ChatButton = () => {
     toggleChat,
     toggleFullScreen,
     handleSend,
-    handleClear,
-    shouldShowButton 
+    handleClear
   } = useChatButton();
+  
+  // Check if we're on a page where we shouldn't show the button
+  const hideOnRoutes = ['/chat', '/'];
+  const shouldShowButton = !hideOnRoutes.includes(location.pathname);
   
   if (!shouldShowButton) {
     return null;
@@ -53,13 +59,6 @@ const ChatButton = () => {
           />
         )}
       </AnimatePresence>
-      
-      {/* Add debug message for development */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="fixed top-20 right-4 p-2 bg-black/80 text-white text-xs rounded z-50">
-          Chat state: {isOpen ? 'Open' : 'Closed'} | {isFullScreen ? 'Full screen' : 'Mini'}
-        </div>
-      )}
       
       {/* Only show the button if not in fullscreen */}
       <motion.button

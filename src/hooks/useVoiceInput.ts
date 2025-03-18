@@ -4,12 +4,14 @@ import { useGeminiSpeechRecognition } from './useGeminiSpeechRecognition';
 import { useSpeechRecognition } from './useSpeechRecognition';
 import debounce from 'lodash/debounce';
 import { useGeminiInitialization } from './gemini/useGeminiInitialization';
+import { useToast } from './use-toast';
 
 export function useVoiceInput(setValue: (value: string) => void, onSend: () => void) {
   const [aiProcessing, setAiProcessing] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const processingRef = useRef(false);
   const { hasApiKey, getApiKey } = useGeminiInitialization();
+  const { toast } = useToast();
   
   // Create debounced function only once
   const debouncedProcessingRef = useRef(
@@ -44,8 +46,14 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
       console.error('Error processing voice command:', error);
       setAiProcessing(false);
       processingRef.current = false;
+      
+      toast({
+        title: "Voice Recognition Error",
+        description: "Failed to process voice command",
+        variant: "destructive"
+      });
     }
-  }, []);
+  }, [toast, setValue, onSend]);
   
   // Use Gemini or browser speech recognition based on API key availability
   const useGeminiAPI = hasApiKey();
@@ -105,8 +113,13 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
   useEffect(() => {
     if (voiceError) {
       console.error('Voice input error:', voiceError);
+      toast({
+        title: "Voice Recognition Error",
+        description: voiceError,
+        variant: "destructive"
+      });
     }
-  }, [voiceError]);
+  }, [voiceError, toast]);
 
   return {
     isListening,
