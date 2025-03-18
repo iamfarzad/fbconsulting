@@ -7,7 +7,6 @@ import SEO from '@/components/SEO';
 import { usePageViewTracking } from '@/hooks/useAnalytics';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Faq3 } from "@/components/ui/faq3";
-import { motion } from 'framer-motion';
 import ContactCTA from '@/components/ContactCTA';
 import AboutHero from '@/components/about/AboutHero';
 import GlobalImpact from '@/components/about/GlobalImpact';
@@ -27,13 +26,25 @@ const Index = () => {
 
   useEffect(() => {
     console.log("Index page effect running");
-    // Remove previous class first if exists
-    document.body.classList.remove('page-enter');
-    document.body.classList.add('page-enter-active');
+    
+    // Safer DOM manipulation with requestAnimationFrame to ensure document is ready
+    const applyPageTransitionClasses = () => {
+      if (document && document.body) {
+        document.body.classList.remove('page-enter');
+        document.body.classList.add('page-enter-active');
+      }
+    };
+    
+    // Schedule DOM manipulation for next frame
+    const animationFrame = requestAnimationFrame(applyPageTransitionClasses);
     
     return () => {
-      document.body.classList.remove('page-enter-active');
-      document.body.classList.add('page-enter');
+      cancelAnimationFrame(animationFrame);
+      // Cleanup in a safe way
+      if (document && document.body) {
+        document.body.classList.remove('page-enter-active');
+        document.body.classList.add('page-enter');
+      }
     };
   }, []);
 

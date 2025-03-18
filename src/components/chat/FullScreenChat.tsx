@@ -7,17 +7,23 @@ import { AnimatedBars } from '../ui/AnimatedBars';
 import { ChatInput } from '../ui/ai-chat/ChatInput';
 import { ChatMessageList } from '../ui/ai-chat/ChatMessageList';
 import { AIMessage } from '@/services/copilotService';
+import { UploadedFile } from '@/hooks/useFileUpload';
 
 interface FullScreenChatProps {
   onMinimize: () => void;
   initialMessages?: AIMessage[];
-  onSendMessage: () => void;
+  onSendMessage: (files?: { mimeType: string; data: string; name: string; type: string }[]) => void;
   inputValue: string;
   setInputValue: (value: string) => void;
   isLoading: boolean;
   suggestedResponse: string | null;
   onClear: () => void;
   placeholderText?: string;
+  // File-related props
+  files?: UploadedFile[];
+  uploadFile?: (file: File) => Promise<void>;
+  removeFile?: (index: number) => void;
+  isUploading?: boolean;
 }
 
 const FullScreenChat: React.FC<FullScreenChatProps> = ({ 
@@ -29,7 +35,12 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
   isLoading,
   suggestedResponse,
   onClear,
-  placeholderText = "Ask about our AI services..."
+  placeholderText = "Ask about our AI services...",
+  // File-related props with defaults
+  files = [],
+  uploadFile,
+  removeFile,
+  isUploading = false
 }) => {
   const hasMessages = initialMessages.length > 0;
 
@@ -110,6 +121,10 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
                   hasMessages={hasMessages}
                   suggestedResponse={suggestedResponse}
                   placeholder={placeholderText}
+                  files={files}
+                  onUploadFile={uploadFile}
+                  onRemoveFile={removeFile}
+                  isUploading={isUploading}
                 />
               </div>
             </div>

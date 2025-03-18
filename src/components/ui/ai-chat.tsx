@@ -29,7 +29,13 @@ export function AIChatInput({
     toggleFullScreen,
     handleSend,
     handleClear,
-    setIsFullScreen
+    setIsFullScreen,
+    // File upload props
+    files,
+    uploadFile,
+    removeFile,
+    clearFiles,
+    isUploading
   } = useAIChatInput();
   
   const isMobile = useIsMobile();
@@ -60,6 +66,11 @@ export function AIChatInput({
           suggestedResponse={suggestedResponse}
           onClear={handleClear}
           placeholderText={placeholderText}
+          // Pass file props
+          files={files}
+          uploadFile={uploadFile}
+          removeFile={removeFile}
+          isUploading={isUploading}
         />
       </AnimatePresence>
     );
@@ -80,6 +91,11 @@ export function AIChatInput({
         toggleFullScreen={toggleFullScreen}
         placeholder={placeholderText}
         isFullScreen={false}
+        // Pass file props
+        files={files}
+        uploadFile={uploadFile}
+        removeFile={removeFile}
+        isUploading={isUploading}
       />
     </AnimatePresence>
   );
