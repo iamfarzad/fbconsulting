@@ -6,13 +6,10 @@ export {
   sendGeminiChatRequest,
   streamGeminiChat,
   sendMultimodalRequest,
-  convertToGeminiMessages
-} from './gemini/geminiService';
-
-export type { 
+  convertToGeminiMessages,
   GeminiMessage, 
   GeminiConfig 
-} from './gemini/geminiService';
+} from './gemini';
 
 // Message types (keeping backward compatibility)
 export type { AIMessage } from './chat/messageTypes';

@@ -4,10 +4,10 @@ import { usePersonaManagement } from '../../mcp/hooks/usePersonaManagement';
 import { useGeminiAPI } from '../../App';
 import { toast } from 'sonner';
 import { 
-  GoogleGenerativeAI as GenerativeAI, 
+  GenerativeAI,
   GenerativeModel 
-} from '@google/genai';
-import { initializeGemini } from '@/services/gemini/geminiService';
+} from '@google/generative-ai';
+import { initializeGemini } from '@/services/gemini';
 
 // Interface for Gemini context
 interface GeminiContextType {
