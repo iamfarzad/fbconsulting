@@ -1,11 +1,47 @@
 import { useState, useEffect } from "react";
-import { useAIChatInput } from "./useAIChatInput";
+import { useUnifiedChat } from "./useUnifiedChat";
 import { useLocation } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 export function useChatButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
   const location = useLocation();
+  const { toast } = useToast();
+  
+  // Wrap useUnifiedChat in try-catch to handle potential errors
+  let chatState;
+  try {
+    chatState = useUnifiedChat({ useCopilotKit: true });
+  } catch (err) {
+    console.error('Error in useUnifiedChat:', err);
+    setError(err instanceof Error ? err : new Error('Unknown error in chat'));
+    
+    // Return default/fallback values
+    return {
+      isOpen,
+      isFullScreen,
+      inputValue: '',
+      setInputValue: () => {},
+      isLoading: false,
+      messages: [],
+      suggestedResponse: null,
+      toggleChat: () => {
+        toast({
+          title: 'Chat is currently unavailable',
+          description: 'Please try again later',
+          variant: 'destructive'
+        });
+      },
+      toggleFullScreen: () => {},
+      handleSend: () => Promise.resolve(),
+      handleClear: () => {},
+      shouldShowButton: !location.pathname.includes('/chat'),
+      chatService: null,
+      error
+    };
+  }
   
   const {
     messages,
@@ -15,8 +51,9 @@ export function useChatButton() {
     suggestedResponse,
     handleSend,
     handleClear,
-    setIsFullScreen: setAIChatFullScreen
-  } = useAIChatInput();
+    setIsFullScreen: setAIChatFullScreen,
+    chatService
+  } = chatState;
 
   // Keep both isFullScreen states synchronized
   useEffect(() => {
@@ -52,12 +89,14 @@ export function useChatButton() {
     inputValue,
     setInputValue,
     isLoading,
-    messages,
+    messages: messages.filter(msg => msg.role !== 'system'),
     suggestedResponse,
     toggleChat,
     toggleFullScreen,
     handleSend,
     handleClear,
-    shouldShowButton
+    shouldShowButton,
+    chatService,
+    error
   };
 }

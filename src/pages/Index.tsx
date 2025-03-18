@@ -91,8 +91,10 @@ const Index = () => {
     homePageStructuredData
   ];
 
-  return (
-    <>
+  // Wrap SEO component in try-catch to prevent it from crashing the entire page
+  let seoComponent;
+  try {
+    seoComponent = (
       <SEO
         title={isNorwegian ? "AI Automatisering for Norske Bedrifter | F.B Consulting" : "AI Automation Ally - Automate Your Business with AI | F.B Consulting"}
         description={isNorwegian 
@@ -104,6 +106,15 @@ const Index = () => {
         structuredData={combinedStructuredData}
         language={isNorwegian ? "no" : "en"}
       />
+    );
+  } catch (error) {
+    console.error('Error rendering SEO component:', error);
+    seoComponent = <title>AI Automation Ally | F.B Consulting</title>;
+  }
+  
+  return (
+    <>
+      {seoComponent}
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
         <main className="flex-grow relative">

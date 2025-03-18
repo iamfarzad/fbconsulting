@@ -1,6 +1,7 @@
 
-import React, { useEffect, useState, createContext, useContext } from "react";
+import React, { useEffect, useState, createContext, useContext, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ErrorBoundary from "./components/ErrorBoundary";
 import ThemeProvider from "./components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import Index from "./pages/Index";
@@ -14,6 +15,9 @@ import TestPage from "./pages/TestPage";
 import { AnimatePresence } from "framer-motion";
 import ChatButton from "./components/ChatButton";
 import TestMCP from "./pages/TestMCP";
+import TestGoogleAI from "./pages/TestGoogleAI";
+import TestUnifiedChat from "./pages/TestUnifiedChat";
+import AIDemo from "./pages/AIDemo";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { CopilotProvider } from "./components/copilot/CopilotProvider";
 
@@ -43,17 +47,26 @@ const GeminiAPIProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   return <GeminiAPIContext.Provider value={{ apiKey }}>{children}</GeminiAPIContext.Provider>;
 };
 
+// Simple loading component
+const LoadingFallback = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+  </div>
+);
+
 const App: React.FC = () => {
   return (
-    <BrowserRouter>
-      <ThemeProvider>
-        <LanguageProvider>
-          <CopilotProvider>
-            <GeminiAPIProvider>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <ThemeProvider>
+          <LanguageProvider>
+              <GeminiAPIProvider>
+                <CopilotProvider>
+                  <Suspense fallback={<LoadingFallback />}>
               <AnimatePresence mode="wait">
-                <Toaster />
-                <ChatButton />
-                <Routes>
+                <Toaster key="toaster" />
+                <ChatButton key="chat-button" />
+                <Routes key="routes">
                   <Route path="/" element={<Index />} />
                   <Route path="/services" element={<Services />} />
                   <Route path="/about" element={<About />} />
@@ -62,14 +75,19 @@ const App: React.FC = () => {
                   <Route path="/blog/:slug" element={<BlogPost />} />
                   <Route path="/test" element={<TestPage />} />
                   <Route path="/test-mcp" element={<TestMCP />} />
+                  <Route path="/test-google-ai" element={<TestGoogleAI />} />
+                  <Route path="/test-unified-chat" element={<TestUnifiedChat />} />
+                  <Route path="/ai-demo" element={<AIDemo />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </AnimatePresence>
-            </GeminiAPIProvider>
-          </CopilotProvider>
-        </LanguageProvider>
-      </ThemeProvider>
-    </BrowserRouter>
+                  </Suspense>
+                </CopilotProvider>
+              </GeminiAPIProvider>
+          </LanguageProvider>
+        </ThemeProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 };
 

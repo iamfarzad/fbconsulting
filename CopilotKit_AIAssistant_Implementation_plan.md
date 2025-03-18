@@ -4,14 +4,9 @@
 
 ### Goal: Deploy AI model to power the chatbot on the website.
 
-✅ **Step 1.1 – Deploy GPT-4o on Azure AI Foundry**  
-- Go to **Azure AI Foundry > Models + Endpoints**  
-- Deploy **GPT-4o (latest version: `2024-11-20`)**  
-- Set **Tokens per Minute Limit**: **450K**  
-- Set **Content Filter**: `DefaultV2`  
-- Copy **API Endpoint & Authentication Key** for later use  
 
-📍 **Output**: ✅ **AI Model Successfully Deployed**  
+ToDO: need to work with google gemini 2.0 flash 
+
 
 ---
 
@@ -19,9 +14,7 @@
 
 ### Goal: Configure **GPT-4o** in Azure AI Foundry with correct role, site knowledge, and response behavior.
 
-✅ **Step 2.1 – Add System Instructions in Azure AI Foundry**  
-- Navigate to **Models + Endpoints > GPT-4o > Instructions**  
-- Add the following:
+
 
 ```plaintext
 You are **Farzad AI Assistant**, an AI consultant built into the landing page of F.B Consulting. Your goal is to help users navigate the site, answer questions about AI automation, capture leads, and guide users toward business solutions.
@@ -181,7 +174,7 @@ export default function Chatbox() {
 ---
 
 ## **🎯 Final Checklist**
-✅ **Deploy AI Model on Azure**  
+
 ✅ **Set Instructions & Context in Azure**  
 ✅ **Integrate CopilotKit for Chat**  
 ✅ **Enable Lead Capture & Email Summaries**  
