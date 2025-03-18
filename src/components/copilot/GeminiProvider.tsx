@@ -81,7 +81,7 @@ Rules:
         // Test API key with a simple generation
         try {
           const result = await model.generateContent("Hello, this is a test message.");
-          const response = await result.text();
+          const response = await result.response.text();
           
           if (response) {
             console.log("✅ Gemini initialized successfully");
