@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Mic, MicOff } from 'lucide-react';
+import { Mic } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AnimatedBars } from '../AnimatedBars';
