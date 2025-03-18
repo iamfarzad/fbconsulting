@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { usePersonaManagement } from '../../mcp/hooks/usePersonaManagement';
 import { useGeminiAPI } from '../../App';
 import { toast } from 'sonner';
-import { GoogleGenerativeAI } from '@google/genai';
+import { GoogleGenerativeAI as GenAI } from '@google/genai';
 
 // Interface for Gemini context
 interface GeminiContextType {
@@ -75,7 +75,7 @@ Rules:
         }
         
         // Initialize the Gemini API with the SDK
-        const genAI = new GoogleGenerativeAI(apiKey);
+        const genAI = new GenAI(apiKey);
         
         // Test API key with a simple generation
         try {

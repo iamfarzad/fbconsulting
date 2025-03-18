@@ -1,5 +1,9 @@
 
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/genai';
+import { 
+  GoogleGenerativeAI as GenAI, 
+  HarmCategory, 
+  HarmBlockThreshold 
+} from '@google/genai';
 
 // Types for Gemini message formats
 export interface GeminiMessage {
@@ -42,7 +46,7 @@ export async function sendGeminiChatRequest(
   }
 
   // Initialize the Gemini API with the provided key
-  const genAI = new GoogleGenerativeAI(apiKey);
+  const genAI = new GenAI(apiKey);
   
   // Get the model (using gemini-1.5-flash by default)
   const model = genAI.getGenerativeModel({ 
