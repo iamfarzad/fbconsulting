@@ -11,20 +11,21 @@ import { SuggestionButton } from "./SuggestionButton";
 import { ChatInputActions } from "./ChatInputActions";
 import { TranscriptionDisplay } from "./TranscriptionDisplay";
 import { ImagePreviewArea } from "./ImagePreviewArea";
+import { UploadedFile } from "@/hooks/useFileUpload";
 
 interface ChatInputProps {
   value: string;
   setValue: (value: string) => void;
-  onSend: (images?: { mimeType: string; data: string }[]) => void;
+  onSend: (files?: { mimeType: string; data: string; name: string; type: string }[]) => void;
   onClear: () => void;
   isLoading: boolean;
   showMessages: boolean;
   hasMessages: boolean;
   suggestedResponse: string | null;
   placeholder: string;
-  images?: { mimeType: string; data: string; preview: string }[];
-  onUploadImage?: (file: File) => Promise<void>;
-  onRemoveImage?: (index: number) => void;
+  files?: UploadedFile[];
+  onUploadFile?: (file: File) => Promise<void>;
+  onRemoveFile?: (index: number) => void;
   isUploading?: boolean;
 }
 
@@ -38,9 +39,9 @@ export function ChatInput({
   hasMessages,
   suggestedResponse,
   placeholder = "Ask me anything about AI automation for your business...",
-  images = [],
-  onUploadImage,
-  onRemoveImage,
+  files = [],
+  onUploadFile,
+  onRemoveFile,
   isUploading = false
 }: ChatInputProps) {
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
@@ -60,7 +61,7 @@ export function ChatInput({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if ((value.trim() || images.length > 0) && !isLoading && !isUploading) {
+      if ((value.trim() || files.length > 0) && !isLoading && !isUploading) {
         handleSend();
       }
     }
@@ -79,19 +80,21 @@ export function ChatInput({
   };
   
   const handleSend = () => {
-    // Don't send if loading or uploading an image
+    // Don't send if loading or uploading an file
     if (isLoading || isUploading) return;
     
-    // Require either text or at least one image
-    if (!value.trim() && images.length === 0) return;
+    // Require either text or at least one file
+    if (!value.trim() && files.length === 0) return;
     
-    // If we have images, pass them to onSend
-    if (images.length > 0) {
-      const imageData = images.map(img => ({
-        mimeType: img.mimeType,
-        data: img.data
+    // If we have files, pass them to onSend
+    if (files.length > 0) {
+      const fileData = files.map(file => ({
+        mimeType: file.mimeType,
+        data: file.data,
+        name: file.name,
+        type: file.type
       }));
-      onSend(imageData);
+      onSend(fileData);
     } else {
       onSend();
     }
@@ -136,11 +139,17 @@ export function ChatInput({
           />
         </div>
         
-        {/* Image Preview Area */}
-        {images.length > 0 && onRemoveImage && (
+        {/* File Preview Area */}
+        {files.length > 0 && onRemoveFile && (
           <ImagePreviewArea 
-            images={images} 
-            onRemoveImage={onRemoveImage} 
+            images={files.filter(f => f.type === 'image')} 
+            onRemoveImage={(index) => {
+              // Find the actual index in the combined files array
+              const imageFiles = files.filter(f => f.type === 'image');
+              const imageToRemove = imageFiles[index];
+              const actualIndex = files.findIndex(f => f === imageToRemove);
+              onRemoveFile(actualIndex);
+            }} 
           />
         )}
 
@@ -150,9 +159,9 @@ export function ChatInput({
           <ChatInputActions 
             hasMessages={hasMessages}
             onClear={onClear}
-            images={images}
-            onUploadImage={onUploadImage}
-            onRemoveImage={onRemoveImage}
+            files={files}
+            onUploadFile={onUploadFile}
+            onRemoveFile={onRemoveFile}
             isLoading={isLoading}
             isListening={isListening}
             isUploading={isUploading}
@@ -176,7 +185,7 @@ export function ChatInput({
             />
             
             <SendButton
-              hasContent={!!value.trim() || images.length > 0}
+              hasContent={!!value.trim() || files.length > 0}
               isLoading={isLoading || isUploading}
               aiProcessing={aiProcessing}
               disabled={isListening}

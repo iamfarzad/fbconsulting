@@ -1,14 +1,13 @@
-
 import { initializeGemini } from './initialize';
 import { GeminiConfig } from './types';
 import { Part, Content } from '@google/generative-ai';
 
 /**
- * Send a multimodal request to Gemini (text + images)
+ * Send a multimodal request to Gemini (text + images + documents)
  */
 export async function sendMultimodalRequest(
   text: string,
-  images: { mimeType: string, data: string }[],
+  files: { mimeType: string, data: string, name?: string, type?: string }[],
   config: GeminiConfig,
   chatHistory: Part[][] = []
 ): Promise<string> {
@@ -23,16 +22,44 @@ export async function sendMultimodalRequest(
       model: "gemini-2.0-vision" // Use gemini-2.0-vision for multimodal
     });
     
-    // Create content array with text and images
+    // Create content array with text and files
     const parts: Part[] = [
-      { text },
-      ...images.map(img => ({
-        inlineData: {
-          mimeType: img.mimeType,
-          data: img.data
-        }
-      }))
+      { text }
     ];
+    
+    // Add files to parts array
+    files.forEach(file => {
+      if (file.mimeType.startsWith('image/')) {
+        // Add image
+        parts.push({
+          inlineData: {
+            mimeType: file.mimeType,
+            data: file.data
+          }
+        });
+      } else {
+        // For documents, add a text description and the file data
+        const fileName = file.name || 'document';
+        parts.push({
+          text: `Document: ${fileName}\nMIME type: ${file.mimeType}\n`
+        });
+        
+        // Only add the document data if it's not too large
+        if (file.data.length < 100000) { // Limit to approximately 100KB
+          parts.push({
+            inlineData: {
+              mimeType: file.mimeType,
+              data: file.data
+            }
+          });
+        } else {
+          // For large documents, add a note
+          parts.push({
+            text: `Note: This document is too large to include in full. Please extract key information from what you can see.`
+          });
+        }
+      }
+    });
     
     // If we have chat history, use it to maintain context
     if (chatHistory.length > 0) {
@@ -84,20 +111,51 @@ export class GeminiMultimodalChat {
   }
   
   /**
-   * Send a message with optional images to the chat
+   * Send a message with optional files to the chat
    */
-  async sendMessage(text: string, images: { mimeType: string, data: string }[] = []): Promise<string> {
+  async sendMessage(
+    text: string, 
+    files: { mimeType: string, data: string, name?: string, type?: string }[] = []
+  ): Promise<string> {
     try {
-      // Create content parts with text and images
+      // Create content parts with text and files
       const parts: Part[] = [
-        { text },
-        ...images.map(img => ({
-          inlineData: {
-            mimeType: img.mimeType,
-            data: img.data
-          }
-        }))
+        { text }
       ];
+      
+      // Add files to parts array
+      files.forEach(file => {
+        if (file.mimeType.startsWith('image/')) {
+          // Add image
+          parts.push({
+            inlineData: {
+              mimeType: file.mimeType,
+              data: file.data
+            }
+          });
+        } else {
+          // For documents, add a text description and the file data
+          const fileName = file.name || 'document';
+          parts.push({
+            text: `Document: ${fileName}\nMIME type: ${file.mimeType}\n`
+          });
+          
+          // Only add the document data if it's not too large
+          if (file.data.length < 100000) { // Limit to approximately 100KB
+            parts.push({
+              inlineData: {
+                mimeType: file.mimeType,
+                data: file.data
+              }
+            });
+          } else {
+            // For large documents, add a note
+            parts.push({
+              text: `Note: This document is too large to include in full. Please extract key information from what you can see.`
+            });
+          }
+        }
+      });
       
       // Add user message to history
       this.chatHistory.push(parts);

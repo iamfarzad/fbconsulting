@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChatMessageList } from "./ChatMessageList";
 import { ChatInput } from "./ChatInput";
 import { AIMessage } from "@/services/copilotService";
+import { UploadedFile } from "@/hooks/useFileUpload";
 
 interface ChatContainerProps {
   containerRef: React.RefObject<HTMLDivElement>;
@@ -13,15 +14,15 @@ interface ChatContainerProps {
   setInputValue: (value: string) => void;
   isLoading: boolean;
   suggestedResponse: string | null;
-  handleSend: (images?: { mimeType: string; data: string }[]) => void;
+  handleSend: (files?: { mimeType: string; data: string; name: string; type: string }[]) => void;
   handleClear: () => void;
   toggleFullScreen: () => void;
   placeholder?: string;
   isFullScreen?: boolean;
-  // Add image-related props
-  images?: { mimeType: string; data: string; preview: string }[];
-  uploadImage?: (file: File) => Promise<void>;
-  removeImage?: (index: number) => void;
+  // Add file-related props
+  files?: UploadedFile[];
+  uploadFile?: (file: File) => Promise<void>;
+  removeFile?: (index: number) => void;
   isUploading?: boolean;
 }
 
@@ -38,10 +39,10 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
   toggleFullScreen,
   placeholder = "Ask me anything...",
   isFullScreen = false,
-  // Image-related props with defaults
-  images = [],
-  uploadImage,
-  removeImage,
+  // File-related props with defaults
+  files = [],
+  uploadFile,
+  removeFile,
   isUploading = false
 }) => {
   return (
@@ -125,9 +126,9 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
           hasMessages={messages.length > 0}
           suggestedResponse={suggestedResponse}
           placeholder={placeholder}
-          images={images}
-          onUploadImage={uploadImage}
-          onRemoveImage={removeImage}
+          files={files}
+          onUploadFile={uploadFile}
+          onRemoveFile={removeFile}
           isUploading={isUploading}
         />
       </motion.div>

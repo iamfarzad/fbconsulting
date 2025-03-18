@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useMessages } from "./useMessages";
 import { useSuggestedResponse } from "./useSuggestedResponse";
-import { useImageUpload } from "@/hooks/useImageUpload";
+import { useFileUpload } from "@/hooks/useFileUpload";
 import { useChatUIState } from "./chat/useChatUIState";
 import { useChatInitialization } from "./chat/useChatInitialization";
 import { useChatMessageHandler } from "./chat/useChatMessageHandler";
@@ -12,7 +12,7 @@ import { LeadInfo } from '@/services/lead/leadExtractor';
 export function useAIChatInput() {
   const { messages, addUserMessage, addAssistantMessage, clearMessages } = useMessages();
   const { toast } = useToast();
-  const { images, uploadImage, removeImage, clearImages, isUploading } = useImageUpload();
+  const { files, uploadFile, removeFile, clearFiles, isUploading } = useFileUpload();
   
   // Extract UI state management
   const {
@@ -48,7 +48,7 @@ export function useAIChatInput() {
     addUserMessage,
     addAssistantMessage,
     setShowMessages,
-    clearImages,
+    clearFiles,
     messages
   });
   
@@ -62,7 +62,7 @@ export function useAIChatInput() {
   // Clear messages and chat history
   const handleClear = () => {
     clearMessages();
-    clearImages();
+    clearFiles();
     setShowMessages(false);
     handleClearInternal();
     
@@ -72,9 +72,9 @@ export function useAIChatInput() {
     });
   };
 
-  // Handle sending messages, possibly with images
-  const handleSendWrapper = (imagesToSend?: { mimeType: string, data: string }[]) => {
-    handleSend(images);
+  // Handle sending messages, possibly with files
+  const handleSendWrapper = (filesToSend?: { mimeType: string, data: string, name: string, type: string }[]) => {
+    handleSend(files);
   };
 
   return {
@@ -90,10 +90,10 @@ export function useAIChatInput() {
     handleSend: handleSendWrapper,
     handleClear,
     setIsFullScreen,
-    images,
-    uploadImage,
-    removeImage,
-    clearImages,
+    files,
+    uploadFile,
+    removeFile,
+    clearFiles,
     isUploading
   };
 }
