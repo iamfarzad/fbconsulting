@@ -1,20 +1,19 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AIChatInput } from './ui/ai-chat';
 import LocationGreeting from './LocationGreeting';
-import { Flag, Calendar, ArrowRight, Mic } from 'lucide-react';
+import { Flag, Calendar, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
 import { AnimatedGridPattern } from './ui/animated-grid-pattern';
 import { cn } from '@/lib/utils';
-import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
 import { trackEvent } from '@/services/analyticsService';
 import { ShimmerButton } from './ui/shimmer-button';
 import { useGeminiSpeechRecognition } from '@/hooks/useGeminiSpeechRecognition';
 import { AnimatedBars } from './ui/AnimatedBars';
 import { useGeminiInitialization } from '@/hooks/gemini/useGeminiInitialization';
+import { VoiceControls } from './ui/ai-chat/VoiceControls';
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -24,10 +23,8 @@ const Hero = () => {
   const [chatInputValue, setChatInputValue] = useState('');
   const { hasApiKey, getApiKey } = useGeminiInitialization();
   
-  // Determine if we should use Gemini API for voice
   const useGeminiApi = hasApiKey();
   
-  // Add direct voice capability for the hero section with Gemini
   const { 
     isListening, 
     transcript, 
@@ -57,7 +54,6 @@ const Hero = () => {
       ref={heroRef}
       className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 overflow-hidden pt-16"
     >
-      {/* Animated Grid Pattern Background - Now Tilted */}
       <AnimatedGridPattern
         numSquares={30}
         maxOpacity={0.05}
@@ -66,7 +62,7 @@ const Hero = () => {
         className={cn(
           "opacity-70 dark:opacity-50",
           "[mask-image:radial-gradient(900px_circle_at_center,white,transparent)]",
-          "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12", // Added skew for tilt effect
+          "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12",
           "z-0"
         )}
       />
@@ -121,7 +117,6 @@ const Hero = () => {
             {isNorwegian ? t('hero_subtitle') : "Ask me anything about AI automation, workflow optimization, or how to reduce costs with intelligent systems"}
           </motion.p>
           
-          {/* Voice Indicator (when active) */}
           <AnimatePresence>
             {(isListening || isTranscribing) && (
               <motion.div 
@@ -159,27 +154,12 @@ const Hero = () => {
             
             {isVoiceSupported && (
               <div className="absolute right-2 -bottom-14 flex items-center gap-2">
-                <Button 
-                  onClick={toggleListening}
-                  variant="outline"
-                  className={cn(
-                    "rounded-full p-3 h-auto",
-                    isListening && "bg-[#fe5a1d] text-white border-[#fe5a1d]/50",
-                    useGeminiApi && !isListening && "border-[#fe5a1d]/30"
-                  )}
-                >
-                  <Mic className={cn("w-5 h-5", isListening && "animate-pulse")} />
-                  <span className="ml-2">
-                    {isListening 
-                      ? "Listening..." 
-                      : useGeminiApi 
-                        ? "Speak with Gemini" 
-                        : "Speak to Chat"}
-                  </span>
-                  {useGeminiApi && !isListening && (
-                    <span className="ml-1 text-xs text-[#fe5a1d]">(Charon)</span>
-                  )}
-                </Button>
+                <VoiceControls
+                  isListening={isListening}
+                  toggleListening={toggleListening}
+                  disabled={false}
+                  aiProcessing={isTranscribing}
+                />
               </div>
             )}
           </motion.div>
@@ -208,7 +188,6 @@ const Hero = () => {
         </div>
       </div>
       
-      {/* Simplified scroll indicator */}
       <motion.div 
         className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
         animate={{ y: [0, 5, 0] }}
