@@ -27,12 +27,11 @@ export function VoiceControls({
             onClick={toggleListening}
             disabled={disabled || aiProcessing}
             className={cn(
-              "relative p-2.5 rounded-full transition-all duration-300 border",
+              "relative p-2.5 rounded-full transition-colors duration-300 border",
               isListening 
-                ? "bg-[#fe5a1d] text-white border-[#fe5a1d]/50" 
-                : "text-black/80 hover:bg-black/5 border-black/20",
+                ? "bg-black text-white border-white/20 dark:bg-white dark:text-black dark:border-black/20" 
+                : "text-black/80 hover:bg-black/5 border-black/20 dark:text-white/80 dark:hover:bg-white/10 dark:border-white/20",
               disabled && "opacity-50 cursor-not-allowed",
-              "dark:border-white/20 dark:text-white/80"
             )}
           >
             {isListening ? (

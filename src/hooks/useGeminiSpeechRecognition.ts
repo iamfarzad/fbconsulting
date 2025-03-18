@@ -69,15 +69,22 @@ export const useGeminiSpeechRecognition = (
       setIsListening(false);
       setIsTranscribing(true);
       
+      console.log('Processing audio with Gemini API, key:', apiKey ? 'Available' : 'Not available');
+      
       // Process audio with Gemini
+      if (!apiKey) {
+        throw new Error('Gemini API key is not available');
+      }
+      
       const transcription = await processAudioInput(audioBlob, {
         apiKey,
-        model: 'gemini-2.0-vision', // Vision model handles multimodal including audio
+        model: 'gemini-2.0-pro', // Using the pro model for better transcription
         speechConfig: {
           voice_name: 'Charon'
         }
       });
       
+      console.log('Transcription result:', transcription);
       setTranscript(transcription);
       setIsTranscribing(false);
       
