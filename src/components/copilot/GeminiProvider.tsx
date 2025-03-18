@@ -16,6 +16,7 @@ interface GeminiContextType {
   personaData: any;
   error: string | null;
   model: GenerativeModel | null;
+  visionModel: GenerativeModel | null;
 }
 
 // Create a context for Gemini-specific functionality
@@ -24,7 +25,8 @@ const GeminiContext = createContext<GeminiContextType>({
   isLoading: true,
   personaData: null,
   error: null,
-  model: null
+  model: null,
+  visionModel: null
 });
 
 // Custom hook to access the Gemini context
@@ -41,6 +43,7 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [model, setModel] = useState<GenerativeModel | null>(null);
+  const [visionModel, setVisionModel] = useState<GenerativeModel | null>(null);
   
   // Default persona configuration
   const defaultPersona = {
@@ -69,7 +72,7 @@ Rules:
   };
   
   useEffect(() => {
-    const initializeGeminiModel = async () => {
+    const initializeGeminiModels = async () => {
       setIsLoading(true);
       setError(null);
       
@@ -98,8 +101,14 @@ Rules:
         
         // Initialize the Gemini API with the SDK
         const genAI = new GenerativeAI(apiKey);
+        
+        // Initialize text model
         const geminiModel = genAI.getGenerativeModel({ model: modelName });
         setModel(geminiModel);
+        
+        // Initialize vision model
+        const visionModel = genAI.getGenerativeModel({ model: "gemini-2.0-vision" });
+        setVisionModel(visionModel);
         
         // Test API key with a simple generation
         try {
@@ -108,6 +117,8 @@ Rules:
           
           if (response) {
             console.log(`✅ Gemini initialized successfully with model: ${modelName}`);
+            console.log(`✅ Vision model initialized: gemini-2.0-vision`);
+            
             if (personaData) {
               console.log("Using persona data:", personaData.currentPersona);
             } else {
@@ -136,7 +147,7 @@ Rules:
       }
     };
     
-    initializeGeminiModel();
+    initializeGeminiModels();
   }, [apiKey, personaData]);
   
   return (
@@ -145,7 +156,8 @@ Rules:
       isLoading,
       error,
       personaData: personaData || defaultPersona,
-      model
+      model,
+      visionModel
     }}>
       {children}
     </GeminiContext.Provider>

@@ -25,7 +25,12 @@ export const GeminiChat: React.FC = () => {
     error,
     providerError,
     voiceError,
-    isVoiceSupported
+    isVoiceSupported,
+    // Image properties
+    images,
+    uploadImage,
+    removeImage,
+    isUploading
   } = useGeminiChatHandler();
   
   return (
@@ -67,6 +72,11 @@ export const GeminiChat: React.FC = () => {
         isVoiceSupported={isVoiceSupported}
         error={error}
         voiceError={voiceError}
+        // Add image-related props
+        images={images}
+        onUploadImage={uploadImage}
+        onRemoveImage={removeImage}
+        isUploading={isUploading}
       />
     </div>
   );
