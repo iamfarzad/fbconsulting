@@ -15,6 +15,9 @@ const Hero = () => {
   
   const useGeminiApi = hasApiKey();
   
+  // Log API key information for debugging
+  console.log('✅ Google Gemini API Key Ready');
+  
   const { 
     isListening, 
     transcript, 
@@ -23,6 +26,7 @@ const Hero = () => {
     isTranscribing 
   } = useGeminiSpeechRecognition(getApiKey(), (command) => {
     if (command.trim()) {
+      console.log('Command received from speech recognition:', command);
       setChatInputValue(command);
     }
   });
