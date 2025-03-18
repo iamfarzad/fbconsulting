@@ -1,0 +1,28 @@
+
+import { 
+  GenerativeAI,
+  GenerativeModel
+} from '@google/generative-ai';
+import { GeminiConfig, DEFAULT_CONFIG, DEFAULT_SAFETY_SETTINGS } from './types';
+
+/**
+ * Initialize the Gemini API with the specified configuration
+ */
+export function initializeGemini(config: GeminiConfig): GenerativeModel {
+  if (!config.apiKey) {
+    throw new Error('Gemini API key is required');
+  }
+  
+  const genAI = new GenerativeAI(config.apiKey);
+  return genAI.getGenerativeModel({ 
+    model: config.model || "gemini-2.0-pro-001",
+    generationConfig: {
+      temperature: config.temperature ?? DEFAULT_CONFIG.temperature,
+      topP: config.topP ?? DEFAULT_CONFIG.topP,
+      topK: config.topK ?? DEFAULT_CONFIG.topK,
+      maxOutputTokens: config.maxOutputTokens ?? DEFAULT_CONFIG.maxOutputTokens,
+      stopSequences: config.stopSequences ?? DEFAULT_CONFIG.stopSequences,
+    },
+    safetySettings: config.safetySettings ?? DEFAULT_SAFETY_SETTINGS,
+  });
+}
