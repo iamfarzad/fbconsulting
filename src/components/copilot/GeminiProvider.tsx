@@ -81,15 +81,21 @@ Rules:
         const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
         let activeApiKey = contextApiKey || envApiKey;
         
+        console.log("GeminiProvider - ENV API Key:", envApiKey ? "✅ Found" : "❌ Not found");
+        console.log("GeminiProvider - Context API Key:", contextApiKey ? "✅ Found" : "❌ Not found");
+        
         // Check localStorage for user-provided key (takes precedence)
         const savedConfig = localStorage.getItem('GEMINI_CONFIG');
         let modelName = "gemini-2.0-flash"; // Default model
+        let keySource = "unknown";
         
         if (savedConfig) {
           try {
             const config = JSON.parse(savedConfig);
             if (config.apiKey) {
               activeApiKey = config.apiKey;
+              keySource = "localStorage";
+              console.log("GeminiProvider - Using localStorage API key");
             }
             if (config.modelName) {
               modelName = config.modelName;
@@ -97,14 +103,23 @@ Rules:
           } catch (error) {
             console.error('Error parsing saved configuration:', error);
           }
+        } else if (envApiKey) {
+          keySource = "environment";
+          console.log("GeminiProvider - Using environment API key");
+        } else if (contextApiKey) {
+          keySource = "context";
+          console.log("GeminiProvider - Using context API key");
         }
         
         if (!activeApiKey) {
           setError('No Gemini API key found');
           console.warn("No Gemini API key found in environment, localStorage, or context");
+          console.log("Environment variables:", import.meta.env);
           setIsLoading(false);
           return;
         }
+        
+        console.log(`GeminiProvider - Initializing with API key from ${keySource}, model: ${modelName}`);
         
         // Initialize the Gemini API with the SDK
         const genAI = new GenerativeAI(activeApiKey);
@@ -125,6 +140,7 @@ Rules:
           if (response) {
             console.log(`✅ Gemini initialized successfully with model: ${modelName}`);
             console.log(`✅ Vision model initialized: gemini-2.0-vision`);
+            console.log(`✅ API key source: ${keySource}`);
             
             if (personaData) {
               console.log("Using persona data:", personaData.currentPersona);
