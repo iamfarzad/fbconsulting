@@ -23,7 +23,10 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
       
       // Only send if there's content
       if (command.trim()) {
+        console.log('Voice command processed, sending:', command);
         onSend();
+      } else {
+        console.log('Empty voice command, not sending');
       }
       
       // Reset processing flag after a delay
@@ -57,6 +60,7 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
   
   // Use Gemini or browser speech recognition based on API key availability
   const useGeminiAPI = hasApiKey();
+  console.log('Using Gemini API for voice:', useGeminiAPI ? 'YES' : 'NO');
   
   const geminiSpeechRecognition = useGeminiSpeechRecognition(
     getApiKey(),
