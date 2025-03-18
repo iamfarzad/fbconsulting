@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useMessages } from "./useMessages";
 import { useSuggestedResponse } from "./useSuggestedResponse";
@@ -6,7 +5,8 @@ import { LeadInfo } from "@/services/lead/leadExtractor";
 import { generateResponse } from "@/services/chat/responseGenerator";
 import { useToast } from "./use-toast";
 import { useLocation } from "react-router-dom";
-import { sendMultimodalRequest, GeminiMultimodalChat } from "@/services/gemini";
+import { sendMultimodalRequest } from "@/services/gemini";
+import { GeminiMultimodalChat } from "@/services/gemini/multimodal";
 import { useImageUpload } from "@/hooks/useImageUpload";
 
 export function useAIChatInput() {
@@ -36,9 +36,7 @@ export function useAIChatInput() {
   
   const suggestedResponse = useSuggestedResponse(mockLeadInfo);
 
-  // Initialize multimodal chat if needed
   const initializeMultimodalChat = () => {
-    // Get API key and model configuration
     const savedConfig = localStorage.getItem('GEMINI_CONFIG');
     let apiKey = '';
     
@@ -93,8 +91,8 @@ export function useAIChatInput() {
     setIsFullScreen(prev => !prev);
   };
 
-  const handleSend = async (images?: { mimeType: string; data: string }[]) => {
-    if (!inputValue.trim() && (!images || images.length === 0)) {
+  const handleSend = async () => {
+    if (!inputValue.trim() && images.length === 0) {
       toast({
         title: "Message is empty",
         description: "Please enter a message or add an image before sending.",
@@ -115,14 +113,20 @@ export function useAIChatInput() {
       }
       
       if (images && images.length > 0) {
-        // Use the multimodal chat for image-based conversations
         if (multimodalChatRef.current) {
-          aiResponse = await multimodalChatRef.current.sendMessage(inputValue, images);
+          const imageData = images.map(img => ({
+            mimeType: img.mimeType,
+            data: img.data
+          }));
+          
+          aiResponse = await multimodalChatRef.current.sendMessage(inputValue, imageData);
         } else {
-          // Fallback to individual request if chat initialization failed
           aiResponse = await sendMultimodalRequest(
             inputValue,
-            images,
+            images.map(img => ({
+              mimeType: img.mimeType,
+              data: img.data
+            })),
             { 
               apiKey: JSON.parse(localStorage.getItem('GEMINI_CONFIG') || '{}').apiKey, 
               model: 'gemini-2.0-vision'
@@ -130,8 +134,6 @@ export function useAIChatInput() {
           );
         }
       } else {
-        // For text-only responses, use the mock generator for now
-        // In a real implementation, you'd use the Gemini chat here too
         const mockLeadInfo: LeadInfo = {
           interests: [...messages.map(m => m.content), inputValue],
           stage: 'discovery'
@@ -166,7 +168,6 @@ export function useAIChatInput() {
     clearImages();
     setShowMessages(false);
     
-    // Also clear the multimodal chat history
     if (multimodalChatRef.current) {
       multimodalChatRef.current.clearHistory();
     }

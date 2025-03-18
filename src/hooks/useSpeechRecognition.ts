@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { SpeechRecognition, SpeechRecognitionEvent } from '@/types/voice';
 
@@ -83,40 +82,63 @@ export const useSpeechRecognition = (onCommand: (command: string) => void = () =
     };
   }, [onCommand]);
 
-  const toggleListening = useCallback(async () => {
+  // Start listening function
+  const startListening = useCallback(async () => {
     if (!recognitionRef.current) {
       setVoiceError('Speech recognition not initialized or not supported in this browser');
       return;
     }
     
-    if (isListening) {
-      console.log('Stopping speech recognition');
-      recognitionRef.current.stop();
-      setIsListening(false);
-    } else {
-      try {
-        console.log('Requesting microphone permission');
-        // Request microphone permission
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-        // Reset states
-        setVoiceError(null);
-        setTranscript('');
-        // Start recognition
-        console.log('Starting speech recognition');
-        recognitionRef.current.start();
-        setIsListening(true);
-      } catch (error) {
-        console.error('Microphone permission denied:', error);
-        setVoiceError('Microphone permission denied');
-      }
+    try {
+      console.log('Requesting microphone permission');
+      // Request microphone permission
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Reset states
+      setVoiceError(null);
+      setTranscript('');
+      // Start recognition
+      console.log('Starting speech recognition');
+      recognitionRef.current.start();
+      setIsListening(true);
+    } catch (error) {
+      console.error('Microphone permission denied:', error);
+      setVoiceError('Microphone permission denied');
     }
-  }, [isListening]);
+  }, []);
+
+  // Stop listening function
+  const stopListening = useCallback(() => {
+    if (!recognitionRef.current) {
+      return;
+    }
+    
+    console.log('Stopping speech recognition');
+    recognitionRef.current.stop();
+    setIsListening(false);
+  }, []);
+
+  // Reset transcript function
+  const resetTranscript = useCallback(() => {
+    setTranscript('');
+  }, []);
+
+  // Toggle listening function - keep for backward compatibility
+  const toggleListening = useCallback(async () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      await startListening();
+    }
+  }, [isListening, startListening, stopListening]);
 
   return {
     isListening,
     transcript,
     toggleListening,
+    startListening,
+    stopListening,
+    resetTranscript,
     voiceError,
-    isSupported
+    isVoiceSupported: isSupported
   };
 };
