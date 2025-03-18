@@ -29,7 +29,12 @@ export function AIChatInput({
     toggleFullScreen,
     handleSend,
     handleClear,
-    setIsFullScreen
+    setIsFullScreen,
+    // Image upload props
+    images,
+    uploadImage,
+    removeImage,
+    isUploading
   } = useAIChatInput();
   
   const isMobile = useIsMobile();
@@ -60,6 +65,11 @@ export function AIChatInput({
           suggestedResponse={suggestedResponse}
           onClear={handleClear}
           placeholderText={placeholderText}
+          // Pass image props
+          images={images}
+          uploadImage={uploadImage}
+          removeImage={removeImage}
+          isUploading={isUploading}
         />
       </AnimatePresence>
     );
@@ -80,6 +90,11 @@ export function AIChatInput({
         toggleFullScreen={toggleFullScreen}
         placeholder={placeholderText}
         isFullScreen={false}
+        // Pass image props
+        images={images}
+        uploadImage={uploadImage}
+        removeImage={removeImage}
+        isUploading={isUploading}
       />
     </AnimatePresence>
   );

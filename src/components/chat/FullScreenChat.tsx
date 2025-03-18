@@ -11,13 +11,18 @@ import { AIMessage } from '@/services/copilotService';
 interface FullScreenChatProps {
   onMinimize: () => void;
   initialMessages?: AIMessage[];
-  onSendMessage: () => void;
+  onSendMessage: (images?: { mimeType: string; data: string }[]) => void;
   inputValue: string;
   setInputValue: (value: string) => void;
   isLoading: boolean;
   suggestedResponse: string | null;
   onClear: () => void;
   placeholderText?: string;
+  // Add image-related props
+  images?: { mimeType: string; data: string; preview: string }[];
+  uploadImage?: (file: File) => Promise<void>;
+  removeImage?: (index: number) => void;
+  isUploading?: boolean;
 }
 
 const FullScreenChat: React.FC<FullScreenChatProps> = ({ 
@@ -29,7 +34,12 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
   isLoading,
   suggestedResponse,
   onClear,
-  placeholderText = "Ask about our AI services..."
+  placeholderText = "Ask about our AI services...",
+  // Image-related props with defaults
+  images = [],
+  uploadImage,
+  removeImage,
+  isUploading = false
 }) => {
   const hasMessages = initialMessages.length > 0;
 
@@ -110,6 +120,10 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
                   hasMessages={hasMessages}
                   suggestedResponse={suggestedResponse}
                   placeholder={placeholderText}
+                  images={images}
+                  onUploadImage={uploadImage}
+                  onRemoveImage={removeImage}
+                  isUploading={isUploading}
                 />
               </div>
             </div>

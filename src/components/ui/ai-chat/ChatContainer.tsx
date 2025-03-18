@@ -18,6 +18,11 @@ interface ChatContainerProps {
   toggleFullScreen: () => void;
   placeholder?: string;
   isFullScreen?: boolean;
+  // Add image-related props
+  images?: { mimeType: string; data: string; preview: string }[];
+  uploadImage?: (file: File) => Promise<void>;
+  removeImage?: (index: number) => void;
+  isUploading?: boolean;
 }
 
 export const ChatContainer: React.FC<ChatContainerProps> = ({
@@ -32,7 +37,12 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
   handleClear,
   toggleFullScreen,
   placeholder = "Ask me anything...",
-  isFullScreen = false
+  isFullScreen = false,
+  // Image-related props with defaults
+  images = [],
+  uploadImage,
+  removeImage,
+  isUploading = false
 }) => {
   return (
     <motion.div 
@@ -115,6 +125,10 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
           hasMessages={messages.length > 0}
           suggestedResponse={suggestedResponse}
           placeholder={placeholder}
+          images={images}
+          onUploadImage={uploadImage}
+          onRemoveImage={removeImage}
+          isUploading={isUploading}
         />
       </motion.div>
     </motion.div>

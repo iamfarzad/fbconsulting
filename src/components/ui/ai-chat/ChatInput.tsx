@@ -10,7 +10,6 @@ import { SendButton } from "./SendButton";
 import { SuggestionButton } from "./SuggestionButton";
 import { AnimatedBars } from "@/components/ui/AnimatedBars";
 import { ImageUploader } from "./ImageUploader";
-import { useImageUpload } from "@/hooks/useImageUpload";
 
 interface ChatInputProps {
   value: string;
@@ -22,6 +21,10 @@ interface ChatInputProps {
   hasMessages: boolean;
   suggestedResponse: string | null;
   placeholder: string;
+  images?: { mimeType: string; data: string; preview: string }[];
+  onUploadImage?: (file: File) => Promise<void>;
+  onRemoveImage?: (index: number) => void;
+  isUploading?: boolean;
 }
 
 export function ChatInput({
@@ -34,19 +37,15 @@ export function ChatInput({
   hasMessages,
   suggestedResponse,
   placeholder = "Ask me anything about AI automation for your business...",
+  images = [],
+  onUploadImage,
+  onRemoveImage,
+  isUploading = false
 }: ChatInputProps) {
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
     minHeight: 60,
     maxHeight: 200,
   });
-  
-  const {
-    images,
-    uploadImage,
-    removeImage,
-    clearImages,
-    isUploading
-  } = useImageUpload();
   
   const {
     isListening,
@@ -95,9 +94,6 @@ export function ChatInput({
     } else {
       onSend();
     }
-    
-    // Clear images after sending
-    clearImages();
   };
 
   return (
@@ -153,12 +149,12 @@ export function ChatInput({
         </div>
         
         {/* Image upload area */}
-        {images.length > 0 && (
+        {images.length > 0 && onRemoveImage && (
           <div className="px-4 pb-2 border-t border-black/10 pt-2">
             <ImageUploader
               images={images}
-              onUpload={uploadImage}
-              onRemove={removeImage}
+              onUpload={onUploadImage || (async () => {})}
+              onRemove={onRemoveImage}
               isUploading={isUploading}
             />
           </div>
@@ -180,11 +176,11 @@ export function ChatInput({
               </button>
             )}
             
-            {images.length === 0 && (
+            {images.length === 0 && onUploadImage && (
               <ImageUploader
                 images={images}
-                onUpload={uploadImage}
-                onRemove={removeImage}
+                onUpload={onUploadImage}
+                onRemove={onRemoveImage || (() => {})}
                 isUploading={isUploading}
               />
             )}
