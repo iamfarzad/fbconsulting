@@ -7,6 +7,7 @@ import { generateResponse } from "@/services/chat/responseGenerator";
 import { useToast } from "./use-toast";
 import { useLocation } from "react-router-dom";
 import { sendMultimodalRequest } from "@/services/gemini";
+import { useImageUpload } from "@/hooks/useImageUpload";
 
 export function useAIChatInput() {
   const [showMessages, setShowMessages] = useState(false);
@@ -18,6 +19,15 @@ export function useAIChatInput() {
   const containerRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const currentPath = location.pathname;
+  
+  // Add image upload functionality
+  const {
+    images,
+    uploadImage,
+    removeImage,
+    clearImages,
+    isUploading
+  } = useImageUpload();
   
   // Create a mock LeadInfo object for suggestions
   const mockLeadInfo: LeadInfo = {
@@ -140,6 +150,9 @@ export function useAIChatInput() {
     
     setInputValue("");
     
+    // Clear any uploaded images after sending
+    clearImages();
+    
     // Show messages container when first message is sent
     if (!showMessages) {
       setShowMessages(true);
@@ -148,6 +161,7 @@ export function useAIChatInput() {
 
   const handleClear = () => {
     clearMessages();
+    clearImages();
     setShowMessages(false);
     toast({
       title: "Chat cleared",
@@ -167,6 +181,12 @@ export function useAIChatInput() {
     toggleFullScreen,
     handleSend,
     handleClear,
-    setIsFullScreen
+    setIsFullScreen,
+    // Export image upload functionality
+    images,
+    uploadImage,
+    removeImage,
+    clearImages,
+    isUploading
   };
 }
