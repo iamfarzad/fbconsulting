@@ -86,7 +86,7 @@ Rules:
         
         // Check localStorage for user-provided key (takes precedence)
         const savedConfig = localStorage.getItem('GEMINI_CONFIG');
-        let modelName = "gemini-1.5-flash"; // Updated to a valid model name
+        let modelName = "gemini-2.0-flash"; // Updated to correct model name
         let keySource = "unknown";
         
         if (savedConfig) {
@@ -129,7 +129,7 @@ Rules:
         setModel(geminiModel);
         
         // Initialize vision model
-        const visionModel = genAI.getGenerativeModel({ model: "gemini-1.5-pro-vision" }); // Updated to a valid model name
+        const visionModel = genAI.getGenerativeModel({ model: "gemini-2.0-vision" }); // Updated to correct model name
         setVisionModel(visionModel);
         
         // Test API key with a simple generation
@@ -139,7 +139,7 @@ Rules:
           
           if (response) {
             console.log(`✅ Gemini initialized successfully with model: ${modelName}`);
-            console.log(`✅ Vision model initialized: gemini-1.5-pro-vision`);
+            console.log(`✅ Vision model initialized: gemini-2.0-vision`);
             console.log(`✅ API key source: ${keySource}`);
             
             if (personaData) {

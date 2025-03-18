@@ -78,7 +78,7 @@ export const useGeminiSpeechRecognition = (
       
       const transcription = await processAudioInput(audioBlob, {
         apiKey,
-        model: 'gemini-1.5-pro', // Updated to use a valid model name
+        model: 'gemini-2.0-pro', // Updated to correct model name
         speechConfig: {
           voice_name: 'Charon'
         }

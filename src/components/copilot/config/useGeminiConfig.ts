@@ -9,7 +9,7 @@ import { useGeminiAPI } from '@/App';
 export const useGeminiConfig = () => {
   const { apiKey: contextApiKey } = useGeminiAPI();
   const [apiKey, setApiKey] = useState('');
-  const [modelName, setModelName] = useState('gemini-1.5-flash'); // Updated default model name
+  const [modelName, setModelName] = useState('gemini-2.0-flash'); // Updated to correct model name
   const [isLoading, setIsLoading] = useState(false);
   const [hasSavedKey, setHasSavedKey] = useState(false);
   const [hasEnvKey, setHasEnvKey] = useState(false);
@@ -125,7 +125,7 @@ export const useGeminiConfig = () => {
   const handleClearConfig = () => {
     localStorage.removeItem('GEMINI_CONFIG');
     setApiKey('');
-    setModelName('gemini-1.5-flash'); // Updated default model name
+    setModelName('gemini-2.0-flash');
     setHasSavedKey(false);
     toast.success('API configuration cleared');
   };

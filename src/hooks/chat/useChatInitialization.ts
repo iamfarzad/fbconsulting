@@ -33,7 +33,7 @@ export function useChatInitialization() {
         if (apiKey && !multimodalChatRef.current) {
           multimodalChatRef.current = new GeminiMultimodalChat({
             apiKey,
-            model: 'gemini-1.5-pro-vision' // Updated to use a valid model name
+            model: 'gemini-2.0-vision' // Updated to use correct model name
           });
           
           console.log("✅ Gemini chat initialized successfully with key source:", config.apiKey ? "localStorage" : "environment");
@@ -51,7 +51,7 @@ export function useChatInitialization() {
       // If we only have the env variable but no saved config
       multimodalChatRef.current = new GeminiMultimodalChat({
         apiKey,
-        model: 'gemini-1.5-pro-vision' // Updated to use a valid model name
+        model: 'gemini-2.0-vision' // Updated to use correct model name
       });
       
       console.log("✅ Gemini chat initialized successfully with environment API key");

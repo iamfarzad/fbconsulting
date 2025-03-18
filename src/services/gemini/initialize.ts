@@ -18,7 +18,7 @@ export function initializeGemini(config: GeminiConfig): GenerativeModel {
   
   // Get the model with the specified configuration
   return genAI.getGenerativeModel({ 
-    model: config.model || "gemini-2.0-flash", // Use gemini-2.0-flash as default
+    model: config.model || "gemini-2.0-flash", // Updated to use correct model
     generationConfig: {
       temperature: config.temperature ?? DEFAULT_CONFIG.temperature,
       topP: config.topP ?? DEFAULT_CONFIG.topP,
