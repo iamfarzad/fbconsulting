@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useMessages } from "./useMessages";
 import { useSuggestedResponse } from "./useSuggestedResponse";
@@ -5,7 +6,7 @@ import { LeadInfo } from "@/services/lead/leadExtractor";
 import { generateResponse } from "@/services/chat/responseGenerator";
 import { useToast } from "./use-toast";
 import { useLocation } from "react-router-dom";
-import { sendMultimodalRequest } from "@/services/gemini";
+import { sendMultimodalRequest, GeminiMultimodalChat } from "@/services/gemini";
 import { useImageUpload } from "@/hooks/useImageUpload";
 
 export function useAIChatInput() {
@@ -18,6 +19,7 @@ export function useAIChatInput() {
   const containerRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const currentPath = location.pathname;
+  const multimodalChatRef = useRef<GeminiMultimodalChat | null>(null);
   
   const {
     images,
@@ -33,6 +35,31 @@ export function useAIChatInput() {
   };
   
   const suggestedResponse = useSuggestedResponse(mockLeadInfo);
+
+  // Initialize multimodal chat if needed
+  const initializeMultimodalChat = () => {
+    // Get API key and model configuration
+    const savedConfig = localStorage.getItem('GEMINI_CONFIG');
+    let apiKey = '';
+    
+    if (savedConfig) {
+      try {
+        const config = JSON.parse(savedConfig);
+        apiKey = config.apiKey;
+        
+        if (apiKey && !multimodalChatRef.current) {
+          multimodalChatRef.current = new GeminiMultimodalChat({
+            apiKey,
+            model: 'gemini-2.0-vision'
+          });
+        }
+      } catch (error) {
+        console.error('Error initializing multimodal chat:', error);
+      }
+    }
+    
+    return !!apiKey;
+  };
 
   const calculateContainerHeight = () => {
     if (containerRef.current && typeof window !== 'undefined') {
@@ -81,37 +108,30 @@ export function useAIChatInput() {
       addUserMessage(inputValue);
       
       let aiResponse = '';
+      const hasApiKey = initializeMultimodalChat();
       
-      const savedConfig = localStorage.getItem('GEMINI_CONFIG');
-      let apiKey = '';
-      let modelName = 'gemini-2.0-flash';
-      
-      if (savedConfig) {
-        try {
-          const config = JSON.parse(savedConfig);
-          apiKey = config.apiKey;
-          if (config.modelName) {
-            modelName = config.modelName;
-          }
-        } catch (error) {
-          console.error('Error parsing saved configuration:', error);
-        }
-      }
-      
-      if (!apiKey) {
+      if (!hasApiKey) {
         throw new Error('No API key found. Please configure Gemini in the settings.');
       }
       
       if (images && images.length > 0) {
-        aiResponse = await sendMultimodalRequest(
-          inputValue,
-          images,
-          { 
-            apiKey, 
-            model: 'gemini-2.0-vision'
-          }
-        );
+        // Use the multimodal chat for image-based conversations
+        if (multimodalChatRef.current) {
+          aiResponse = await multimodalChatRef.current.sendMessage(inputValue, images);
+        } else {
+          // Fallback to individual request if chat initialization failed
+          aiResponse = await sendMultimodalRequest(
+            inputValue,
+            images,
+            { 
+              apiKey: JSON.parse(localStorage.getItem('GEMINI_CONFIG') || '{}').apiKey, 
+              model: 'gemini-2.0-vision'
+            }
+          );
+        }
       } else {
+        // For text-only responses, use the mock generator for now
+        // In a real implementation, you'd use the Gemini chat here too
         const mockLeadInfo: LeadInfo = {
           interests: [...messages.map(m => m.content), inputValue],
           stage: 'discovery'
@@ -145,6 +165,12 @@ export function useAIChatInput() {
     clearMessages();
     clearImages();
     setShowMessages(false);
+    
+    // Also clear the multimodal chat history
+    if (multimodalChatRef.current) {
+      multimodalChatRef.current.clearHistory();
+    }
+    
     toast({
       title: "Chat cleared",
       description: "All messages have been removed.",
