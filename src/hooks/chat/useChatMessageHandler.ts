@@ -105,9 +105,8 @@ export function useChatMessageHandler({
     setInputValue("");
     clearImages();
     
-    if (!showMessages) {
-      setShowMessages(true);
-    }
+    // Fixed: We're using setShowMessages directly, not checking showMessages
+    setShowMessages(true);
   };
 
   // Handle clearing the chat
