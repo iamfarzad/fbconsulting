@@ -61,32 +61,67 @@ export function useChatMessageHandler({
       
       let aiResponse = '';
       
-      // Validate API key for image messages
-      if (images && images.length > 0) {
-        if (!hasApiKey()) {
-          throw new Error('No API key found. Please configure Gemini in the settings.');
-        }
-        
-        // Try to use the multimodal chat reference if available
-        if (multimodalChatRef.current) {
-          const imageData = images.map(img => ({
-            mimeType: img.mimeType,
-            data: img.data
-          }));
+      // Check if we have an API key for Gemini
+      if (hasApiKey()) {
+        try {
+          if (images && images.length > 0) {
+            // Process multimodal messages with images
+            if (multimodalChatRef.current) {
+              const imageData = images.map(img => ({
+                mimeType: img.mimeType,
+                data: img.data
+              }));
+              
+              aiResponse = await multimodalChatRef.current.sendMessage(inputValue, imageData);
+            } else {
+              // Fallback to direct API call
+              aiResponse = await processMultimodalMessage(inputValue, images, getApiKey());
+            }
+          } else {
+            // For text-only messages, also use Gemini if available
+            if (multimodalChatRef.current) {
+              aiResponse = await multimodalChatRef.current.sendMessage(inputValue);
+            } else {
+              // Use the text model through API
+              const mockLeadInfo: LeadInfo = {
+                interests: [...messages.map(m => m.content), inputValue],
+                stage: 'discovery' as const
+              };
+              
+              // Use the model directly for text messages
+              aiResponse = await processMultimodalMessage(inputValue, [], getApiKey());
+            }
+          }
+        } catch (error) {
+          console.error("Gemini API error:", error);
+          toast({
+            title: "AI Service Error",
+            description: "Could not connect to Gemini. Using fallback response instead.",
+            variant: "destructive",
+          });
           
-          aiResponse = await multimodalChatRef.current.sendMessage(inputValue, imageData);
-        } else {
-          // Fallback to direct API call
-          aiResponse = await processMultimodalMessage(inputValue, images, getApiKey());
+          // Fallback to mock response
+          const mockLeadInfo: LeadInfo = {
+            interests: [...messages.map(m => m.content), inputValue],
+            stage: 'discovery' as const
+          };
+          
+          aiResponse = await processTextMessage(inputValue, mockLeadInfo);
         }
       } else {
-        // For text-only messages, use the mock lead info
+        // No API key, use mock response generator
         const mockLeadInfo: LeadInfo = {
           interests: [...messages.map(m => m.content), inputValue],
           stage: 'discovery' as const
         };
         
         aiResponse = await processTextMessage(inputValue, mockLeadInfo);
+        
+        // Show a toast suggesting to set up Gemini
+        toast({
+          title: "Using Demo Mode",
+          description: "Set up Gemini API Key in the settings for full AI features.",
+        });
       }
       
       // Add the AI response to the chat
