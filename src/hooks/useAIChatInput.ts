@@ -95,7 +95,7 @@ export function useAIChatInput() {
       // Get Gemini API key from localStorage
       const savedConfig = localStorage.getItem('GEMINI_CONFIG');
       let apiKey = '';
-      let modelName = 'gemini-2.0-pro-001';
+      let modelName = 'gemini-1.5-pro';
       
       if (savedConfig) {
         try {
@@ -121,7 +121,7 @@ export function useAIChatInput() {
           images,
           { 
             apiKey, 
-            model: 'gemini-2.0-vision-001' // Use vision model
+            model: 'gemini-1.5-pro-vision' // Use vision model
           }
         );
       } else {
