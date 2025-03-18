@@ -57,27 +57,27 @@
   
   /* Standardized typography */
   h1, .h1 {
-    @apply text-3xl md:text-4xl font-semibold leading-tight tracking-tight;
+    @apply text-3xl md:text-4xl font-semibold leading-tight tracking-tight text-foreground dark:text-white;
   }
   
   h2, .h2 {
-    @apply text-2xl md:text-3xl font-semibold leading-tight tracking-tight;
+    @apply text-2xl md:text-3xl font-semibold leading-tight tracking-tight text-foreground dark:text-white;
   }
   
   h3, .h3 {
-    @apply text-xl md:text-2xl font-medium leading-snug;
+    @apply text-xl md:text-2xl font-medium leading-snug text-foreground dark:text-white;
   }
   
   h4, .h4 {
-    @apply text-lg font-medium leading-snug;
+    @apply text-lg font-medium leading-snug text-foreground dark:text-white;
   }
   
   p, .body {
-    @apply text-base leading-relaxed;
+    @apply text-base leading-relaxed text-foreground dark:text-gray-200;
   }
   
   .body-sm {
-    @apply text-sm leading-relaxed;
+    @apply text-sm leading-relaxed text-foreground dark:text-gray-200;
   }
 }
 
