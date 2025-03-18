@@ -27,7 +27,7 @@ export function VoiceControls({
             onClick={toggleListening}
             disabled={disabled || aiProcessing}
             className={cn(
-              "relative p-1.5 rounded-md transition-all duration-300 border",
+              "relative p-2.5 rounded-full transition-all duration-300 border",
               isListening 
                 ? "bg-[#fe5a1d] text-white border-[#fe5a1d]/50" 
                 : "text-black/80 hover:bg-black/5 border-black/20",
@@ -37,13 +37,13 @@ export function VoiceControls({
           >
             {isListening ? (
               <>
-                <Mic className="w-3.5 h-3.5" />
+                <Mic className="w-5 h-5" />
                 <span className="absolute -bottom-1 -right-1">
                   <AnimatedBars isActive={true} small />
                 </span>
               </>
             ) : (
-              <Mic className="w-3.5 h-3.5" />
+              <Mic className="w-5 h-5" />
             )}
             <span className="sr-only">Toggle voice input</span>
           </button>
