@@ -27,9 +27,9 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
             </SelectTrigger>
           </FormControl>
           <SelectContent>
-            <SelectItem value="gemini-1.5-flash">gemini-1.5-flash (Fastest)</SelectItem>
-            <SelectItem value="gemini-1.5-pro">gemini-1.5-pro (Balance)</SelectItem>
-            <SelectItem value="gemini-1.5-pro-vision">gemini-1.5-pro-vision (Vision)</SelectItem>
+            <SelectItem value="gemini-2.0-flash">gemini-2.0-flash (Fastest)</SelectItem>
+            <SelectItem value="gemini-2.0-pro">gemini-2.0-pro (Balance)</SelectItem>
+            <SelectItem value="gemini-2.0-vision">gemini-2.0-vision (Vision)</SelectItem>
           </SelectContent>
         </Select>
         <FormDescription>
