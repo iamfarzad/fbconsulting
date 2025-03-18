@@ -1,5 +1,6 @@
+
 import { 
-  GenerativeModel,
+  GoogleGenerativeAI,
   HarmCategory, 
   HarmBlockThreshold 
 } from '@google/genai';
@@ -44,11 +45,9 @@ export async function sendGeminiChatRequest(
     throw new Error('Gemini API key is not available');
   }
 
-  // Initialize the model
-  const model = new GenerativeModel({
-    model: "gemini-1.5-pro",
-    apiKey: apiKey
-  });
+  // Initialize the Gemini API
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
   try {
     // Format the history for the SDK chat format
