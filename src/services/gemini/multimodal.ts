@@ -36,12 +36,12 @@ export async function sendMultimodalRequest(
     
     // If we have chat history, use it to maintain context
     if (chatHistory.length > 0) {
-      // Create a chat with history
+      // Create a chat with history - properly format as Content array with role
       const chat = model.startChat({
         history: chatHistory.map(parts => ({ 
           role: 'user', 
           parts 
-        }) as Content),
+        })),
       });
       
       // Send the message with the new parts
