@@ -49,7 +49,7 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
     transcript, 
     toggleListening,
     voiceError,
-    isSupported
+    isVoiceSupported 
   } = useSpeechRecognition(handleCommand);
 
   // Enhanced animation state management with increased durations
@@ -101,6 +101,6 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
     voiceError,
     aiProcessing,
     isTranscribing,
-    isVoiceSupported: isSupported
+    isVoiceSupported
   };
 }
