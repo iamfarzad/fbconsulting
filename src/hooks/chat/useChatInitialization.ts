@@ -20,11 +20,15 @@ export function useChatInitialization() {
     const savedConfig = localStorage.getItem('GEMINI_CONFIG');
     let apiKey = envApiKey || '';
     
+    console.log("Checking for API key - ENV:", envApiKey ? "✅ Found" : "❌ Not found");
+    
     if (savedConfig) {
       try {
         const config = JSON.parse(savedConfig);
         // User-provided key takes precedence over environment variable
         apiKey = config.apiKey || apiKey;
+        
+        console.log("Checking for API key - Local Storage:", config.apiKey ? "✅ Found" : "❌ Using env key");
         
         if (apiKey && !multimodalChatRef.current) {
           multimodalChatRef.current = new GeminiMultimodalChat({
@@ -32,7 +36,7 @@ export function useChatInitialization() {
             model: 'gemini-2.0-vision'
           });
           
-          console.log("✅ Gemini chat initialized successfully");
+          console.log("✅ Gemini chat initialized successfully with key source:", config.apiKey ? "localStorage" : "environment");
           return true;
         }
       } catch (error) {
@@ -56,6 +60,7 @@ export function useChatInitialization() {
     
     if (!apiKey) {
       console.log("⚠️ No Gemini API key found in env or localStorage, using mock responses");
+      console.log("ENV variable check:", import.meta.env.VITE_GEMINI_API_KEY ? "exists" : "not found", "Value:", import.meta.env.VITE_GEMINI_API_KEY);
     }
     
     return !!apiKey;
@@ -64,17 +69,22 @@ export function useChatInitialization() {
   // Check if API key is available from any source
   const hasApiKey = () => {
     const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    console.log("ENV API Key check in hasApiKey():", envApiKey ? "✅ Found" : "❌ Not found");
     
     // Check localStorage
     const savedConfig = localStorage.getItem('GEMINI_CONFIG');
     if (savedConfig) {
       try {
         const config = JSON.parse(savedConfig);
-        return !!(config.apiKey || envApiKey);
+        const hasKey = !!(config.apiKey || envApiKey);
+        console.log("API Key availability:", hasKey ? "✅ Available" : "❌ Not available");
+        return hasKey;
       } catch (error) {
+        console.log("Error parsing config, falling back to env key:", !!envApiKey);
         return !!envApiKey;
       }
     }
+    console.log("No local config, using env key:", !!envApiKey);
     return !!envApiKey;
   };
 
@@ -97,7 +107,8 @@ export function useChatInitialization() {
 
   // Initialize when the hook is first used
   useEffect(() => {
-    initializeMultimodalChat();
+    const initialized = initializeMultimodalChat();
+    console.log("Initial chat initialization result:", initialized ? "✅ Success" : "❌ Failed");
   }, []);
 
   // Clear chat history and reset the chat instance

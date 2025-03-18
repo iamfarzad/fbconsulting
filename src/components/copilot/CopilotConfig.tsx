@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -5,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { useGeminiAPI } from '@/App';
-import { Loader2, Info } from 'lucide-react';
+import { Loader2, Info, AlertCircle, Check } from 'lucide-react';
 import { 
   Select,
   SelectContent,
@@ -19,6 +20,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const CopilotConfig: React.FC = () => {
   const { apiKey: contextApiKey } = useGeminiAPI();
@@ -27,12 +29,17 @@ export const CopilotConfig: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasSavedKey, setHasSavedKey] = useState(false);
   const [hasEnvKey, setHasEnvKey] = useState(false);
+  const [envKeyValue, setEnvKeyValue] = useState('');
   
   // Load saved API key from localStorage if available
   useEffect(() => {
     // Check for environment variable
     const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
     setHasEnvKey(!!envApiKey);
+    if (envApiKey) {
+      setEnvKeyValue(envApiKey);
+      console.log("Environment API key detected:", envApiKey.substring(0, 5) + "..." + envApiKey.substring(envApiKey.length - 4));
+    }
     
     // Check localStorage
     const savedConfig = localStorage.getItem('GEMINI_CONFIG');
@@ -42,6 +49,7 @@ export const CopilotConfig: React.FC = () => {
         if (config.apiKey) {
           setApiKey(config.apiKey);
           setHasSavedKey(true);
+          console.log("Local storage API key detected");
         }
         if (config.modelName) {
           setModelName(config.modelName);
@@ -60,6 +68,7 @@ export const CopilotConfig: React.FC = () => {
     
     try {
       setIsLoading(true);
+      console.log(`Testing Gemini connection with model: ${model}`);
       
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
@@ -85,10 +94,12 @@ export const CopilotConfig: React.FC = () => {
       
       if (!response.ok) {
         const errorData = await response.json();
+        console.error("API error response:", errorData);
         throw new Error(`API error: ${errorData.error?.message || response.statusText}`);
       }
       
       const data = await response.json();
+      console.log("Test response:", data.candidates ? "Success" : "No candidates in response");
       return Boolean(data.candidates);
     } catch (error) {
       console.error('Error testing Gemini API:', error);
@@ -142,31 +153,26 @@ export const CopilotConfig: React.FC = () => {
         <CardDescription>
           Configure your Google Gemini API integration
         </CardDescription>
-        {hasEnvKey && (
-          <div className="flex items-center gap-2 mt-2 text-sm text-green-600 dark:text-green-400">
-            <Info size={16} />
-            <span>Environment API key is available</span>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" className="h-6 w-6 p-0 rounded-full">
-                    <Info size={14} />
-                    <span className="sr-only">Info</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="max-w-xs">
-                    A Gemini API key has been found in environment variables. You can still add your own key here which will take precedence.
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-        )}
       </CardHeader>
       <CardContent className="space-y-4">
+        {hasEnvKey && (
+          <Alert className="bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800">
+            <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <AlertDescription className="text-green-600 dark:text-green-400">
+              Environment API key detected: {envKeyValue.substring(0, 5)}...{envKeyValue.substring(envKeyValue.length - 4)}
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <div className="space-y-2">
-          <Label htmlFor="apiKey">Gemini API Key</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="apiKey">Gemini API Key</Label>
+            {hasSavedKey && (
+              <span className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+                <Check className="h-3 w-3" /> Key saved
+              </span>
+            )}
+          </div>
           <Input
             id="apiKey"
             type="password" 
