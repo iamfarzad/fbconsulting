@@ -66,7 +66,7 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
     isVoiceSupported 
   } = useGeminiAPI ? geminiSpeechRecognition : browserSpeechRecognition;
 
-  // Enhanced animation state management with increased durations
+  // Enhanced animation state management
   useEffect(() => {
     let transcribingTimer: NodeJS.Timeout;
     
@@ -115,8 +115,6 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
     voiceError,
     aiProcessing,
     isTranscribing,
-    isVoiceSupported,
-    // Flag to indicate we're using Gemini API
-    isUsingGeminiApi: useGeminiAPI
+    isVoiceSupported
   };
 }
