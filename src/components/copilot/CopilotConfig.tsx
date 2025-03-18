@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { useGeminiAPI } from '@/App';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Info } from 'lucide-react';
 import { 
   Select,
   SelectContent,
@@ -14,6 +13,12 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export const CopilotConfig: React.FC = () => {
   const { apiKey: contextApiKey } = useGeminiAPI();
@@ -21,9 +26,15 @@ export const CopilotConfig: React.FC = () => {
   const [modelName, setModelName] = useState('gemini-2.0-flash');
   const [isLoading, setIsLoading] = useState(false);
   const [hasSavedKey, setHasSavedKey] = useState(false);
+  const [hasEnvKey, setHasEnvKey] = useState(false);
   
   // Load saved API key from localStorage if available
   useEffect(() => {
+    // Check for environment variable
+    const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    setHasEnvKey(!!envApiKey);
+    
+    // Check localStorage
     const savedConfig = localStorage.getItem('GEMINI_CONFIG');
     if (savedConfig) {
       try {
@@ -131,6 +142,27 @@ export const CopilotConfig: React.FC = () => {
         <CardDescription>
           Configure your Google Gemini API integration
         </CardDescription>
+        {hasEnvKey && (
+          <div className="flex items-center gap-2 mt-2 text-sm text-green-600 dark:text-green-400">
+            <Info size={16} />
+            <span>Environment API key is available</span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" className="h-6 w-6 p-0 rounded-full">
+                    <Info size={14} />
+                    <span className="sr-only">Info</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs">
+                    A Gemini API key has been found in environment variables. You can still add your own key here which will take precedence.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
