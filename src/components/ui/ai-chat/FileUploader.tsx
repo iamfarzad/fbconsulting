@@ -1,6 +1,5 @@
 
 import React, { useRef } from "react";
-import { Button } from "@/components/ui/button";
 import { Upload, X, File } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { UploadedFile } from "@/hooks/useFileUpload";
@@ -34,26 +33,25 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl overflow-hidden">
+    <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
+        <button
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className="rounded-xl"
+          className="flex items-center gap-1 text-xs px-1.5 py-1 border border-black/20 rounded-md hover:bg-black/5 transition-colors"
         >
           {isUploading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Uploading...
+              <Loader2 className="h-3 w-3 animate-spin" />
+              <span>Uploading...</span>
             </>
           ) : (
             <>
-              <Upload className="mr-2 h-4 w-4" />
-              Upload File
+              <Upload className="h-3 w-3" />
+              <span>Upload File</span>
             </>
           )}
-        </Button>
+        </button>
         
         <p className="text-xs text-muted-foreground">
           {files.length > 0 ? `${files.length} file${files.length > 1 ? "s" : ""} attached` : "No files attached"}
@@ -68,11 +66,11 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
                 <img
                   src={file.preview}
                   alt={file.name}
-                  className="h-16 w-16 object-cover rounded-xl border"
+                  className="h-14 w-14 object-cover rounded-lg border"
                 />
               ) : (
-                <div className="h-16 w-16 flex flex-col items-center justify-center border rounded-xl bg-gray-50">
-                  <File size={20} className="text-gray-500" />
+                <div className="h-14 w-14 flex flex-col items-center justify-center border rounded-lg bg-gray-50">
+                  <File size={18} className="text-gray-500" />
                   <span className="text-[10px] text-gray-500 mt-1 px-1 truncate w-full text-center">
                     {file.name.split('.').pop()}
                   </span>
@@ -83,7 +81,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
                   className="bg-black/70 hover:bg-black text-white p-0.5 rounded-full opacity-70 hover:opacity-100"
                   onClick={() => onRemove(index)}
                 >
-                  <X size={12} />
+                  <X size={10} />
                 </button>
               </div>
               <div className="absolute -bottom-1 left-0 right-0 flex justify-center">

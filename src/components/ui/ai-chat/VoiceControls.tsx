@@ -17,15 +17,15 @@ export function VoiceControls({ isListening, toggleListening, disabled, aiProces
       onClick={toggleListening}
       disabled={disabled || aiProcessing}
       className={cn(
-        "p-1.5 rounded-xl transition-all duration-300 border",
+        "p-1.5 rounded-md transition-all duration-300 border",
         isListening 
           ? "bg-black text-white border-white/20" 
-          : "text-black/80 hover:bg-black/10 border-black/20",
+          : "text-black/80 hover:bg-black/5 border-black/20",
         disabled && "opacity-50 cursor-not-allowed",
         "dark:border-white/20 dark:text-white/80"
       )}
     >
-      <Mic className="w-4 h-4" />
+      <Mic className="w-3.5 h-3.5" />
       <span className="sr-only">Toggle voice input</span>
     </button>
   );
