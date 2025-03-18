@@ -1,14 +1,14 @@
 
 import { 
-  GoogleGenerativeAI,
+  GoogleGenerativeAI as GenerativeAI,
   GenerativeModel,
   Part,
   Content,
-  EnhancedGenerateContentResponse,
+  GenerateContentResponse,
   GenerationConfig,
-  SafetySetting,
   HarmCategory,
-  HarmBlockThreshold
+  HarmBlockThreshold,
+  SafetySetting
 } from '@google/genai';
 
 // Types for Gemini message formats
@@ -45,20 +45,20 @@ const DEFAULT_CONFIG: Partial<GenerationConfig> = {
 // Default safety settings
 const DEFAULT_SAFETY_SETTINGS: SafetySetting[] = [
   {
-    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    category: HarmCategory.HARASSMENT,
+    threshold: HarmBlockThreshold.MEDIUM_AND_ABOVE,
   },
   {
-    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    category: HarmCategory.HATE_SPEECH,
+    threshold: HarmBlockThreshold.MEDIUM_AND_ABOVE,
   },
   {
-    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    category: HarmCategory.SEXUALLY_EXPLICIT,
+    threshold: HarmBlockThreshold.MEDIUM_AND_ABOVE,
   },
   {
-    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    category: HarmCategory.DANGEROUS_CONTENT,
+    threshold: HarmBlockThreshold.MEDIUM_AND_ABOVE,
   },
 ];
 
@@ -70,7 +70,7 @@ export function initializeGemini(config: GeminiConfig): GenerativeModel {
     throw new Error('Gemini API key is required');
   }
   
-  const genAI = new GoogleGenerativeAI(config.apiKey);
+  const genAI = new GenerativeAI(config.apiKey);
   return genAI.getGenerativeModel({ 
     model: config.model || "gemini-2.0-pro-001",
     generationConfig: {
