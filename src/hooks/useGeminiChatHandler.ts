@@ -1,16 +1,18 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSpeechRecognition } from './useSpeechRecognition';
 import { useImageUpload } from './useImageUpload';
 import { useGeminiInitialization } from './gemini/useGeminiInitialization';
 import { useGeminiMessages } from './gemini/useGeminiMessages';
 import { useGeminiMessageSubmission } from './gemini/useGeminiMessageSubmission';
+import { useToast } from './use-toast';
 
 /**
  * Main hook for handling Gemini chat functionality
  */
 export function useGeminiChatHandler() {
   const [inputValue, setInputValue] = useState('');
+  const { toast } = useToast();
   
   // Initialize Gemini
   const {
@@ -20,7 +22,9 @@ export function useGeminiChatHandler() {
     providerError,
     currentPersonaName,
     multimodalChatRef,
-    personaData
+    personaData,
+    hasApiKey,
+    getApiKey
   } = useGeminiInitialization();
   
   // Manage messages
@@ -42,14 +46,23 @@ export function useGeminiChatHandler() {
     isUploading
   } = useImageUpload();
   
-  // Voice recognition
+  // Voice recognition with toast notifications
   const {
     isListening,
     transcript,
     toggleListening,
     voiceError,
     isVoiceSupported
-  } = useSpeechRecognition();
+  } = useSpeechRecognition((command) => {
+    if (command.trim()) {
+      setInputValue(command);
+      // Auto-send after short delay to give user time to see what was recognized
+      setTimeout(() => {
+        handleSendMessage(command, images, false, () => {});
+        setInputValue('');
+      }, 500);
+    }
+  });
   
   // Handle message submission
   const {
@@ -63,12 +76,16 @@ export function useGeminiChatHandler() {
     multimodalChatRef
   });
   
-  // Handle voice transcription
-  useState(() => {
-    if (transcript) {
-      setInputValue(transcript);
+  // Show toast for voice errors
+  useEffect(() => {
+    if (voiceError) {
+      toast({
+        title: "Voice Recognition Error",
+        description: voiceError,
+        variant: "destructive"
+      });
     }
-  });
+  }, [voiceError, toast]);
   
   // Combined error from multiple sources
   const error = initError || sendError;
@@ -78,6 +95,9 @@ export function useGeminiChatHandler() {
     await handleSendMessage(inputValue, images, isListening, () => {});
     setInputValue('');
   };
+
+  // Check if API key is valid
+  const hasValidApiKey = hasApiKey();
 
   return {
     inputValue,
@@ -103,6 +123,8 @@ export function useGeminiChatHandler() {
     uploadImage,
     removeImage,
     clearImages,
-    isUploading
+    isUploading,
+    // API key status
+    hasValidApiKey
   };
 }

@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -62,7 +63,8 @@ export function ChatInput({
     toggleListening,
     voiceError,
     aiProcessing,
-    isTranscribing
+    isTranscribing,
+    isVoiceSupported
   } = useVoiceInput(setValue, () => handleSend());
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -127,7 +129,9 @@ export function ChatInput({
           <div className="flex items-center gap-2">
             {suggestedResponse && <SuggestionButton suggestion={suggestedResponse} onClick={handleSuggestionClick} disabled={isLoading || isListening} />}
             
-            <VoiceControls isListening={isListening} toggleListening={toggleListening} disabled={isLoading} aiProcessing={aiProcessing} />
+            {isVoiceSupported && (
+              <VoiceControls isListening={isListening} toggleListening={toggleListening} disabled={isLoading} aiProcessing={aiProcessing} />
+            )}
             
             <SendButton hasContent={!!value.trim() || files.length > 0} isLoading={isLoading || isUploading} aiProcessing={aiProcessing} disabled={isListening} onClick={handleSend} />
           </div>

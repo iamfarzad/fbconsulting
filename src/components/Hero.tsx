@@ -1,9 +1,9 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { AIChatInput } from './ui/ai-chat';
 import LocationGreeting from './LocationGreeting';
-import { Flag, Calendar, ArrowRight } from 'lucide-react';
+import { Flag, Calendar, ArrowRight, Mic } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
 import { AnimatedGridPattern } from './ui/animated-grid-pattern';
@@ -12,12 +12,22 @@ import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
 import { trackEvent } from '@/services/analyticsService';
 import { ShimmerButton } from './ui/shimmer-button';
+import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
+import { AnimatedBars } from './ui/AnimatedBars';
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const { t, language } = useLanguage();
   const isNorwegian = language === 'no';
   const navigate = useNavigate();
+  const [chatInputValue, setChatInputValue] = useState('');
+  
+  // Add direct voice capability for the hero section
+  const { isListening, transcript, toggleListening, isVoiceSupported } = useSpeechRecognition((command) => {
+    if (command.trim()) {
+      setChatInputValue(command);
+    }
+  });
   
   const handleConsultationClick = () => {
     trackEvent({
@@ -100,20 +110,52 @@ const Hero = () => {
             {isNorwegian ? t('hero_subtitle') : "Ask me anything about AI automation, workflow optimization, or how to reduce costs with intelligent systems"}
           </motion.p>
           
+          {/* Voice Indicator (when active) */}
+          {isListening && (
+            <motion.div 
+              className="flex items-center gap-3 bg-black/5 dark:bg-white/5 backdrop-blur-sm px-4 py-2 rounded-full"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+            >
+              <AnimatedBars isActive={true} small={true} />
+              <span className="text-sm">{transcript || "Listening..."}</span>
+            </motion.div>
+          )}
+          
           <motion.div 
             className="w-full relative"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
           >
-            <AIChatInput autoFullScreen={false} />
+            <AIChatInput 
+              autoFullScreen={false} 
+              placeholderText={chatInputValue || "Ask me anything about AI automation..."}
+            />
+            
+            {isVoiceSupported && (
+              <div className="absolute right-2 -bottom-14 flex items-center gap-2">
+                <Button 
+                  onClick={toggleListening}
+                  variant="outline"
+                  className={cn(
+                    "rounded-full p-3 h-auto",
+                    isListening && "bg-[#fe5a1d] text-white border-[#fe5a1d]/50"
+                  )}
+                >
+                  <Mic className={cn("w-5 h-5", isListening && "animate-pulse")} />
+                  <span className="ml-2">{isListening ? "Listening..." : "Speak to Chat"}</span>
+                </Button>
+              </div>
+            )}
           </motion.div>
           
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.5 }}
-            className="flex justify-center mt-4"
+            className="flex justify-center mt-4 pt-6"
           >
             <ShimmerButton 
               onClick={handleConsultationClick}

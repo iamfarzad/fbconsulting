@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { Mic } from 'lucide-react';
+import { Mic, MicOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface VoiceControlsProps {
   isListening: boolean;
@@ -12,21 +13,34 @@ interface VoiceControlsProps {
 
 export function VoiceControls({ isListening, toggleListening, disabled, aiProcessing }: VoiceControlsProps) {
   return (
-    <button
-      type="button"
-      onClick={toggleListening}
-      disabled={disabled || aiProcessing}
-      className={cn(
-        "p-1.5 rounded-md transition-all duration-300 border",
-        isListening 
-          ? "bg-black text-white border-white/20" 
-          : "text-black/80 hover:bg-black/5 border-black/20",
-        disabled && "opacity-50 cursor-not-allowed",
-        "dark:border-white/20 dark:text-white/80"
-      )}
-    >
-      <Mic className="w-3.5 h-3.5" />
-      <span className="sr-only">Toggle voice input</span>
-    </button>
+    <TooltipProvider>
+      <Tooltip delayDuration={300}>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            onClick={toggleListening}
+            disabled={disabled || aiProcessing}
+            className={cn(
+              "p-1.5 rounded-md transition-all duration-300 border",
+              isListening 
+                ? "bg-[#fe5a1d] text-white border-[#fe5a1d]/50" 
+                : "text-black/80 hover:bg-black/5 border-black/20",
+              disabled && "opacity-50 cursor-not-allowed",
+              "dark:border-white/20 dark:text-white/80"
+            )}
+          >
+            {isListening ? (
+              <Mic className="w-3.5 h-3.5 animate-pulse" />
+            ) : (
+              <Mic className="w-3.5 h-3.5" />
+            )}
+            <span className="sr-only">Toggle voice input</span>
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>{isListening ? "Stop listening" : "Start voice input"}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
