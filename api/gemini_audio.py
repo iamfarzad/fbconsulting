@@ -3,14 +3,12 @@ import google.generativeai as genai
 import json
 import os
 from typing import Dict, Any
-from pydub import AudioSegment
 import io
 import tempfile
 from datetime import datetime
 import hashlib
 import time
 import logging
-from dataclasses import dataclass
 
 def handler(request):
     """Handle HTTP requests for audio synthesis."""
@@ -68,10 +66,12 @@ def handler(request):
                 'Content-Type': 'audio/mpeg',
                 'Content-Length': str(len(audio_data))
             },
-            'body': audio_data
+            'body': audio_data,
+            'isBase64Encoded': True
         }
         
     except Exception as e:
+        logging.error(f"Error in gemini_audio handler: {str(e)}")
         return {
             'statusCode': 500,
             'headers': {'Content-Type': 'application/json'},
