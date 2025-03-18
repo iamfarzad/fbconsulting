@@ -10,9 +10,6 @@
   "rewrites": [
     { "source": "/api/gemini_audio", "destination": "/api/gemini_audio" }
   ],
-  "env": {
-    "GOOGLE_API_KEY": "@google_api_key"
-  },
   "build": {
     "env": {
       "PYTHON_VERSION": "3.11"
