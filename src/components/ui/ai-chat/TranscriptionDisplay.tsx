@@ -26,10 +26,12 @@ export const TranscriptionDisplay: React.FC<TranscriptionDisplayProps> = ({
         <div className="flex-shrink-0">
           <AnimatedBars isActive={isListening} small />
         </div>
-        <div className="flex-1 line-clamp-1">
+        <div className="flex-1">
           {isTranscribing 
             ? "Processing..." 
-            : transcript || "Listening..."}
+            : transcript 
+              ? transcript 
+              : "Listening..."}
         </div>
       </div>
     </div>
