@@ -1,18 +1,16 @@
 {
   "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "functions": {
-    "api/gemini_audio/**/*.py": {
-      "runtime": "@vercel/python@3.1.0",
-      "memory": 1024,
-      "maxDuration": 10
+    "api/*.py": {
+      "runtime": "@vercel/python@3.1.0"
     }
   },
-  "rewrites": [
-    { "source": "/api/gemini_audio", "destination": "/api/gemini_audio" }
+  "routes": [
+    { "src": "/api/gemini_audio", "dest": "/api/gemini_audio.py" }
   ],
-  "build": {
-    "env": {
-      "PYTHON_VERSION": "3.11"
-    }
+  "env": {
+    "GOOGLE_API_KEY": "${GOOGLE_API_KEY}"
   }
 }
