@@ -40,19 +40,19 @@ export const DEFAULT_CONFIG: Partial<GenerationConfig> = {
 // Default safety settings
 export const DEFAULT_SAFETY_SETTINGS: SafetySetting[] = [
   {
-    category: HarmCategory.HARASSMENT,
-    threshold: HarmBlockThreshold.MEDIUM_AND_ABOVE,
+    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
   },
   {
-    category: HarmCategory.HATE_SPEECH,
-    threshold: HarmBlockThreshold.MEDIUM_AND_ABOVE,
+    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
   },
   {
-    category: HarmCategory.SEXUALLY_EXPLICIT,
-    threshold: HarmBlockThreshold.MEDIUM_AND_ABOVE,
+    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
   },
   {
-    category: HarmCategory.DANGEROUS_CONTENT,
-    threshold: HarmBlockThreshold.MEDIUM_AND_ABOVE,
+    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
   },
 ];

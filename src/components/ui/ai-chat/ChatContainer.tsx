@@ -1,3 +1,4 @@
+
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChatMessageList } from "./ChatMessageList";
@@ -12,7 +13,7 @@ interface ChatContainerProps {
   setInputValue: (value: string) => void;
   isLoading: boolean;
   suggestedResponse: string | null;
-  handleSend: () => void;
+  handleSend: (images?: { mimeType: string; data: string }[]) => void;
   handleClear: () => void;
   toggleFullScreen: () => void;
   placeholder?: string;

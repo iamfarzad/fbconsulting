@@ -10,16 +10,16 @@ export function formatMessagesForSDK(messages: GeminiMessage[]): Content[] {
     role: msg.role,
     parts: msg.parts.map(part => {
       if (part.text) {
-        return { text: part.text };
+        return { text: part.text } as Part;
       } else if (part.inlineData) {
         return {
           inlineData: {
             mimeType: part.inlineData.mimeType,
             data: part.inlineData.data
           }
-        };
+        } as Part;
       }
-      return { text: "" };
+      return { text: "" } as Part;
     })
   }));
 }
@@ -30,16 +30,16 @@ export function formatMessagesForSDK(messages: GeminiMessage[]): Content[] {
 export function convertPartsToContent(parts: any[]): Part[] {
   return parts.map(part => {
     if (part.text) {
-      return { text: part.text };
+      return { text: part.text } as Part;
     } else if (part.inlineData) {
       return {
         inlineData: {
           mimeType: part.inlineData.mimeType,
           data: part.inlineData.data
         }
-      };
+      } as Part;
     }
-    return { text: "" };
+    return { text: "" } as Part;
   });
 }
 

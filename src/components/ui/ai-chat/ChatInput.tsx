@@ -9,11 +9,13 @@ import { VoiceControls } from "./VoiceControls";
 import { SendButton } from "./SendButton";
 import { SuggestionButton } from "./SuggestionButton";
 import { AnimatedBars } from "@/components/ui/AnimatedBars";
+import { ImageUploader } from "./ImageUploader";
+import { useImageUpload } from "@/hooks/useImageUpload";
 
 interface ChatInputProps {
   value: string;
   setValue: (value: string) => void;
-  onSend: () => void;
+  onSend: (images?: { mimeType: string; data: string }[]) => void;
   onClear: () => void;
   isLoading: boolean;
   showMessages: boolean;
@@ -39,19 +41,27 @@ export function ChatInput({
   });
   
   const {
+    images,
+    uploadImage,
+    removeImage,
+    clearImages,
+    isUploading
+  } = useImageUpload();
+  
+  const {
     isListening,
     transcript,
     toggleListening,
     voiceError,
     aiProcessing,
     isTranscribing
-  } = useVoiceInput(setValue, onSend);
+  } = useVoiceInput(setValue, () => handleSend());
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (value.trim() && !isLoading) {
-        onSend();
+      if ((value.trim() || images.length > 0) && !isLoading && !isUploading) {
+        handleSend();
       }
     }
   };
@@ -66,6 +76,28 @@ export function ChatInput({
       setValue(suggestedResponse);
       adjustHeight();
     }
+  };
+  
+  const handleSend = () => {
+    // Don't send if loading or uploading an image
+    if (isLoading || isUploading) return;
+    
+    // Require either text or at least one image
+    if (!value.trim() && images.length === 0) return;
+    
+    // If we have images, pass them to onSend
+    if (images.length > 0) {
+      const imageData = images.map(img => ({
+        mimeType: img.mimeType,
+        data: img.data
+      }));
+      onSend(imageData);
+    } else {
+      onSend();
+    }
+    
+    // Clear images after sending
+    clearImages();
   };
 
   return (
@@ -119,6 +151,18 @@ export function ChatInput({
             disabled={isLoading || isListening}
           />
         </div>
+        
+        {/* Image upload area */}
+        {images.length > 0 && (
+          <div className="px-4 pb-2 border-t border-black/10 pt-2">
+            <ImageUploader
+              images={images}
+              onUpload={uploadImage}
+              onRemove={removeImage}
+              isUploading={isUploading}
+            />
+          </div>
+        )}
 
         <div className="flex items-center justify-between p-3 border-t border-black/10">
           <div className="flex items-center gap-2">
@@ -134,6 +178,15 @@ export function ChatInput({
                   Clear
                 </span>
               </button>
+            )}
+            
+            {images.length === 0 && (
+              <ImageUploader
+                images={images}
+                onUpload={uploadImage}
+                onRemove={removeImage}
+                isUploading={isUploading}
+              />
             )}
           </div>
           
@@ -154,11 +207,11 @@ export function ChatInput({
             />
             
             <SendButton
-              hasContent={!!value.trim()}
-              isLoading={isLoading}
+              hasContent={!!value.trim() || images.length > 0}
+              isLoading={isLoading || isUploading}
               aiProcessing={aiProcessing}
               disabled={isListening}
-              onClick={onSend}
+              onClick={handleSend}
             />
           </div>
         </div>

@@ -1,6 +1,6 @@
 
 import { 
-  GenerativeAI,
+  GoogleGenerativeAI as GenerativeAI,
   GenerativeModel
 } from '@google/generative-ai';
 import { GeminiConfig, DEFAULT_CONFIG, DEFAULT_SAFETY_SETTINGS } from './types';

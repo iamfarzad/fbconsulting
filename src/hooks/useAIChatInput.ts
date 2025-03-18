@@ -6,6 +6,7 @@ import { LeadInfo } from "@/services/lead/leadExtractor";
 import { generateResponse } from "@/services/chat/responseGenerator";
 import { useToast } from "./use-toast";
 import { useLocation } from "react-router-dom";
+import { sendMultimodalRequest } from "@/services/gemini";
 
 export function useAIChatInput() {
   const [showMessages, setShowMessages] = useState(false);
@@ -64,11 +65,11 @@ export function useAIChatInput() {
     setIsFullScreen(prev => !prev);
   };
 
-  const handleSend = async () => {
-    if (!inputValue.trim()) {
+  const handleSend = async (images?: { mimeType: string; data: string }[]) => {
+    if (!inputValue.trim() && (!images || images.length === 0)) {
       toast({
         title: "Message is empty",
-        description: "Please enter a message before sending.",
+        description: "Please enter a message or add an image before sending.",
         variant: "destructive",
       });
       return;
@@ -76,27 +77,60 @@ export function useAIChatInput() {
     
     setIsLoading(true);
     try {
+      // Add user message to chat
       addUserMessage(inputValue);
       
-      // Create mock lead info from conversation context
-      const mockLeadInfo: LeadInfo = {
-        interests: [...messages.map(m => m.content), inputValue],
-        stage: 'discovery'
-      };
+      let aiResponse = '';
       
-      // Generate AI response with possible graphic cards
-      const currentPage = getCurrentPage();
-      const aiResponse = generateResponse(inputValue, mockLeadInfo);
+      // Get Gemini API key from localStorage
+      const savedConfig = localStorage.getItem('GEMINI_CONFIG');
+      let apiKey = '';
+      let modelName = 'gemini-2.0-pro-001';
       
-      // Simulate AI response delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (savedConfig) {
+        try {
+          const config = JSON.parse(savedConfig);
+          apiKey = config.apiKey;
+          if (config.modelName) {
+            modelName = config.modelName;
+          }
+        } catch (error) {
+          console.error('Error parsing saved configuration:', error);
+        }
+      }
+      
+      if (!apiKey) {
+        throw new Error('No API key found. Please configure Gemini in the settings.');
+      }
+      
+      // If we have images, use vision API
+      if (images && images.length > 0) {
+        // Use the multimodal API
+        aiResponse = await sendMultimodalRequest(
+          inputValue,
+          images,
+          { 
+            apiKey, 
+            model: 'gemini-2.0-vision-001' // Use vision model
+          }
+        );
+      } else {
+        // Create mock lead info from conversation context
+        const mockLeadInfo: LeadInfo = {
+          interests: [...messages.map(m => m.content), inputValue],
+          stage: 'discovery'
+        };
+        
+        // Generate AI response with possible graphic cards
+        aiResponse = generateResponse(inputValue, mockLeadInfo);
+      }
       
       // Add the response to the chat
       addAssistantMessage(aiResponse);
     } catch (error) {
       toast({
         title: "Error sending message",
-        description: "Please try again later.",
+        description: error instanceof Error ? error.message : "Please try again later.",
         variant: "destructive",
       });
       console.error("Chat error:", error);

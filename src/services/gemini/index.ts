@@ -4,4 +4,5 @@ export { initializeGemini } from './initialize';
 export { sendGeminiChatRequest, streamGeminiChat } from './chat';
 export { sendMultimodalRequest } from './multimodal';
 export { formatMessagesForSDK, convertPartsToContent, convertToGeminiMessages } from './formatters';
-export { GeminiMessage, GeminiConfig, DEFAULT_CONFIG, DEFAULT_SAFETY_SETTINGS } from './types';
+export type { GeminiMessage, GeminiConfig } from './types';
+export { DEFAULT_CONFIG, DEFAULT_SAFETY_SETTINGS } from './types';
