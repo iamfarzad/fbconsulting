@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { usePersonaManagement } from '../../mcp/hooks/usePersonaManagement';
 import { useGeminiAPI } from '../../App';
@@ -150,7 +149,7 @@ Rules:
             
             setIsInitialized(true);
             toast.success('Farzad AI Ready', {
-              description: `Gemini ${modelName} has been successfully initialized.`
+              description: `Has been successfully initialized.`
             });
           } else {
             throw new Error("Empty response from Gemini API test");
