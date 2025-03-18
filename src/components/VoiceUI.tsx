@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { AnimatedBars } from './ui/AnimatedBars';
-import { VoiceButton } from './voice/VoiceButton';
+import { VoiceControls } from './ui/ai-chat/VoiceControls';
 import { VoicePanel } from './voice/VoicePanel';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import type { VoiceUIProps } from '@/types/voice';
@@ -43,11 +43,14 @@ const VoiceUI: React.FC<VoiceUIProps> = ({ onCommand = () => {} }) => {
   
   return (
     <>
-      <VoiceButton 
-        isListening={isListening}
-        onClick={isExpanded ? handleToggleListening : toggleExpanded}
-        isExpanded={isExpanded}
-      />
+      <div className="fixed bottom-4 right-4 z-50">
+        <VoiceControls 
+          isListening={isListening}
+          toggleListening={isExpanded ? handleToggleListening : toggleExpanded}
+          disabled={false}
+          aiProcessing={false}
+        />
+      </div>
       
       <AnimatePresence>
         {isExpanded && (
