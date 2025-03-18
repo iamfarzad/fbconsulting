@@ -1,6 +1,5 @@
-
 import { 
-  GoogleGenerativeAI as GenAI, 
+  GenerativeModel,
   HarmCategory, 
   HarmBlockThreshold 
 } from '@google/genai';
@@ -45,34 +44,10 @@ export async function sendGeminiChatRequest(
     throw new Error('Gemini API key is not available');
   }
 
-  // Initialize the Gemini API with the provided key
-  const genAI = new GenAI(apiKey);
-  
-  // Get the model (using gemini-1.5-flash by default)
-  const model = genAI.getGenerativeModel({ 
-    model: "gemini-1.5-flash",
-    generationConfig: {
-      ...DEFAULT_CONFIG,
-      ...config,
-    },
-    safetySettings: [
-      {
-        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-      {
-        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-      },
-    ],
+  // Initialize the model
+  const model = new GenerativeModel({
+    model: "gemini-1.5-pro",
+    apiKey: apiKey
   });
 
   try {
@@ -81,7 +56,7 @@ export async function sendGeminiChatRequest(
     
     // Start a chat session
     const chat = model.startChat({
-      history: formattedMessages.slice(0, -1), // All messages except the last one
+      history: formattedMessages.slice(0, -1),
       generationConfig: {
         ...DEFAULT_CONFIG,
         ...config,
@@ -93,8 +68,8 @@ export async function sendGeminiChatRequest(
     const result = await chat.sendMessage(lastMessage.parts);
     
     // Extract the response text
-    const responseText = result.response.text();
-    return responseText;
+    const response = await result.text();
+    return response;
   } catch (error) {
     console.error('Error calling Gemini API:', error);
     throw error;

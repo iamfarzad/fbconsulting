@@ -1,9 +1,8 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { usePersonaManagement } from '../../mcp/hooks/usePersonaManagement';
 import { useGeminiAPI } from '../../App';
 import { toast } from 'sonner';
-import { GoogleGenerativeAI as GenAI } from '@google/genai';
+import { GenerativeModel } from '@google/genai';
 
 // Interface for Gemini context
 interface GeminiContextType {
@@ -75,16 +74,17 @@ Rules:
         }
         
         // Initialize the Gemini API with the SDK
-        const genAI = new GenAI(apiKey);
+        const model = new GenerativeModel({
+          model: "gemini-1.5-pro",
+          apiKey: apiKey
+        });
         
         // Test API key with a simple generation
         try {
-          const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
           const result = await model.generateContent("Hello, this is a test message.");
-          const response = await result.response;
-          const text = response.text();
+          const response = await result.text();
           
-          if (text) {
+          if (response) {
             console.log("✅ Gemini initialized successfully");
             if (personaData) {
               console.log("Using persona data:", personaData.currentPersona);
