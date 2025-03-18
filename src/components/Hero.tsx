@@ -1,6 +1,6 @@
 
-import React, { useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef, useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AIChatInput } from './ui/ai-chat';
 import LocationGreeting from './LocationGreeting';
 import { Flag, Calendar, ArrowRight, Mic } from 'lucide-react';
@@ -12,8 +12,9 @@ import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
 import { trackEvent } from '@/services/analyticsService';
 import { ShimmerButton } from './ui/shimmer-button';
-import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
+import { useGeminiSpeechRecognition } from '@/hooks/useGeminiSpeechRecognition';
 import { AnimatedBars } from './ui/AnimatedBars';
+import { useGeminiInitialization } from '@/hooks/gemini/useGeminiInitialization';
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -21,9 +22,19 @@ const Hero = () => {
   const isNorwegian = language === 'no';
   const navigate = useNavigate();
   const [chatInputValue, setChatInputValue] = useState('');
+  const { hasApiKey, getApiKey } = useGeminiInitialization();
   
-  // Add direct voice capability for the hero section
-  const { isListening, transcript, toggleListening, isVoiceSupported } = useSpeechRecognition((command) => {
+  // Determine if we should use Gemini API for voice
+  const useGeminiApi = hasApiKey();
+  
+  // Add direct voice capability for the hero section with Gemini
+  const { 
+    isListening, 
+    transcript, 
+    toggleListening, 
+    isVoiceSupported,
+    isTranscribing 
+  } = useGeminiSpeechRecognition(getApiKey(), (command) => {
     if (command.trim()) {
       setChatInputValue(command);
     }
@@ -111,17 +122,29 @@ const Hero = () => {
           </motion.p>
           
           {/* Voice Indicator (when active) */}
-          {isListening && (
-            <motion.div 
-              className="flex items-center gap-3 bg-black/5 dark:bg-white/5 backdrop-blur-sm px-4 py-2 rounded-full"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-            >
-              <AnimatedBars isActive={true} small={true} />
-              <span className="text-sm">{transcript || "Listening..."}</span>
-            </motion.div>
-          )}
+          <AnimatePresence>
+            {(isListening || isTranscribing) && (
+              <motion.div 
+                className={cn(
+                  "flex items-center gap-3 backdrop-blur-sm px-4 py-2 rounded-full",
+                  useGeminiApi 
+                    ? "bg-black/5 border border-[#fe5a1d]/20 dark:bg-white/5" 
+                    : "bg-black/5 dark:bg-white/5"
+                )}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+              >
+                <AnimatedBars isActive={isListening} small={true} />
+                <span className="text-sm">
+                  {isTranscribing 
+                    ? (useGeminiApi ? "Gemini is processing..." : "Processing...") 
+                    : transcript || (useGeminiApi ? "Listening with Gemini Charon..." : "Listening...")}
+                </span>
+                {useGeminiApi && <span className="text-xs text-[#fe5a1d] font-medium">Gemini Voice</span>}
+              </motion.div>
+            )}
+          </AnimatePresence>
           
           <motion.div 
             className="w-full relative"
@@ -141,11 +164,21 @@ const Hero = () => {
                   variant="outline"
                   className={cn(
                     "rounded-full p-3 h-auto",
-                    isListening && "bg-[#fe5a1d] text-white border-[#fe5a1d]/50"
+                    isListening && "bg-[#fe5a1d] text-white border-[#fe5a1d]/50",
+                    useGeminiApi && !isListening && "border-[#fe5a1d]/30"
                   )}
                 >
                   <Mic className={cn("w-5 h-5", isListening && "animate-pulse")} />
-                  <span className="ml-2">{isListening ? "Listening..." : "Speak to Chat"}</span>
+                  <span className="ml-2">
+                    {isListening 
+                      ? "Listening..." 
+                      : useGeminiApi 
+                        ? "Speak with Gemini" 
+                        : "Speak to Chat"}
+                  </span>
+                  {useGeminiApi && !isListening && (
+                    <span className="ml-1 text-xs text-[#fe5a1d]">(Charon)</span>
+                  )}
                 </Button>
               </div>
             )}

@@ -64,7 +64,8 @@ export function ChatInput({
     voiceError,
     aiProcessing,
     isTranscribing,
-    isVoiceSupported
+    isVoiceSupported,
+    isUsingGeminiApi
   } = useVoiceInput(setValue, () => handleSend());
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -107,7 +108,12 @@ export function ChatInput({
   };
 
   return <div className="flex flex-col w-full">
-      <TranscriptionDisplay isTranscribing={isTranscribing} isListening={isListening} transcript={transcript} />
+      <TranscriptionDisplay 
+        isTranscribing={isTranscribing} 
+        isListening={isListening} 
+        transcript={transcript}
+        isUsingGeminiApi={isUsingGeminiApi}
+      />
 
       <div className={cn("relative bg-white/95 backdrop-blur-lg border border-black/20 rounded-2xl transition-all duration-300", showMessages || hasMessages ? "shadow-lg" : "")}>
         <div className="overflow-y-auto">
@@ -130,7 +136,13 @@ export function ChatInput({
             {suggestedResponse && <SuggestionButton suggestion={suggestedResponse} onClick={handleSuggestionClick} disabled={isLoading || isListening} />}
             
             {isVoiceSupported && (
-              <VoiceControls isListening={isListening} toggleListening={toggleListening} disabled={isLoading} aiProcessing={aiProcessing} />
+              <VoiceControls 
+                isListening={isListening} 
+                toggleListening={toggleListening} 
+                disabled={isLoading} 
+                aiProcessing={aiProcessing}
+                isUsingGeminiApi={isUsingGeminiApi}
+              />
             )}
             
             <SendButton hasContent={!!value.trim() || files.length > 0} isLoading={isLoading || isUploading} aiProcessing={aiProcessing} disabled={isListening} onClick={handleSend} />

@@ -1,9 +1,10 @@
+
 import { initializeGemini } from './initialize';
-import { GeminiConfig } from './types';
+import { GeminiConfig, DEFAULT_SPEECH_CONFIG } from './types';
 import { Part, Content } from '@google/generative-ai';
 
 /**
- * Send a multimodal request to Gemini (text + images + documents)
+ * Send a multimodal request to Gemini (text + images + audio + documents)
  */
 export async function sendMultimodalRequest(
   text: string,
@@ -33,6 +34,14 @@ export async function sendMultimodalRequest(
         // Add image
         parts.push({
           inlineData: {
+            mimeType: file.mimeType,
+            data: file.data
+          }
+        });
+      } else if (file.mimeType.startsWith('audio/')) {
+        // Add audio file
+        parts.push({
+          audio: {
             mimeType: file.mimeType,
             data: file.data
           }
@@ -69,6 +78,14 @@ export async function sendMultimodalRequest(
           role: 'user', 
           parts 
         })),
+        generationConfig: {
+          temperature: config.temperature,
+          topP: config.topP,
+          topK: config.topK,
+          maxOutputTokens: config.maxOutputTokens,
+          stopSequences: config.stopSequences
+        },
+        safetySettings: config.safetySettings
       });
       
       // Send the message with the new parts
@@ -92,6 +109,7 @@ export class GeminiMultimodalChat {
   private model;
   private chat;
   private chatHistory: Part[][] = [];
+  private speechConfig;
   
   constructor(config: GeminiConfig) {
     if (!config.apiKey) {
@@ -104,9 +122,20 @@ export class GeminiMultimodalChat {
       model: "gemini-2.0-vision" // Use gemini-2.0-vision for multimodal chat
     });
     
+    // Set up speech config
+    this.speechConfig = config.speechConfig || DEFAULT_SPEECH_CONFIG;
+    
     // Start a chat session
     this.chat = this.model.startChat({
       history: [],
+      generationConfig: {
+        temperature: config.temperature,
+        topP: config.topP,
+        topK: config.topK,
+        maxOutputTokens: config.maxOutputTokens,
+        stopSequences: config.stopSequences
+      },
+      safetySettings: config.safetySettings
     });
   }
   
@@ -129,6 +158,14 @@ export class GeminiMultimodalChat {
           // Add image
           parts.push({
             inlineData: {
+              mimeType: file.mimeType,
+              data: file.data
+            }
+          });
+        } else if (file.mimeType.startsWith('audio/')) {
+          // Add audio file
+          parts.push({
+            audio: {
               mimeType: file.mimeType,
               data: file.data
             }
@@ -175,6 +212,31 @@ export class GeminiMultimodalChat {
   }
   
   /**
+   * Transcribe audio using Gemini's audio processing
+   */
+  async transcribeAudio(audioData: string, mimeType: string): Promise<string> {
+    try {
+      // Create parts with audio data
+      const parts: Part[] = [
+        { text: "Please transcribe this audio and respond with only the transcription text." },
+        { 
+          audio: {
+            mimeType: mimeType,
+            data: audioData
+          }
+        }
+      ];
+      
+      // Send for transcription
+      const result = await this.model.generateContent(parts);
+      return result.response.text();
+    } catch (error) {
+      console.error('Error transcribing audio:', error);
+      throw error;
+    }
+  }
+  
+  /**
    * Get the current chat history
    */
   getHistory(): Part[][] {
@@ -189,5 +251,19 @@ export class GeminiMultimodalChat {
     this.chat = this.model.startChat({
       history: [],
     });
+  }
+  
+  /**
+   * Get the speech configuration
+   */
+  getSpeechConfig() {
+    return this.speechConfig;
+  }
+  
+  /**
+   * Update the speech configuration
+   */
+  setSpeechConfig(config: Partial<typeof this.speechConfig>) {
+    this.speechConfig = { ...this.speechConfig, ...config };
   }
 }
