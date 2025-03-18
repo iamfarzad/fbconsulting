@@ -18,26 +18,28 @@ export function SendButton({
   disabled,
   onClick
 }: SendButtonProps) {
+  const isProcessing = isLoading || aiProcessing;
+  
   return (
     <button
       type="button"
       className={cn(
-        "px-1.5 py-1.5 rounded-lg text-sm transition-colors border hover:border-foreground flex items-center justify-between gap-1",
-        hasContent && !isLoading
+        "p-1.5 rounded-md text-xs transition-colors border flex items-center justify-center",
+        hasContent && !isProcessing
           ? "bg-black text-white dark:bg-white dark:text-black border-black dark:border-white"
           : "text-foreground border-foreground/30",
-        (isLoading || aiProcessing) && "opacity-50 cursor-not-allowed"
+        isProcessing && "opacity-50 cursor-not-allowed"
       )}
       onClick={onClick}
-      disabled={!hasContent || isLoading || disabled || aiProcessing}
+      disabled={!hasContent || isProcessing || disabled}
     >
-      {isLoading || aiProcessing ? (
-        <Loader2 className="w-4 h-4 animate-spin" />
+      {isProcessing ? (
+        <Loader2 className="w-3.5 h-3.5 animate-spin" />
       ) : (
         <ArrowUpIcon
           className={cn(
-            "w-4 h-4",
-            hasContent && !isLoading
+            "w-3.5 h-3.5",
+            hasContent && !isProcessing
               ? "text-white dark:text-black"
               : "text-foreground"
           )}

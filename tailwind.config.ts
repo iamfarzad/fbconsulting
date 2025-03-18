@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -88,7 +89,7 @@ export default {
           '0%, 100%': { opacity: '1' },
           '50%': { opacity: '0.8' }
         },
-        float: {
+        'float': {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-10px)' }
         },
@@ -112,6 +113,12 @@ export default {
         'rotate-slow': {
           '0%': { transform: 'rotate(0deg)' },
           '100%': { transform: 'rotate(360deg)' }
+        },
+        'shimmer-slide': {
+          to: { transform: 'translateY(-50%)' }
+        },
+        'spin-around': {
+          to: { transform: 'rotate(1turn)' }
         }
       },
       animation: {
@@ -121,12 +128,14 @@ export default {
         'fade-in-up': 'fade-in-up 0.8s ease-out',
         'text-reveal': 'text-reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
         'pulse-slow': 'pulse-slow 3s infinite',
-        float: 'float 6s ease-in-out infinite',
+        'float': 'float 6s ease-in-out infinite',
         'blur-in': 'blur-in 0.6s ease-out',
         'gradient-shift': 'gradient-shift 15s ease infinite',
         'grid-pulse': 'grid-pulse 4s ease-in-out infinite',
         'hover-lift': 'hover-lift 0.3s ease-out forwards',
-        'rotate-slow': 'rotate-slow 20s linear infinite'
+        'rotate-slow': 'rotate-slow 20s linear infinite',
+        'shimmer-slide': 'shimmer-slide var(--speed) linear infinite',
+        'spin-around': 'spin-around calc(var(--speed) * 2) linear infinite'
       },
       backdropBlur: {
         xs: '2px',

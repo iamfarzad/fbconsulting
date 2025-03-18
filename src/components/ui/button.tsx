@@ -12,7 +12,7 @@ const buttonVariants = cva(
       variant: {
         default: "bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 [&_svg]:text-[#fe5a1d] hover:[&_svg]:scale-110",
         outline: "border border-black bg-transparent text-foreground hover:bg-black/5 dark:border-white dark:text-white dark:hover:bg-white/5 [&_svg]:text-[#fe5a1d] hover:[&_svg]:scale-110",
-        ghost: "bg-transparent text-foreground hover:bg-black/5 dark:text-white dark:hover:bg-white/5 [&_svg]:text-[#fe5a1d] hover:[&_svg]:scale-110",
+        ghost: "bg-transparent text-foreground hover:bg-black/5 dark:text-white dark:hover:bg-white/10 [&_svg]:text-[#fe5a1d] hover:[&_svg]:scale-110",
         link: "text-foreground underline-offset-4 hover:underline dark:text-white [&_svg]:text-[#fe5a1d] hover:[&_svg]:scale-110",
       },
       size: {

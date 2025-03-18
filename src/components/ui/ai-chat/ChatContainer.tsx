@@ -1,8 +1,10 @@
+
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChatMessageList } from "./ChatMessageList";
 import { ChatInput } from "./ChatInput";
 import { AIMessage } from "@/services/copilotService";
+import { UploadedFile } from "@/hooks/useFileUpload";
 
 interface ChatContainerProps {
   containerRef: React.RefObject<HTMLDivElement>;
@@ -12,11 +14,16 @@ interface ChatContainerProps {
   setInputValue: (value: string) => void;
   isLoading: boolean;
   suggestedResponse: string | null;
-  handleSend: () => void;
+  handleSend: (files?: { mimeType: string; data: string; name: string; type: string }[]) => void;
   handleClear: () => void;
   toggleFullScreen: () => void;
   placeholder?: string;
   isFullScreen?: boolean;
+  // Add file-related props
+  files?: UploadedFile[];
+  uploadFile?: (file: File) => Promise<void>;
+  removeFile?: (index: number) => void;
+  isUploading?: boolean;
 }
 
 export const ChatContainer: React.FC<ChatContainerProps> = ({
@@ -31,7 +38,12 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
   handleClear,
   toggleFullScreen,
   placeholder = "Ask me anything...",
-  isFullScreen = false
+  isFullScreen = false,
+  // File-related props with defaults
+  files = [],
+  uploadFile,
+  removeFile,
+  isUploading = false
 }) => {
   return (
     <motion.div 
@@ -102,7 +114,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.1 }}
-        className="relative z-10 bg-background"
+        className="relative z-10 bg-background rounded-2xl"
       >
         <ChatInput
           value={inputValue}
@@ -114,6 +126,10 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
           hasMessages={messages.length > 0}
           suggestedResponse={suggestedResponse}
           placeholder={placeholder}
+          files={files}
+          onUploadFile={uploadFile}
+          onRemoveFile={removeFile}
+          isUploading={isUploading}
         />
       </motion.div>
     </motion.div>

@@ -1,124 +1,80 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useMessages } from "./useMessages";
 import { useSuggestedResponse } from "./useSuggestedResponse";
-import { LeadInfo } from "@/services/lead/leadExtractor";
-import { generateResponse } from "@/services/chat/responseGenerator";
+import { useFileUpload, UploadedFile } from "@/hooks/useFileUpload";
+import { useChatUIState } from "./chat/useChatUIState";
+import { useChatInitialization } from "./chat/useChatInitialization";
+import { useChatMessageHandler } from "./chat/useChatMessageHandler";
 import { useToast } from "./use-toast";
-import { useLocation } from "react-router-dom";
+import { LeadInfo } from '@/services/lead/leadExtractor';
 
 export function useAIChatInput() {
-  const [showMessages, setShowMessages] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const [inputValue, setInputValue] = useState("");
   const { messages, addUserMessage, addAssistantMessage, clearMessages } = useMessages();
   const { toast } = useToast();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const location = useLocation();
-  const currentPath = location.pathname;
+  const { files, uploadFile, removeFile, clearFiles, isUploading } = useFileUpload();
   
-  // Create a mock LeadInfo object for suggestions
+  // Extract UI state management
+  const {
+    showMessages,
+    setShowMessages,
+    isFullScreen,
+    setIsFullScreen,
+    containerRef,
+    toggleFullScreen,
+    getCurrentPage
+  } = useChatUIState();
+  
+  // Extract chat initialization
+  const { multimodalChatRef, initializeMultimodalChat } = useChatInitialization();
+  
+  // Create mock lead info for suggesting responses
   const mockLeadInfo: LeadInfo = {
     interests: messages.map(m => m.content),
-    stage: 'discovery'
+    stage: 'discovery' // Now using a valid literal value of LeadInfo.stage
   };
   
+  // Get suggested response
   const suggestedResponse = useSuggestedResponse(mockLeadInfo);
-
-  // Calculate container height based on content - added safety checks
-  const calculateContainerHeight = () => {
-    if (containerRef.current && typeof window !== 'undefined') {
-      // Update max-height based on viewport if needed
-      const vh = window.innerHeight;
-      const maxHeight = Math.min(vh * 0.7, 600); // 70% of viewport height or 600px, whichever is smaller
-      containerRef.current.style.maxHeight = `${maxHeight}px`;
-    }
-  };
-
-  // Update container height on window resize with cleanup
-  useEffect(() => {
-    calculateContainerHeight();
-    
-    // Safety check for window
-    if (typeof window !== 'undefined') {
-      window.addEventListener('resize', calculateContainerHeight);
-      return () => window.removeEventListener('resize', calculateContainerHeight);
-    }
-  }, []);
-
-  // Show messages container when first message is sent
+  
+  // Extract message handling
+  const {
+    isLoading,
+    inputValue,
+    setInputValue,
+    handleSend,
+    handleClear: handleClearInternal
+  } = useChatMessageHandler({
+    addUserMessage,
+    addAssistantMessage,
+    setShowMessages,
+    clearFiles,
+    messages
+  });
+  
+  // Show messages when they exist
   useEffect(() => {
     if (messages.length > 0 && !showMessages) {
       setShowMessages(true);
     }
-  }, [messages.length, showMessages]);
-
-  // Extract current page from path
-  const getCurrentPage = (): string | undefined => {
-    if (currentPath === '/') return 'home';
-    return currentPath.substring(1); // Remove leading slash
-  };
-
-  const toggleFullScreen = () => {
-    setIsFullScreen(prev => !prev);
-  };
-
-  const handleSend = async () => {
-    if (!inputValue.trim()) {
-      toast({
-        title: "Message is empty",
-        description: "Please enter a message before sending.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsLoading(true);
-    try {
-      addUserMessage(inputValue);
-      
-      // Create mock lead info from conversation context
-      const mockLeadInfo: LeadInfo = {
-        interests: [...messages.map(m => m.content), inputValue],
-        stage: 'discovery'
-      };
-      
-      // Generate AI response with possible graphic cards
-      const currentPage = getCurrentPage();
-      const aiResponse = generateResponse(inputValue, mockLeadInfo);
-      
-      // Simulate AI response delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Add the response to the chat
-      addAssistantMessage(aiResponse);
-    } catch (error) {
-      toast({
-        title: "Error sending message",
-        description: "Please try again later.",
-        variant: "destructive",
-      });
-      console.error("Chat error:", error);
-    } finally {
-      setIsLoading(false);
-    }
-    
-    setInputValue("");
-    
-    // Show messages container when first message is sent
-    if (!showMessages) {
-      setShowMessages(true);
-    }
-  };
-
+  }, [messages.length, showMessages, setShowMessages]);
+  
+  // Clear messages and chat history
   const handleClear = () => {
     clearMessages();
+    clearFiles();
     setShowMessages(false);
+    handleClearInternal();
+    
     toast({
       title: "Chat cleared",
       description: "All messages have been removed.",
     });
+  };
+
+  // Handle sending messages, possibly with files
+  const handleSendWrapper = (filesToSend?: { mimeType: string, data: string, name: string, type: string }[]) => {
+    handleSend(files);
   };
 
   return {
@@ -131,8 +87,13 @@ export function useAIChatInput() {
     containerRef,
     isFullScreen,
     toggleFullScreen,
-    handleSend,
+    handleSend: handleSendWrapper,
     handleClear,
-    setIsFullScreen
+    setIsFullScreen,
+    files,
+    uploadFile,
+    removeFile,
+    clearFiles,
+    isUploading
   };
 }
