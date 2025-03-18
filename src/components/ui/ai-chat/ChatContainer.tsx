@@ -113,7 +113,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.1 }}
-        className="relative z-10 bg-background"
+        className="relative z-10 bg-background rounded-2xl"
       >
         <ChatInput
           value={inputValue}
