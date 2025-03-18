@@ -8,8 +8,9 @@ import { useVoiceInput } from "@/hooks/useVoiceInput";
 import { VoiceControls } from "./VoiceControls";
 import { SendButton } from "./SendButton";
 import { SuggestionButton } from "./SuggestionButton";
-import { AnimatedBars } from "@/components/ui/AnimatedBars";
-import { ImageUploader } from "./ImageUploader";
+import { ChatInputActions } from "./ChatInputActions";
+import { TranscriptionDisplay } from "./TranscriptionDisplay";
+import { ImagePreviewArea } from "./ImagePreviewArea";
 
 interface ChatInputProps {
   value: string;
@@ -98,25 +99,12 @@ export function ChatInput({
 
   return (
     <div className="flex flex-col w-full">
-      {/* Animated Transcription Display */}
-      <div 
-        className={cn(
-          "overflow-hidden transition-all duration-500 ease-in-out bg-black/95 backdrop-blur-lg text-white rounded-2xl mb-2",
-          isTranscribing ? "max-h-24 opacity-100 py-3 px-4 border border-white/20" : "max-h-0 opacity-0 py-0 px-0"
-        )}
-      >
-        <div className={cn(
-          "flex items-center gap-2 transition-transform duration-500",
-          isTranscribing ? "translate-y-0" : "-translate-y-full"
-        )}>
-          <div className="flex-shrink-0">
-            <AnimatedBars isActive={isListening} small={false} />
-          </div>
-          <p className="text-sm font-medium animate-fade-in-up">
-            {transcript || "Listening..."}
-          </p>
-        </div>
-      </div>
+      {/* Transcription Display */}
+      <TranscriptionDisplay 
+        isTranscribing={isTranscribing}
+        isListening={isListening}
+        transcript={transcript}
+      />
 
       {/* Chat Input Box */}
       <div className={cn(
@@ -148,44 +136,29 @@ export function ChatInput({
           />
         </div>
         
-        {/* Image upload area */}
+        {/* Image Preview Area */}
         {images.length > 0 && onRemoveImage && (
-          <div className="px-4 pb-2 border-t border-black/10 pt-2">
-            <ImageUploader
-              images={images}
-              onUpload={onUploadImage || (async () => {})}
-              onRemove={onRemoveImage}
-              isUploading={isUploading}
-            />
-          </div>
+          <ImagePreviewArea 
+            images={images} 
+            onRemoveImage={onRemoveImage} 
+          />
         )}
 
+        {/* Input Actions */}
         <div className="flex items-center justify-between p-3 border-t border-black/10">
-          <div className="flex items-center gap-2">
-            {hasMessages && (
-              <button
-                type="button"
-                className="group p-2 hover:bg-black/10 rounded-lg transition-colors flex items-center gap-1"
-                onClick={onClear}
-                disabled={isLoading || isListening}
-              >
-                <Loader2 className="w-4 h-4 text-black" />
-                <span className="text-xs text-black hidden group-hover:inline transition-opacity">
-                  Clear
-                </span>
-              </button>
-            )}
-            
-            {images.length === 0 && onUploadImage && (
-              <ImageUploader
-                images={images}
-                onUpload={onUploadImage}
-                onRemove={onRemoveImage || (() => {})}
-                isUploading={isUploading}
-              />
-            )}
-          </div>
+          {/* Left side actions */}
+          <ChatInputActions 
+            hasMessages={hasMessages}
+            onClear={onClear}
+            images={images}
+            onUploadImage={onUploadImage}
+            onRemoveImage={onRemoveImage}
+            isLoading={isLoading}
+            isListening={isListening}
+            isUploading={isUploading}
+          />
           
+          {/* Right side actions */}
           <div className="flex items-center gap-2">
             {suggestedResponse && (
               <SuggestionButton

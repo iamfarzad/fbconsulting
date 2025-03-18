@@ -18,7 +18,7 @@ interface FullScreenChatProps {
   suggestedResponse: string | null;
   onClear: () => void;
   placeholderText?: string;
-  // Add image-related props
+  // Image-related props
   images?: { mimeType: string; data: string; preview: string }[];
   uploadImage?: (file: File) => Promise<void>;
   removeImage?: (index: number) => void;
