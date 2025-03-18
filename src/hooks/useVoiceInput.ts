@@ -1,12 +1,15 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useGeminiSpeechRecognition } from './useGeminiSpeechRecognition';
 import { useSpeechRecognition } from './useSpeechRecognition';
 import debounce from 'lodash/debounce';
+import { useGeminiInitialization } from './gemini/useGeminiInitialization';
 
 export function useVoiceInput(setValue: (value: string) => void, onSend: () => void) {
   const [aiProcessing, setAiProcessing] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const processingRef = useRef(false);
+  const { hasApiKey, getApiKey } = useGeminiInitialization();
   
   // Create debounced function only once
   const debouncedProcessingRef = useRef(
@@ -44,13 +47,24 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
     }
   }, []);
   
+  // Use Gemini or browser speech recognition based on API key availability
+  const useGeminiAPI = hasApiKey();
+  
+  const geminiSpeechRecognition = useGeminiSpeechRecognition(
+    getApiKey(),
+    handleCommand
+  );
+  
+  const browserSpeechRecognition = useSpeechRecognition(handleCommand);
+  
+  // Combine the two recognition systems
   const { 
     isListening, 
     transcript, 
     toggleListening,
     voiceError,
     isVoiceSupported 
-  } = useSpeechRecognition(handleCommand);
+  } = useGeminiAPI ? geminiSpeechRecognition : browserSpeechRecognition;
 
   // Enhanced animation state management with increased durations
   useEffect(() => {
@@ -101,6 +115,8 @@ export function useVoiceInput(setValue: (value: string) => void, onSend: () => v
     voiceError,
     aiProcessing,
     isTranscribing,
-    isVoiceSupported
+    isVoiceSupported,
+    // Flag to indicate we're using Gemini API
+    isUsingGeminiApi: useGeminiAPI
   };
 }

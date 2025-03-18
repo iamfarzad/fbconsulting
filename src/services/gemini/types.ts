@@ -15,7 +15,19 @@ export interface GeminiMessage {
       mimeType: string;
       data: string;
     };
+    audio?: {
+      mimeType: string;
+      data: string;
+    };
   }[];
+}
+
+// Speech configuration for Gemini
+export interface SpeechConfig {
+  voice_name: 'Aoede' | 'Charon' | 'Fenrir' | 'Kore' | 'Puck';
+  audio_format?: string; // 'wav' | 'mp3' | 'aiff' | 'aac' | 'ogg' | 'flac'
+  speaking_rate?: number; // 0.25 to 4.0, default 1.0
+  pitch?: number; // -20.0 to 20.0, default 0
 }
 
 export interface GeminiConfig {
@@ -27,6 +39,7 @@ export interface GeminiConfig {
   maxOutputTokens?: number;
   stopSequences?: string[];
   safetySettings?: SafetySetting[];
+  speechConfig?: SpeechConfig;
 }
 
 // Default configuration for Gemini chat
@@ -35,6 +48,12 @@ export const DEFAULT_CONFIG: Partial<GenerationConfig> = {
   topP: 0.95,
   topK: 40,
   maxOutputTokens: 1024,
+};
+
+// Default speech configuration
+export const DEFAULT_SPEECH_CONFIG: SpeechConfig = {
+  voice_name: 'Charon',
+  audio_format: 'mp3'
 };
 
 // Default safety settings

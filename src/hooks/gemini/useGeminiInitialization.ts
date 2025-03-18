@@ -21,7 +21,10 @@ export function useGeminiInitialization() {
           if (apiKey) {
             multimodalChatRef.current = new GeminiMultimodalChat({
               apiKey,
-              model: 'gemini-2.0-vision'
+              model: 'gemini-2.0-vision',
+              speechConfig: {
+                voice_name: 'Charon'
+              }
             });
           }
         }
