@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils';
 import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
 import { trackEvent } from '@/services/analyticsService';
+import { ShimmerButton } from './ui/shimmer-button';
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -114,15 +115,20 @@ const Hero = () => {
             transition={{ delay: 0.6, duration: 0.5 }}
             className="flex justify-center mt-4"
           >
-            <Button 
-              size="lg" 
+            <ShimmerButton 
               onClick={handleConsultationClick}
-              className="rounded-full px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300 group bg-[#fe5a1d] hover:bg-[#fe5a1d]/90 text-white"
+              className="px-8 py-3 text-lg shadow-lg hover:shadow-xl"
+              background="#fe5a1d"
+              shimmerColor="rgba(255, 255, 255, 0.4)"
+              shimmerSize="0.1em"
+              shimmerDuration="2.5s"
             >
-              <Calendar className="mr-2 h-5 w-5 text-white group-hover:scale-110 transition-all duration-300" />
-              Book Free Consultation
-              <ArrowRight className="ml-2 h-4 w-4 text-white group-hover:translate-x-1 transition-transform duration-300" />
-            </Button>
+              <div className="flex items-center">
+                <Calendar className="mr-2 h-5 w-5 text-white group-hover:scale-110 transition-all duration-300" />
+                <span>Book Free Consultation</span>
+                <ArrowRight className="ml-2 h-4 w-4 text-white group-hover:translate-x-1 transition-transform duration-300" />
+              </div>
+            </ShimmerButton>
           </motion.div>
         </div>
       </div>
