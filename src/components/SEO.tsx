@@ -25,8 +25,19 @@ const SEO: React.FC<SEOProps> = ({
   author = 'AI Automation Consultant',
   language,
 }) => {
-  const siteUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  const pageUrl = canonicalUrl || (typeof window !== 'undefined' ? window.location.href : '');
+  // Use a try-catch block to handle potential errors with window access
+  let siteUrl = '';
+  let pageUrl = '';
+  try {
+    siteUrl = typeof window !== 'undefined' && window.location ? window.location.origin : '';
+    pageUrl = canonicalUrl || (typeof window !== 'undefined' && window.location ? window.location.href : '');
+  } catch (error) {
+    console.error('Error accessing window.location:', error);
+    // Fallback values
+    siteUrl = 'https://fbconsulting.com';
+    pageUrl = canonicalUrl || 'https://fbconsulting.com';
+  }
+  
   const imageUrl = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`;
   
   // Default organization structured data to be merged with page-specific data
@@ -54,15 +65,17 @@ const SEO: React.FC<SEOProps> = ({
     fullStructuredData = [organizationSchema];
   }
   
-  return (
-    <Helmet>
-      {/* Basic meta tags */}
-      <title>{title}</title>
-      <meta name="description" content={description} />
-      <link rel="canonical" href={pageUrl} />
-      {keywords && <meta name="keywords" content={keywords} />}
-      {author && <meta name="author" content={author} />}
-      {language && <html lang={language} />}
+  // Wrap the Helmet in a try-catch to prevent crashes
+  try {
+    return (
+      <Helmet>
+        {/* Basic meta tags */}
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <link rel="canonical" href={pageUrl} />
+        {keywords && <meta name="keywords" content={keywords} />}
+        {author && <meta name="author" content={author} />}
+        {language && <html lang={language} />}
       
       {/* OpenGraph tags */}
       <meta property="og:title" content={title} />
@@ -84,8 +97,13 @@ const SEO: React.FC<SEOProps> = ({
           {JSON.stringify(fullStructuredData)}
         </script>
       )}
-    </Helmet>
-  );
+      </Helmet>
+    );
+  } catch (error) {
+    console.error('Error rendering Helmet:', error);
+    // Return null or a minimal component that won't crash
+    return <title>{title}</title>;
+  }
 };
 
 export default SEO;

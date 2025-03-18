@@ -135,26 +135,28 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     return translation;
   };
   
-  // Set initial language based on saved preference or location detection
+  // Initialize language and handle changes
   useEffect(() => {
     // First try to get from localStorage
     const savedLanguage = localStorage.getItem('preferredLanguage') as Language | null;
     
-    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'no')) {
-      setLanguage(savedLanguage);
-    } else if (isNorwegian) {
-      // If no saved preference, use location detection
+    // Only update if we don't have a saved preference and we're in Norway
+    if (!savedLanguage && isNorwegian) {
       setLanguage('no');
+      localStorage.setItem('preferredLanguage', 'no');
+    } else if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'no')) {
+      setLanguage(savedLanguage);
     }
   }, [isNorwegian]);
   
-  // Save language preference to localStorage
-  useEffect(() => {
-    localStorage.setItem('preferredLanguage', language);
-  }, [language]);
+  // Save explicit language changes to localStorage
+  const handleLanguageChange = (newLanguage: Language) => {
+    setLanguage(newLanguage);
+    localStorage.setItem('preferredLanguage', newLanguage);
+  };
   
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, availableLanguages }}>
+    <LanguageContext.Provider value={{ language, setLanguage: handleLanguageChange, t, availableLanguages }}>
       {children}
     </LanguageContext.Provider>
   );

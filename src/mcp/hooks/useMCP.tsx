@@ -33,7 +33,7 @@ export function useMCP<M, C extends Context = Context>(
     }).catch(error => {
       console.error('Error in MCP handler:', error);
     });
-  }, [model, protocol]);
+  }, [protocol]); // Remove model from dependencies to prevent infinite loop
 
   return [model, sendMessage];
 }
