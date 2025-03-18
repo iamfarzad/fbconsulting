@@ -1,9 +1,4 @@
 {
-  "functions": {
-    "api/**/*.py": {
-      "runtime": "@now/python@3.9"
-    }
-  },
   "env": {
     "GOOGLE_API_KEY": "${GOOGLE_API_KEY}"
   }
