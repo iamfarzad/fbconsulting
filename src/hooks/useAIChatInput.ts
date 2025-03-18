@@ -1,181 +1,80 @@
-import { useState, useEffect, useRef } from "react";
+
+import { useEffect } from "react";
 import { useMessages } from "./useMessages";
 import { useSuggestedResponse } from "./useSuggestedResponse";
-import { LeadInfo } from "@/services/lead/leadExtractor";
-import { generateResponse } from "@/services/chat/responseGenerator";
-import { useToast } from "./use-toast";
-import { useLocation } from "react-router-dom";
-import { sendMultimodalRequest } from "@/services/gemini";
-import { GeminiMultimodalChat } from "@/services/gemini/multimodal";
 import { useImageUpload } from "@/hooks/useImageUpload";
+import { useChatUIState } from "./chat/useChatUIState";
+import { useChatInitialization } from "./chat/useChatInitialization";
+import { useChatMessageHandler } from "./chat/useChatMessageHandler";
+import { useToast } from "./use-toast";
 
 export function useAIChatInput() {
-  const [showMessages, setShowMessages] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isFullScreen, setIsFullScreen] = useState(false);
-  const [inputValue, setInputValue] = useState("");
   const { messages, addUserMessage, addAssistantMessage, clearMessages } = useMessages();
   const { toast } = useToast();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const location = useLocation();
-  const currentPath = location.pathname;
-  const multimodalChatRef = useRef<GeminiMultimodalChat | null>(null);
+  const { images, uploadImage, removeImage, clearImages, isUploading } = useImageUpload();
   
+  // Extract UI state management
   const {
-    images,
-    uploadImage,
-    removeImage,
-    clearImages,
-    isUploading
-  } = useImageUpload();
+    showMessages,
+    setShowMessages,
+    isFullScreen,
+    setIsFullScreen,
+    containerRef,
+    toggleFullScreen,
+    getCurrentPage
+  } = useChatUIState();
   
-  const mockLeadInfo: LeadInfo = {
+  // Extract chat initialization
+  const { multimodalChatRef, initializeMultimodalChat } = useChatInitialization();
+  
+  // Create mock lead info for suggesting responses
+  const mockLeadInfo = {
     interests: messages.map(m => m.content),
     stage: 'discovery'
   };
   
+  // Get suggested response
   const suggestedResponse = useSuggestedResponse(mockLeadInfo);
-
-  const initializeMultimodalChat = () => {
-    const savedConfig = localStorage.getItem('GEMINI_CONFIG');
-    let apiKey = '';
-    
-    if (savedConfig) {
-      try {
-        const config = JSON.parse(savedConfig);
-        apiKey = config.apiKey;
-        
-        if (apiKey && !multimodalChatRef.current) {
-          multimodalChatRef.current = new GeminiMultimodalChat({
-            apiKey,
-            model: 'gemini-2.0-vision'
-          });
-        }
-      } catch (error) {
-        console.error('Error initializing multimodal chat:', error);
-      }
-    }
-    
-    return !!apiKey;
-  };
-
-  const calculateContainerHeight = () => {
-    if (containerRef.current && typeof window !== 'undefined') {
-      const vh = window.innerHeight;
-      const maxHeight = Math.min(vh * 0.7, 600);
-      containerRef.current.style.maxHeight = `${maxHeight}px`;
-    }
-  };
-
-  useEffect(() => {
-    calculateContainerHeight();
-    
-    if (typeof window !== 'undefined') {
-      window.addEventListener('resize', calculateContainerHeight);
-      return () => window.removeEventListener('resize', calculateContainerHeight);
-    }
-  }, []);
-
+  
+  // Extract message handling
+  const {
+    isLoading,
+    inputValue,
+    setInputValue,
+    handleSend,
+    handleClear: handleClearInternal
+  } = useChatMessageHandler({
+    addUserMessage,
+    addAssistantMessage,
+    setShowMessages,
+    multimodalChatRef,
+    clearImages,
+    messages
+  });
+  
+  // Show messages when they exist
   useEffect(() => {
     if (messages.length > 0 && !showMessages) {
       setShowMessages(true);
     }
-  }, [messages.length, showMessages]);
-
-  const getCurrentPage = (): string | undefined => {
-    if (currentPath === '/') return 'home';
-    return currentPath.substring(1);
-  };
-
-  const toggleFullScreen = () => {
-    setIsFullScreen(prev => !prev);
-  };
-
-  const handleSend = async () => {
-    if (!inputValue.trim() && images.length === 0) {
-      toast({
-        title: "Message is empty",
-        description: "Please enter a message or add an image before sending.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsLoading(true);
-    try {
-      addUserMessage(inputValue);
-      
-      let aiResponse = '';
-      const hasApiKey = initializeMultimodalChat();
-      
-      if (!hasApiKey) {
-        throw new Error('No API key found. Please configure Gemini in the settings.');
-      }
-      
-      if (images && images.length > 0) {
-        if (multimodalChatRef.current) {
-          const imageData = images.map(img => ({
-            mimeType: img.mimeType,
-            data: img.data
-          }));
-          
-          aiResponse = await multimodalChatRef.current.sendMessage(inputValue, imageData);
-        } else {
-          aiResponse = await sendMultimodalRequest(
-            inputValue,
-            images.map(img => ({
-              mimeType: img.mimeType,
-              data: img.data
-            })),
-            { 
-              apiKey: JSON.parse(localStorage.getItem('GEMINI_CONFIG') || '{}').apiKey, 
-              model: 'gemini-2.0-vision'
-            }
-          );
-        }
-      } else {
-        const mockLeadInfo: LeadInfo = {
-          interests: [...messages.map(m => m.content), inputValue],
-          stage: 'discovery'
-        };
-        
-        aiResponse = generateResponse(inputValue, mockLeadInfo);
-      }
-      
-      addAssistantMessage(aiResponse);
-    } catch (error) {
-      toast({
-        title: "Error sending message",
-        description: error instanceof Error ? error.message : "Please try again later.",
-        variant: "destructive",
-      });
-      console.error("Chat error:", error);
-    } finally {
-      setIsLoading(false);
-    }
-    
-    setInputValue("");
-    
-    clearImages();
-    
-    if (!showMessages) {
-      setShowMessages(true);
-    }
-  };
-
+  }, [messages.length, showMessages, setShowMessages]);
+  
+  // Clear messages and chat history
   const handleClear = () => {
     clearMessages();
     clearImages();
     setShowMessages(false);
-    
-    if (multimodalChatRef.current) {
-      multimodalChatRef.current.clearHistory();
-    }
+    handleClearInternal();
     
     toast({
       title: "Chat cleared",
       description: "All messages have been removed.",
     });
+  };
+
+  // Handle sending messages, possibly with images
+  const handleSendWrapper = (imagesToSend?: { mimeType: string, data: string }[]) => {
+    handleSend(images);
   };
 
   return {
@@ -188,7 +87,7 @@ export function useAIChatInput() {
     containerRef,
     isFullScreen,
     toggleFullScreen,
-    handleSend,
+    handleSend: handleSendWrapper,
     handleClear,
     setIsFullScreen,
     images,
