@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { useSpeechRecognition } from './useSpeechRecognition';
 import { useGemini } from '@/components/copilot/GeminiProvider';
@@ -27,9 +26,10 @@ export function useGeminiChatHandler() {
   // Voice recognition
   const {
     isListening,
+    transcript,
+    toggleListening,
     startListening,
     stopListening,
-    transcript,
     resetTranscript,
     voiceError,
     isVoiceSupported
@@ -87,15 +87,6 @@ export function useGeminiChatHandler() {
       }
     }
   }, [isInitialized, personaData, messages.length]);
-
-  const toggleListening = () => {
-    if (isListening) {
-      stopListening();
-    } else {
-      resetTranscript();
-      startListening();
-    }
-  };
 
   const addMessage = (role: 'user' | 'assistant' | 'error', content: string) => {
     const newMessage: AIMessage = {

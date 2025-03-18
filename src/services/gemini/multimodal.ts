@@ -1,7 +1,7 @@
 
 import { initializeGemini } from './initialize';
 import { GeminiConfig } from './types';
-import { Part } from '@google/generative-ai';
+import { Part, Content } from '@google/generative-ai';
 
 /**
  * Send a multimodal request to Gemini (text + images)
@@ -38,7 +38,10 @@ export async function sendMultimodalRequest(
     if (chatHistory.length > 0) {
       // Create a chat with history
       const chat = model.startChat({
-        history: chatHistory.map(parts => ({ parts })),
+        history: chatHistory.map(parts => ({ 
+          role: 'user', 
+          parts 
+        }) as Content),
       });
       
       // Send the message with the new parts
