@@ -2,15 +2,14 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { LeadInfo } from '@/services/lead/leadExtractor';
-import { generateResponse } from '@/services/chat/responseGenerator';
 import { GeminiMultimodalChat } from '@/services/gemini';
-import { sendMultimodalRequest } from '@/services/gemini';
+import { useChatInitialization } from './useChatInitialization';
+import { useMessageProcessor } from './useMessageProcessor';
 
 interface UseChatMessageHandlerProps {
   addUserMessage: (message: string) => void;
   addAssistantMessage: (message: string) => void;
   setShowMessages: (show: boolean) => void;
-  multimodalChatRef: React.MutableRefObject<GeminiMultimodalChat | null>;
   clearImages: () => void;
   messages: any[];
 }
@@ -22,37 +21,27 @@ export function useChatMessageHandler({
   addUserMessage,
   addAssistantMessage,
   setShowMessages,
-  multimodalChatRef,
   clearImages,
   messages
 }: UseChatMessageHandlerProps) {
-  const [isLoading, setIsLoading] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const { toast } = useToast();
-
-  // Initialize the multimodal chat if needed
-  const initializeIfNeeded = () => {
-    const savedConfig = localStorage.getItem('GEMINI_CONFIG');
-    let apiKey = '';
-    
-    if (savedConfig) {
-      try {
-        const config = JSON.parse(savedConfig);
-        apiKey = config.apiKey;
-        
-        if (apiKey && !multimodalChatRef.current) {
-          multimodalChatRef.current = new GeminiMultimodalChat({
-            apiKey,
-            model: 'gemini-2.0-vision'
-          });
-        }
-      } catch (error) {
-        console.error('Error initializing multimodal chat:', error);
-      }
-    }
-    
-    return !!apiKey;
-  };
+  
+  // Use the initialization hook
+  const { 
+    multimodalChatRef,
+    hasApiKey,
+    getApiKey,
+    resetChat
+  } = useChatInitialization();
+  
+  // Use the message processor hook
+  const {
+    isLoading,
+    setIsLoading,
+    processTextMessage,
+    processMultimodalMessage
+  } = useMessageProcessor();
 
   // Send a message
   const handleSend = async (images: { mimeType: string, data: string, preview: string }[] = []) => {
@@ -67,16 +56,18 @@ export function useChatMessageHandler({
     
     setIsLoading(true);
     try {
+      // Add the user message to the chat
       addUserMessage(inputValue);
       
       let aiResponse = '';
-      const hasApiKey = initializeIfNeeded();
       
-      if (!hasApiKey) {
-        throw new Error('No API key found. Please configure Gemini in the settings.');
-      }
-      
+      // Validate API key for image messages
       if (images && images.length > 0) {
+        if (!hasApiKey()) {
+          throw new Error('No API key found. Please configure Gemini in the settings.');
+        }
+        
+        // Try to use the multimodal chat reference if available
         if (multimodalChatRef.current) {
           const imageData = images.map(img => ({
             mimeType: img.mimeType,
@@ -85,27 +76,20 @@ export function useChatMessageHandler({
           
           aiResponse = await multimodalChatRef.current.sendMessage(inputValue, imageData);
         } else {
-          aiResponse = await sendMultimodalRequest(
-            inputValue,
-            images.map(img => ({
-              mimeType: img.mimeType,
-              data: img.data
-            })),
-            { 
-              apiKey: JSON.parse(localStorage.getItem('GEMINI_CONFIG') || '{}').apiKey, 
-              model: 'gemini-2.0-vision'
-            }
-          );
+          // Fallback to direct API call
+          aiResponse = await processMultimodalMessage(inputValue, images, getApiKey());
         }
       } else {
+        // For text-only messages, use the mock lead info
         const mockLeadInfo: LeadInfo = {
           interests: [...messages.map(m => m.content), inputValue],
-          stage: 'discovery'
+          stage: 'discovery' as const
         };
         
-        aiResponse = generateResponse(inputValue, mockLeadInfo);
+        aiResponse = await processTextMessage(inputValue, mockLeadInfo);
       }
       
+      // Add the AI response to the chat
       addAssistantMessage(aiResponse);
     } catch (error) {
       toast({
@@ -121,16 +105,15 @@ export function useChatMessageHandler({
     setInputValue("");
     clearImages();
     
-    if (!setShowMessages) {
+    if (!showMessages) {
       setShowMessages(true);
     }
   };
 
   // Handle clearing the chat
   const handleClear = () => {
-    if (multimodalChatRef.current) {
-      multimodalChatRef.current.clearHistory();
-    }
+    resetChat();
+    setInputValue("");
   };
 
   return {

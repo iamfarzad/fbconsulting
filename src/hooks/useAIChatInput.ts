@@ -7,6 +7,7 @@ import { useChatUIState } from "./chat/useChatUIState";
 import { useChatInitialization } from "./chat/useChatInitialization";
 import { useChatMessageHandler } from "./chat/useChatMessageHandler";
 import { useToast } from "./use-toast";
+import { LeadInfo } from '@/services/lead/leadExtractor';
 
 export function useAIChatInput() {
   const { messages, addUserMessage, addAssistantMessage, clearMessages } = useMessages();
@@ -28,9 +29,9 @@ export function useAIChatInput() {
   const { multimodalChatRef, initializeMultimodalChat } = useChatInitialization();
   
   // Create mock lead info for suggesting responses
-  const mockLeadInfo = {
+  const mockLeadInfo: LeadInfo = {
     interests: messages.map(m => m.content),
-    stage: 'discovery'
+    stage: 'discovery' // Now using a valid literal value of LeadInfo.stage
   };
   
   // Get suggested response
@@ -47,7 +48,6 @@ export function useAIChatInput() {
     addUserMessage,
     addAssistantMessage,
     setShowMessages,
-    multimodalChatRef,
     clearImages,
     messages
   });
