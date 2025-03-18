@@ -1,7 +1,7 @@
 
 import React from "react";
+import { AnimatedBars } from "../AnimatedBars";
 import { cn } from "@/lib/utils";
-import { AnimatedBars } from "@/components/ui/AnimatedBars";
 
 interface TranscriptionDisplayProps {
   isTranscribing: boolean;
@@ -9,29 +9,27 @@ interface TranscriptionDisplayProps {
   transcript: string;
 }
 
-export function TranscriptionDisplay({
+export const TranscriptionDisplay: React.FC<TranscriptionDisplayProps> = ({
   isTranscribing,
   isListening,
   transcript
-}: TranscriptionDisplayProps) {
+}) => {
+  if (!isListening && !isTranscribing) return null;
+
   return (
-    <div 
-      className={cn(
-        "overflow-hidden transition-all duration-500 ease-in-out bg-black/95 backdrop-blur-lg text-white rounded-2xl mb-2",
-        isTranscribing ? "max-h-24 opacity-100 py-3 px-4 border border-white/20" : "max-h-0 opacity-0 py-0 px-0"
-      )}
-    >
+    <div className="mb-2 relative overflow-hidden">
       <div className={cn(
-        "flex items-center gap-2 transition-transform duration-500",
-        isTranscribing ? "translate-y-0" : "-translate-y-full"
+        "bg-white/95 backdrop-blur-lg border border-black/20 rounded-2xl p-3 text-sm",
+        "flex items-center gap-3 transition-all duration-300 animate-fade-in",
+        isTranscribing ? "text-black/70" : "text-black"
       )}>
         <div className="flex-shrink-0">
-          <AnimatedBars isActive={isListening} small={false} />
+          <AnimatedBars isActive={isListening} small />
         </div>
-        <p className="text-sm font-medium animate-fade-in-up">
-          {transcript || "Listening..."}
-        </p>
+        <div className="flex-1 line-clamp-1">
+          {isTranscribing ? "Processing..." : transcript || "Listening..."}
+        </div>
       </div>
     </div>
   );
-}
+};
