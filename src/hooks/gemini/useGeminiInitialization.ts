@@ -35,6 +35,40 @@ export function useGeminiInitialization() {
   // Get current persona from context
   const currentPersonaName = personaData?.personaDefinitions?.[personaData?.currentPersona]?.name || 'AI Assistant';
 
+  // Check if API key is available from any source
+  const hasApiKey = (): boolean => {
+    const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    
+    // Check localStorage
+    const savedConfig = localStorage.getItem('GEMINI_CONFIG');
+    if (savedConfig) {
+      try {
+        const config = JSON.parse(savedConfig);
+        return !!(config.apiKey || envApiKey);
+      } catch (error) {
+        return !!envApiKey;
+      }
+    }
+    return !!envApiKey;
+  };
+
+  // Get the API key from localStorage or environment
+  const getApiKey = (): string => {
+    const envApiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+    
+    // Check localStorage first as user-provided keys take precedence
+    const savedConfig = localStorage.getItem('GEMINI_CONFIG');
+    if (savedConfig) {
+      try {
+        const config = JSON.parse(savedConfig);
+        return config.apiKey || envApiKey;
+      } catch (error) {
+        return envApiKey;
+      }
+    }
+    return envApiKey;
+  };
+
   return {
     isInitialized,
     isProviderLoading,
@@ -42,6 +76,8 @@ export function useGeminiInitialization() {
     providerError,
     currentPersonaName,
     multimodalChatRef,
-    personaData
+    personaData,
+    hasApiKey,
+    getApiKey
   };
 }
