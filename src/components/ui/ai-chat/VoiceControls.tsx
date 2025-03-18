@@ -9,16 +9,13 @@ interface VoiceControlsProps {
   toggleListening: () => void;
   disabled: boolean;
   aiProcessing: boolean;
-  // New prop to indicate if using Gemini API for voice
-  isUsingGeminiApi?: boolean;
 }
 
 export function VoiceControls({ 
   isListening, 
   toggleListening, 
   disabled, 
-  aiProcessing, 
-  isUsingGeminiApi = false 
+  aiProcessing
 }: VoiceControlsProps) {
   return (
     <TooltipProvider>
@@ -34,9 +31,7 @@ export function VoiceControls({
                 ? "bg-[#fe5a1d] text-white border-[#fe5a1d]/50" 
                 : "text-black/80 hover:bg-black/5 border-black/20",
               disabled && "opacity-50 cursor-not-allowed",
-              "dark:border-white/20 dark:text-white/80",
-              // Add a special indicator for Gemini API
-              isUsingGeminiApi && !isListening && "border-[#fe5a1d]/30"
+              "dark:border-white/20 dark:text-white/80"
             )}
           >
             {isListening ? (
@@ -48,13 +43,7 @@ export function VoiceControls({
           </button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>
-            {isListening 
-              ? "Stop listening" 
-              : isUsingGeminiApi 
-                ? "Start voice input (Gemini Charon)" 
-                : "Start voice input"}
-          </p>
+          <p>{isListening ? "Stop listening" : "Start voice input"}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

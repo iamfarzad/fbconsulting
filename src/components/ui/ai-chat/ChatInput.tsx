@@ -64,8 +64,7 @@ export function ChatInput({
     voiceError,
     aiProcessing,
     isTranscribing,
-    isVoiceSupported,
-    isUsingGeminiApi
+    isVoiceSupported
   } = useVoiceInput(setValue, () => handleSend());
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -107,33 +106,73 @@ export function ChatInput({
     }
   };
 
-  return <div className="flex flex-col w-full">
+  return (
+    <div className="flex flex-col w-full">
       <TranscriptionDisplay 
         isTranscribing={isTranscribing} 
         isListening={isListening} 
         transcript={transcript}
-        isUsingGeminiApi={isUsingGeminiApi}
       />
 
-      <div className={cn("relative bg-white/95 backdrop-blur-lg border border-black/20 rounded-2xl transition-all duration-300", showMessages || hasMessages ? "shadow-lg" : "")}>
+      <div className={cn(
+        "relative bg-white/95 backdrop-blur-lg border border-black/20 rounded-2xl transition-all duration-300", 
+        showMessages || hasMessages ? "shadow-lg" : ""
+      )}>
         <div className="overflow-y-auto">
-          <Textarea ref={textareaRef} value={value} onChange={handleChange} onKeyDown={handleKeyDown} placeholder={isListening ? "Listening..." : placeholder} className={cn("w-full px-4 py-3", "resize-none", "bg-transparent", "border-none", "text-black/90 text-sm", "focus:outline-none", "focus-visible:ring-0 focus-visible:ring-offset-0", "placeholder:text-black/50 placeholder:text-sm", "min-h-[60px] rounded-2xl")} style={{
-          overflow: "hidden"
-        }} disabled={isLoading || isListening} />
+          <Textarea 
+            ref={textareaRef} 
+            value={value} 
+            onChange={handleChange} 
+            onKeyDown={handleKeyDown} 
+            placeholder={isListening ? "Listening..." : placeholder} 
+            className={cn(
+              "w-full px-4 py-3",
+              "resize-none",
+              "bg-transparent",
+              "border-none",
+              "text-black/90 text-sm",
+              "focus:outline-none",
+              "focus-visible:ring-0 focus-visible:ring-offset-0",
+              "placeholder:text-black/50 placeholder:text-sm",
+              "min-h-[60px] rounded-2xl"
+            )}
+            style={{ overflow: "hidden" }}
+            disabled={isLoading || isListening}
+          />
         </div>
         
-        {files.length > 0 && onRemoveFile && <ImagePreviewArea images={files.filter(f => f.type === 'image')} onRemoveImage={index => {
-        const imageFiles = files.filter(f => f.type === 'image');
-        const imageToRemove = imageFiles[index];
-        const actualIndex = files.findIndex(f => f === imageToRemove);
-        onRemoveFile(actualIndex);
-      }} />}
+        {files.length > 0 && onRemoveFile && (
+          <ImagePreviewArea 
+            images={files.filter(f => f.type === 'image')} 
+            onRemoveImage={index => {
+              const imageFiles = files.filter(f => f.type === 'image');
+              const imageToRemove = imageFiles[index];
+              const actualIndex = files.findIndex(f => f === imageToRemove);
+              onRemoveFile(actualIndex);
+            }} 
+          />
+        )}
 
         <div className="flex items-center justify-between p-3 border-t border-black/10 bg-white dark:bg-slate-800 rounded-b-2xl">
-          <ChatInputActions hasMessages={hasMessages} onClear={onClear} files={files} onUploadFile={onUploadFile} onRemoveFile={onRemoveFile} isLoading={isLoading} isListening={isListening} isUploading={isUploading} />
+          <ChatInputActions 
+            hasMessages={hasMessages} 
+            onClear={onClear} 
+            files={files} 
+            onUploadFile={onUploadFile} 
+            onRemoveFile={onRemoveFile} 
+            isLoading={isLoading} 
+            isListening={isListening} 
+            isUploading={isUploading} 
+          />
           
           <div className="flex items-center gap-2">
-            {suggestedResponse && <SuggestionButton suggestion={suggestedResponse} onClick={handleSuggestionClick} disabled={isLoading || isListening} />}
+            {suggestedResponse && (
+              <SuggestionButton 
+                suggestion={suggestedResponse} 
+                onClick={handleSuggestionClick} 
+                disabled={isLoading || isListening} 
+              />
+            )}
             
             {isVoiceSupported && (
               <VoiceControls 
@@ -141,13 +180,19 @@ export function ChatInput({
                 toggleListening={toggleListening} 
                 disabled={isLoading} 
                 aiProcessing={aiProcessing}
-                isUsingGeminiApi={isUsingGeminiApi}
               />
             )}
             
-            <SendButton hasContent={!!value.trim() || files.length > 0} isLoading={isLoading || isUploading} aiProcessing={aiProcessing} disabled={isListening} onClick={handleSend} />
+            <SendButton 
+              hasContent={!!value.trim() || files.length > 0} 
+              isLoading={isLoading || isUploading} 
+              aiProcessing={aiProcessing} 
+              disabled={isListening} 
+              onClick={handleSend} 
+            />
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 }
