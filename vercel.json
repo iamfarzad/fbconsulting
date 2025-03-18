@@ -1,7 +1,7 @@
 {
   "version": 2,
   "functions": {
-    "api/gemini_audio.py": {
+    "pages/api/gemini_audio.py": {
       "runtime": "python3.11",
       "memory": 1024,
       "maxDuration": 10
@@ -10,10 +10,15 @@
   "routes": [
     {
       "src": "/api/gemini_audio",
-      "dest": "/api/gemini_audio.py"
+      "dest": "/pages/api/gemini_audio.py"
     }
   ],
   "env": {
     "GOOGLE_API_KEY": "@google_api_key"
+  },
+  "build": {
+    "env": {
+      "PYTHON_VERSION": "3.11"
+    }
   }
 }
