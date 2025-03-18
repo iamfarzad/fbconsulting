@@ -34,7 +34,7 @@ export function ChatInputActions({
           disabled={isLoading || isListening}
         >
           <Loader2 className="w-4 h-4 text-black" />
-          <span className="text-xs text-black hidden group-hover:inline transition-opacity">
+          <span className="text-xs text-black">
             Clear
           </span>
         </button>
