@@ -149,7 +149,7 @@ Rules:
             }
             
             setIsInitialized(true);
-            toast.success('AI Assistant Ready', {
+            toast.success('Farzad AI Ready', {
               description: `Gemini ${modelName} has been successfully initialized.`
             });
           } else {
