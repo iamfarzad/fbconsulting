@@ -1,5 +1,7 @@
 
-// Types for Gemini API requests and responses
+import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/genai';
+
+// Types for Gemini message formats
 export interface GeminiMessage {
   role: 'user' | 'model';
   parts: {
@@ -19,28 +21,6 @@ export interface GeminiGenerationConfig {
   stopSequences?: string[];
 }
 
-export interface GeminiChatRequest {
-  contents: GeminiMessage[];
-  generationConfig?: GeminiGenerationConfig;
-  safetySettings?: any[];
-}
-
-export interface GeminiChatResponse {
-  candidates: {
-    content: {
-      role: string;
-      parts: {
-        text: string;
-      }[];
-    };
-    finishReason: string;
-    safetyRatings: any[];
-  }[];
-  promptFeedback: {
-    safetyRatings: any[];
-  };
-}
-
 // Default configuration for Gemini chat
 const DEFAULT_CONFIG: GeminiGenerationConfig = {
   temperature: 0.7,
@@ -50,7 +30,7 @@ const DEFAULT_CONFIG: GeminiGenerationConfig = {
 };
 
 /**
- * Sends a chat request to the Gemini API
+ * Sends a chat request to the Gemini API using the official SDK
  */
 export async function sendGeminiChatRequest(
   messages: GeminiMessage[],
@@ -61,48 +41,82 @@ export async function sendGeminiChatRequest(
     throw new Error('Gemini API key is not available');
   }
 
-  // Construct the request payload
-  const payload: GeminiChatRequest = {
-    contents: messages,
+  // Initialize the Gemini API with the provided key
+  const genAI = new GoogleGenerativeAI(apiKey);
+  
+  // Get the model (using gemini-1.5-flash by default)
+  const model = genAI.getGenerativeModel({ 
+    model: "gemini-1.5-flash",
     generationConfig: {
       ...DEFAULT_CONFIG,
       ...config,
     },
-  };
+    safetySettings: [
+      {
+        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+    ],
+  });
 
   try {
-    // Call the Google Gemini API
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      }
-    );
+    // Format the history for the SDK chat format
+    const formattedMessages = formatMessagesForSDK(messages);
     
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Gemini API error:', errorData);
-      throw new Error(`Gemini API error: ${errorData.error?.message || response.statusText}`);
-    }
-
-    const data: GeminiChatResponse = await response.json();
+    // Start a chat session
+    const chat = model.startChat({
+      history: formattedMessages.slice(0, -1), // All messages except the last one
+      generationConfig: {
+        ...DEFAULT_CONFIG,
+        ...config,
+      },
+    });
+    
+    // Send the last message to get a response
+    const lastMessage = formattedMessages[formattedMessages.length - 1];
+    const result = await chat.sendMessage(lastMessage.parts);
     
     // Extract the response text
-    if (data.candidates && data.candidates.length > 0) {
-      const textResponse = data.candidates[0].content.parts[0].text;
-      return textResponse || '';
-    }
-    
-    console.error('No text found in Gemini response:', data);
-    return 'Sorry, I could not generate a response at this time.';
+    const responseText = result.response.text();
+    return responseText;
   } catch (error) {
     console.error('Error calling Gemini API:', error);
     throw error;
   }
+}
+
+/**
+ * Format messages into the SDK's expected format
+ */
+function formatMessagesForSDK(messages: GeminiMessage[]) {
+  return messages.map(msg => ({
+    role: msg.role,
+    parts: msg.parts.map(part => {
+      if (part.text) {
+        return { text: part.text };
+      } else if (part.inlineData) {
+        return {
+          inlineData: {
+            mimeType: part.inlineData.mimeType,
+            data: part.inlineData.data
+          }
+        };
+      }
+      return { text: "" };
+    })
+  }));
 }
 
 /**

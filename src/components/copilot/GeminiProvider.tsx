@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { usePersonaManagement } from '../../mcp/hooks/usePersonaManagement';
 import { useGeminiAPI } from '../../App';
 import { toast } from 'sonner';
+import { GoogleGenerativeAI } from '@google/genai';
 
 // Interface for Gemini context
 interface GeminiContextType {
@@ -73,44 +74,35 @@ Rules:
           return;
         }
         
-        // Test API key with a simple request
-        const testRequestPayload = {
-          contents: [
-            {
-              role: 'user',
-              parts: [{ text: 'Hello, test message.' }]
+        // Initialize the Gemini API with the SDK
+        const genAI = new GoogleGenerativeAI(apiKey);
+        
+        // Test API key with a simple generation
+        try {
+          const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+          const result = await model.generateContent("Hello, this is a test message.");
+          const response = await result.response;
+          const text = response.text();
+          
+          if (text) {
+            console.log("✅ Gemini initialized successfully");
+            if (personaData) {
+              console.log("Using persona data:", personaData.currentPersona);
+            } else {
+              console.log("Using default persona");
             }
-          ],
-          generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 10
+            
+            setIsInitialized(true);
+            toast.success('AI Assistant Ready', {
+              description: 'Gemini AI has been successfully initialized.'
+            });
+          } else {
+            throw new Error("Empty response from Gemini API test");
           }
-        };
-        
-        const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(testRequestPayload)
-          }
-        );
-        
-        if (!response.ok) {
-          throw new Error(`API test failed: ${response.status} ${response.statusText}`);
+        } catch (error) {
+          console.error("API test failed:", error);
+          throw error;
         }
-        
-        console.log("✅ Gemini initialized successfully");
-        if (personaData) {
-          console.log("Using persona data:", personaData.currentPersona);
-        } else {
-          console.log("Using default persona");
-        }
-        
-        setIsInitialized(true);
-        toast.success('AI Assistant Ready', {
-          description: 'Gemini AI has been successfully initialized.'
-        });
       } catch (error) {
         console.error("Error initializing Gemini:", error);
         setError(error instanceof Error ? error.message : 'Unknown error initializing Gemini');
