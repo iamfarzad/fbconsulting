@@ -1,6 +1,7 @@
 
 import { initializeGemini } from './initialize';
 import { GeminiConfig, DEFAULT_SPEECH_CONFIG } from './types';
+import { Content } from '@google/generative-ai';
 
 /**
  * Transcribes audio using Gemini's audio processing capabilities
@@ -21,26 +22,27 @@ export async function transcribeAudio(
       model: "gemini-2.0-vision" // Use vision model for multimodal inputs
     });
     
-    // Create content with audio data
-    const content = [
-      {
-        role: 'user',
-        parts: [
-          { 
-            text: "Please transcribe this audio and respond with only the transcription text." 
-          },
-          {
-            audio: {
-              mimeType: mimeType,
-              data: audioData
-            }
-          }
-        ]
-      }
-    ];
+    // Create prompt for audio transcription
+    const prompt = "Please transcribe this audio and respond with only the transcription text.";
     
-    // Generate content
-    const result = await model.generateContent(content);
+    // Use generateContent with proper Part format for audio
+    const result = await model.generateContent({
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            { text: prompt },
+            {
+              inlineData: {
+                mimeType: mimeType,
+                data: audioData
+              }
+            }
+          ]
+        }
+      ]
+    });
+    
     return result.response.text();
   } catch (error) {
     console.error('Error transcribing audio with Gemini:', error);

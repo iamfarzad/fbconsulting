@@ -39,9 +39,9 @@ export async function sendMultimodalRequest(
           }
         });
       } else if (file.mimeType.startsWith('audio/')) {
-        // Add audio file
+        // For audio files, add as inlineData
         parts.push({
-          audio: {
+          inlineData: {
             mimeType: file.mimeType,
             data: file.data
           }
@@ -163,9 +163,9 @@ export class GeminiMultimodalChat {
             }
           });
         } else if (file.mimeType.startsWith('audio/')) {
-          // Add audio file
+          // Add audio as inlineData instead of audio type
           parts.push({
-            audio: {
+            inlineData: {
               mimeType: file.mimeType,
               data: file.data
             }
@@ -216,19 +216,27 @@ export class GeminiMultimodalChat {
    */
   async transcribeAudio(audioData: string, mimeType: string): Promise<string> {
     try {
-      // Create parts with audio data
-      const parts: Part[] = [
-        { text: "Please transcribe this audio and respond with only the transcription text." },
-        { 
-          audio: {
-            mimeType: mimeType,
-            data: audioData
-          }
-        }
-      ];
+      // Create prompt for audio transcription
+      const prompt = "Please transcribe this audio and respond with only the transcription text.";
       
-      // Send for transcription
-      const result = await this.model.generateContent(parts);
+      // Use generateContent with proper content format for audio
+      const result = await this.model.generateContent({
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              { text: prompt },
+              {
+                inlineData: {
+                  mimeType: mimeType,
+                  data: audioData
+                }
+              }
+            ]
+          }
+        ]
+      });
+      
       return result.response.text();
     } catch (error) {
       console.error('Error transcribing audio:', error);
