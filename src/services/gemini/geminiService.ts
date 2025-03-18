@@ -3,7 +3,7 @@ import {
   GoogleGenerativeAI, 
   HarmCategory, 
   HarmBlockThreshold 
-} from '@google/genai';
+} from '@google/generative-ai';
 
 // Types for Gemini message formats
 export interface GeminiMessage {
