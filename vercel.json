@@ -6,10 +6,7 @@
     "api/*.py": {
       "runtime": "@vercel/python@3.1.0",
       "maxDuration": 60,
-      "memory": 1024,
-      "experimental": {
-        "fluidCompute": true
-      }
+      "memory": 1024
     }
   },
   "routes": [
