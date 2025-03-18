@@ -30,7 +30,9 @@ export const GeminiChat: React.FC = () => {
     images,
     uploadImage,
     removeImage,
-    isUploading
+    isUploading,
+    // Check if we're using real data or mock data
+    hasValidApiKey
   } = useGeminiChatHandler();
   
   return (
@@ -40,6 +42,8 @@ export const GeminiChat: React.FC = () => {
         isLoading={isProviderLoading}
         messagesCount={messages.length}
         onClear={clearMessages}
+        isUsingMockData={!hasValidApiKey}
+        isConnected={isInitialized}
       />
       
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
