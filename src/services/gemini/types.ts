@@ -3,8 +3,17 @@ import {
   HarmCategory,
   HarmBlockThreshold,
   SafetySetting,
-  GenerationConfig
+  GenerationConfig,
+  Part as GeminiPart
 } from '@google/generative-ai';
+
+// Extend the Part type to include audio support
+export interface ExtendedPart extends GeminiPart {
+  audio?: {
+    mimeType: string;
+    data: string;
+  };
+}
 
 // Types for Gemini message formats
 export interface GeminiMessage {
