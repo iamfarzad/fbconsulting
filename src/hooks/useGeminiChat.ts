@@ -28,10 +28,24 @@ export const useGeminiChat = ({
     addMessage,
     messages
   });
+  
+  // Get the API key from localStorage
+  const getApiKey = () => {
+    try {
+      const config = localStorage.getItem('GEMINI_CONFIG');
+      if (config) {
+        const { apiKey } = JSON.parse(config);
+        return apiKey;
+      }
+    } catch (error) {
+      console.error('Error parsing Gemini config:', error);
+    }
+    return null;
+  };
 
   const { sendMessage } = useMessageHandler({
     messages,
-    apiKey: window.localStorage.getItem('GEMINI_API_KEY'),
+    apiKey: getApiKey(),
     addMessage,
     setLoadingState,
     handleError,

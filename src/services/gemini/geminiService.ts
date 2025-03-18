@@ -2,9 +2,9 @@
 import { 
   GoogleGenerativeAI,
   GenerativeModel,
-  Content,
-  Part
-} from '@google/generative-ai';
+  Part,
+  EnhancedGenerateContentResponse
+} from '@google/genai';
 
 // Types for Gemini message formats
 export interface GeminiMessage {
@@ -48,15 +48,15 @@ export async function sendGeminiChatRequest(
 
   // Initialize the Gemini API
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-pro-001" });
 
   try {
     // Format the history for the SDK chat format
-    const formattedMessages = formatMessagesForSDK(messages);
+    const formattedHistory = formatMessagesForChat(messages.slice(0, -1));
     
     // Start a chat session
     const chat = model.startChat({
-      history: formattedMessages.slice(0, -1),
+      history: formattedHistory,
       generationConfig: {
         ...DEFAULT_CONFIG,
         ...config,
@@ -64,8 +64,8 @@ export async function sendGeminiChatRequest(
     });
     
     // Send the last message to get a response
-    const lastMessage = formattedMessages[formattedMessages.length - 1];
-    const result = await chat.sendMessage(convertPartsToContent(lastMessage.parts));
+    const lastMessage = messages[messages.length - 1];
+    const result = await chat.sendMessage(formatMessageContent(lastMessage));
     
     // Extract the response text
     const response = result.response.text();
@@ -77,35 +77,28 @@ export async function sendGeminiChatRequest(
 }
 
 /**
- * Format messages into the SDK's expected format
+ * Format messages for the chat history
  */
-function formatMessagesForSDK(messages: GeminiMessage[]): Content[] {
+function formatMessagesForChat(messages: GeminiMessage[]) {
   return messages.map(msg => ({
     role: msg.role,
-    parts: msg.parts.map(part => {
-      if (part.text) {
-        return { text: part.text };
-      } else if (part.inlineData) {
-        return {
-          inlineData: {
-            mimeType: part.inlineData.mimeType,
-            data: part.inlineData.data
-          }
-        };
-      }
-      return { text: "" };
-    })
+    parts: formatParts(msg.parts)
   }));
 }
 
 /**
- * Convert parts array to the format expected by sendMessage
+ * Format a single message's content for sendMessage
  */
-function convertPartsToContent(parts: any[]): string | Part[] {
+function formatMessageContent(message: GeminiMessage) {
+  return formatParts(message.parts);
+}
+
+/**
+ * Format parts array to the format expected by the API
+ */
+function formatParts(parts: any[]) {
   return parts.map(part => {
-    if (typeof part === 'string') {
-      return part;
-    } else if (part.text) {
+    if (part.text) {
       return { text: part.text };
     } else if (part.inlineData) {
       return {
