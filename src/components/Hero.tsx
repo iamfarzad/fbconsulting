@@ -68,12 +68,12 @@ const Hero = () => {
               transition={{ duration: 0.3 }}
             >
               <Flag className="w-4 h-4 text-red-600" />
-              <span className="text-sm font-medium">{t('norway_focused')}</span>
+              <span className="text-sm font-medium text-foreground dark:text-white">{t('norway_focused')}</span>
             </motion.div>
           )}
           
           <motion.h1 
-            className="text-4xl md:text-5xl font-semibold text-foreground"
+            className="text-4xl md:text-5xl font-semibold text-foreground dark:text-white"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
@@ -92,7 +92,7 @@ const Hero = () => {
           </motion.h1>
           
           <motion.p
-            className="text-lg text-muted-foreground text-center max-w-lg"
+            className="text-lg text-muted-foreground dark:text-gray-300 text-center max-w-lg"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
@@ -117,7 +117,7 @@ const Hero = () => {
           >
             <ShimmerButton 
               onClick={handleConsultationClick}
-              className="px-8 py-3 text-lg shadow-lg hover:shadow-xl"
+              className="px-8 py-3 text-lg shadow-lg hover:shadow-xl text-white dark:text-white"
               background="#fe5a1d"
               shimmerColor="rgba(255, 255, 255, 0.4)"
               shimmerSize="0.1em"

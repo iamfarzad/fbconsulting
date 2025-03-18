@@ -62,7 +62,7 @@ const HeroActions = () => {
         background="transparent"
         shimmerColor="rgba(255, 255, 255, 0.2)"
       >
-        <div className="flex items-center text-white">
+        <div className="flex items-center text-white dark:text-white">
           <Calendar className="mr-2 h-5 w-5 text-[#fe5a1d] group-hover:scale-110 transition-all duration-300" />
           <span>Schedule Consultation</span>
           <ArrowRight className="ml-2 h-4 w-4 text-[#fe5a1d] group-hover:translate-x-1 transition-transform duration-300" />
