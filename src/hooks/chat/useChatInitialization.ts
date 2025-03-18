@@ -13,13 +13,18 @@ export function useChatInitialization() {
   
   // Initialize the multimodal chat if an API key exists
   const initializeMultimodalChat = () => {
+    // First check for API key in environment variables
+    const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    
+    // Then check localStorage for user-provided key
     const savedConfig = localStorage.getItem('GEMINI_CONFIG');
-    let apiKey = '';
+    let apiKey = envApiKey || '';
     
     if (savedConfig) {
       try {
         const config = JSON.parse(savedConfig);
-        apiKey = config.apiKey;
+        // User-provided key takes precedence over environment variable
+        apiKey = config.apiKey || apiKey;
         
         if (apiKey && !multimodalChatRef.current) {
           multimodalChatRef.current = new GeminiMultimodalChat({
@@ -38,41 +43,56 @@ export function useChatInitialization() {
           variant: "destructive",
         });
       }
+    } else if (apiKey) {
+      // If we only have the env variable but no saved config
+      multimodalChatRef.current = new GeminiMultimodalChat({
+        apiKey,
+        model: 'gemini-2.0-vision'
+      });
+      
+      console.log("✅ Gemini chat initialized successfully with environment API key");
+      return true;
     }
     
     if (!apiKey) {
-      console.log("⚠️ No Gemini API key found, using mock responses");
+      console.log("⚠️ No Gemini API key found in env or localStorage, using mock responses");
     }
     
     return !!apiKey;
   };
 
-  // Check if API key is available
+  // Check if API key is available from any source
   const hasApiKey = () => {
+    const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    
+    // Check localStorage
     const savedConfig = localStorage.getItem('GEMINI_CONFIG');
     if (savedConfig) {
       try {
         const config = JSON.parse(savedConfig);
-        return !!config.apiKey;
+        return !!(config.apiKey || envApiKey);
       } catch (error) {
-        return false;
+        return !!envApiKey;
       }
     }
-    return false;
+    return !!envApiKey;
   };
 
-  // Get the current API key
+  // Get the current API key from any source
   const getApiKey = (): string => {
+    const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    
+    // Check localStorage first as user-provided keys take precedence
     const savedConfig = localStorage.getItem('GEMINI_CONFIG');
     if (savedConfig) {
       try {
         const config = JSON.parse(savedConfig);
-        return config.apiKey || '';
+        return config.apiKey || envApiKey || '';
       } catch (error) {
-        return '';
+        return envApiKey || '';
       }
     }
-    return '';
+    return envApiKey || '';
   };
 
   // Initialize when the hook is first used

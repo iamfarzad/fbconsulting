@@ -29,23 +29,27 @@ export const useGeminiChat = ({
     messages
   });
   
-  // Get the API key and model from localStorage
+  // Get the API key and model from environment or localStorage
   const getConfig = () => {
+    const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    let apiKey = envApiKey || null;
+    let modelName = 'gemini-2.0-flash';
+    
     try {
       const config = localStorage.getItem('GEMINI_CONFIG');
       if (config) {
         const parsedConfig = JSON.parse(config);
-        return {
-          apiKey: parsedConfig.apiKey,
-          modelName: parsedConfig.modelName || 'gemini-2.0-flash'
-        };
+        // User-provided key takes precedence
+        apiKey = parsedConfig.apiKey || apiKey;
+        modelName = parsedConfig.modelName || modelName;
       }
     } catch (error) {
       console.error('Error parsing Gemini config:', error);
     }
+    
     return {
-      apiKey: null,
-      modelName: 'gemini-2.0-flash'
+      apiKey,
+      modelName
     };
   };
   

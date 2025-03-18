@@ -38,7 +38,7 @@ interface GeminiProviderProps {
 
 export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
   const { personaData } = usePersonaManagement();
-  const { apiKey } = useGeminiAPI();
+  const { apiKey: contextApiKey } = useGeminiAPI();
   const [isInitialized, setIsInitialized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,20 +77,20 @@ Rules:
       setError(null);
       
       try {
-        if (!apiKey) {
-          setError('No Gemini API key found');
-          console.warn("No Gemini API key found");
-          setIsLoading(false);
-          return;
-        }
+        // Get API key from environment variable or context
+        const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+        let activeApiKey = contextApiKey || envApiKey;
         
-        // Get the model configuration from localStorage
+        // Check localStorage for user-provided key (takes precedence)
         const savedConfig = localStorage.getItem('GEMINI_CONFIG');
         let modelName = "gemini-2.0-flash"; // Default model
         
         if (savedConfig) {
           try {
             const config = JSON.parse(savedConfig);
+            if (config.apiKey) {
+              activeApiKey = config.apiKey;
+            }
             if (config.modelName) {
               modelName = config.modelName;
             }
@@ -99,8 +99,15 @@ Rules:
           }
         }
         
+        if (!activeApiKey) {
+          setError('No Gemini API key found');
+          console.warn("No Gemini API key found in environment, localStorage, or context");
+          setIsLoading(false);
+          return;
+        }
+        
         // Initialize the Gemini API with the SDK
-        const genAI = new GenerativeAI(apiKey);
+        const genAI = new GenerativeAI(activeApiKey);
         
         // Initialize text model
         const geminiModel = genAI.getGenerativeModel({ model: modelName });
@@ -148,7 +155,7 @@ Rules:
     };
     
     initializeGeminiModels();
-  }, [apiKey, personaData]);
+  }, [contextApiKey, personaData]);
   
   return (
     <GeminiContext.Provider value={{ 
