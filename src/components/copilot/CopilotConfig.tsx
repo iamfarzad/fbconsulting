@@ -7,10 +7,18 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { useGeminiAPI } from '@/App';
 import { Loader2 } from 'lucide-react';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 
 export const CopilotConfig: React.FC = () => {
   const { apiKey: contextApiKey } = useGeminiAPI();
   const [apiKey, setApiKey] = useState('');
+  const [modelName, setModelName] = useState('gemini-2.0-pro-001');
   const [isLoading, setIsLoading] = useState(false);
   const [hasSavedKey, setHasSavedKey] = useState(false);
   
@@ -24,6 +32,9 @@ export const CopilotConfig: React.FC = () => {
           setApiKey(config.apiKey);
           setHasSavedKey(true);
         }
+        if (config.modelName) {
+          setModelName(config.modelName);
+        }
       } catch (error) {
         console.error('Error parsing saved configuration:', error);
       }
@@ -33,14 +44,14 @@ export const CopilotConfig: React.FC = () => {
     }
   }, [contextApiKey]);
   
-  const testGeminiConnection = async (key: string): Promise<boolean> => {
+  const testGeminiConnection = async (key: string, model: string): Promise<boolean> => {
     if (!key) return false;
     
     try {
       setIsLoading(true);
       
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${key}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
         {
           method: 'POST',
           headers: {
@@ -79,12 +90,13 @@ export const CopilotConfig: React.FC = () => {
   const handleSaveConfig = async () => {
     try {
       // Test connection
-      const isConnected = await testGeminiConnection(apiKey);
+      const isConnected = await testGeminiConnection(apiKey, modelName);
       
       if (isConnected) {
         // Save configuration to localStorage - store the full API key securely
         localStorage.setItem('GEMINI_CONFIG', JSON.stringify({
           apiKey: apiKey,
+          modelName: modelName,
           timestamp: Date.now()
         }));
         
@@ -95,7 +107,7 @@ export const CopilotConfig: React.FC = () => {
         window.location.reload();
       } else {
         toast.error('Failed to connect to Gemini API', {
-          description: 'Please check your API key and try again.'
+          description: 'Please check your API key and model selection and try again.'
         });
       }
     } catch (error) {
@@ -107,6 +119,7 @@ export const CopilotConfig: React.FC = () => {
   const handleClearConfig = () => {
     localStorage.removeItem('GEMINI_CONFIG');
     setApiKey('');
+    setModelName('gemini-2.0-pro-001');
     setHasSavedKey(false);
     toast.success('API configuration cleared');
   };
@@ -131,6 +144,23 @@ export const CopilotConfig: React.FC = () => {
           />
           <p className="text-xs text-muted-foreground mt-1">
             Get your API key from the <a href="https://ai.google.dev/" target="_blank" rel="noopener noreferrer" className="underline">Google AI Studio</a>
+          </p>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="modelSelect">Gemini Model</Label>
+          <Select value={modelName} onValueChange={setModelName}>
+            <SelectTrigger id="modelSelect">
+              <SelectValue placeholder="Select Gemini model" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="gemini-2.0-flash-001">Gemini 2.0 Flash</SelectItem>
+              <SelectItem value="gemini-2.0-pro-001">Gemini 2.0 Pro</SelectItem>
+              <SelectItem value="gemini-2.0-vision-001">Gemini 2.0 Vision</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground mt-1">
+            Select the Gemini model you want to use for AI assistant
           </p>
         </div>
       </CardContent>
