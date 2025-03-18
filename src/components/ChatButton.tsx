@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { Bot, X } from 'lucide-react';
+import React from 'react';
+import { Bot } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import FullScreenChat from './chat/FullScreenChat';
 import { useChatButton } from '@/hooks/useChatButton';
