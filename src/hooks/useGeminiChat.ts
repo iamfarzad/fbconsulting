@@ -29,23 +29,32 @@ export const useGeminiChat = ({
     messages
   });
   
-  // Get the API key from localStorage
-  const getApiKey = () => {
+  // Get the API key and model from localStorage
+  const getConfig = () => {
     try {
       const config = localStorage.getItem('GEMINI_CONFIG');
       if (config) {
-        const { apiKey } = JSON.parse(config);
-        return apiKey;
+        const parsedConfig = JSON.parse(config);
+        return {
+          apiKey: parsedConfig.apiKey,
+          modelName: parsedConfig.modelName || 'gemini-2.0-pro-001'
+        };
       }
     } catch (error) {
       console.error('Error parsing Gemini config:', error);
     }
-    return null;
+    return {
+      apiKey: null,
+      modelName: 'gemini-2.0-pro-001'
+    };
   };
+  
+  const { apiKey, modelName } = getConfig();
 
   const { sendMessage } = useMessageHandler({
     messages,
-    apiKey: getApiKey(),
+    apiKey,
+    modelName,
     addMessage,
     setLoadingState,
     handleError,

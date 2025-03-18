@@ -1,34 +1,18 @@
-// Re-export all functionality from the new modular structure
-// This maintains backward compatibility with existing code
+// Re-export functionality from the Gemini service module
 
-// Core functionality
+// Core Gemini functionality
 export { 
-  initializeAzureAI, 
-  testAzureConnection, 
-  getDefaultSystemInstructions 
-} from './copilot/azureService';
+  initializeGemini,
+  sendGeminiChatRequest,
+  streamGeminiChat,
+  sendMultimodalRequest,
+  convertToGeminiMessages
+} from './gemini/geminiService';
 
-export type { AzureAIConfig } from './copilot/azureService';
-
-// Deployment tracking
-export {
-  getDeploymentStatus,
-  updateDeploymentStatus,
-  isModelReady,
-  getAllDeploymentStatuses
-} from './copilot/deploymentService';
-
-export type { DeploymentStatus } from './copilot/deploymentService';
-
-// Lead extraction (keeping backward compatibility)
-export { extractLeadInfo } from './lead/leadExtractor';
-export type { LeadInfo } from './lead/leadExtractor';
-
-// Lead stage management (keeping backward compatibility)
-export { determineLeadStage, updateLeadStage } from './lead/leadStageManager';
-
-// Response generation (keeping backward compatibility)
-export { generateSuggestedResponse, determinePersona } from './chat/responseGenerator';
+export type { 
+  GeminiMessage, 
+  GeminiConfig 
+} from './gemini/geminiService';
 
 // Message types (keeping backward compatibility)
 export type { AIMessage } from './chat/messageTypes';
@@ -40,3 +24,13 @@ export {
   saveLeadInfo,
   loadLeadInfo
 } from './storage/localStorageManager';
+
+// Lead extraction (keeping backward compatibility)
+export { extractLeadInfo } from './lead/leadExtractor';
+export type { LeadInfo } from './lead/leadExtractor';
+
+// Lead stage management (keeping backward compatibility)
+export { determineLeadStage, updateLeadStage } from './lead/leadStageManager';
+
+// Response generation (keeping backward compatibility)
+export { generateSuggestedResponse, determinePersona } from './chat/responseGenerator';
