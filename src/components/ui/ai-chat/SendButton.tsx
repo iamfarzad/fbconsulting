@@ -22,7 +22,7 @@ export function SendButton({
     <button
       type="button"
       className={cn(
-        "px-1.5 py-1.5 rounded-lg text-sm transition-colors border hover:border-foreground flex items-center justify-between gap-1",
+        "p-1.5 rounded-md text-xs transition-colors border flex items-center justify-center",
         hasContent && !isLoading
           ? "bg-black text-white dark:bg-white dark:text-black border-black dark:border-white"
           : "text-foreground border-foreground/30",
@@ -32,11 +32,11 @@ export function SendButton({
       disabled={!hasContent || isLoading || disabled || aiProcessing}
     >
       {isLoading || aiProcessing ? (
-        <Loader2 className="w-4 h-4 animate-spin" />
+        <Loader2 className="w-3.5 h-3.5 animate-spin" />
       ) : (
         <ArrowUpIcon
           className={cn(
-            "w-4 h-4",
+            "w-3.5 h-3.5",
             hasContent && !isLoading
               ? "text-white dark:text-black"
               : "text-foreground"

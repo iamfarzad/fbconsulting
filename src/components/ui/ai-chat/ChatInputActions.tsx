@@ -30,11 +30,11 @@ export function ChatInputActions({
       {hasMessages && (
         <button
           type="button"
-          className="group p-2 hover:bg-black/10 rounded-lg transition-colors flex items-center gap-1"
+          className="group p-1.5 hover:bg-black/10 rounded-lg transition-colors flex items-center gap-1"
           onClick={onClear}
           disabled={isLoading || isListening}
         >
-          <Loader2 className="w-4 h-4 text-black" />
+          <Loader2 className="w-3.5 h-3.5 text-black" />
           <span className="text-xs text-black">
             Clear
           </span>
