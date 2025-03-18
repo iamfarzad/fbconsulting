@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useMessages } from "./useMessages";
 import { useSuggestedResponse } from "./useSuggestedResponse";
@@ -20,7 +19,6 @@ export function useAIChatInput() {
   const location = useLocation();
   const currentPath = location.pathname;
   
-  // Add image upload functionality
   const {
     images,
     uploadImage,
@@ -29,7 +27,6 @@ export function useAIChatInput() {
     isUploading
   } = useImageUpload();
   
-  // Create a mock LeadInfo object for suggestions
   const mockLeadInfo: LeadInfo = {
     interests: messages.map(m => m.content),
     stage: 'discovery'
@@ -37,38 +34,32 @@ export function useAIChatInput() {
   
   const suggestedResponse = useSuggestedResponse(mockLeadInfo);
 
-  // Calculate container height based on content - added safety checks
   const calculateContainerHeight = () => {
     if (containerRef.current && typeof window !== 'undefined') {
-      // Update max-height based on viewport if needed
       const vh = window.innerHeight;
-      const maxHeight = Math.min(vh * 0.7, 600); // 70% of viewport height or 600px, whichever is smaller
+      const maxHeight = Math.min(vh * 0.7, 600);
       containerRef.current.style.maxHeight = `${maxHeight}px`;
     }
   };
 
-  // Update container height on window resize with cleanup
   useEffect(() => {
     calculateContainerHeight();
     
-    // Safety check for window
     if (typeof window !== 'undefined') {
       window.addEventListener('resize', calculateContainerHeight);
       return () => window.removeEventListener('resize', calculateContainerHeight);
     }
   }, []);
 
-  // Show messages container when first message is sent
   useEffect(() => {
     if (messages.length > 0 && !showMessages) {
       setShowMessages(true);
     }
   }, [messages.length, showMessages]);
 
-  // Extract current page from path
   const getCurrentPage = (): string | undefined => {
     if (currentPath === '/') return 'home';
-    return currentPath.substring(1); // Remove leading slash
+    return currentPath.substring(1);
   };
 
   const toggleFullScreen = () => {
@@ -87,15 +78,13 @@ export function useAIChatInput() {
     
     setIsLoading(true);
     try {
-      // Add user message to chat
       addUserMessage(inputValue);
       
       let aiResponse = '';
       
-      // Get Gemini API key from localStorage
       const savedConfig = localStorage.getItem('GEMINI_CONFIG');
       let apiKey = '';
-      let modelName = 'gemini-1.5-pro';
+      let modelName = 'gemini-2.0-flash';
       
       if (savedConfig) {
         try {
@@ -113,29 +102,24 @@ export function useAIChatInput() {
         throw new Error('No API key found. Please configure Gemini in the settings.');
       }
       
-      // If we have images, use vision API
       if (images && images.length > 0) {
-        // Use the multimodal API
         aiResponse = await sendMultimodalRequest(
           inputValue,
           images,
           { 
             apiKey, 
-            model: 'gemini-1.5-pro-vision' // Use vision model
+            model: 'gemini-2.0-vision'
           }
         );
       } else {
-        // Create mock lead info from conversation context
         const mockLeadInfo: LeadInfo = {
           interests: [...messages.map(m => m.content), inputValue],
           stage: 'discovery'
         };
         
-        // Generate AI response with possible graphic cards
         aiResponse = generateResponse(inputValue, mockLeadInfo);
       }
       
-      // Add the response to the chat
       addAssistantMessage(aiResponse);
     } catch (error) {
       toast({
@@ -150,10 +134,8 @@ export function useAIChatInput() {
     
     setInputValue("");
     
-    // Clear any uploaded images after sending
     clearImages();
     
-    // Show messages container when first message is sent
     if (!showMessages) {
       setShowMessages(true);
     }
@@ -182,7 +164,6 @@ export function useAIChatInput() {
     handleSend,
     handleClear,
     setIsFullScreen,
-    // Export image upload functionality
     images,
     uploadImage,
     removeImage,
