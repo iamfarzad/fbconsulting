@@ -1,8 +1,9 @@
 
 import { 
-  GoogleGenerativeAI, 
-  HarmCategory, 
-  HarmBlockThreshold 
+  GoogleGenerativeAI,
+  GenerativeModel,
+  Content,
+  Part
 } from '@google/generative-ai';
 
 // Types for Gemini message formats
@@ -64,10 +65,10 @@ export async function sendGeminiChatRequest(
     
     // Send the last message to get a response
     const lastMessage = formattedMessages[formattedMessages.length - 1];
-    const result = await chat.sendMessage(lastMessage.parts);
+    const result = await chat.sendMessage(convertPartsToContent(lastMessage.parts));
     
     // Extract the response text
-    const response = await result.text();
+    const response = result.response.text();
     return response;
   } catch (error) {
     console.error('Error calling Gemini API:', error);
@@ -78,7 +79,7 @@ export async function sendGeminiChatRequest(
 /**
  * Format messages into the SDK's expected format
  */
-function formatMessagesForSDK(messages: GeminiMessage[]) {
+function formatMessagesForSDK(messages: GeminiMessage[]): Content[] {
   return messages.map(msg => ({
     role: msg.role,
     parts: msg.parts.map(part => {
@@ -95,6 +96,27 @@ function formatMessagesForSDK(messages: GeminiMessage[]) {
       return { text: "" };
     })
   }));
+}
+
+/**
+ * Convert parts array to the format expected by sendMessage
+ */
+function convertPartsToContent(parts: any[]): string | Part[] {
+  return parts.map(part => {
+    if (typeof part === 'string') {
+      return part;
+    } else if (part.text) {
+      return { text: part.text };
+    } else if (part.inlineData) {
+      return {
+        inlineData: {
+          mimeType: part.inlineData.mimeType,
+          data: part.inlineData.data
+        }
+      };
+    }
+    return { text: "" };
+  });
 }
 
 /**
