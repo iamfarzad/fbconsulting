@@ -1,14 +1,15 @@
 
 import React from "react";
 import { Loader2 } from "lucide-react";
-import { ImageUploader } from "./ImageUploader";
+import { FileUploader } from "./FileUploader";
+import { UploadedFile } from "@/hooks/useFileUpload";
 
 interface ChatInputActionsProps {
   hasMessages: boolean;
   onClear: () => void;
-  images: { mimeType: string; data: string; preview: string }[];
-  onUploadImage?: (file: File) => Promise<void>;
-  onRemoveImage?: (index: number) => void;
+  files: UploadedFile[];
+  onUploadFile?: (file: File) => Promise<void>;
+  onRemoveFile?: (index: number) => void;
   isLoading: boolean;
   isListening: boolean;
   isUploading?: boolean;
@@ -17,9 +18,9 @@ interface ChatInputActionsProps {
 export function ChatInputActions({
   hasMessages,
   onClear,
-  images,
-  onUploadImage,
-  onRemoveImage,
+  files,
+  onUploadFile,
+  onRemoveFile,
   isLoading,
   isListening,
   isUploading = false
@@ -40,11 +41,11 @@ export function ChatInputActions({
         </button>
       )}
       
-      {images.length === 0 && onUploadImage && (
-        <ImageUploader
-          images={images}
-          onUpload={onUploadImage}
-          onRemove={onRemoveImage || (() => {})}
+      {files.length === 0 && onUploadFile && (
+        <FileUploader
+          files={files}
+          onUpload={onUploadFile}
+          onRemove={onRemoveFile || (() => {})}
           isUploading={isUploading}
         />
       )}
