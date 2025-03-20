@@ -5,13 +5,15 @@ import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AnimatedBars } from '@/components/ui/AnimatedBars';
 import { UnifiedChat } from './UnifiedChat';
+import { ChatProvider } from '@/contexts/ChatContext';
 
 interface UnifiedFullScreenChatProps {
   onMinimize: () => void;
   title?: string;
   subtitle?: string;
   placeholderText?: string;
-  useCopilotKit?: boolean;
+  apiKey?: string;
+  modelName?: string;
 }
 
 export const UnifiedFullScreenChat: React.FC<UnifiedFullScreenChatProps> = ({
@@ -19,7 +21,8 @@ export const UnifiedFullScreenChat: React.FC<UnifiedFullScreenChatProps> = ({
   title = 'AI Assistant',
   subtitle,
   placeholderText = "Ask me anything...",
-  useCopilotKit = false
+  apiKey,
+  modelName
 }) => {
   // Prevent body scrolling when fullscreen chat is open
   useEffect(() => {
@@ -67,14 +70,15 @@ export const UnifiedFullScreenChat: React.FC<UnifiedFullScreenChatProps> = ({
         </div>
         
         <div className="flex-1 p-6 flex flex-col relative overflow-hidden">
-          <UnifiedChat 
-            fullScreen={true} 
-            placeholderText={placeholderText}
-            title={title}
-            subtitle={subtitle}
-            className="h-full border-0 rounded-none shadow-none"
-            useCopilotKit={useCopilotKit}
-          />
+          <ChatProvider apiKey={apiKey} modelName={modelName}>
+            <UnifiedChat 
+              fullScreen={true} 
+              placeholderText={placeholderText}
+              title={title}
+              subtitle={subtitle}
+              className="h-full border-0 rounded-none shadow-none"
+            />
+          </ChatProvider>
         </div>
       </motion.div>
     </motion.div>

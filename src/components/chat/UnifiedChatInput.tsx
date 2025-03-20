@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { useChat } from '@/contexts/ChatContext';
@@ -8,6 +8,7 @@ import { InputControls } from './core/InputControls';
 import { SuggestionButton } from './core/SuggestionButton';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
 import { useAutoResizeTextarea } from '@/hooks/useAutoResizeTextarea';
+import { FileAttachment } from '@/services/chat/types';
 
 interface UnifiedChatInputProps {
   placeholder?: string;
@@ -54,7 +55,12 @@ export const UnifiedChatInput: React.FC<UnifiedChatInputProps> = ({
     () => handleSend()
   );
   
-  // Media upload
+  // Update textarea height when input value changes
+  useEffect(() => {
+    adjustHeight();
+  }, [inputValue, adjustHeight]);
+  
+  // Media upload toggle
   const [showMediaUpload, setShowMediaUpload] = React.useState(false);
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -75,7 +81,9 @@ export const UnifiedChatInput: React.FC<UnifiedChatInputProps> = ({
     if (isLoading) return;
     if (!inputValue.trim()) return;
     
-    sendMessage(inputValue);
+    // We'll pass an empty array for files since this implementation doesn't support them yet
+    const files: FileAttachment[] = [];
+    sendMessage(inputValue, files);
   };
   
   const handleSuggestionClick = () => {
@@ -115,14 +123,6 @@ export const UnifiedChatInput: React.FC<UnifiedChatInputProps> = ({
           style={{ overflow: 'hidden' }}
           disabled={isLoading || isListening}
         />
-        
-        {/* Media upload area if needed */}
-        {showMediaUpload && (
-          <div className="p-2 border-t border-black/10 dark:border-white/10">
-            {/* Media upload component would go here */}
-            <p className="text-xs text-center text-muted-foreground">Media upload not implemented yet</p>
-          </div>
-        )}
         
         <div className="flex items-center justify-between p-3 border-t border-black/10 dark:border-white/10">
           <div className="flex items-center">

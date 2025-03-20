@@ -6,16 +6,19 @@ import { AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { UnifiedChat } from "../chat/UnifiedChat";
 import { UnifiedFullScreenChat } from "../chat/UnifiedFullScreenChat";
-import { ChatProvider } from "@/contexts/ChatContext";
 
 interface AIChatInputProps {
   placeholderText?: string;
   autoFullScreen?: boolean;
+  apiKey?: string;
+  modelName?: string;
 }
 
 export function AIChatInput({ 
   placeholderText = "Ask me anything...",
-  autoFullScreen = false 
+  autoFullScreen = false,
+  apiKey,
+  modelName
 }: AIChatInputProps) {
   const [isFullScreen, setIsFullScreen] = React.useState(false);
   const isMobile = useIsMobile();
@@ -37,21 +40,23 @@ export function AIChatInput({
   };
 
   return (
-    <ChatProvider>
-      <AnimatePresence mode="wait">
-        {isFullScreen ? (
-          <UnifiedFullScreenChat
-            onMinimize={toggleFullScreen}
-            placeholderText={placeholderText}
-          />
-        ) : (
-          <UnifiedChat
-            placeholderText={placeholderText}
-            onToggleFullScreen={toggleFullScreen}
-          />
-        )}
-      </AnimatePresence>
-    </ChatProvider>
+    <AnimatePresence mode="wait">
+      {isFullScreen ? (
+        <UnifiedFullScreenChat
+          onMinimize={toggleFullScreen}
+          placeholderText={placeholderText}
+          apiKey={apiKey}
+          modelName={modelName}
+        />
+      ) : (
+        <UnifiedChat
+          placeholderText={placeholderText}
+          onToggleFullScreen={toggleFullScreen}
+          apiKey={apiKey}
+          modelName={modelName}
+        />
+      )}
+    </AnimatePresence>
   );
 }
 

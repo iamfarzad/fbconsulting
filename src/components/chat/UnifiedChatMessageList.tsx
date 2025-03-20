@@ -40,11 +40,13 @@ export const UnifiedChatMessageList: React.FC<UnifiedChatMessageListProps> = ({
   return (
     <div 
       ref={containerRef}
-      className={`bg-black/95 dark:bg-black/95 backdrop-blur-lg rounded-2xl border border-white/20 dark:border-white/20 shadow-lg p-4 ${className}`}
+      className={cn(
+        "border border-border rounded-lg overflow-y-auto",
+        className
+      )}
       style={{
         minHeight: '120px',
         maxHeight: '400px',
-        overflowY: 'auto',
         scrollBehavior: 'smooth'
       }}
     >
@@ -55,16 +57,16 @@ export const UnifiedChatMessageList: React.FC<UnifiedChatMessageListProps> = ({
             animate={{ opacity: 1 }}
             className="flex flex-col items-center justify-center h-full text-center py-10"
           >
-            <Bot size={40} className="text-white/90 mb-4" />
-            <h3 className="text-white/90 text-lg font-medium mb-2">
+            <Bot size={40} className="mb-4" />
+            <h3 className="text-lg font-medium mb-2">
               {emptyStateTitle}
             </h3>
-            <p className="text-white/70 max-w-lg">
+            <p className="text-muted-foreground max-w-lg">
               {emptyStateDescription}
             </p>
           </motion.div>
         ) : (
-          <div className="flex flex-col space-y-4">
+          <div className="flex flex-col space-y-4 p-4">
             {messages.filter(msg => msg.role !== 'system').map((msg, index) => (
               <ChatMessage 
                 key={index} 
@@ -91,4 +93,9 @@ export const UnifiedChatMessageList: React.FC<UnifiedChatMessageListProps> = ({
       </AnimatePresence>
     </div>
   );
+};
+
+// Helper function to conditionally join class names
+const cn = (...classes: (string | undefined)[]) => {
+  return classes.filter(Boolean).join(' ');
 };
