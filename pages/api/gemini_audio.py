@@ -143,6 +143,7 @@ class handler(BaseHTTPRequestHandler):
             genai.configure(api_key=api_key)
             client = genai.Client()
             
+            # Using Google Gemini 2.0 Flash voice function with Charon configuration for audio responses
             # Configure live session with Charon voice
             config = {
                 "response_modalities": ["TEXT", "AUDIO"],

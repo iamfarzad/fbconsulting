@@ -1,5 +1,4 @@
-
-FROM node:18
+FROM mcr.microsoft.com/devcontainers/javascript-node:18
 
 # Set working directory
 WORKDIR /app
@@ -25,3 +24,12 @@ USER node
 
 # Set the working directory permissions
 RUN mkdir -p /app && chown -R node:node /app
+
+# Install Python
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get -y install --no-install-recommends python3-pip python3-venv \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create and activate virtual environment
+RUN python3 -m venv /workspace/venv
+ENV PATH="/workspace/venv/bin:$PATH"

@@ -1,107 +1,126 @@
-# Gemini Multimodal Service
+# Gemini Service Backend
 
-This microservice provides audio synthesis capabilities using Google's Gemini Multimodal Live API. It acts as a bridge between the frontend application and Gemini's audio features.
+This is the backend service for handling chat, audio synthesis, and WebSocket communication with the Gemini AI model.
 
 ## Features
-
-- Real-time audio synthesis using Gemini's Multimodal Live API
-- WebSocket-based communication for streaming audio
-- Support for the Charon voice model
-- Handles both text and audio responses
+- Real-time chat with Gemini Pro model
+- Text-to-speech synthesis with voice customization
+- WebSocket streaming for audio chunks
+- Configurable voice settings (rate, pitch, language)
+- Automatic sentence chunking for natural pauses
+- Connection heartbeat and auto-reconnect
+- Detailed logging and error handling
 
 ## Prerequisites
-
 - Python 3.11 or higher
 - Google API Key with access to Gemini API
-- Node.js (for the frontend application)
+- Virtual environment (recommended)
 
-## Setup
+## Quick Start
 
-1. Create a `.env` file in the `backend/gemini_service` directory:
-```env
-GOOGLE_API_KEY=your_api_key_here
+1. Create and activate a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: .\venv\Scripts\activate
 ```
 
 2. Install dependencies:
 ```bash
-cd backend/gemini_service
 pip install -r requirements.txt
 ```
 
-3. Run the service:
+3. Set up environment variables:
 ```bash
-python main.py
+cp .env.example .env
+# Edit .env and add your GOOGLE_API_KEY
 ```
 
-The service will start on `http://localhost:8000`.
-
-## Docker Setup
-
-1. Build the Docker image:
+4. Start the service:
 ```bash
-cd backend/gemini_service
-docker build -t gemini-service .
+python start_local.py
 ```
 
-2. Run the container:
-```bash
-docker run -p 8000:8000 -e GOOGLE_API_KEY=your_api_key_here gemini-service
-```
-
-## API Documentation
-
-### WebSocket Endpoint
-
-- URL: `ws://localhost:8000/ws/{client_id}`
-- The `client_id` is a unique identifier for each client connection
-
-### Message Format
-
-Send messages to the WebSocket in this format:
-```json
-{
-  "text": "Text to synthesize",
-  "role": "user"
-}
-```
-
-### Response Format
-
-The service will respond with either:
-- Binary audio data (when synthesis is successful)
-- JSON error message:
-```json
-{
-  "error": "Error message"
-}
-```
-
-## Integration with Frontend
-
-The frontend TypeScript service (`googleGenAIService.ts`) is already configured to connect to this microservice. It will:
-1. Establish a WebSocket connection
-2. Send text to be synthesized
-3. Play received audio using the Web Audio API
-
-## Error Handling
-
-The service implements robust error handling:
-- Connection errors
-- API errors
-- Audio synthesis errors
-
-All errors are logged and sent back to the client for proper handling.
-
-## Development
-
-To run in development mode with auto-reload:
-```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-```
+The service will be available at http://localhost:8000
 
 ## Testing
 
-You can test the WebSocket connection using wscat:
+1. Test WebSocket connection:
 ```bash
-wscat -c ws://localhost:8000/ws/test
+python test_websocket.py --save-audio --message "Tell me a joke about programming"
 ```
+
+Options:
+- `--host`: WebSocket host (default: localhost)
+- `--port`: WebSocket port (default: 8000)
+- `--message`: Message to send (default: "Tell me a short joke")
+- `--save-audio`: Save received audio chunks to files
+
+2. Check health endpoint:
+```bash
+curl http://localhost:8000/health
+```
+
+## Configuration
+
+Environment variables in `.env`:
+- `GOOGLE_API_KEY`: Your Google API key
+- `HOST`: Server host (default: 0.0.0.0)
+- `PORT`: Server port (default: 8000)
+- `LOG_LEVEL`: Logging level (default: INFO)
+- `ALLOWED_ORIGINS`: CORS allowed origins
+- `DEFAULT_VOICE`: Default voice name
+- `DEFAULT_LANGUAGE`: Default language code
+- `WS_PING_INTERVAL`: WebSocket ping interval in seconds
+- `WS_PING_TIMEOUT`: WebSocket ping timeout in seconds
+
+## Voice Settings
+
+Available voice settings:
+- Name: Default "Charon"
+- Language: Default "en-US"
+- Rate: 0.25 to 4.0 (default 1.0)
+- Pitch: -20.0 to 20.0 (default 0.0)
+
+## Monitoring
+
+- Logs are written to `gemini_service.log`
+- Health check endpoint at `/health`
+- Connection status in WebSocket messages
+- Detailed error messages in response
+
+## Development
+
+- Auto-reload is enabled by default in development
+- Test changes with `test_websocket.py`
+- Monitor logs with:
+```bash
+tail -f gemini_service.log
+```
+
+## Common Issues
+
+1. WebSocket Connection Failed:
+   - Check if the backend service is running
+   - Verify CORS settings in .env
+   - Check firewall settings
+
+2. Audio Not Playing:
+   - Verify GOOGLE_API_KEY has access to text-to-speech
+   - Check audio chunks are being received
+   - Monitor browser console for errors
+
+3. Performance Issues:
+   - Adjust chunk size in gemini_client.py
+   - Modify sentence splitting logic
+   - Check network latency
+
+## Production Deployment
+
+For production:
+1. Set `RELOAD=false` in .env
+2. Configure proper CORS settings
+3. Use proper SSL/TLS
+4. Set up monitoring
+5. Configure proper logging
+
+See `.vercel/implementation.md` for Vercel deployment details.

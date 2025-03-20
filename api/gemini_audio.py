@@ -46,18 +46,53 @@ def handler(request):
             }
         }
         
-        # Start live session and send text
-        session = client.connect("gemini-2.0-flash", config)
-        response = session.send({
-            "turns": [{
-                "parts": [{"text": body['text']}],
-                "role": "user"
-            }],
-            "turn_complete": True
-        })
+        # Start live session and send text with timeout
+        session = None
+        start_time = time.time()
+        max_retries = 2
+        retry_count = 0
+        audio_data = None
         
-        # Get audio data
-        audio_data = response.audio
+        while retry_count <= max_retries and time.time() - start_time < 45:  # Overall timeout of 45 seconds
+            try:
+                session = client.connect("gemini-2.0-flash", config)
+                response = session.send({
+                    "turns": [{
+                        "parts": [{"text": body['text']}],
+                        "role": "user"
+                    }],
+                    "turn_complete": True
+                }, timeout=15)  # 15 second timeout per attempt
+                
+                # Get audio data and break if successful
+                audio_data = response.audio
+                break
+                
+            except Exception as e:
+                logging.warning(f"Attempt {retry_count + 1} failed: {str(e)}")
+                retry_count += 1
+                
+                # Close the session if it exists
+                if session:
+                    try:
+                        session.close()
+                    except Exception as se:
+                        logging.warning(f"Error closing session: {se}")
+                    session = None
+                
+                # Wait before retrying
+                if retry_count <= max_retries:
+                    time.sleep(1)
+        
+        if not audio_data:
+            raise Exception("Failed to generate audio after multiple attempts")
+            
+        # Always clean up the session in a separate try block
+        if session:
+            try:
+                session.close()
+            except Exception as e:
+                logging.warning(f"Error closing Gemini session: {e}")
         
         # Send response
         return {

@@ -20,7 +20,7 @@ export async function sendMultimodalRequest(
     // Initialize the Gemini vision model
     const model = initializeGemini({
       ...config,
-      model: "gemini-2.0-vision" // Use gemini-2.0-vision for multimodal
+      model: "gemini-2.0-flash" // Use gemini-2.0-flash for multimodal
     });
     
     // Create content array with text and files
@@ -119,7 +119,7 @@ export class GeminiMultimodalChat {
     // Initialize the Gemini vision model
     this.model = initializeGemini({
       ...config,
-      model: "gemini-2.0-vision" // Use gemini-2.0-vision for multimodal chat
+      model: "gemini-2.0-flash" // Use gemini-2.0-flash for multimodal chat
     });
     
     // Set up speech config

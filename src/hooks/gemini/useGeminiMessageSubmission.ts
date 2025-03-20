@@ -72,7 +72,7 @@ export function useGeminiMessageSubmission({
             // Create a new multimodal chat instance
             multimodalChatRef.current = new GeminiMultimodalChat({
               apiKey,
-              model: 'gemini-2.0-vision'
+              model: 'gemini-2.0-flash'
             });
             
             // Send the message
@@ -94,9 +94,16 @@ export function useGeminiMessageSubmission({
           systemInstruction: systemInstructions
         });
         
-        // Send the message
+        // Send the message and handle response
         const result = await chat.sendMessage(inputValue);
-        response = result.response.text();
+        const text = result.response.text();
+        
+        // Check if response is valid
+        if (typeof text !== 'string' || !text.trim()) {
+          throw new Error('Invalid response from model');
+        }
+        
+        response = text;
       } else {
         throw new Error('Model not initialized');
       }

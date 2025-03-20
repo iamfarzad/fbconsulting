@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { usePersonaManagement } from '../../mcp/hooks/usePersonaManagement';
-import { useGeminiAPI } from '../../App';
+import useGeminiAPI from '@/hooks/useGeminiAPI';
 import { toast } from 'sonner';
 import { 
   GoogleGenerativeAI as GenerativeAI,
@@ -86,7 +86,7 @@ Rules:
         
         // Check localStorage for user-provided key (takes precedence)
         const savedConfig = localStorage.getItem('GEMINI_CONFIG');
-        let modelName = "gemini-2.0-flash"; // Updated to correct model name
+        let modelName = "gemini-2.0-flash"; // Using the standard Gemini Pro model
         let keySource = "unknown";
         
         if (savedConfig) {
@@ -129,7 +129,7 @@ Rules:
         setModel(geminiModel);
         
         // Initialize vision model
-        const visionModel = genAI.getGenerativeModel({ model: "gemini-2.0-vision" }); // Updated to correct model name
+        const visionModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash-vision" }); // Using the Gemini Pro Vision model
         setVisionModel(visionModel);
         
         // Test API key with a simple generation
@@ -139,7 +139,7 @@ Rules:
           
           if (response) {
             console.log(`✅ Gemini initialized successfully with model: ${modelName}`);
-            console.log(`✅ Vision model initialized: gemini-2.0-vision`);
+            console.log(`✅ Vision model initialized: gemini-2.0-flash-vision`);
             console.log(`✅ API key source: ${keySource}`);
             
             if (personaData) {
@@ -153,17 +153,25 @@ Rules:
               description: `Has been successfully initialized.`
             });
           } else {
-            throw new Error("Empty response from Gemini API test");
+            const error = new Error("Empty response from Gemini API test");
+            console.error("API test failed - empty response");
+            throw error;
           }
         } catch (error) {
           console.error("API test failed:", error);
           throw error;
         }
       } catch (error) {
-        console.error("Error initializing Gemini:", error);
-        setError(error instanceof Error ? error.message : 'Unknown error initializing Gemini');
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error initializing Gemini';
+        console.error("Error initializing Gemini:", {
+          error,
+          errorMessage,
+          hasEnvKey: !!import.meta.env.VITE_GEMINI_API_KEY,
+          hasContextKey: !!contextApiKey
+        });
+        setError(errorMessage);
         toast.error('AI Assistant Error', {
-          description: 'Failed to initialize Gemini AI. Please check your API key.'
+          description: `Failed to initialize Gemini AI: ${errorMessage}`
         });
       } finally {
         setIsLoading(false);

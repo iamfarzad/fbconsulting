@@ -18,11 +18,9 @@ interface MessageProps {
 export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
   const isUser = message.role === 'user';
   
-  // Use our utilities to extract content, cards, forms, and media
   const { textContent, cards, forms } = extractContentFromMessage(message.content);
   const { media } = extractMediaContent(textContent);
   
-  // Helper function to render the appropriate form component
   const renderForm = (formType: FormType, formData?: Record<string, string>) => {
     switch (formType) {
       case 'email-summary':
@@ -30,7 +28,6 @@ export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
       case 'newsletter-signup':
         return <NewsletterSignup compact={true} />;
       case 'booking-request':
-        // Future implementation for booking form
         return (
           <div className="p-4 bg-black/5 rounded-lg">
             <p className="text-sm text-muted-foreground">
@@ -39,7 +36,6 @@ export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
           </div>
         );
       case 'contact-form':
-        // Future implementation for contact form
         return (
           <div className="p-4 bg-black/5 rounded-lg">
             <p className="text-sm text-muted-foreground">
@@ -79,7 +75,6 @@ export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
             {textContent}
           </p>
           
-          {/* Render media content */}
           {media.length > 0 && (
             <div className="space-y-2 mt-2">
               {media.map((item, index) => (
@@ -91,14 +86,12 @@ export const ChatMessage = ({ message, isLastMessage }: MessageProps) => {
             </div>
           )}
           
-          {/* Render cards if present */}
           {cards.length > 0 && (
             <div className="mt-3">
               <GraphicCardCollection cards={cards} />
             </div>
           )}
           
-          {/* Render forms if present */}
           {!isUser && forms.length > 0 && (
             <div className="mt-3 space-y-3">
               {forms.map((form, index) => (

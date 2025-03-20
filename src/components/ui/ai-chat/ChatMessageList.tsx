@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot } from "lucide-react";
@@ -22,7 +21,6 @@ export const ChatMessageList = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // Enhanced scroll to bottom function
   const scrollToBottom = (behavior: ScrollBehavior = "smooth") => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ 
@@ -32,14 +30,12 @@ export const ChatMessageList = ({
     }
   };
   
-  // Scroll on new messages or loading state change
   useEffect(() => {
     if (messages.length > 0 || isLoading) {
       scrollToBottom("smooth");
     }
   }, [messages, isLoading]);
   
-  // Initial scroll and visibility change scroll
   useEffect(() => {
     if (showMessages) {
       const timer = setTimeout(() => {

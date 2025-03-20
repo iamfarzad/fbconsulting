@@ -4,9 +4,9 @@
 
 export type VoiceType = 'Charon';
 
-export interface ChatMessage {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
+import { AIMessage } from '../chat/messageTypes';
+
+export interface ChatMessage extends AIMessage {
   audio?: AudioContent;
 }
 

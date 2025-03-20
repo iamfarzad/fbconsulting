@@ -23,6 +23,7 @@ export interface SpeechRecognition extends EventTarget {
   continuous: boolean;
   interimResults: boolean;
   lang: string;
+  maxAlternatives: number;
   start(): void;
   stop(): void;
   abort(): void;
@@ -40,4 +41,5 @@ declare global {
 
 export interface VoiceUIProps {
   onCommand?: (command: string) => void;
+  noFloatingButton?: boolean;
 }

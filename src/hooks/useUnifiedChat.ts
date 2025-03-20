@@ -6,12 +6,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCopilotChat } from '@copilotkit/react-core';
 import { usePersonaManagement } from '@/mcp/hooks/usePersonaManagement';
-import { GoogleGenAIChatService, getChatService, ChatMessage } from '@/services/chat/googleGenAIService';
+import { GoogleGenAIChatService, getChatService, ChatMessage, GoogleGenAIChatServiceConfig } from '@/services/chat/googleGenAIService';
 import { LeadInfo } from '@/services/lead/leadExtractor';
 import { useToast } from './use-toast';
 import { useLocation } from 'react-router-dom';
-import { useGeminiAPI } from '@/SafeApp';
+import useGeminiAPI from '@/hooks/useGeminiAPI';
 import { PersonaData, PersonaType } from '@/mcp/protocols/personaManagement/types';
+import { formatErrorMessage, logDetailedError, categorizeError } from '@/utils/errorHandling';
 
 interface UseUnifiedChatOptions {
   useCopilotKit?: boolean;
@@ -32,6 +33,8 @@ export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [suggestedResponse, setSuggestedResponse] = useState<string | null>(null);
   const [chatService, setChatService] = useState<GoogleGenAIChatService | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle');
+  const [connectionError, setConnectionError] = useState<string | null>(null);
   
   // Refs
   const containerRef = useRef<HTMLDivElement>(null);
@@ -82,38 +85,35 @@ export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
   // Initialize chat service
   useEffect(() => {
     let isMounted = true;
-    let initAttempt = 0;
-    const maxAttempts = 3;
-    
-    const initializeChatService = async () => {
+
+    const initializeChat = async () => {
       try {
-        initAttempt++;
-        console.log(`Initialization attempt ${initAttempt}/${maxAttempts}`);
-
-        // Log environment state
-        console.log('Environment state:', {
-          hasApiKey: !!apiKey,
-          apiKeyLength: apiKey?.length,
-          autoInitialize,
-          currentPath,
-          env: import.meta.env.MODE,
-          isDev: import.meta.env.DEV
-        });
-
-        // Validate API key
         if (!apiKey) {
-          throw new Error('API key is missing');
+          setConnectionStatus('error');
+          setConnectionError('API key not found');
+          return;
         }
 
+        setConnectionStatus('connecting');
+        
+        // Trim any whitespace from the API key
         const trimmedApiKey = apiKey.trim();
+        
         if (!trimmedApiKey) {
-          throw new Error('API key is empty after trimming');
+          setConnectionStatus('error');
+          setConnectionError('API key is empty');
+          toast({
+            title: 'Configuration Error',
+            description: 'API key is empty. Please check your settings.',
+            variant: 'destructive',
+          });
+          return;
         }
 
         // Create service configuration
-        const serviceConfig = {
+        const serviceConfig: GoogleGenAIChatServiceConfig = {
           apiKey: trimmedApiKey,
-          modelName: 'gemini-pro',
+          modelName: 'gemini-2.0-flash',
           temperature: 0.9,
           maxOutputTokens: 2048,
           topP: 1.0,
@@ -132,83 +132,92 @@ export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
         // Create service
         const service = await getChatService(serviceConfig);
         if (!service) {
+          setConnectionStatus('error');
+          setConnectionError('Failed to create chat service instance');
           throw new Error('Failed to create chat service instance');
         }
 
         // Test connection with retries
         console.log('Testing connection...');
-        const connectionTest = await service.testConnection();
+        let connectionTest = false;
+        let retryCount = 0;
+        const maxRetries = 3;
+        let lastError: any = null;
+        
+        while (!connectionTest && retryCount < maxRetries) {
+          try {
+            connectionTest = await service.testConnection();
+            if (!connectionTest) {
+              retryCount++;
+              console.log(`Connection test failed, retry ${retryCount}/${maxRetries}`);
+              // Wait before retrying
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+          } catch (error) {
+            lastError = error;
+            retryCount++;
+            logDetailedError(error, {
+              attempt: retryCount,
+              maxRetries,
+              model: serviceConfig.modelName
+            });
+            // Wait before retrying
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
+        
         if (!connectionTest) {
-          throw new Error('Connection test failed - service returned false');
+          setConnectionStatus('error');
+          const errorMessage = lastError ? formatErrorMessage(lastError) : 'Connection test failed after multiple attempts';
+          setConnectionError(errorMessage);
+          throw new Error(errorMessage);
         }
 
         // Only proceed if component is still mounted
-        if (!isMounted) return;
-
-        // Initialize chat
-        console.log('Connection successful, initializing chat service...');
-        setChatService(service);
-
-        if (autoInitialize) {
-          const personaToUse = personaData || defaultPersona;
-          console.log('Initializing chat with persona:', personaToUse.currentPersona);
-          
-          await service.initializeChat(personaToUse);
-          const history = service.getHistory();
-          setMessages(history);
+        if (isMounted) {
+          setChatService(service);
+          setConnectionStatus('connected');
+          setConnectionError(null);
         }
-
-        console.log('Chat service initialization complete');
       } catch (error) {
-        // Only handle error if component is still mounted
-        if (!isMounted) return;
-
-        // Log detailed error information
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.error('Chat service initialization failed:', {
-          attempt: initAttempt,
-          error,
-          errorMessage,
-          errorName: error instanceof Error ? error.name : 'Unknown',
-          errorStack: error instanceof Error ? error.stack : undefined,
-          apiKeyStatus: apiKey ? 'present' : 'missing',
-          currentPath
+        logDetailedError(error, {
+          component: 'useUnifiedChat',
+          apiKeyPresent: !!apiKey,
+          apiKeyLength: apiKey?.length
         });
-
-        // Retry initialization if possible
-        if (initAttempt < maxAttempts) {
-          console.log(`Retrying initialization in 1 second... (Attempt ${initAttempt}/${maxAttempts})`);
-          setTimeout(() => {
-            if (isMounted) {
-              initializeChatService();
-            }
-          }, 1000);
-          return;
+        
+        if (isMounted) {
+          setConnectionStatus('error');
+          const errorMessage = formatErrorMessage(error);
+          setConnectionError(errorMessage);
+          
+          const errorCategory = categorizeError(error);
+          let toastTitle = 'Chat Service Error';
+          let toastDescription = errorMessage;
+          
+          if (errorCategory === 'api') {
+            toastTitle = 'API Connection Error';
+            toastDescription = 'Failed to connect to the Gemini API. Please check your network connection.';
+          } else if (errorCategory === 'auth') {
+            toastTitle = 'API Key Error';
+            toastDescription = 'Invalid or expired API key. Please check your API key configuration.';
+          }
+          
+          toast({
+            title: toastTitle,
+            description: toastDescription,
+            variant: 'destructive',
+          });
         }
-
-        // Show user-friendly error message after all retries fail
-        toast({
-          title: 'Chat Service Error',
-          description: `Failed to initialize chat service after ${maxAttempts} attempts: ${errorMessage}`,
-          variant: 'destructive'
-        });
-
-        // Set fallback message
-        setMessages([{
-          role: 'system',
-          content: 'Chat service is currently unavailable. Please check your API key and try again later.'
-        } as ChatMessage]);
       }
     };
 
-    // Start initialization
-    initializeChatService();
+    initializeChat();
 
-    // Cleanup function
     return () => {
       isMounted = false;
     };
-  }, [apiKey, personaData, currentPath, autoInitialize, toast]);
+  }, [apiKey, toast]);
 
   // Update messages when persona changes
   useEffect(() => {
@@ -268,7 +277,8 @@ export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
   const addUserMessage = (content: string) => {
     const newMessage: ChatMessage = {
       role: 'user',
-      content
+      content,
+      timestamp: Date.now()
     };
     
     setMessages(prev => [...prev, newMessage]);
@@ -287,7 +297,8 @@ export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
   const addAssistantMessage = (content: string) => {
     const newMessage: ChatMessage = {
       role: 'assistant',
-      content
+      content,
+      timestamp: Date.now()
     };
     
     setMessages(prev => [...prev, newMessage]);
@@ -446,6 +457,13 @@ export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
     setIsFullScreen,
     addUserMessage,
     addAssistantMessage,
-    chatService
+    chatService,
+    connectionStatus,
+    connectionError,
+    retryConnection: () => {
+      setChatService(null);
+      setConnectionStatus('idle');
+      setConnectionError(null);
+    }
   };
 }

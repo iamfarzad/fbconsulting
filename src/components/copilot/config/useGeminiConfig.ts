@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { useGeminiAPI } from '@/App';
+import useGeminiAPI from '@/hooks/useGeminiAPI';
 
 /**
  * Hook for managing Gemini API configuration

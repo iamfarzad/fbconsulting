@@ -1,15 +1,19 @@
 
-import React from 'react';
-import { Mic, MicOff, X } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { Mic, MicOff, X, Volume2, VolumeOff, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '../ui/button';
 import { AnimatedBars } from '../ui/AnimatedBars';
+import { useGeminiService, useGeminiAudioPlayback } from '@/hooks/gemini';
+import { Progress } from '../ui/progress';
+import { useMessage } from '@/contexts/MessageContext';
 
 interface VoicePanelProps {
   isListening: boolean;
   transcript: string;
   onClose: () => void;
   onToggleListening: () => void;
+  aiResponse?: string;
 }
 
 export const VoicePanel: React.FC<VoicePanelProps> = ({
@@ -17,7 +21,33 @@ export const VoicePanel: React.FC<VoicePanelProps> = ({
   transcript,
   onClose,
   onToggleListening,
+  aiResponse,
 }) => {
+  const { error: serviceError, isLoading, progress } = useGeminiService();
+  const { isPlaying, error: audioError, stopAudio, handleAudioChunk, playAudioChunks } = useGeminiAudioPlayback({
+    onPlaybackError: console.error
+  });
+
+  const { message, audioEnabled, setAudioEnabled } = useMessage();
+
+  useEffect(() => {
+    // Automatically play audio when message is received in context
+    if (message && audioEnabled) {
+      handleAudioChunk(new Blob([message], { type: 'text/plain' }));
+      playAudioChunks().catch(console.error);
+    }
+  }, [message, audioEnabled, handleAudioChunk, playAudioChunks]);
+
+  const handleAudioControl = () => {
+    if (isPlaying || isLoading) {
+      stopAudio();
+      setAudioEnabled(false);
+    } else if (message) {
+      setAudioEnabled(true);
+      handleAudioChunk(new Blob([message], { type: 'text/plain' }));
+      playAudioChunks().catch(console.error);
+    }
+  };
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20, scale: 0.9 }}
@@ -26,15 +56,44 @@ export const VoicePanel: React.FC<VoicePanelProps> = ({
       className="fixed bottom-24 right-6 p-4 bg-background border rounded-xl shadow-lg z-50 w-80"
     >
       <div className="flex justify-between items-center mb-3">
-        <h3 className="text-foreground font-medium text-sm">Voice Assistant</h3>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
-          className="h-7 w-7 rounded-full"
-        >
-          <X className="h-4 w-4 text-muted-foreground" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <h3 className="text-foreground font-medium text-sm">Voice Assistant</h3>
+          {(serviceError || audioError) && <span className="text-destructive text-xs">{serviceError || audioError}</span>}
+        </div>
+        <div className="flex gap-2">
+          {message && (
+            <div className="flex items-center gap-2">
+              {isLoading && (
+                <div className="w-24">
+                  <Progress value={progress} className="h-2" />
+                </div>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleAudioControl}
+                className="h-7 w-7 rounded-full"
+                disabled={!message}
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                ) : isPlaying ? (
+                  <Volume2 className="h-4 w-4 text-primary" />
+                ) : (
+                  <VolumeOff className="h-4 w-4 text-muted-foreground" />
+                )}
+              </Button>
+            </div>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="h-7 w-7 rounded-full"
+          >
+            <X className="h-4 w-4 text-muted-foreground" />
+          </Button>
+        </div>
       </div>
       
       <div className="text-muted-foreground text-sm mb-4">
