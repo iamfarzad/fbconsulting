@@ -13,33 +13,41 @@ interface ChatMessage {
 
 const CopilotChat: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const chat = useCopilotChat();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
-    // Add user message to UI - using appendMessage for newer versions
-    const userMessage = { role: 'user', content: inputValue };
-    chat.appendMessage(userMessage as any);
+    // Add user message to UI
+    const userMessage = { role: 'user' as const, content: inputValue };
+    setMessages(prev => [...prev, userMessage]);
     
     // Clear input
     setInputValue('');
     
     try {
-      // Send message to Copilot - use appendMessage instead of appendUserMessage
-      await chat.appendMessage({ 
-        role: 'user', 
-        content: inputValue 
-      } as any);
+      // Send message to Copilot
+      await chat.sendMessage(inputValue);
     } catch (error) {
       console.error('Error sending message:', error);
-      chat.appendMessage({ 
-        role: 'assistant', 
-        content: 'Sorry, there was an error processing your request.' 
-      } as any);
+      setMessages(prev => [
+        ...prev, 
+        { 
+          role: 'assistant', 
+          content: 'Sorry, there was an error processing your request.' 
+        }
+      ]);
     }
   };
+
+  // Update local messages when chat.messages changes
+  React.useEffect(() => {
+    if (chat.history) {
+      setMessages(chat.history as any);
+    }
+  }, [chat.history]);
 
   return (
     <Card className="flex flex-col h-full border">
@@ -47,7 +55,7 @@ const CopilotChat: React.FC = () => {
         <CardTitle className="text-lg">Copilot Chat</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 overflow-auto p-4 space-y-4">
-        {chat.messages && chat.messages.map((message, index) => (
+        {messages.map((message, index) => (
           <div 
             key={index}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}

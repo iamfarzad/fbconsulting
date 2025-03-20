@@ -9,6 +9,7 @@ import { SuggestionButton } from './core/SuggestionButton';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
 import { useAutoResizeTextarea } from '@/hooks/useAutoResizeTextarea';
 import { FileAttachment } from '@/services/chat/types';
+import { X } from 'lucide-react'; // Added missing X icon import
 
 interface UnifiedChatInputProps {
   placeholder?: string;
@@ -38,6 +39,7 @@ export const UnifiedChatInput: React.FC<UnifiedChatInputProps> = ({
     isLoading, 
     suggestedResponse,
     showMessages,
+    messages, // Access messages from state
     mediaItems
   } = state;
   
