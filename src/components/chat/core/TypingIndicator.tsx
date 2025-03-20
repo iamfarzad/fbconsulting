@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 interface TypingIndicatorProps {
   className?: string;
@@ -8,26 +8,10 @@ interface TypingIndicatorProps {
 
 export const TypingIndicator: React.FC<TypingIndicatorProps> = ({ className }) => {
   return (
-    <div className={`flex justify-start ${className}`}>
-      <div className="max-w-[80%] p-3 rounded-lg bg-muted">
-        <div className="flex space-x-2">
-          <motion.div 
-            className="w-2 h-2 rounded-full bg-foreground/40"
-            animate={{ y: [0, -5, 0] }}
-            transition={{ repeat: Infinity, duration: 1 }}
-          />
-          <motion.div 
-            className="w-2 h-2 rounded-full bg-foreground/40"
-            animate={{ y: [0, -5, 0] }}
-            transition={{ repeat: Infinity, duration: 1, delay: 0.2 }}
-          />
-          <motion.div 
-            className="w-2 h-2 rounded-full bg-foreground/40"
-            animate={{ y: [0, -5, 0] }}
-            transition={{ repeat: Infinity, duration: 1, delay: 0.4 }}
-          />
-        </div>
-      </div>
+    <div className={cn("flex items-center space-x-1 p-2", className)}>
+      <div className="w-2 h-2 rounded-full bg-foreground/40 animate-bounce" style={{ animationDelay: "0ms" }} />
+      <div className="w-2 h-2 rounded-full bg-foreground/40 animate-bounce" style={{ animationDelay: "150ms" }} />
+      <div className="w-2 h-2 rounded-full bg-foreground/40 animate-bounce" style={{ animationDelay: "300ms" }} />
     </div>
   );
 };

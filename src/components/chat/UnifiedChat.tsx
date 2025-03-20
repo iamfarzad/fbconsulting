@@ -12,7 +12,8 @@ interface UnifiedChatContentProps {
   fullScreen?: boolean;
   onToggleFullScreen?: () => void;
   className?: string;
-  useCopilotKit?: boolean;
+  apiKey?: string;
+  modelName?: string;
 }
 
 // Inner component that uses the ChatContext
@@ -23,7 +24,8 @@ const UnifiedChatContent: React.FC<UnifiedChatContentProps> = ({
   fullScreen = false,
   onToggleFullScreen,
   className = '',
-  useCopilotKit = false
+  apiKey,
+  modelName
 }) => {
   const { 
     state, 
@@ -79,9 +81,11 @@ const UnifiedChatContent: React.FC<UnifiedChatContentProps> = ({
 interface UnifiedChatProps extends UnifiedChatContentProps {}
 
 export const UnifiedChat: React.FC<UnifiedChatProps> = (props) => {
+  const { apiKey, modelName, ...restProps } = props;
+  
   return (
-    <ChatProvider>
-      <UnifiedChatContent {...props} />
+    <ChatProvider apiKey={apiKey} modelName={modelName}>
+      <UnifiedChatContent {...restProps} />
     </ChatProvider>
   );
 };
