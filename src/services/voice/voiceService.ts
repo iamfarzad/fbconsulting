@@ -6,6 +6,7 @@ import {
   VoiceRecognitionOptions,
   VoiceSynthesisOptions
 } from '@/types/voiceService';
+import { SpeechRecognition, SpeechRecognitionEvent } from '@/types/voice';
 
 class VoiceServiceImpl implements VoiceService {
   private recognitionInstance: SpeechRecognition | null = null;

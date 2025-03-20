@@ -1,6 +1,7 @@
 
 export interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
+  resultIndex: number;
 }
 
 export interface SpeechRecognitionResultList {
@@ -23,17 +24,17 @@ export interface SpeechRecognition extends EventTarget {
   continuous: boolean;
   interimResults: boolean;
   lang: string;
+  maxAlternatives: number;
   start(): void;
   stop(): void;
   abort(): void;
   onresult: (event: SpeechRecognitionEvent) => void;
   onend: () => void;
   onerror: (event: Event) => void;
+  onstart: () => void;
 }
 
 export interface VoiceUIProps {
   onCommand?: (command: string) => void;
   aiProcessing?: boolean;
 }
-
-// Define SpeechRecognition constructors in window.d.ts instead
