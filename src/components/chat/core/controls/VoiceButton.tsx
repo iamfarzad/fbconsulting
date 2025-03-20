@@ -30,10 +30,10 @@ export const VoiceButton: React.FC<VoiceButtonProps> = ({
         <TooltipTrigger asChild>
           <Button
             type="button"
-            variant={isListening ? "destructive" : "ghost"}
+            variant={isListening ? "outline" : "ghost"}
             size="icon"
             onClick={onToggle}
-            className="rounded-full w-8 h-8"
+            className={`rounded-full w-8 h-8 ${isListening ? 'bg-red-500 text-white hover:bg-red-600' : ''}`}
             disabled={isLoading}
           >
             {isLoading ? (

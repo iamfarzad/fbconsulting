@@ -17,6 +17,8 @@ interface InputControlsProps {
   onToggleMedia?: () => void;
   showMedia?: boolean;
   onUploadImage?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onUploadFile?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  aiProcessing?: boolean;
 }
 
 export const InputControls: React.FC<InputControlsProps> = ({
@@ -30,12 +32,21 @@ export const InputControls: React.FC<InputControlsProps> = ({
   onToggleMedia,
   showMedia = false,
   onUploadImage,
+  onUploadFile,
+  aiProcessing = false,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
   
   const handleUploadClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
+    }
+  };
+  
+  const handleDocumentClick = () => {
+    if (documentInputRef.current) {
+      documentInputRef.current.click();
     }
   };
   
@@ -59,13 +70,26 @@ export const InputControls: React.FC<InputControlsProps> = ({
             />
           </>
         )}
+        
+        {/* File upload input if provided */}
+        {onUploadFile && (
+          <>
+            <input 
+              ref={documentInputRef}
+              type="file"
+              accept=".pdf,.doc,.docx,.txt"
+              onChange={onUploadFile}
+              className="hidden"
+            />
+          </>
+        )}
       
         {/* Voice button */}
         {onToggleMic && isVoiceSupported && (
           <VoiceButton 
             isListening={isListening} 
             onToggle={onToggleMic} 
-            isLoading={isLoading}
+            isLoading={isLoading || aiProcessing}
             isVoiceSupported={isVoiceSupported}
           />
         )}

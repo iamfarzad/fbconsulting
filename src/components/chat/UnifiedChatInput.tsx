@@ -9,7 +9,7 @@ import { SuggestionButton } from './core/SuggestionButton';
 import { useVoiceInput } from '@/hooks/useVoiceInput';
 import { useAutoResizeTextarea } from '@/hooks/useAutoResizeTextarea';
 import { FileAttachment } from '@/services/chat/types';
-import { X } from 'lucide-react'; // Added missing X icon import
+import { X } from 'lucide-react';
 
 interface UnifiedChatInputProps {
   placeholder?: string;
@@ -39,7 +39,7 @@ export const UnifiedChatInput: React.FC<UnifiedChatInputProps> = ({
     isLoading, 
     suggestedResponse,
     showMessages,
-    messages, // Access messages from state
+    messages,
     mediaItems
   } = state;
   
@@ -259,12 +259,12 @@ export const UnifiedChatInput: React.FC<UnifiedChatInputProps> = ({
               onToggleMic={isVoiceSupported ? toggleListening : undefined}
               isListening={isListening}
               isVoiceSupported={isVoiceSupported}
-              aiProcessing={aiProcessing}
               onToggleMedia={() => setShowMediaUpload(!showMediaUpload)}
               showMedia={showMediaUpload}
               onUploadImage={handleImageUpload}
               onUploadFile={handleFileUpload}
               onClearChat={messages.length > 0 ? clearMessages : undefined}
+              aiProcessing={aiProcessing}
             />
           </div>
         </div>

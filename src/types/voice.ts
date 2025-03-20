@@ -35,14 +35,15 @@ export interface SpeechRecognition extends EventTarget {
 declare global {
   interface Window {
     SpeechRecognition?: {
-      new(): SpeechRecognition;
+      new (): SpeechRecognition;
     };
     webkitSpeechRecognition?: {
-      new(): SpeechRecognition;
+      new (): SpeechRecognition;
     };
   }
 }
 
 export interface VoiceUIProps {
   onCommand?: (command: string) => void;
+  aiProcessing?: boolean;
 }
