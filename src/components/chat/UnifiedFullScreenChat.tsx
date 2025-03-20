@@ -1,25 +1,34 @@
-/**
- * UnifiedFullScreenChat Component
- * A full-screen version of the UnifiedChat component
- */
 
-import React from 'react';
-import { UnifiedChat } from './UnifiedChat';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { AnimatedBars } from '@/components/ui/AnimatedBars';
+import { UnifiedChat } from './UnifiedChat';
 
 interface UnifiedFullScreenChatProps {
   onMinimize: () => void;
-  useCopilotKit?: boolean;
+  title?: string;
+  subtitle?: string;
   placeholderText?: string;
 }
 
 export const UnifiedFullScreenChat: React.FC<UnifiedFullScreenChatProps> = ({
   onMinimize,
-  useCopilotKit = true,
+  title = 'AI Assistant',
+  subtitle,
   placeholderText = "Ask me anything..."
 }) => {
+  // Prevent body scrolling when fullscreen chat is open
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+    
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, []);
+
   return (
     <motion.div
       className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
@@ -45,11 +54,22 @@ export const UnifiedFullScreenChat: React.FC<UnifiedFullScreenChatProps> = ({
           </Button>
         </div>
         
-        <div className="flex-1 p-0 overflow-hidden">
-          <UnifiedChat
-            useCopilotKit={useCopilotKit}
-            fullScreen={true}
+        <div className="p-6 text-center mb-4">
+          <h2 className="text-2xl font-semibold mb-2">{title}</h2>
+          <div className="flex justify-center">
+            <AnimatedBars isActive={true} />
+          </div>
+          {subtitle && (
+            <p className="text-muted-foreground mt-4">{subtitle}</p>
+          )}
+        </div>
+        
+        <div className="flex-1 p-6 flex flex-col relative overflow-hidden">
+          <UnifiedChat 
+            fullScreen={true} 
             placeholderText={placeholderText}
+            title={title}
+            subtitle={subtitle}
             className="h-full border-0 rounded-none shadow-none"
           />
         </div>
