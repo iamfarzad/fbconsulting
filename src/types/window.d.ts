@@ -9,6 +9,6 @@ interface Window {
   gtag: (...args: any[]) => void;
   
   // Speech Recognition APIs
-  SpeechRecognition: any;
-  webkitSpeechRecognition: any;
+  SpeechRecognition: typeof SpeechRecognition;
+  webkitSpeechRecognition: typeof SpeechRecognition;
 }

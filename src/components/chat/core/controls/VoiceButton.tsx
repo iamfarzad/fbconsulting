@@ -10,6 +10,8 @@ interface VoiceButtonProps {
   isLoading?: boolean;
   tooltipText?: string;
   onVoiceCommand?: (command: string) => void;
+  isListening?: boolean;
+  isVoiceSupported?: boolean;
 }
 
 export const VoiceButton: React.FC<VoiceButtonProps> = ({
@@ -17,9 +19,10 @@ export const VoiceButton: React.FC<VoiceButtonProps> = ({
   isLoading = false,
   tooltipText,
   onVoiceCommand,
+  isListening = false,
+  isVoiceSupported = true
 }) => {
   const {
-    isListening,
     toggleListening,
     recognitionSupported
   } = useVoiceService({
@@ -38,7 +41,7 @@ export const VoiceButton: React.FC<VoiceButtonProps> = ({
   };
 
   // Don't render the button if voice isn't supported
-  if (!recognitionSupported) {
+  if (!recognitionSupported || !isVoiceSupported) {
     return null;
   }
 
