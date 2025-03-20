@@ -1,11 +1,10 @@
 
-import React, { useRef } from 'react';
-import { cn } from '@/lib/utils';
-import { MediaUploadButton } from './controls/MediaUploadButton';
-import { ImageUploadButton } from './controls/ImageUploadButton';
-import { ClearChatButton } from './controls/ClearChatButton';
-import { VoiceButton } from './controls/VoiceButton';
+import React from 'react';
 import { SendMessageButton } from './controls/SendMessageButton';
+import { VoiceButton } from './controls/VoiceButton';
+import { ClearChatButton } from './controls/ClearChatButton';
+import { ImageUploadButton } from './controls/ImageUploadButton';
+import { useRef } from 'react';
 
 interface InputControlsProps {
   onSend: () => void;
@@ -14,13 +13,10 @@ interface InputControlsProps {
   onToggleMic?: () => void;
   isListening?: boolean;
   isVoiceSupported?: boolean;
-  aiProcessing?: boolean;
+  onClearChat?: () => void;
   onToggleMedia?: () => void;
   showMedia?: boolean;
   onUploadImage?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onUploadFile?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onClearChat?: () => void;
-  className?: string;
 }
 
 export const InputControls: React.FC<InputControlsProps> = ({
@@ -30,95 +26,66 @@ export const InputControls: React.FC<InputControlsProps> = ({
   onToggleMic,
   isListening = false,
   isVoiceSupported = false,
-  aiProcessing = false,
+  onClearChat,
   onToggleMedia,
   showMedia = false,
   onUploadImage,
-  onUploadFile,
-  onClearChat,
-  className = '',
 }) => {
-  const imageInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const handleImageButtonClick = () => {
-    if (imageInputRef.current) {
-      imageInputRef.current.click();
-    }
-  };
-  
-  const handleFileButtonClick = () => {
+  const handleUploadClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
   
   return (
-    <div className={cn("flex items-center space-x-2", className)}>
-      {/* Hidden inputs for file uploads */}
-      {onUploadImage && (
-        <input 
-          ref={imageInputRef}
-          type="file"
-          accept="image/*"
-          onChange={onUploadImage}
-          className="sr-only"
-        />
-      )}
+    <div className="flex items-center justify-between w-full">
+      <div className="flex items-center space-x-1">
+        {/* Only show image upload if handler is provided */}
+        {onUploadImage && (
+          <>
+            <ImageUploadButton 
+              onImageUpload={handleUploadClick} 
+              isLoading={isLoading} 
+              isListening={isListening || false} 
+            />
+            <input 
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={onUploadImage}
+              className="hidden"
+            />
+          </>
+        )}
       
-      {onUploadFile && (
-        <input 
-          ref={fileInputRef}
-          type="file"
-          onChange={onUploadFile}
-          className="sr-only"
-        />
-      )}
-      
-      {/* Media upload controls */}
-      {onToggleMedia && (
-        <MediaUploadButton 
-          showMedia={showMedia}
-          onToggleMedia={onToggleMedia}
-          isLoading={isLoading}
-          isListening={isListening}
-        />
-      )}
-      
-      {/* Media upload buttons */}
-      {showMedia && onUploadImage && (
-        <ImageUploadButton
-          onImageUpload={handleImageButtonClick}
-          isLoading={isLoading}
-          isListening={isListening}
-        />
-      )}
-      
-      {/* Clear chat button */}
-      {onClearChat && (
-        <ClearChatButton
-          onClearChat={onClearChat}
-          isLoading={isLoading}
-          isListening={isListening}
-        />
-      )}
-      
-      {/* Voice input controls */}
-      {isVoiceSupported && onToggleMic && (
-        <VoiceButton
-          isListening={isListening}
-          onToggleMic={onToggleMic}
-          isLoading={isLoading}
-          aiProcessing={aiProcessing}
-        />
-      )}
+        {/* Voice button */}
+        {onToggleMic && isVoiceSupported && (
+          <VoiceButton 
+            isListening={isListening} 
+            onToggle={onToggleMic} 
+            isLoading={isLoading}
+            isVoiceSupported={isVoiceSupported}
+          />
+        )}
+        
+        {/* Clear chat button */}
+        {onClearChat && (
+          <ClearChatButton 
+            onClearChat={onClearChat} 
+            isLoading={isLoading} 
+            isListening={isListening || false} 
+          />
+        )}
+      </div>
       
       {/* Send button */}
-      <SendMessageButton
-        hasContent={hasContent}
-        isLoading={isLoading}
-        onClick={onSend}
-        disabled={!isListening}
+      <SendMessageButton 
+        onClick={onSend} 
+        hasContent={hasContent} 
+        isLoading={isLoading} 
+        disabled={isListening || false} 
       />
     </div>
   );
