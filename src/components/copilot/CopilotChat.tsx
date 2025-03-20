@@ -19,19 +19,19 @@ const CopilotChat: React.FC = () => {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
-    // Add user message to UI
+    // Add user message to UI - using appendMessage for newer versions
     const userMessage = { role: 'user', content: inputValue };
-    chat.addMessage(userMessage as any);
+    chat.appendMessage(userMessage as any);
     
     // Clear input
     setInputValue('');
     
     try {
       // Send message to Copilot
-      await chat.sendMessage(inputValue);
+      await chat.appendUserMessage(inputValue);
     } catch (error) {
       console.error('Error sending message:', error);
-      chat.addMessage({ 
+      chat.appendMessage({ 
         role: 'assistant', 
         content: 'Sorry, there was an error processing your request.' 
       } as any);
@@ -44,7 +44,7 @@ const CopilotChat: React.FC = () => {
         <CardTitle className="text-lg">Copilot Chat</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 overflow-auto p-4 space-y-4">
-        {chat.messages.map((message, index) => (
+        {chat.history.map((message, index) => (
           <div 
             key={index}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}

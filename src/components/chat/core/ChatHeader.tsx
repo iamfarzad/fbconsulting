@@ -30,7 +30,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           <h3 className="font-medium text-lg">{title}</h3>
           <div className="flex items-center space-x-2">
             {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
-            {isLoading && <AnimatedBars isActive={true} className="h-3" />}
+            {isLoading && <AnimatedBars isActive={true} small={true} />}
           </div>
         </div>
       </div>

@@ -1,12 +1,14 @@
 
 import React, { useEffect, useState, useRef } from 'react';
+import { cn } from '@/lib/utils';
 
 interface AnimatedBarsProps {
   isActive: boolean;
   small?: boolean;
+  className?: string;
 }
 
-export const AnimatedBars: React.FC<AnimatedBarsProps> = ({ isActive, small = false }) => {
+export const AnimatedBars: React.FC<AnimatedBarsProps> = ({ isActive, small = false, className = '' }) => {
   const [heights, setHeights] = useState<number[]>(
     Array(small ? 4 : 9).fill(33)
   );
@@ -53,7 +55,7 @@ export const AnimatedBars: React.FC<AnimatedBarsProps> = ({ isActive, small = fa
   }, [isActive, small]);
 
   return (
-    <div className={`flex items-end gap-[2px] ${small ? 'h-4 w-8' : 'h-8 w-20'}`}>
+    <div className={cn(`flex items-end gap-[2px] ${small ? 'h-4 w-8' : 'h-8 w-20'}`, className)}>
       {heights.map((height, i) => (
         <div
           key={i}

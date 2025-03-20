@@ -51,3 +51,7 @@ export interface ChatService {
   sendMessage(message: string, history?: AIMessage[], files?: FileAttachment[]): Promise<AIMessage>;
   clearHistory(): void;
 }
+
+export interface GeminiChatService extends ChatService {
+  // Additional Gemini-specific methods can be added here
+}

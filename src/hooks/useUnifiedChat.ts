@@ -1,79 +1,112 @@
 
-// Import the correct types and service
-import { useState, useEffect } from 'react';
-import { 
-  GeminiChatService, 
-  getChatService,
-  ChatMessage as GenAIChatMessage
-} from '@/services/chat/googleGenAIService';
-import { AIMessage } from '@/services/chat/messageTypes';
+import { useState, useRef, useCallback } from 'react';
+import { AIMessage, FileAttachment } from '@/services/chat/types';
+import { useToast } from '@/hooks/use-toast';
+import { useVoiceInput } from '@/hooks/useVoiceInput';
 
-// Local interface for chat messages to prevent naming conflicts
-interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  timestamp?: number;
+interface UseUnifiedChatOptions {
+  useCopilotKit?: boolean;
+  apiKey?: string;
+  modelName?: string;
 }
 
-export function useUnifiedChat(
-  placeholderText: string = 'Ask me anything...',
-  useCopilotKit: boolean = false
-) {
+export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
+  const { useCopilotKit = false, apiKey, modelName } = options;
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
-  // Initialize chat service if not using CopilotKit
-  useEffect(() => {
-    if (!useCopilotKit) {
-      // Initialize chat service
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
-      if (apiKey) {
-        const chatService = getChatService({ apiKey });
-        console.log('Chat service initialized');
-      }
-    }
-  }, [useCopilotKit]);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [showMessages, setShowMessages] = useState(true);
+  const [suggestedResponse, setSuggestedResponse] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
-  const handleSendMessage = async (message: string) => {
-    if (!message.trim()) return;
+  // Voice input integration
+  const {
+    isListening,
+    transcript,
+    toggleListening,
+    isTranscribing,
+    voiceError
+  } = useVoiceInput(
+    (value) => setInputValue(value),
+    () => handleSend()
+  );
+
+  // Toggle fullscreen state
+  const toggleFullScreen = useCallback(() => {
+    setIsFullScreen(prev => !prev);
+  }, []);
+
+  // Send message function
+  const handleSend = useCallback(async (files?: FileAttachment[]) => {
+    if (!inputValue.trim() && (!files || files.length === 0)) return;
     
     try {
-      // Add user message to state
-      const userMessage: AIMessage = {
-        role: 'user',
-        content: message,
-        timestamp: Date.now()
-      };
-      
-      setMessages(prev => [...prev, userMessage]);
-      setInputValue('');
       setIsLoading(true);
       
-      // Mock response for now
+      // Create user message
+      const userMessage: AIMessage = {
+        role: 'user',
+        content: inputValue,
+        timestamp: Date.now(),
+      };
+      
+      // Add user message to state
+      setMessages(prev => [...prev, userMessage]);
+      setInputValue('');
+      
+      // In a real implementation, this would call the chat service
+      // For now, we'll use a mock response
       setTimeout(() => {
-        const assistantMessage: AIMessage = {
+        const botMessage: AIMessage = {
           role: 'assistant',
-          content: `This is a response to: ${message}`,
-          timestamp: Date.now()
+          content: `This is a response to: ${userMessage.content}`,
+          timestamp: Date.now(),
         };
         
-        setMessages(prev => [...prev, assistantMessage]);
+        setMessages(prev => [...prev, botMessage]);
         setIsLoading(false);
       }, 1000);
       
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error("Error sending message:", error);
       setIsLoading(false);
+      
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        variant: "destructive",
+      });
     }
-  };
+  }, [inputValue, toast]);
+
+  // Clear all messages
+  const handleClear = useCallback(() => {
+    setMessages([]);
+  }, []);
 
   return {
     messages,
     inputValue,
     setInputValue,
     isLoading,
-    handleSendMessage,
-    placeholderText
+    showMessages,
+    suggestedResponse,
+    containerRef,
+    isFullScreen,
+    toggleFullScreen,
+    handleSend,
+    handleClear,
+    setIsFullScreen,
+    setShowMessages,
+    // Voice-related properties
+    isListening,
+    transcript,
+    toggleListening,
+    isTranscribing,
+    voiceError
   };
 }
+
+export default useUnifiedChat;
