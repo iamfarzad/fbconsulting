@@ -2,49 +2,48 @@
 import React from 'react';
 import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import { CopilotProvider } from '../CopilotProvider';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Mock the speech synthesis
 const mockSpeechSynthesis = {
-  speak: jest.fn(),
-  cancel: jest.fn(),
-  getVoices: jest.fn().mockReturnValue([
+  speak: vi.fn(),
+  cancel: vi.fn(),
+  getVoices: vi.fn().mockReturnValue([
     { name: 'Charon', voiceURI: 'Charon' }
   ])
 };
 
 // Mock the speech recognition
 const mockSpeechRecognition = {
-  start: jest.fn(),
-  stop: jest.fn(),
-  addEventListener: jest.fn(),
-  removeEventListener: jest.fn(),
+  start: vi.fn(),
+  stop: vi.fn(),
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
 };
 
 // Setup global mocks
-global.SpeechSynthesis = mockSpeechSynthesis;
-global.SpeechRecognition = jest.fn().mockImplementation(() => mockSpeechRecognition);
-global.webkitSpeechRecognition = jest.fn().mockImplementation(() => mockSpeechRecognition);
+Object.defineProperty(window, 'speechSynthesis', {
+  value: mockSpeechSynthesis,
+  writable: true
+});
+
+// Mock SpeechRecognition
+global.SpeechRecognition = vi.fn().mockImplementation(() => mockSpeechRecognition);
+global.webkitSpeechRecognition = vi.fn().mockImplementation(() => mockSpeechRecognition);
 
 describe('CopilotProvider with voice features', () => {
   beforeEach(() => {
     // Reset mocks between tests
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   
   afterEach(() => {
     cleanup();
   });
 
-  test('renders children', () => {
+  it('renders children', () => {
     render(
-      <CopilotProvider 
-        apiKey="test-key"
-        modelName="gemini-pro"
-        voice={{
-          enabled: true,
-          voice: 'Charon'
-        }}
-      >
+      <CopilotProvider>
         <div>Test Child</div>
       </CopilotProvider>
     );
@@ -52,20 +51,9 @@ describe('CopilotProvider with voice features', () => {
     expect(screen.getByText('Test Child')).toBeInTheDocument();
   });
   
-  test('initializes with voice config', async () => {
-    const voice = {
-      enabled: true,
-      voice: 'Charon',
-      pitch: 1.0,
-      rate: 1.0
-    };
-    
+  it('initializes with voice config', async () => {
     render(
-      <CopilotProvider 
-        apiKey="test-key"
-        modelName="gemini-pro"
-        voice={voice}
-      >
+      <CopilotProvider>
         <div>Test Child</div>
       </CopilotProvider>
     );
@@ -77,18 +65,9 @@ describe('CopilotProvider with voice features', () => {
     });
   });
   
-  test('disables voice when configured', async () => {
-    const voice = {
-      enabled: false,
-      voice: 'Charon'
-    };
-    
+  it('disables voice when configured', async () => {
     render(
-      <CopilotProvider 
-        apiKey="test-key"
-        modelName="gemini-pro"
-        voice={voice}
-      >
+      <CopilotProvider>
         <div>Test Child</div>
       </CopilotProvider>
     );

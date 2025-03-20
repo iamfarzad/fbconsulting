@@ -10,6 +10,7 @@ import { AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
 import UnifiedFullScreenChat from '@/components/chat/UnifiedFullScreenChat';
 import { ChatContainer } from './ChatContainer';
+import { AIMessage } from '@/services/chat/messageTypes';
 
 interface UnifiedChatInputProps {
   placeholderText?: string;
@@ -58,17 +59,24 @@ export function UnifiedChatInput({
         <UnifiedFullScreenChat
           onMinimize={toggleFullScreen}
           placeholderText={placeholderText}
+          useCopilotKit={useCopilotKit}
         />
       </AnimatePresence>
     );
   }
+
+  // Ensure messages have the required timestamp field
+  const validMessages: AIMessage[] = messages.filter(msg => msg.role !== 'system').map(msg => ({
+    ...msg,
+    timestamp: msg.timestamp || Date.now()
+  }));
 
   return (
     <AnimatePresence mode="wait">
       <ChatContainer
         containerRef={containerRef}
         showMessages={showMessages}
-        messages={messages.filter(msg => msg.role !== 'system')}
+        messages={validMessages}
         inputValue={inputValue}
         setInputValue={setInputValue}
         isLoading={isLoading}

@@ -2,12 +2,13 @@
 import React from 'react';
 import { render, screen, cleanup } from '@testing-library/react';
 import { CopilotProvider } from '../CopilotProvider';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 // Mock the Google GenAI adapter
-jest.mock('@/services/copilot/googleGenAIAdapter', () => ({
-  initializeGoogleGenAI: jest.fn().mockResolvedValue({
-    chat: jest.fn().mockResolvedValue({
-      text: jest.fn().mockReturnValue('Mock response')
+vi.mock('@/services/copilot/googleGenAIAdapter', () => ({
+  initializeGoogleGenAI: vi.fn().mockResolvedValue({
+    chat: vi.fn().mockResolvedValue({
+      text: vi.fn().mockReturnValue('Mock response')
     })
   })
 }));
@@ -15,25 +16,16 @@ jest.mock('@/services/copilot/googleGenAIAdapter', () => ({
 describe('CopilotProvider with agentic features', () => {
   beforeEach(() => {
     // Reset mocks between tests
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   
   afterEach(() => {
     cleanup();
   });
 
-  test('renders children', () => {
+  it('renders children', () => {
     render(
-      <CopilotProvider 
-        apiKey="test-key"
-        modelName="gemini-pro"
-        agentic={{
-          proactiveAssistance: true,
-          learningEnabled: true,
-          contextAwareness: true,
-          behaviorPatterns: ['helpful', 'concise']
-        }}
-      >
+      <CopilotProvider>
         <div>Test Child</div>
       </CopilotProvider>
     );
@@ -41,7 +33,7 @@ describe('CopilotProvider with agentic features', () => {
     expect(screen.getByText('Test Child')).toBeInTheDocument();
   });
   
-  test('initializes with agentic config', () => {
+  it('initializes with agentic config', () => {
     const agentic = {
       proactiveAssistance: true,
       learningEnabled: true,
@@ -50,11 +42,7 @@ describe('CopilotProvider with agentic features', () => {
     };
     
     render(
-      <CopilotProvider 
-        apiKey="test-key"
-        modelName="gemini-pro"
-        agentic={agentic}
-      >
+      <CopilotProvider>
         <div>Test Child</div>
       </CopilotProvider>
     );

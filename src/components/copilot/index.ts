@@ -2,6 +2,7 @@
 // Export components
 export { CopilotProvider } from './CopilotProvider';
 export { default as GoogleGenAIConfig } from './GoogleGenAIConfig';
+export { default as CopilotChat } from './CopilotChat';
 
 // Export adapters
 export * from './adapters';
