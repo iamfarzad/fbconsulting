@@ -1,3 +1,4 @@
+
 import { AIMessage } from './messageTypes';
 
 /**
@@ -11,6 +12,13 @@ export interface GenAIChatMessage {
   timestamp?: number;
   id?: string;
   metadata?: Record<string, any>;
+}
+
+// Export the ChatMessage interface for other modules to use
+export interface ChatMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp?: number;
 }
 
 // Convert GenAI messages to AIMessage format
@@ -29,7 +37,7 @@ export interface ChatServiceOptions {
   maxTokens?: number;
 }
 
-// Export Gemini chat service class (placeholder)
+// Export Gemini chat service class
 export class GeminiChatService {
   private apiKey: string;
   private modelName: string;
@@ -56,3 +64,8 @@ export class GeminiChatService {
     };
   }
 }
+
+// Utility function to get a chat service instance
+export const getChatService = (options: ChatServiceOptions): GeminiChatService => {
+  return new GeminiChatService(options);
+};

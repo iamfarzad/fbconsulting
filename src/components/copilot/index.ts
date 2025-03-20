@@ -7,6 +7,9 @@ export { default as CopilotChat } from './CopilotChat';
 // Export adapters
 export * from './adapters';
 
+// Export hooks
+export * from './hooks';
+
 // Re-export necessary CopilotKit types and hooks for easier access
 export { useCopilotChat, useCopilotAction } from '@copilotkit/react-core';
 

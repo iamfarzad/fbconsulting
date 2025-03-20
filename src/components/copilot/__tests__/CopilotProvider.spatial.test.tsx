@@ -40,6 +40,13 @@ describe('CopilotProvider - Spatial Understanding', () => {
         <section id="contact">Contact Section</section>
       </div>
     `;
+    
+    // Reset timers
+    vi.useFakeTimers();
+  });
+  
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should update spatial context on page navigation', () => {
@@ -90,8 +97,6 @@ describe('CopilotProvider - Spatial Understanding', () => {
   });
 
   it('should detect user inactivity', () => {
-    vi.useFakeTimers();
-
     render(
       <MemoryRouter>
         <CopilotProvider>
@@ -107,8 +112,6 @@ describe('CopilotProvider - Spatial Understanding', () => {
     act(() => {
       vi.advanceTimersByTime(31000); // 31 seconds
     });
-
-    vi.useRealTimers();
     
     // No assertions needed here since we're just testing that it doesn't error
   });

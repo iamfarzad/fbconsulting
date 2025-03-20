@@ -42,7 +42,7 @@ describe('CopilotProvider with agentic features', () => {
     };
     
     render(
-      <CopilotProvider>
+      <CopilotProvider agentic={agentic}>
         <div>Test Child</div>
       </CopilotProvider>
     );
