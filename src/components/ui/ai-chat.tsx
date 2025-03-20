@@ -2,11 +2,11 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useAIChatInput } from "@/hooks/useAIChatInput";
 import { AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import FullScreenChat from "../chat/FullScreenChat";
-import { ChatContainer } from "./ai-chat/ChatContainer";
+import { UnifiedChat } from "../chat/UnifiedChat";
+import { UnifiedFullScreenChat } from "../chat/UnifiedFullScreenChat";
+import { ChatProvider } from "@/contexts/ChatContext";
 
 interface AIChatInputProps {
   placeholderText?: string;
@@ -17,87 +17,41 @@ export function AIChatInput({
   placeholderText = "Ask me anything...",
   autoFullScreen = false 
 }: AIChatInputProps) {
-  const {
-    showMessages,
-    messages,
-    isLoading,
-    inputValue,
-    setInputValue,
-    suggestedResponse,
-    containerRef,
-    isFullScreen,
-    toggleFullScreen,
-    handleSend,
-    handleClear,
-    setIsFullScreen,
-    // File upload props
-    files,
-    uploadFile,
-    removeFile,
-    clearFiles,
-    isUploading
-  } = useAIChatInput();
-  
+  const [isFullScreen, setIsFullScreen] = React.useState(false);
   const isMobile = useIsMobile();
 
-  // Automatically go fullscreen when messages are present and autoFullScreen is true
+  // If autoFullScreen is true, go to fullscreen after a delay when mobile
   useEffect(() => {
-    if (autoFullScreen && messages.length > 0 && !isFullScreen) {
-      // Add a small delay to ensure smooth transition
+    if (autoFullScreen && isMobile) {
       const timer = setTimeout(() => {
         setIsFullScreen(true);
-      }, 300);
+      }, 1000);
       
       return () => clearTimeout(timer);
     }
-  }, [messages.length, autoFullScreen, isFullScreen, setIsFullScreen]);
+  }, [autoFullScreen, isMobile]);
 
-  // If in fullscreen mode, show FullScreenChat
-  if (isFullScreen) {
-    return (
-      <AnimatePresence mode="wait">
-        <FullScreenChat 
-          onMinimize={toggleFullScreen} 
-          initialMessages={messages}
-          onSendMessage={handleSend}
-          inputValue={inputValue}
-          setInputValue={setInputValue}
-          isLoading={isLoading}
-          suggestedResponse={suggestedResponse}
-          onClear={handleClear}
-          placeholderText={placeholderText}
-          // Pass file props
-          files={files}
-          uploadFile={uploadFile}
-          removeFile={removeFile}
-          isUploading={isUploading}
-        />
-      </AnimatePresence>
-    );
-  }
+  // Handle toggling fullscreen mode
+  const toggleFullScreen = () => {
+    setIsFullScreen(prev => !prev);
+  };
 
   return (
-    <AnimatePresence mode="wait">
-      <ChatContainer
-        containerRef={containerRef}
-        showMessages={showMessages}
-        messages={messages}
-        inputValue={inputValue}
-        setInputValue={setInputValue}
-        isLoading={isLoading}
-        suggestedResponse={suggestedResponse}
-        handleSend={handleSend}
-        handleClear={handleClear}
-        toggleFullScreen={toggleFullScreen}
-        placeholder={placeholderText}
-        isFullScreen={false}
-        // Pass file props
-        files={files}
-        uploadFile={uploadFile}
-        removeFile={removeFile}
-        isUploading={isUploading}
-      />
-    </AnimatePresence>
+    <ChatProvider>
+      <AnimatePresence mode="wait">
+        {isFullScreen ? (
+          <UnifiedFullScreenChat
+            onMinimize={toggleFullScreen}
+            placeholderText={placeholderText}
+          />
+        ) : (
+          <UnifiedChat
+            placeholderText={placeholderText}
+            onToggleFullScreen={toggleFullScreen}
+          />
+        )}
+      </AnimatePresence>
+    </ChatProvider>
   );
 }
 
