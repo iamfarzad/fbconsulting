@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { AnimatedBars } from '@/components/ui/AnimatedBars';
 import { Button } from '@/components/ui/button';

@@ -3,6 +3,12 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { SpeechRecognition, SpeechRecognitionEvent } from '@/types/voice';
 import { useToast } from './use-toast';
 
+interface UseSpeechRecognitionOptions {
+  onFinalResult?: (transcript: string) => void;
+  continuous?: boolean;
+  language?: string;
+}
+
 export const useSpeechRecognition = (onCommand: (command: string) => void = () => {}) => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -14,13 +20,9 @@ export const useSpeechRecognition = (onCommand: (command: string) => void = () =
   // Initialize speech recognition
   useEffect(() => {
     const checkSpeechSupport = () => {
-      let SpeechRecognitionConstructor: any;
-      
-      if ('SpeechRecognition' in window) {
-        SpeechRecognitionConstructor = window.SpeechRecognition;
-      } else if ('webkitSpeechRecognition' in window) {
-        SpeechRecognitionConstructor = window.webkitSpeechRecognition;
-      }
+      // Correct type handling for SpeechRecognition
+      const SpeechRecognitionConstructor = 
+        window.SpeechRecognition || window.webkitSpeechRecognition;
       
       if (SpeechRecognitionConstructor) {
         recognitionRef.current = new SpeechRecognitionConstructor();
