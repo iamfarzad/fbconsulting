@@ -7,11 +7,12 @@ import { ChatHeader } from './chat/ChatHeader';
 import { ChatMessages } from './chat/ChatMessages';
 import { ChatInputArea } from './chat/ChatInputArea';
 import { ErrorDisplay } from './chat/ErrorDisplay';
+import { AIMessage } from '@/services/chat/messageTypes';
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
   content: string;
-  timestamp?: number;
+  timestamp: number;
 }
 
 interface CopilotChatProps {
@@ -102,6 +103,13 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
     // Voice functionality would be implemented here
   };
   
+  // Convert messages to AIMessage format for ChatMessages component
+  const aiMessages: AIMessage[] = messages.map(msg => ({
+    role: msg.role,
+    content: msg.content,
+    timestamp: msg.timestamp
+  }));
+  
   return (
     <div className={`rounded-lg border shadow-sm overflow-hidden flex flex-col h-[600px] ${className}`}>
       {/* Chat header */}
@@ -113,7 +121,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900">
         <ChatMessages 
-          messages={messages} 
+          messages={aiMessages} 
           isLoading={isLoading}
           isProviderLoading={false}
           isListening={isListening}
