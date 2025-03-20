@@ -168,7 +168,7 @@ export const InputControls: React.FC<InputControlsProps> = ({
               >
                 {isListening ? (
                   <div className="flex items-center justify-center">
-                    <AnimatedBars className="h-3 w-3" />
+                    <AnimatedBars className="h-3 w-3" isActive={true} />
                   </div>
                 ) : (
                   <Mic className="h-4 w-4" />

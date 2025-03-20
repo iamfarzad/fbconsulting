@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCopilotChat } from '@copilotkit/react-core';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -28,8 +28,8 @@ const CopilotChat: React.FC = () => {
     setInputValue('');
     
     try {
-      // Send message to Copilot
-      await chat.sendMessage(inputValue);
+      // Send message to Copilot - using appendMessage instead of sendMessage
+      await chat.appendMessage(inputValue);
     } catch (error) {
       console.error('Error sending message:', error);
       setMessages(prev => [
@@ -43,11 +43,11 @@ const CopilotChat: React.FC = () => {
   };
 
   // Update local messages when chat.messages changes
-  React.useEffect(() => {
-    if (chat.history) {
-      setMessages(chat.history as any);
+  useEffect(() => {
+    if (chat.messages) {
+      setMessages(chat.messages as any);
     }
-  }, [chat.history]);
+  }, [chat.messages]);
 
   return (
     <Card className="flex flex-col h-full border">
