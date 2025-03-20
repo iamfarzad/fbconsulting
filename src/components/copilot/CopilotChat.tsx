@@ -1,11 +1,18 @@
 
 import React, { useState, useEffect } from 'react';
-import { useCopilotChat } from '@copilotkit/react-core';
+import { CardHeader } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { ChatHeader } from './chat/ChatHeader';
 import { ChatMessages } from './chat/ChatMessages';
 import { ChatInputArea } from './chat/ChatInputArea';
 import { ErrorDisplay } from './chat/ErrorDisplay';
-import { Message } from '@copilotkit/shared';
+
+interface Message {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp?: number;
+}
 
 interface CopilotChatProps {
   apiKey?: string;
@@ -23,17 +30,10 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
   const [isVoiceSupported, setIsVoiceSupported] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [voiceError, setVoiceError] = useState<string | null>(null);
-  
-  // Initialize CopilotKit chat
-  const { chatState, handleSubmitMessage, isInitialized, error } = useCopilotChat({
-    messages: [{
-      role: 'system',
-      content: systemMessage
-    }]
-  });
-  
-  const messages = chatState?.messages || [];
-  const isLoading = chatState?.isLoading || false;
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Check for voice support
   useEffect(() => {
@@ -45,7 +45,8 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
     };
     
     setIsVoiceSupported(checkVoiceSupport());
-  }, []);
+    setIsInitialized(!!apiKey);
+  }, [apiKey]);
   
   // Show error if there's an issue
   useEffect(() => {
@@ -56,12 +57,31 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
   }, [error]);
   
   // Handle sending message
+  const handleSubmitMessage = (newMessage: Message) => {
+    setMessages(prev => [...prev, newMessage]);
+    setIsLoading(true);
+    
+    // Simulate API response
+    setTimeout(() => {
+      const response: Message = {
+        role: 'assistant',
+        content: `This is a mock response to: "${newMessage.content}"`,
+        timestamp: Date.now()
+      };
+      
+      setMessages(prev => [...prev, response]);
+      setIsLoading(false);
+    }, 1000);
+  };
+  
+  // Handle sending message
   const handleSendMessage = () => {
     if (!inputValue.trim()) return;
     
     const newMessage: Message = {
       role: 'user',
-      content: inputValue
+      content: inputValue,
+      timestamp: Date.now()
     };
     
     handleSubmitMessage(newMessage);
@@ -85,16 +105,22 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
   return (
     <div className={`rounded-lg border shadow-sm overflow-hidden flex flex-col h-[600px] ${className}`}>
       {/* Chat header */}
-      <ChatHeader 
-        title="AI Assistant" 
-        subtitle={isInitialized ? "Ready" : "Initializing..."}
-      />
+      <CardHeader className="p-4 border-b">
+        <h3 className="text-lg font-medium">AI Assistant</h3>
+        <p className="text-sm text-muted-foreground">{isInitialized ? "Ready" : "Initializing..."}</p>
+      </CardHeader>
       
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900">
         <ChatMessages 
           messages={messages} 
           isLoading={isLoading}
+          isProviderLoading={false}
+          isListening={isListening}
+          transcript=""
+          error={error}
+          messagesEndRef={{ current: null }}
+          isInitialized={isInitialized}
         />
       </div>
       
@@ -119,3 +145,5 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
     </div>
   );
 };
+
+export default CopilotChat;

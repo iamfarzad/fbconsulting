@@ -2,9 +2,26 @@
 import React, { useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot } from "lucide-react";
-import { AIMessage } from "@/services/copilotService";
-import { ChatMessage } from "./ChatMessage";
+import { AIMessage } from "@/services/chat/messageTypes";
 import { TypingIndicator } from "./TypingIndicator";
+
+interface ChatMessageProps {
+  message: AIMessage;
+  isLastMessage?: boolean;
+}
+
+// Simple ChatMessage component for this file
+const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+  const isUser = message.role === 'user';
+  
+  return (
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+      <div className={`max-w-[80%] p-3 rounded-lg ${isUser ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+        {message.content}
+      </div>
+    </div>
+  );
+};
 
 interface ChatMessageListProps {
   messages: AIMessage[];
@@ -89,7 +106,6 @@ export const ChatMessageList = ({
               <ChatMessage 
                 key={index} 
                 message={msg} 
-                isLastMessage={index === messages.length - 1}
               />
             ))}
             <AnimatePresence>
