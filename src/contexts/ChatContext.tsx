@@ -14,6 +14,17 @@ interface ChatState {
   showMessages: boolean;
   suggestedResponse: string | null;
   isInitialized: boolean;
+  // New state properties for enhanced functionality
+  activeConversationId: string | null;
+  conversationTitle: string | null;
+  voiceEnabled: boolean;
+  mediaPreviewOpen: boolean;
+  mediaItems: Array<{
+    type: string;
+    data: string;
+    mimeType?: string;
+    name?: string;
+  }>;
 }
 
 // Define the actions we can dispatch
@@ -28,7 +39,14 @@ type ChatAction =
   | { type: 'SET_FULLSCREEN'; payload: boolean }
   | { type: 'SET_SHOW_MESSAGES'; payload: boolean }
   | { type: 'SET_SUGGESTED_RESPONSE'; payload: string | null }
-  | { type: 'SET_INITIALIZED'; payload: boolean };
+  | { type: 'SET_INITIALIZED'; payload: boolean }
+  | { type: 'SET_ACTIVE_CONVERSATION'; payload: string | null }
+  | { type: 'SET_CONVERSATION_TITLE'; payload: string | null }
+  | { type: 'TOGGLE_VOICE'; payload?: boolean }
+  | { type: 'TOGGLE_MEDIA_PREVIEW'; payload?: boolean }
+  | { type: 'ADD_MEDIA_ITEM'; payload: { type: string; data: string; mimeType?: string; name?: string } }
+  | { type: 'REMOVE_MEDIA_ITEM'; payload: number }
+  | { type: 'CLEAR_MEDIA_ITEMS' };
 
 // Initial state
 const initialState: ChatState = {
@@ -40,6 +58,12 @@ const initialState: ChatState = {
   showMessages: true,
   suggestedResponse: null,
   isInitialized: false,
+  // New state properties initial values
+  activeConversationId: null,
+  conversationTitle: null,
+  voiceEnabled: false,
+  mediaPreviewOpen: false,
+  mediaItems: [],
 };
 
 // Reducer function
@@ -60,6 +84,8 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
       return {
         ...state,
         messages: [],
+        activeConversationId: null,
+        conversationTitle: null,
       };
     case 'SET_INPUT_VALUE':
       return {
@@ -101,6 +127,41 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         ...state,
         isInitialized: action.payload,
       };
+    case 'SET_ACTIVE_CONVERSATION':
+      return {
+        ...state,
+        activeConversationId: action.payload,
+      };
+    case 'SET_CONVERSATION_TITLE':
+      return {
+        ...state,
+        conversationTitle: action.payload,
+      };
+    case 'TOGGLE_VOICE':
+      return {
+        ...state,
+        voiceEnabled: action.payload !== undefined ? action.payload : !state.voiceEnabled,
+      };
+    case 'TOGGLE_MEDIA_PREVIEW':
+      return {
+        ...state,
+        mediaPreviewOpen: action.payload !== undefined ? action.payload : !state.mediaPreviewOpen,
+      };
+    case 'ADD_MEDIA_ITEM':
+      return {
+        ...state,
+        mediaItems: [...state.mediaItems, action.payload],
+      };
+    case 'REMOVE_MEDIA_ITEM':
+      return {
+        ...state,
+        mediaItems: state.mediaItems.filter((_, index) => index !== action.payload),
+      };
+    case 'CLEAR_MEDIA_ITEMS':
+      return {
+        ...state,
+        mediaItems: [],
+      };
     default:
       return state;
   }
@@ -115,6 +176,11 @@ interface ChatContextType {
   toggleFullScreen: () => void;
   containerRef: React.RefObject<HTMLDivElement>;
   isInitialized: boolean;
+  // New enhanced functionality
+  addMediaItem: (item: { type: string; data: string; mimeType?: string; name?: string }) => void;
+  removeMediaItem: (index: number) => void;
+  clearMediaItems: () => void;
+  toggleVoice: (enable?: boolean) => void;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -176,6 +242,9 @@ export const ChatProvider: React.FC<{
 
       dispatch({ type: 'ADD_MESSAGE', payload: userMessage });
       dispatch({ type: 'SET_INPUT_VALUE', payload: '' });
+      
+      // Clear media items after sending
+      dispatch({ type: 'CLEAR_MEDIA_ITEMS' });
       
       // Get response from chat service
       if (chatServiceRef.current) {
@@ -244,6 +313,26 @@ export const ChatProvider: React.FC<{
     dispatch({ type: 'TOGGLE_FULLSCREEN' });
   };
 
+  // Add a media item
+  const addMediaItem = (item: { type: string; data: string; mimeType?: string; name?: string }) => {
+    dispatch({ type: 'ADD_MEDIA_ITEM', payload: item });
+  };
+
+  // Remove a media item
+  const removeMediaItem = (index: number) => {
+    dispatch({ type: 'REMOVE_MEDIA_ITEM', payload: index });
+  };
+
+  // Clear all media items
+  const clearMediaItems = () => {
+    dispatch({ type: 'CLEAR_MEDIA_ITEMS' });
+  };
+
+  // Toggle voice functionality
+  const toggleVoice = (enable?: boolean) => {
+    dispatch({ type: 'TOGGLE_VOICE', payload: enable });
+  };
+
   const value = {
     state,
     dispatch,
@@ -252,6 +341,10 @@ export const ChatProvider: React.FC<{
     toggleFullScreen,
     containerRef,
     isInitialized: state.isInitialized,
+    addMediaItem,
+    removeMediaItem,
+    clearMediaItems,
+    toggleVoice
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
