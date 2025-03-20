@@ -9,28 +9,42 @@ import { toast } from '@/components/ui/use-toast';
 import { useGeminiAPI } from '@/hooks/useGeminiAPI';
 import type { 
   SpatialContext, 
-  VoiceConfig 
+  VoiceConfig,
+  AgenticConfig
 } from '@/services/copilot/types';
 
 interface CopilotProviderProps {
   children: React.ReactNode;
+  apiKey?: string;
+  modelName?: string;
+  voice?: VoiceConfig;
+  agentic?: AgenticConfig;
 }
 
-export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) => {
+export const CopilotProvider: React.FC<CopilotProviderProps> = ({ 
+  children,
+  apiKey: propApiKey,
+  modelName: propModelName,
+  voice: propVoice,
+  agentic: propAgentic
+}) => {
   // Hooks for external data
   const { personaData, setCurrentPage } = usePersonaManagement();
   const location = useLocation();
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const { apiKey: contextApiKey } = useGeminiAPI();
+  const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
   // State hooks
-  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [voiceEnabled, setVoiceEnabled] = useState(propVoice?.enabled || false);
   const [spatialContext, setSpatialContext] = useState<SpatialContext | null>(null);
 
-  // Memoized values
-  const publicApiKey = useMemo(() => {
-    console.log('API Key:', apiKey);
-    return apiKey || '';
-  }, [apiKey]);
+  // Determine which API key to use (prop > context > env)
+  const apiKey = useMemo(() => {
+    const key = propApiKey || contextApiKey || envApiKey || '';
+    console.log('Using API Key:', key ? '✅ Found' : '❌ Not found');
+    return key;
+  }, [propApiKey, contextApiKey, envApiKey]);
+
   const runtimeUrl = useMemo(
     () => 'http://localhost:3000',
     []
@@ -140,10 +154,32 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
     initVoice();
   }, []);
 
+  // Process agentic configuration
+  const agenticConfig = useMemo(() => {
+    return propAgentic || {
+      proactiveAssistance: true,
+      learningEnabled: true,
+      contextAwareness: true,
+      behaviorPatterns: ['page_navigation', 'content_interaction', 'form_interaction']
+    };
+  }, [propAgentic]);
+
+  // Process voice configuration
+  const voiceConfig = useMemo(() => {
+    if (!voiceEnabled && !propVoice?.enabled) return undefined;
+    
+    return propVoice || {
+      enabled: voiceEnabled,
+      voice: 'Charon',
+      pitch: 1,
+      rate: 1
+    };
+  }, [voiceEnabled, propVoice]);
+
   const copilotConfig = useMemo(
     () => {
       return {
-        publicApiKey,
+        publicApiKey: apiKey,
         baseUrl: runtimeUrl,
         chatOptions: {
           initialMessages: [
@@ -152,28 +188,18 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
               content: systemMessage
             }
           ],
-          model: 'gemini-2.0-flash-001',
+          model: propModelName || 'gemini-2.0-flash-001',
           temperature: 0.7,
           maxTokens: 2048,
           topP: 0.95,
           topK: 40,
-          voice: voiceEnabled ? {
-            enabled: true,
-            voice: 'Charon',
-            pitch: 1,
-            rate: 1
-          } : undefined,
+          voice: voiceConfig,
           spatialContext: spatialContext,
-          agentic: {
-            proactiveAssistance: true,
-            learningEnabled: true,
-            contextAwareness: true,
-            behaviorPatterns: ['page_navigation', 'content_interaction', 'form_interaction']
-          }
+          agentic: agenticConfig
         }
       };
     },
-    [runtimeUrl, systemMessage, voiceEnabled, spatialContext, publicApiKey]
+    [runtimeUrl, systemMessage, voiceConfig, spatialContext, apiKey, propModelName, agenticConfig]
   );
 
   // Initialize API key
