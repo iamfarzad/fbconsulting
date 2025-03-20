@@ -234,10 +234,4 @@ export const useVoiceInput = (
   };
 };
 
-// Add necessary type declarations for Speech Recognition but using Window interface
-declare global {
-  interface Window {
-    SpeechRecognition?: any;
-    webkitSpeechRecognition?: any;
-  }
-}
+// Note: We removed the global declarations as they're now in window.d.ts

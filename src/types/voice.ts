@@ -31,15 +31,9 @@ export interface SpeechRecognition extends EventTarget {
   onerror: (event: Event) => void;
 }
 
-// Define the global Window interface without conflicting with existing declarations
-declare global {
-  interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
-  }
-}
-
 export interface VoiceUIProps {
   onCommand?: (command: string) => void;
   aiProcessing?: boolean;
 }
+
+// Define SpeechRecognition constructors in window.d.ts instead
