@@ -1,391 +1,109 @@
 
-import React, { createContext, useContext, useState, useReducer, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useReducer, useCallback, useEffect } from 'react';
 import { AIMessage } from '@/services/chat/messageTypes';
-import { useGeminiAPI } from '@/SafeApp';
-import { usePersonaManagement } from '@/mcp/hooks/usePersonaManagement';
-import { useToast } from '@/hooks/use-toast';
-import { LeadInfo } from '@/services/lead/leadExtractor';
-import { GoogleGenAIChatService, getChatService } from '@/services/chat/googleGenAIService';
+import { 
+  GeminiChatService, 
+  getChatService,
+  ChatMessage as GenAIChatMessage 
+} from '@/services/chat/googleGenAIService';
 
-// Define the state interface
-export interface ChatState {
-  messages: AIMessage[];
-  isLoading: boolean;
-  isFullScreen: boolean;
-  inputValue: string;
-  suggestedResponse: string | null;
-  showMessages: boolean;
-  error: string | null;
-}
-
-// Define the action types
-type ChatAction =
-  | { type: 'SET_MESSAGES'; payload: AIMessage[] }
-  | { type: 'ADD_MESSAGE'; payload: AIMessage }
-  | { type: 'CLEAR_MESSAGES' }
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_FULLSCREEN'; payload: boolean }
-  | { type: 'TOGGLE_FULLSCREEN' }
-  | { type: 'SET_INPUT_VALUE'; payload: string }
-  | { type: 'SET_SUGGESTED_RESPONSE'; payload: string | null }
-  | { type: 'SET_SHOW_MESSAGES'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null };
-
-// Create the initial state
-const initialState: ChatState = {
-  messages: [],
-  isLoading: false,
-  isFullScreen: false,
-  inputValue: '',
-  suggestedResponse: null,
-  showMessages: false,
-  error: null,
-};
-
-// Create the reducer function
-const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
-  switch (action.type) {
-    case 'SET_MESSAGES':
-      return { ...state, messages: action.payload };
-    case 'ADD_MESSAGE':
-      return { ...state, messages: [...state.messages, action.payload] };
-    case 'CLEAR_MESSAGES':
-      return { ...state, messages: [] };
-    case 'SET_LOADING':
-      return { ...state, isLoading: action.payload };
-    case 'SET_FULLSCREEN':
-      return { ...state, isFullScreen: action.payload };
-    case 'TOGGLE_FULLSCREEN':
-      return { ...state, isFullScreen: !state.isFullScreen };
-    case 'SET_INPUT_VALUE':
-      return { ...state, inputValue: action.payload };
-    case 'SET_SUGGESTED_RESPONSE':
-      return { ...state, suggestedResponse: action.payload };
-    case 'SET_SHOW_MESSAGES':
-      return { ...state, showMessages: action.payload };
-    case 'SET_ERROR':
-      return { ...state, error: action.payload };
-    default:
-      return state;
-  }
-};
-
-// Interface for the context
+// Define types for the chat context
 interface ChatContextType {
-  state: ChatState;
-  dispatch: React.Dispatch<ChatAction>;
-  sendMessage: (content: string, files?: { mimeType: string; data: string; name: string; type: string }[]) => Promise<void>;
+  messages: AIMessage[];
+  sendMessage: (message: string) => Promise<void>;
   clearMessages: () => void;
-  toggleFullScreen: () => void;
-  addUserMessage: (content: string) => void;
-  addAssistantMessage: (content: string) => void;
-  containerRef: React.RefObject<HTMLDivElement>;
-  chatService: GoogleGenAIChatService | null;
-  isInitialized: boolean;
+  isLoading: boolean;
+  error: string | null;
 }
 
 // Create the context
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
-// Helper function to convert service messages to AIMessages
-const convertToAIMessages = (messages: any[]): AIMessage[] => {
-  return messages.map(msg => ({
-    role: msg.role as AIMessage['role'],
-    content: msg.content,
-    timestamp: msg.timestamp || Date.now(),
-    id: msg.id,
-    metadata: msg.metadata
-  }));
-};
-
-// Provider component
+// Create a provider component
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [state, dispatch] = useReducer(chatReducer, initialState);
-  const [chatService, setChatService] = useState<GoogleGenAIChatService | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { toast } = useToast();
-  const { apiKey } = useGeminiAPI();
-  const { personaData } = usePersonaManagement();
-
+  const [messages, setMessages] = useState<AIMessage[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [chatService, setChatService] = useState<GeminiChatService | null>(null);
+  
   // Initialize chat service
   useEffect(() => {
-    let isMounted = true;
-    let initAttempt = 0;
-    const maxAttempts = 3;
-    
-    const initializeChatService = async () => {
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+    if (apiKey) {
       try {
-        initAttempt++;
-        console.log(`Initialization attempt ${initAttempt}/${maxAttempts}`);
-
-        if (!apiKey) {
-          throw new Error('API key is missing');
-        }
-
-        const trimmedApiKey = apiKey.trim();
-        if (!trimmedApiKey) {
-          throw new Error('API key is empty after trimming');
-        }
-
-        // Create service configuration
-        const serviceConfig = {
-          apiKey: trimmedApiKey,
-          modelName: 'gemini-pro',
-          temperature: 0.9,
-          maxOutputTokens: 2048,
-          topP: 1.0,
-          topK: 1
-        };
-
-        // Create service
-        const service = await getChatService(serviceConfig);
-        if (!service) {
-          throw new Error('Failed to create chat service instance');
-        }
-
-        // Test connection
-        const connectionTest = await service.testConnection();
-        if (!connectionTest) {
-          throw new Error('Connection test failed');
-        }
-
-        if (!isMounted) return;
-
+        const service = getChatService({ apiKey });
         setChatService(service);
-        setIsInitialized(true);
-
-        // Initialize with persona if available
-        if (personaData) {
-          await service.initializeChat(personaData);
-          const history = service.getHistory();
-          dispatch({ type: 'SET_MESSAGES', payload: convertToAIMessages(history) });
-        }
-
-        console.log('Chat service initialization complete');
       } catch (error) {
-        if (!isMounted) return;
-
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.error('Chat service initialization failed:', errorMessage);
-
-        if (initAttempt < maxAttempts) {
-          setTimeout(() => {
-            if (isMounted) {
-              initializeChatService();
-            }
-          }, 1000);
-          return;
-        }
-
-        toast({
-          title: 'Chat Service Error',
-          description: `Could not initialize: ${errorMessage}`,
-          variant: 'destructive'
-        });
-        
-        setIsInitialized(false);
-        dispatch({ type: 'SET_ERROR', payload: errorMessage });
+        console.error('Error initializing chat service:', error);
+        setError('Failed to initialize chat service');
       }
-    };
-
-    initializeChatService();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [apiKey, personaData, toast]);
-
-  // Update messages when persona changes
-  useEffect(() => {
-    const updateMessages = async () => {
-      try {
-        if (chatService && personaData && isInitialized) {
-          await chatService.initializeChat(personaData);
-          const history = chatService.getHistory();
-          dispatch({ type: 'SET_MESSAGES', payload: convertToAIMessages(history) });
-        }
-      } catch (error) {
-        console.error('Error updating messages with persona change:', error);
-      }
-    };
-    updateMessages();
-  }, [personaData, chatService, isInitialized]);
-
-  // Show messages container when first message is sent
-  useEffect(() => {
-    if (state.messages.length > 0 && !state.showMessages) {
-      dispatch({ type: 'SET_SHOW_MESSAGES', payload: true });
-    }
-  }, [state.messages.length, state.showMessages]);
-
-  // Auto-resize container based on content
-  useEffect(() => {
-    const calculateContainerHeight = () => {
-      if (containerRef.current && typeof window !== 'undefined') {
-        const vh = window.innerHeight;
-        const maxHeight = Math.min(vh * 0.7, 600);
-        containerRef.current.style.maxHeight = `${maxHeight}px`;
-      }
-    };
-
-    calculateContainerHeight();
-    
-    if (typeof window !== 'undefined') {
-      window.addEventListener('resize', calculateContainerHeight);
-      return () => window.removeEventListener('resize', calculateContainerHeight);
+    } else {
+      console.warn('No API key found for chat service');
     }
   }, []);
-
-  // Utility functions
-  const addUserMessage = (content: string) => {
-    const newMessage: AIMessage = {
-      role: 'user',
-      content,
-      timestamp: Date.now()
-    };
-    dispatch({ type: 'ADD_MESSAGE', payload: newMessage });
-  };
-
-  const addAssistantMessage = (content: string) => {
-    const newMessage: AIMessage = {
-      role: 'assistant',
-      content,
-      timestamp: Date.now()
-    };
-    dispatch({ type: 'ADD_MESSAGE', payload: newMessage });
-  };
-
-  const sendMessage = async (content: string, files?: { mimeType: string; data: string; name: string; type: string }[]) => {
-    if (!content.trim() && (!files || files.length === 0)) {
-      toast({
-        title: 'Message is empty',
-        description: 'Please enter a message before sending.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    
-    dispatch({ type: 'SET_LOADING', payload: true });
+  
+  // Function to send messages
+  const sendMessage = useCallback(async (message: string) => {
+    if (!message.trim()) return;
     
     try {
-      // Add user message
-      addUserMessage(content);
+      setIsLoading(true);
+      setError(null);
       
-      // Create mock lead info from conversation context
-      const mockLeadInfo: LeadInfo = {
-        interests: state.messages.filter(m => m.role !== 'system').map(m => m.content),
-        stage: 'discovery'
+      // Add user message to state
+      const userMessage: AIMessage = {
+        role: 'user',
+        content: message,
+        timestamp: Date.now()
       };
       
-      let aiResponse: string = 'I apologize, but I couldn\'t generate a response at this time.';
+      setMessages(prev => [...prev, userMessage]);
       
-      if (chatService && isInitialized) {
-        try {
-          // Use our custom chat service
-          aiResponse = await chatService.sendMessage(content, mockLeadInfo);
-        } catch (chatServiceError) {
-          console.error('Error with chat service:', chatServiceError);
-          // Fall back to default response
-        }
-      }
-      
-      // Add the assistant message
-      addAssistantMessage(aiResponse);
-      
-      // Generate a suggested response
-      const suggestedPrompt = generateSuggestedResponse(aiResponse, mockLeadInfo);
-      if (suggestedPrompt) {
-        dispatch({ type: 'SET_SUGGESTED_RESPONSE', payload: suggestedPrompt });
+      // Get response from service if available
+      if (chatService) {
+        const response = await chatService.sendMessage(message, messages as GenAIChatMessage[]);
+        setMessages(prev => [...prev, response]);
+      } else {
+        // Mock response if service is not available
+        setTimeout(() => {
+          const response: AIMessage = {
+            role: 'assistant',
+            content: `This is a mock response to: ${message}`,
+            timestamp: Date.now()
+          };
+          setMessages(prev => [...prev, response]);
+        }, 1000);
       }
     } catch (error) {
-      console.error('Chat error:', error);
-      toast({
-        title: 'Error sending message',
-        description: 'Please try again later.',
-        variant: 'destructive',
-      });
-      
-      dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Unknown error' });
+      console.error('Error sending message:', error);
+      setError(error instanceof Error ? error.message : 'An unknown error occurred');
     } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
-      dispatch({ type: 'SET_INPUT_VALUE', payload: '' });
-      
-      // Show messages container when first message is sent
-      if (!state.showMessages) {
-        dispatch({ type: 'SET_SHOW_MESSAGES', payload: true });
-      }
+      setIsLoading(false);
     }
+  }, [chatService, messages]);
+  
+  // Function to clear messages
+  const clearMessages = useCallback(() => {
+    setMessages([]);
+  }, []);
+  
+  // The value that will be provided to consumers of this context
+  const contextValue: ChatContextType = {
+    messages,
+    sendMessage,
+    clearMessages,
+    isLoading,
+    error
   };
-
-  const clearMessages = async () => {
-    if (chatService && isInitialized) {
-      await chatService.clearHistory(personaData);
-      const history = chatService.getHistory();
-      dispatch({ type: 'SET_MESSAGES', payload: convertToAIMessages(history) });
-    } else {
-      dispatch({ type: 'CLEAR_MESSAGES' });
-    }
-    
-    dispatch({ type: 'SET_SHOW_MESSAGES', payload: false });
-    dispatch({ type: 'SET_SUGGESTED_RESPONSE', payload: null });
-    
-    toast({
-      title: 'Chat cleared',
-      description: 'All messages have been removed.',
-    });
-  };
-
-  const toggleFullScreen = () => {
-    dispatch({ type: 'TOGGLE_FULLSCREEN' });
-  };
-
-  // Generate suggested responses based on conversation context
-  const generateSuggestedResponse = (aiMessage: string, leadInfo: LeadInfo): string | null => {
-    if (!leadInfo || !leadInfo.stage) {
-      return null;
-    }
-    
-    const containsQuestion = aiMessage.includes('?');
-    if (!containsQuestion) {
-      return null;
-    }
-    
-    switch (leadInfo.stage) {
-      case 'discovery':
-        return 'Tell me more about your AI needs';
-      case 'qualification':
-        return 'Yes, I\'d like to learn more';
-      case 'interested':
-        return 'I\'d like to schedule a consultation';
-      case 'ready-to-book':
-        return 'Next week would work for me';
-      default:
-        return null;
-    }
-  };
-
+  
   return (
-    <ChatContext.Provider
-      value={{
-        state,
-        dispatch,
-        sendMessage,
-        clearMessages,
-        toggleFullScreen,
-        addUserMessage,
-        addAssistantMessage,
-        containerRef,
-        chatService,
-        isInitialized
-      }}
-    >
+    <ChatContext.Provider value={contextValue}>
       {children}
     </ChatContext.Provider>
   );
 };
 
-// Custom hook for using the chat context
+// Custom hook for consuming the chat context
 export const useChat = () => {
   const context = useContext(ChatContext);
   if (context === undefined) {

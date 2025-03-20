@@ -10,7 +10,8 @@ const mockSpeechSynthesis = {
   cancel: vi.fn(),
   getVoices: vi.fn().mockReturnValue([
     { name: 'Charon', voiceURI: 'Charon' }
-  ])
+  ]),
+  onvoiceschanged: null
 };
 
 // Mock the speech recognition
@@ -30,6 +31,11 @@ Object.defineProperty(window, 'speechSynthesis', {
 // Mock SpeechRecognition
 global.SpeechRecognition = vi.fn().mockImplementation(() => mockSpeechRecognition);
 global.webkitSpeechRecognition = vi.fn().mockImplementation(() => mockSpeechRecognition);
+
+// Mock the router since we're using useLocation
+vi.mock('react-router-dom', () => ({
+  useLocation: vi.fn().mockReturnValue({ pathname: '/' }),
+}));
 
 describe('CopilotProvider with voice features', () => {
   beforeEach(() => {
@@ -52,30 +58,45 @@ describe('CopilotProvider with voice features', () => {
   });
   
   it('initializes with voice config', async () => {
+    const voice = {
+      enabled: true,
+      voice: 'Charon'
+    };
+    
     render(
-      <CopilotProvider>
+      <CopilotProvider voice={voice}>
         <div>Test Child</div>
       </CopilotProvider>
     );
     
+    // Simulate voices loaded event
+    if (mockSpeechSynthesis.onvoiceschanged) {
+      mockSpeechSynthesis.onvoiceschanged();
+    }
+    
     // Wait for async initialization
     await waitFor(() => {
-      // You would check that the voice features were initialized correctly
-      // This would depend on your specific implementation
+      // Just checking it doesn't error
+      expect(screen.getByText('Test Child')).toBeInTheDocument();
     });
   });
   
   it('disables voice when configured', async () => {
+    const voice = {
+      enabled: false,
+      voice: 'Charon'
+    };
+    
     render(
-      <CopilotProvider>
+      <CopilotProvider voice={voice}>
         <div>Test Child</div>
       </CopilotProvider>
     );
     
     // Wait for async initialization
     await waitFor(() => {
-      // You would check that voice features are disabled
-      // This would depend on your specific implementation
+      // Just checking it doesn't error
+      expect(screen.getByText('Test Child')).toBeInTheDocument();
     });
   });
 });
