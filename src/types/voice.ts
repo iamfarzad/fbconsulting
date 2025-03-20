@@ -31,15 +31,11 @@ export interface SpeechRecognition extends EventTarget {
   onerror: (event: Event) => void;
 }
 
-// Define the global Window interface with proper typing
+// Define the global Window interface without conflicting with existing declarations
 declare global {
   interface Window {
-    SpeechRecognition?: {
-      new (): SpeechRecognition;
-    };
-    webkitSpeechRecognition?: {
-      new (): SpeechRecognition;
-    };
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
   }
 }
 
