@@ -139,8 +139,9 @@ export const VoiceServiceDemo = () => {
                 
                 {isSpeaking && (
                   <Button
-                    variant="destructive"
+                    variant="outline"
                     onClick={stopSpeaking}
+                    className="bg-red-50 hover:bg-red-100 border-red-200 text-red-500 hover:text-red-600"
                   >
                     Stop
                   </Button>
