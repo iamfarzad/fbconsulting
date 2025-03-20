@@ -3,7 +3,7 @@ import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChatMessageList } from "./ChatMessageList";
 import { ChatInput } from "./ChatInput";
-import { AIMessage } from "@/services/copilotService";
+import { AIMessage } from "@/services/chat/types";
 import { UploadedFile } from "@/hooks/useFileUpload";
 
 interface ChatContainerProps {
@@ -19,7 +19,7 @@ interface ChatContainerProps {
   toggleFullScreen: () => void;
   placeholder?: string;
   isFullScreen?: boolean;
-  // Add file-related props
+  // Add file-related props with default values
   files?: UploadedFile[];
   uploadFile?: (file: File) => Promise<void>;
   removeFile?: (index: number) => void;

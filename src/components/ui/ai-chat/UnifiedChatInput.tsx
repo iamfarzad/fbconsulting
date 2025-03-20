@@ -8,35 +8,41 @@ import React, { useState, useEffect } from 'react';
 import { useUnifiedChat } from '@/hooks/useUnifiedChat';
 import { AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
-import UnifiedFullScreenChat from '@/components/chat/UnifiedFullScreenChat';
+import { UnifiedFullScreenChat } from '@/components/chat/UnifiedFullScreenChat';
 import { ChatContainer } from './ChatContainer';
-import { AIMessage } from '@/services/chat/messageTypes';
+import { AIMessage } from '@/services/chat/types';
 
 interface UnifiedChatInputProps {
   placeholderText?: string;
   autoFullScreen?: boolean;
-  useCopilotKit?: boolean;
+  apiKey?: string;
+  modelName?: string;
 }
 
 export function UnifiedChatInput({
   placeholderText = "Ask me anything...",
   autoFullScreen = false,
-  useCopilotKit = true
+  apiKey,
+  modelName
 }: UnifiedChatInputProps) {
   const {
-    showMessages,
     messages,
-    isLoading,
     inputValue,
     setInputValue,
+    isLoading,
+    showMessages,
     suggestedResponse,
     containerRef,
     isFullScreen,
     toggleFullScreen,
     handleSend,
     handleClear,
-    setIsFullScreen
-  } = useUnifiedChat({ useCopilotKit });
+    setIsFullScreen,
+    setShowMessages
+  } = useUnifiedChat({ 
+    apiKey,
+    modelName
+  });
   
   const isMobile = useIsMobile();
 
@@ -59,17 +65,20 @@ export function UnifiedChatInput({
         <UnifiedFullScreenChat
           onMinimize={toggleFullScreen}
           placeholderText={placeholderText}
-          useCopilotKit={useCopilotKit}
+          apiKey={apiKey}
+          modelName={modelName}
         />
       </AnimatePresence>
     );
   }
 
   // Ensure messages have the required timestamp field
-  const validMessages: AIMessage[] = messages.filter(msg => msg.role !== 'system').map(msg => ({
-    ...msg,
-    timestamp: msg.timestamp || Date.now()
-  }));
+  const validMessages: AIMessage[] = messages
+    .filter(msg => msg.role !== 'system')
+    .map(msg => ({
+      ...msg,
+      timestamp: msg.timestamp || Date.now()
+    }));
 
   return (
     <AnimatePresence mode="wait">
