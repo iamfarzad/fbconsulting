@@ -27,6 +27,14 @@ export type GoogleGenAIChatServiceConfig = GoogleGenAIConfig & {
   topK?: number;
 }
 
+export interface ChatMessage {
+  role: 'user' | 'assistant' | 'system' | 'error';
+  content: string;
+  timestamp?: number;
+  id?: string;
+  metadata?: Record<string, any>;
+}
+
 export class GoogleGenAIChatService {
   private ai: GoogleGenerativeAI;
   private model: GenerativeModel | null = null;
@@ -130,8 +138,6 @@ export class GoogleGenAIChatService {
       throw error;
     }
   }
-
-
 
   /**
    * Generate a system prompt based on the current persona

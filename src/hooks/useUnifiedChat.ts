@@ -1,3 +1,4 @@
+
 /**
  * Unified Chat Hook
  * Combines CopilotKit and custom chat functionality with Google GenAI
@@ -6,12 +7,22 @@
 import { useState, useEffect, useRef } from 'react';
 import { useCopilotChat } from '@copilotkit/react-core';
 import { usePersonaManagement } from '@/mcp/hooks/usePersonaManagement';
-import { GoogleGenAIChatService, getChatService, ChatMessage } from '@/services/chat/googleGenAIService';
+import { GoogleGenAIChatService, getChatService } from '@/services/chat/googleGenAIService';
+import { AIMessage } from '@/services/chat/messageTypes';
 import { LeadInfo } from '@/services/lead/leadExtractor';
 import { useToast } from './use-toast';
 import { useLocation } from 'react-router-dom';
 import { useGeminiAPI } from '@/SafeApp';
 import { PersonaData, PersonaType } from '@/mcp/protocols/personaManagement/types';
+
+// Create a local type definition for ChatMessage that matches what we need
+interface ChatMessage {
+  role: 'user' | 'assistant' | 'system' | 'error';
+  content: string;
+  timestamp?: number;
+  id?: string;
+  metadata?: Record<string, any>;
+}
 
 interface UseUnifiedChatOptions {
   useCopilotKit?: boolean;
@@ -268,7 +279,8 @@ export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
   const addUserMessage = (content: string) => {
     const newMessage: ChatMessage = {
       role: 'user',
-      content
+      content,
+      timestamp: Date.now()
     };
     
     setMessages(prev => [...prev, newMessage]);
@@ -287,7 +299,8 @@ export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
   const addAssistantMessage = (content: string) => {
     const newMessage: ChatMessage = {
       role: 'assistant',
-      content
+      content,
+      timestamp: Date.now()
     };
     
     setMessages(prev => [...prev, newMessage]);

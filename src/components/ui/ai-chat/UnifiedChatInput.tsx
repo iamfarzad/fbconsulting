@@ -1,3 +1,4 @@
+
 /**
  * UnifiedChatInput Component
  * A unified chat input component that can be used across the application
@@ -56,7 +57,6 @@ export function UnifiedChatInput({
       <AnimatePresence mode="wait">
         <UnifiedFullScreenChat
           onMinimize={toggleFullScreen}
-          useCopilotKit={useCopilotKit}
           placeholderText={placeholderText}
         />
       </AnimatePresence>

@@ -87,6 +87,17 @@ interface ChatContextType {
 // Create the context
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
+// Helper function to convert service messages to AIMessages
+const convertToAIMessages = (messages: any[]): AIMessage[] => {
+  return messages.map(msg => ({
+    role: msg.role as AIMessage['role'],
+    content: msg.content,
+    timestamp: msg.timestamp || Date.now(),
+    id: msg.id,
+    metadata: msg.metadata
+  }));
+};
+
 // Provider component
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(chatReducer, initialState);
@@ -148,7 +159,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (personaData) {
           await service.initializeChat(personaData);
           const history = service.getHistory();
-          dispatch({ type: 'SET_MESSAGES', payload: history });
+          dispatch({ type: 'SET_MESSAGES', payload: convertToAIMessages(history) });
         }
 
         console.log('Chat service initialization complete');
@@ -192,7 +203,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (chatService && personaData && isInitialized) {
           await chatService.initializeChat(personaData);
           const history = chatService.getHistory();
-          dispatch({ type: 'SET_MESSAGES', payload: history });
+          dispatch({ type: 'SET_MESSAGES', payload: convertToAIMessages(history) });
         }
       } catch (error) {
         console.error('Error updating messages with persona change:', error);
@@ -311,7 +322,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (chatService && isInitialized) {
       await chatService.clearHistory(personaData);
       const history = chatService.getHistory();
-      dispatch({ type: 'SET_MESSAGES', payload: history });
+      dispatch({ type: 'SET_MESSAGES', payload: convertToAIMessages(history) });
     } else {
       dispatch({ type: 'CLEAR_MESSAGES' });
     }
