@@ -2,27 +2,48 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-interface LinkPreviewMediaProps {
-  title?: string;
-  description?: string;
-  thumbnail?: string;
+export interface LinkPreviewMediaProps {
+  title: string;
+  description?: string | null;
+  thumbnailUrl?: string | null;
+  linkUrl: string;
   className?: string;
 }
 
-export const LinkPreviewMedia = ({ title, description, thumbnail, className }: LinkPreviewMediaProps) => {
+export const LinkPreviewMedia: React.FC<LinkPreviewMediaProps> = ({
+  title,
+  description,
+  thumbnailUrl,
+  linkUrl,
+  className,
+}) => {
   return (
-    <div className={cn("border rounded-lg p-4 my-2", className)}>
-      {thumbnail && (
-        <img
-          src={thumbnail}
-          alt={title || 'Link preview'}
-          className="w-[200px] h-[100px] object-cover rounded-lg mb-2"
-        />
+    <a
+      href={linkUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn(
+        "flex flex-col sm:flex-row items-start border rounded-md overflow-hidden hover:bg-muted/20 transition-colors", 
+        className
       )}
-      <h4 className="font-medium">{title}</h4>
-      <p className="text-sm text-muted-foreground">
-        {description}
-      </p>
-    </div>
+    >
+      {thumbnailUrl && (
+        <div className="sm:w-1/3 max-w-[200px]">
+          <img 
+            src={thumbnailUrl} 
+            alt={title} 
+            className="w-full h-auto max-h-[150px] object-cover"
+          />
+        </div>
+      )}
+      
+      <div className={cn("p-3", thumbnailUrl ? "sm:w-2/3" : "w-full")}>
+        <h3 className="font-medium text-sm mb-1 line-clamp-2">{title}</h3>
+        {description && (
+          <p className="text-xs text-muted-foreground line-clamp-3">{description}</p>
+        )}
+        <p className="text-xs text-blue-500 mt-1 truncate">{linkUrl}</p>
+      </div>
+    </a>
   );
 };

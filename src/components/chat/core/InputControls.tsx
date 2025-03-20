@@ -1,10 +1,11 @@
 
 import React, { useRef } from 'react';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Mic, MicOff, Send, Image, Paperclip, Loader2, X } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { AnimatedBars } from '@/components/ui/AnimatedBars';
+import { MediaUploadButton } from './controls/MediaUploadButton';
+import { ImageUploadButton } from './controls/ImageUploadButton';
+import { ClearChatButton } from './controls/ClearChatButton';
+import { VoiceButton } from './controls/VoiceButton';
+import { SendMessageButton } from './controls/SendMessageButton';
 
 interface InputControlsProps {
   onSend: () => void;
@@ -76,130 +77,49 @@ export const InputControls: React.FC<InputControlsProps> = ({
       
       {/* Media upload controls */}
       {onToggleMedia && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={onToggleMedia}
-                className={cn(
-                  'rounded-full w-8 h-8',
-                  showMedia && 'bg-primary/10 text-primary'
-                )}
-                disabled={isLoading || isListening}
-              >
-                {showMedia ? (
-                  <X className="h-4 w-4" />
-                ) : (
-                  <Paperclip className="h-4 w-4" />
-                )}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{showMedia ? 'Hide media options' : 'Add files'}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <MediaUploadButton 
+          showMedia={showMedia}
+          onToggleMedia={onToggleMedia}
+          isLoading={isLoading}
+          isListening={isListening}
+        />
       )}
       
       {/* Media upload buttons */}
       {showMedia && onUploadImage && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={handleImageButtonClick}
-                className="rounded-full w-8 h-8"
-                disabled={isLoading || isListening}
-              >
-                <Image className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Upload image</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <ImageUploadButton
+          onImageUpload={handleImageButtonClick}
+          isLoading={isLoading}
+          isListening={isListening}
+        />
       )}
       
       {/* Clear chat button */}
       {onClearChat && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={onClearChat}
-                className="text-xs h-8 px-2 rounded-full"
-                disabled={isLoading || isListening}
-              >
-                Clear
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Clear chat history</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <ClearChatButton
+          onClearChat={onClearChat}
+          isLoading={isLoading}
+          isListening={isListening}
+        />
       )}
       
       {/* Voice input controls */}
       {isVoiceSupported && onToggleMic && (
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant={isListening ? "default" : "ghost"}
-                size="icon"
-                onClick={onToggleMic}
-                className={cn(
-                  'rounded-full w-8 h-8',
-                  isListening && 'bg-primary text-primary-foreground'
-                )}
-                disabled={isLoading || aiProcessing}
-              >
-                {isListening ? (
-                  <div className="flex items-center justify-center">
-                    <AnimatedBars className="h-3 w-3" isActive={true} />
-                  </div>
-                ) : (
-                  <Mic className="h-4 w-4" />
-                )}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{isListening ? 'Stop listening' : 'Use voice input'}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <VoiceButton
+          isListening={isListening}
+          onToggleMic={onToggleMic}
+          isLoading={isLoading}
+          aiProcessing={aiProcessing}
+        />
       )}
       
       {/* Send button */}
-      <Button
-        type="submit"
-        size="icon"
-        variant={hasContent ? "default" : "ghost"}
+      <SendMessageButton
+        hasContent={hasContent}
+        isLoading={isLoading}
         onClick={onSend}
-        className={cn(
-          'rounded-full w-8 h-8',
-          !hasContent && 'text-muted-foreground'
-        )}
-        disabled={(!hasContent && !isListening) || isLoading}
-      >
-        {isLoading ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <Send className="h-4 w-4" />
-        )}
-      </Button>
+        disabled={!isListening}
+      />
     </div>
   );
 };
