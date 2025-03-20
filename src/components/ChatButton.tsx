@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Bot } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UnifiedFullScreenChat } from './chat/UnifiedFullScreenChat';
@@ -33,15 +33,8 @@ const ChatButton = () => {
   const { 
     isOpen, 
     isFullScreen, 
-    inputValue,
-    setInputValue,
-    isLoading,
-    messages,
-    suggestedResponse,
     toggleChat,
     toggleFullScreen,
-    handleSend,
-    handleClear,
     shouldShowButton 
   } = chatButtonState;
   
@@ -60,7 +53,6 @@ const ChatButton = () => {
             className="fixed bottom-20 right-4 md:right-6 z-50 w-80 md:w-96 h-96"
           >
             <UnifiedChat
-              useCopilotKit={true}
               fullScreen={false}
               onToggleFullScreen={toggleFullScreen}
               placeholderText="Ask me anything about our AI services..."
@@ -74,7 +66,6 @@ const ChatButton = () => {
         {isOpen && isFullScreen && (
           <UnifiedFullScreenChat 
             onMinimize={toggleFullScreen}
-            useCopilotKit={true}
             placeholderText="Ask me anything about our AI services..."
           />
         )}

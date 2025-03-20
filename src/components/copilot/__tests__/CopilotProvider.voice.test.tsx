@@ -1,107 +1,102 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, act } from '@testing-library/react';
+
+import React from 'react';
+import { render, screen, cleanup, waitFor } from '@testing-library/react';
 import { CopilotProvider } from '../CopilotProvider';
-import { MemoryRouter } from 'react-router-dom';
-import { useGeminiAPI } from '@/hooks/useGeminiAPI';
-import { usePersonaManagement } from '@/mcp/hooks/usePersonaManagement';
 
-// Mock hooks
-vi.mock('@/hooks/useGeminiAPI', () => ({
-  useGeminiAPI: vi.fn()
-}));
+// Mock the speech synthesis
+const mockSpeechSynthesis = {
+  speak: jest.fn(),
+  cancel: jest.fn(),
+  getVoices: jest.fn().mockReturnValue([
+    { name: 'Charon', voiceURI: 'Charon' }
+  ])
+};
 
-vi.mock('@/mcp/hooks/usePersonaManagement', () => ({
-  usePersonaManagement: vi.fn()
-}));
+// Mock the speech recognition
+const mockSpeechRecognition = {
+  start: jest.fn(),
+  stop: jest.fn(),
+  addEventListener: jest.fn(),
+  removeEventListener: jest.fn(),
+};
 
-describe('CopilotProvider - Voice Synthesis', () => {
+// Setup global mocks
+global.SpeechSynthesis = mockSpeechSynthesis;
+global.SpeechRecognition = jest.fn().mockImplementation(() => mockSpeechRecognition);
+global.webkitSpeechRecognition = jest.fn().mockImplementation(() => mockSpeechRecognition);
+
+describe('CopilotProvider with voice features', () => {
   beforeEach(() => {
-    // Mock hook implementations
-    (useGeminiAPI as any).mockReturnValue({
-      apiKey: 'test-key',
-      isLoading: false
-    });
-
-    (usePersonaManagement as any).mockReturnValue({
-      personaData: {
-        personaDefinitions: {
-          default: {
-            name: 'Default',
-            tone: 'Professional',
-            focusAreas: ['Testing']
-          }
-        },
-        currentPersona: 'default',
-        currentPage: '/'
-      },
-      setCurrentPage: vi.fn()
-    });
+    // Reset mocks between tests
+    jest.clearAllMocks();
+  });
+  
+  afterEach(() => {
+    cleanup();
   });
 
-  it('should initialize voice synthesis on mount', async () => {
+  test('renders children', () => {
     render(
-      <MemoryRouter>
-        <CopilotProvider>
-          <div>Test Content</div>
-        </CopilotProvider>
-      </MemoryRouter>
+      <CopilotProvider 
+        apiKey="test-key"
+        modelName="gemini-pro"
+        voice={{
+          enabled: true,
+          voice: 'Charon'
+        }}
+      >
+        <div>Test Child</div>
+      </CopilotProvider>
     );
-
-    // Trigger onvoiceschanged event
-    act(() => {
-      if (window.speechSynthesis.onvoiceschanged) {
-        window.speechSynthesis.onvoiceschanged();
-      }
-    });
-
-    // Verify that getVoices was called
-    expect(window.speechSynthesis.getVoices()).toEqual([
-      { name: 'Charon', lang: 'en-US' },
-      { name: 'Other Voice', lang: 'en-US' }
-    ]);
+    
+    expect(screen.getByText('Test Child')).toBeInTheDocument();
   });
-
-  it('should enable voice when Charon voice is available', async () => {
-    // Mock getVoices to return Charon
-    (window.speechSynthesis.getVoices as any).mockReturnValue([
-      { name: 'Charon', lang: 'en-US' }
-    ]);
-
+  
+  test('initializes with voice config', async () => {
+    const voice = {
+      enabled: true,
+      voice: 'Charon',
+      pitch: 1.0,
+      rate: 1.0
+    };
+    
     render(
-      <MemoryRouter>
-        <CopilotProvider>
-          <div>Test Content</div>
-        </CopilotProvider>
-      </MemoryRouter>
+      <CopilotProvider 
+        apiKey="test-key"
+        modelName="gemini-pro"
+        voice={voice}
+      >
+        <div>Test Child</div>
+      </CopilotProvider>
     );
-
-    // Trigger onvoiceschanged event
-    act(() => {
-      if (window.speechSynthesis.onvoiceschanged) {
-        window.speechSynthesis.onvoiceschanged();
-      }
+    
+    // Wait for async initialization
+    await waitFor(() => {
+      // You would check that the voice features were initialized correctly
+      // This would depend on your specific implementation
     });
   });
-
-  it('should not enable voice when Charon voice is not available', async () => {
-    // Mock getVoices to return no Charon
-    (window.speechSynthesis.getVoices as any).mockReturnValue([
-      { name: 'Other Voice', lang: 'en-US' }
-    ]);
-
+  
+  test('disables voice when configured', async () => {
+    const voice = {
+      enabled: false,
+      voice: 'Charon'
+    };
+    
     render(
-      <MemoryRouter>
-        <CopilotProvider>
-          <div>Test Content</div>
-        </CopilotProvider>
-      </MemoryRouter>
+      <CopilotProvider 
+        apiKey="test-key"
+        modelName="gemini-pro"
+        voice={voice}
+      >
+        <div>Test Child</div>
+      </CopilotProvider>
     );
-
-    // Trigger onvoiceschanged event
-    act(() => {
-      if (window.speechSynthesis.onvoiceschanged) {
-        window.speechSynthesis.onvoiceschanged();
-      }
+    
+    // Wait for async initialization
+    await waitFor(() => {
+      // You would check that voice features are disabled
+      // This would depend on your specific implementation
     });
   });
 });

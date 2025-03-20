@@ -12,6 +12,7 @@ interface UnifiedChatContentProps {
   fullScreen?: boolean;
   onToggleFullScreen?: () => void;
   className?: string;
+  useCopilotKit?: boolean;
 }
 
 // Inner component that uses the ChatContext
@@ -21,7 +22,8 @@ const UnifiedChatContent: React.FC<UnifiedChatContentProps> = ({
   placeholderText = 'Ask me anything...',
   fullScreen = false,
   onToggleFullScreen,
-  className = ''
+  className = '',
+  useCopilotKit = false
 }) => {
   const { 
     state, 

@@ -11,13 +11,15 @@ interface UnifiedFullScreenChatProps {
   title?: string;
   subtitle?: string;
   placeholderText?: string;
+  useCopilotKit?: boolean;
 }
 
 export const UnifiedFullScreenChat: React.FC<UnifiedFullScreenChatProps> = ({
   onMinimize,
   title = 'AI Assistant',
   subtitle,
-  placeholderText = "Ask me anything..."
+  placeholderText = "Ask me anything...",
+  useCopilotKit = false
 }) => {
   // Prevent body scrolling when fullscreen chat is open
   useEffect(() => {
@@ -71,6 +73,7 @@ export const UnifiedFullScreenChat: React.FC<UnifiedFullScreenChatProps> = ({
             title={title}
             subtitle={subtitle}
             className="h-full border-0 rounded-none shadow-none"
+            useCopilotKit={useCopilotKit}
           />
         </div>
       </motion.div>
