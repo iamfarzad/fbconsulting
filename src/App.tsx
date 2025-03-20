@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, createContext, useContext, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -17,7 +18,6 @@ import TestMCP from "./pages/TestMCP";
 import TestGoogleAI from "./pages/TestGoogleAI";
 import TestUnifiedChat from "./pages/TestUnifiedChat";
 import AIDemo from "./pages/AIDemo";
-import VoiceServiceDemo from "./pages/VoiceServiceDemo";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { CopilotProvider } from "./components/copilot/CopilotProvider";
 
@@ -79,7 +79,6 @@ function App() {
                         <Route path="/test-google-ai" element={<TestGoogleAI />} />
                         <Route path="/test-unified-chat" element={<TestUnifiedChat />} />
                         <Route path="/ai-demo" element={<AIDemo />} />
-                        <Route path="/voice-demo" element={<VoiceServiceDemo />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </AnimatePresence>
