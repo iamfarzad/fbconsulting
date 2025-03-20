@@ -29,17 +29,17 @@ export const useVoiceInput = (
   const [aiProcessing, setAiProcessing] = useState(false);
   const [isVoiceSupported, setIsVoiceSupported] = useState(false);
   
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<any | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Initialize speech recognition API
   useEffect(() => {
     if (typeof window !== 'undefined') {
       // Check browser support
-      const SpeechRecognition =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
+      const SpeechRecognitionAPI =
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
       
-      if (SpeechRecognition) {
+      if (SpeechRecognitionAPI) {
         setIsVoiceSupported(true);
       } else {
         setIsVoiceSupported(false);
@@ -110,14 +110,14 @@ export const useVoiceInput = (
         setIsTranscribing(true);
         
         // Create new recognition instance
-        const SpeechRecognition = 
-          window.SpeechRecognition || window.webkitSpeechRecognition;
+        const SpeechRecognitionAPI = 
+          (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         
-        if (!SpeechRecognition) {
+        if (!SpeechRecognitionAPI) {
           throw new Error('Speech recognition not supported');
         }
         
-        const recognition = new SpeechRecognition();
+        const recognition = new SpeechRecognitionAPI();
         recognitionRef.current = recognition;
         
         // Configure recognition
@@ -133,7 +133,7 @@ export const useVoiceInput = (
           updateTranscript('');
         };
         
-        recognition.onresult = (event) => {
+        recognition.onresult = (event: any) => {
           let interimTranscript = '';
           
           for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -151,7 +151,7 @@ export const useVoiceInput = (
           updateTranscript(combinedTranscript.trim());
         };
         
-        recognition.onerror = (event) => {
+        recognition.onerror = (event: any) => {
           console.error('Speech recognition error:', event.error);
           
           let errorMessage: string;
@@ -234,10 +234,10 @@ export const useVoiceInput = (
   };
 };
 
-// Add necessary type declarations for Speech Recognition
+// Add necessary type declarations for Speech Recognition but using Window interface
 declare global {
   interface Window {
-    SpeechRecognition?: typeof SpeechRecognition;
-    webkitSpeechRecognition?: typeof SpeechRecognition;
+    SpeechRecognition?: any;
+    webkitSpeechRecognition?: any;
   }
 }

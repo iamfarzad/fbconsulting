@@ -1,10 +1,9 @@
 
-import React from 'react';
-import { Mic, MicOff, Send, X, Paperclip, Image, File } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { Mic, MicOff, Send, Image, Paperclip, Loader2, X } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { AnimatedBars } from '@/components/ui/AnimatedBars';
 
 interface InputControlsProps {
@@ -13,8 +12,8 @@ interface InputControlsProps {
   isLoading: boolean;
   onToggleMic?: () => void;
   isListening?: boolean;
-  aiProcessing?: boolean;
   isVoiceSupported?: boolean;
+  aiProcessing?: boolean;
   onToggleMedia?: () => void;
   showMedia?: boolean;
   onUploadImage?: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -29,8 +28,8 @@ export const InputControls: React.FC<InputControlsProps> = ({
   isLoading,
   onToggleMic,
   isListening = false,
-  aiProcessing = false,
   isVoiceSupported = false,
+  aiProcessing = false,
   onToggleMedia,
   showMedia = false,
   onUploadImage,
@@ -38,162 +37,169 @@ export const InputControls: React.FC<InputControlsProps> = ({
   onClearChat,
   className = '',
 }) => {
-  const imageInputRef = React.useRef<HTMLInputElement>(null);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const handleTriggerImageUpload = () => {
+  const handleImageButtonClick = () => {
     if (imageInputRef.current) {
       imageInputRef.current.click();
     }
   };
   
-  const handleTriggerFileUpload = () => {
+  const handleFileButtonClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
-
+  
   return (
-    <div className={cn('flex items-center gap-2', className)}>
-      {/* Optional Actions */}
+    <div className={cn("flex items-center space-x-2", className)}>
+      {/* Hidden inputs for file uploads */}
+      {onUploadImage && (
+        <input 
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          onChange={onUploadImage}
+          className="sr-only"
+        />
+      )}
+      
+      {onUploadFile && (
+        <input 
+          ref={fileInputRef}
+          type="file"
+          onChange={onUploadFile}
+          className="sr-only"
+        />
+      )}
+      
+      {/* Media upload controls */}
+      {onToggleMedia && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={onToggleMedia}
+                className={cn(
+                  'rounded-full w-8 h-8',
+                  showMedia && 'bg-primary/10 text-primary'
+                )}
+                disabled={isLoading || isListening}
+              >
+                {showMedia ? (
+                  <X className="h-4 w-4" />
+                ) : (
+                  <Paperclip className="h-4 w-4" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{showMedia ? 'Hide media options' : 'Add files'}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+      
+      {/* Media upload buttons */}
+      {showMedia && onUploadImage && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={handleImageButtonClick}
+                className="rounded-full w-8 h-8"
+                disabled={isLoading || isListening}
+              >
+                <Image className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Upload image</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+      
+      {/* Clear chat button */}
       {onClearChat && (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
+                type="button"
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={onClearChat}
-                className="h-8 w-8"
+                className="text-xs h-8 px-2 rounded-full"
                 disabled={isLoading || isListening}
               >
-                <X size={16} />
+                Clear
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Clear chat</p>
+              <p>Clear chat history</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
       )}
       
-      {/* Media Upload */}
-      {onToggleMedia && (
-        <Popover open={showMedia} onOpenChange={onToggleMedia}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              disabled={isLoading || isListening}
-            >
-              <Paperclip size={16} />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-fit p-2" align="end">
-            <div className="flex flex-col gap-2">
-              {onUploadImage && (
-                <div>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-xs"
-                    size="sm"
-                    onClick={handleTriggerImageUpload}
-                  >
-                    <Image size={14} className="mr-2" />
-                    Upload Image
-                  </Button>
-                  <input
-                    type="file"
-                    ref={imageInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    onChange={onUploadImage}
-                  />
-                </div>
-              )}
-              
-              {onUploadFile && (
-                <div>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-xs"
-                    size="sm"
-                    onClick={handleTriggerFileUpload}
-                  >
-                    <File size={14} className="mr-2" />
-                    Upload File
-                  </Button>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    onChange={onUploadFile}
-                  />
-                </div>
-              )}
-            </div>
-          </PopoverContent>
-        </Popover>
-      )}
-      
-      {/* Voice Control */}
+      {/* Voice input controls */}
       {isVoiceSupported && onToggleMic && (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant={isListening ? 'destructive' : 'ghost'}
+                type="button"
+                variant={isListening ? "default" : "ghost"}
                 size="icon"
                 onClick={onToggleMic}
-                disabled={isLoading}
-                className={cn('h-8 w-8 relative', isListening && 'bg-red-500')}
+                className={cn(
+                  'rounded-full w-8 h-8',
+                  isListening && 'bg-primary text-primary-foreground'
+                )}
+                disabled={isLoading || aiProcessing}
               >
                 {isListening ? (
-                  <>
-                    <MicOff size={16} className="text-white" />
-                    <span className="absolute -top-1 -right-1">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                      </span>
-                    </span>
-                  </>
+                  <div className="flex items-center justify-center">
+                    <AnimatedBars className="h-3 w-3" />
+                  </div>
                 ) : (
-                  <Mic size={16} />
+                  <Mic className="h-4 w-4" />
                 )}
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{isListening ? 'Stop listening' : 'Start voice input'}</p>
+              <p>{isListening ? 'Stop listening' : 'Use voice input'}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
       )}
       
-      {/* Send Button */}
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              onClick={onSend}
-              variant={hasContent ? 'default' : 'secondary'}
-              size="icon"
-              className={cn('h-8 w-8', !hasContent && 'opacity-50')}
-              disabled={(!hasContent && !isListening) || isLoading}
-            >
-              {isLoading ? (
-                <AnimatedBars isActive small />
-              ) : (
-                <Send size={16} />
-              )}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Send message</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+      {/* Send button */}
+      <Button
+        type="submit"
+        size="icon"
+        variant={hasContent ? "default" : "ghost"}
+        onClick={onSend}
+        className={cn(
+          'rounded-full w-8 h-8',
+          !hasContent && 'text-muted-foreground'
+        )}
+        disabled={(!hasContent && !isListening) || isLoading}
+      >
+        {isLoading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Send className="h-4 w-4" />
+        )}
+      </Button>
     </div>
   );
 };
