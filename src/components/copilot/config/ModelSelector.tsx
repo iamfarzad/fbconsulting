@@ -29,7 +29,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
           <SelectContent>
             <SelectItem value="gemini-2.0-flash">gemini-2.0-flash (Fastest)</SelectItem>
             <SelectItem value="gemini-2.0-pro">gemini-2.0-pro (Balance)</SelectItem>
-            <SelectItem value="gemini-2.0-vision">gemini-2.0-vision (Vision)</SelectItem>
+            <SelectItem value="gemini-2.0-flash">gemini-2.0-flash (Vision)</SelectItem>
           </SelectContent>
         </Select>
         <FormDescription>

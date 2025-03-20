@@ -1,4 +1,3 @@
-
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChatMessageList } from "./ChatMessageList";
@@ -19,7 +18,6 @@ interface ChatContainerProps {
   toggleFullScreen: () => void;
   placeholder?: string;
   isFullScreen?: boolean;
-  // Add file-related props
   files?: UploadedFile[];
   uploadFile?: (file: File) => Promise<void>;
   removeFile?: (index: number) => void;
@@ -39,7 +37,6 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
   toggleFullScreen,
   placeholder = "Ask me anything...",
   isFullScreen = false,
-  // File-related props with defaults
   files = [],
   uploadFile,
   removeFile,

@@ -8,8 +8,25 @@ export interface AIMessage {
   content: string;
   timestamp: number;
   id?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
+
+// Type guard functions
+export const isUserMessage = (message: AIMessage): boolean => {
+  return message.role === 'user';
+};
+
+export const isAssistantMessage = (message: AIMessage): boolean => {
+  return message.role === 'assistant';
+};
+
+export const isSystemMessage = (message: AIMessage): boolean => {
+  return message.role === 'system';
+};
+
+export const isErrorMessage = (message: AIMessage): boolean => {
+  return message.role === 'error';
+};
 
 export type MessageRole = AIMessage['role'];
 

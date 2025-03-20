@@ -16,6 +16,9 @@ import type {
   AgenticConfig
 } from '../copilot/types';
 
+// Re-export ChatMessage type to be used in other modules
+export type { ChatMessage } from '../copilot/types';
+
 // Using ChatMessage type from copilot/types
 
 // Chat service configuration
@@ -57,7 +60,7 @@ export class GoogleGenAIChatService {
 
     // Store sanitized config
     this.config = {
-      modelName: config.modelName || 'gemini-2.0-flash-001',  // Using latest Gemini 2.0 Flash model
+      modelName: config.modelName || 'gemini-2.0-flash',  // Using Gemini Pro model for chat capabilities
       temperature: config.temperature ?? 0.9,
       maxOutputTokens: config.maxOutputTokens ?? 2048,
       topP: config.topP ?? 1.0,
@@ -79,13 +82,35 @@ export class GoogleGenAIChatService {
       // Initialize the API client
       this.ai = new GoogleGenerativeAI(config.apiKey);
       
-      // Initialize chat
+      // Initialize the model
+      this.model = this.ai.getGenerativeModel({
+        model: 'gemini-2.0-flash'
+      });
+
+      // Start a chat session
+      this.chat = this.model.startChat({
+        history: [],
+        generationConfig: {
+          temperature: 0.9,
+          maxOutputTokens: 2048
+        }
+      });
+
+      // Test the connection
       (async () => {
-          try {
-              await this.initializeChat();
-          } catch (error) {
-              console.error("Chat initialization failed:", error);
+        try {
+          const result = await this.chat.sendMessage("Hi");
+          if (!result.response) {
+            throw new Error('Model initialization test failed');
           }
+
+          // Initialize chat
+          await this.initializeChat();
+          console.log('Successfully initialized Google Gen AI');
+        } catch (error) {
+          console.error('Error during async initialization:', error);
+          throw error;
+        }
       })();
       
       console.log('Successfully initialized Google Gen AI');
@@ -102,7 +127,7 @@ export class GoogleGenAIChatService {
    */
   public async initializeChat(personaData?: PersonaData): Promise<void> {
     try {
-      // Initialize the chat model
+      // Initialize the chat model with support for multimodal capabilities
       this.model = this.ai.getGenerativeModel({
         model: this.config.modelName,
         generationConfig: {
@@ -110,6 +135,11 @@ export class GoogleGenAIChatService {
           maxOutputTokens: this.config.maxOutputTokens,
           topP: this.config.topP,
           topK: this.config.topK
+        },
+        // Additional configurations for multimodal capabilities
+        systemInstruction: {
+          role: 'system',
+          parts: [{ text: 'You are a helpful assistant that can process text, images, and audio.' }]
         }
       });
 
@@ -120,7 +150,8 @@ export class GoogleGenAIChatService {
         const systemPrompt = await this.generateSystemPrompt(personaData);
         this.history = [{
           role: 'system',
-          content: systemPrompt
+          content: systemPrompt,
+          timestamp: Date.now()
         }];
       } else {
         this.history = [];
@@ -341,6 +372,7 @@ export class GoogleGenAIChatService {
         
         if (suggestion) {
           this.history.push({
+        timestamp: Date.now(),
             role: 'assistant',
             content: suggestion.response.text()
           });
@@ -370,6 +402,7 @@ export class GoogleGenAIChatService {
 
       // Add user message to history
       this.history.push({
+        timestamp: Date.now(),
         role: 'user',
         content: message
       });
@@ -381,7 +414,8 @@ export class GoogleGenAIChatService {
             ? await result.response.text()
             : '';
 
-        this.history.push({ role: 'assistant', content: responseText });
+        this.history.push({
+        timestamp: Date.now(), role: 'assistant', content: responseText });
 
         // If we have lead information and the conversation is ending, send an email summary
         if (leadInfo && this.isConversationEnding(message, responseText)) {
@@ -400,7 +434,8 @@ export class GoogleGenAIChatService {
               ? await retryResult.response.text()
               : '';
 
-          this.history.push({ role: 'assistant', content: retryResponseText });
+          this.history.push({
+        timestamp: Date.now(), role: 'assistant', content: retryResponseText });
 
           return retryResponseText;
         } catch (retryError) {
@@ -433,7 +468,8 @@ export class GoogleGenAIChatService {
     const systemPrompt = await this.generateSystemPrompt(personaData);
     this.history = [{
       role: 'system',
-      content: systemPrompt
+      content: systemPrompt,
+      timestamp: Date.now()
     }];
   }
 
@@ -444,36 +480,19 @@ export class GoogleGenAIChatService {
     try {
       console.log('Testing connection with model:', this.config.modelName);
 
-      // Try to send a minimal test message
-      console.log('Sending test message...');
-      if (!this.ai) {
-        console.error('Google GenAI instance not initialized');
+      if (!this.model || !this.chat) {
+        console.error('Model or chat session not initialized');
         return false;
       }
+
+      // Test with a simple prompt
+      const result = await this.chat.sendMessage('Hi');
+      const response = await result.response;
+      const text = response.text();
       
-      try {
-        this.model = this.ai.getGenerativeModel({ 
-          model: this.config.modelName,
-          generationConfig: {
-            temperature: this.config.temperature,
-            maxOutputTokens: this.config.maxOutputTokens,
-            topP: this.config.topP,
-            topK: this.config.topK
-          }
-        });
-      } catch (error) {
-        console.error('Failed to get generative model:', error);
-        return false;
-      }
-      const result = await this.model.generateContent({
-        contents: [{ role: "user", parts: [{ text: "test" }] }]
-      });
-      const responseText = result.response?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-      
-      console.log('Test connection successful. Response:', responseText);
+      console.log('Test connection successful. Response:', text);
       return true;
     } catch (error) {
-      // Log detailed error information
       console.error('Connection test failed:', {
         error,
         errorMessage: error instanceof Error ? error.message : 'Unknown error',

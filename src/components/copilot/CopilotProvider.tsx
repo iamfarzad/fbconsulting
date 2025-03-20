@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { CopilotKit } from '@copilotkit/react-core';
@@ -7,6 +6,9 @@ import { CopilotKit } from '@copilotkit/react-core';
 import { usePersonaManagement } from '@/mcp/hooks/usePersonaManagement';
 import { toast } from '@/components/ui/use-toast';
 import { useGeminiAPI } from '@/hooks/useGeminiAPI';
+import ConnectionStatusIndicator from './ConnectionStatusIndicator';
+import FallbackChatUI from './FallbackChatUI';
+import { formatErrorMessage, logDetailedError, categorizeError } from '@/utils/errorHandling';
 import type { 
   SpatialContext, 
   VoiceConfig 
@@ -20,15 +22,17 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
   // Hooks for external data
   const { personaData, setCurrentPage } = usePersonaManagement();
   const location = useLocation();
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const { apiKey, isLoading } = useGeminiAPI();
 
   // State hooks
   const [voiceEnabled, setVoiceEnabled] = useState(false);
   const [spatialContext, setSpatialContext] = useState<SpatialContext | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle');
+  const [connectionError, setConnectionError] = useState<string | null>(null);
 
   // Memoized values
   const publicApiKey = useMemo(() => {
-    console.log('API Key:', apiKey);
+    // Safely use the API key without logging it
     return apiKey || '';
   }, [apiKey]);
   const runtimeUrl = useMemo(
@@ -65,49 +69,77 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
 
   // Track user behavior and page context
   useEffect(() => {
+    // Initialize spatial context if needed
+    if (!spatialContext) {
+      const currentPath = location.pathname;
+      const pageName = currentPath === '/' ? 'home' : currentPath.substring(1);
+      
+      setSpatialContext({
+        pageSection: pageName,
+        elementType: 'page',
+        interactionType: 'navigation',
+        userBehavior: 'active',
+        timestamp: Date.now()
+      });
+      return; // Exit early as we just initialized
+    }
+    
     let lastInteractionTime = Date.now();
     let inactivityTimeout: NodeJS.Timeout;
 
     const trackUserBehavior = (event: MouseEvent | KeyboardEvent) => {
-      const currentTime = Date.now();
-      lastInteractionTime = currentTime;
+      try {
+        const currentTime = Date.now();
+        lastInteractionTime = currentTime;
 
-      // Clear any existing inactivity timeout
-      clearTimeout(inactivityTimeout);
+        // Clear any existing inactivity timeout
+        clearTimeout(inactivityTimeout);
 
-      // Set new inactivity timeout
-      inactivityTimeout = setTimeout(() => {
-        setSpatialContext(prev => ({
-          ...prev!,
-          userBehavior: 'inactive',
-          timestamp: Date.now()
-        }));
-      }, 30000); // 30 seconds of inactivity
+        // Set new inactivity timeout
+        inactivityTimeout = setTimeout(() => {
+          setSpatialContext(prev => prev ? {
+            ...prev,
+            userBehavior: 'inactive',
+            timestamp: Date.now()
+          } : null);
+        }, 30000); // 30 seconds of inactivity
 
-      // Determine interaction type
-      let interactionType = 'unknown';
-      if (event instanceof MouseEvent) {
-        const target = event.target as HTMLElement;
-        if (target.tagName === 'BUTTON') {
-          interactionType = 'button_click';
-        } else if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-          interactionType = 'form_interaction';
-        } else if (target.tagName === 'A') {
-          interactionType = 'link_click';
-        } else {
-          interactionType = 'mouse_movement';
+        // Determine interaction type
+        let interactionType = 'unknown';
+        let elementType = 'unknown';
+        
+        try {
+          // Safely get the target element
+          const target = event.target as HTMLElement;
+          elementType = target?.tagName?.toLowerCase() || 'unknown';
+          
+          if (event instanceof MouseEvent) {
+            if (elementType === 'button') {
+              interactionType = 'button_click';
+            } else if (elementType === 'input' || elementType === 'textarea') {
+              interactionType = 'form_interaction';
+            } else if (elementType === 'a') {
+              interactionType = 'link_click';
+            } else {
+              interactionType = 'mouse_movement';
+            }
+          } else if (event instanceof KeyboardEvent) {
+            interactionType = 'keyboard_input';
+          }
+        } catch (targetError) {
+          console.error('Error accessing event target:', targetError);
         }
-      } else if (event instanceof KeyboardEvent) {
-        interactionType = 'keyboard_input';
+        
+        setSpatialContext(prev => prev ? {
+          ...prev,
+          userBehavior: 'active',
+          interactionType,
+          elementType,
+          timestamp: currentTime
+        } : null);
+      } catch (error) {
+        console.error('Error in trackUserBehavior:', error);
       }
-      
-      setSpatialContext(prev => ({
-        ...prev!,
-        userBehavior: 'active',
-        interactionType,
-        elementType: (event.target as HTMLElement)?.tagName.toLowerCase() || 'unknown',
-        timestamp: currentTime
-      }));
     };
 
     window.addEventListener('mousemove', trackUserBehavior);
@@ -126,19 +158,43 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
   useEffect(() => {
     const initVoice = async () => {
       if ('speechSynthesis' in window) {
-        await new Promise<void>(resolve => {
-          window.speechSynthesis.onvoiceschanged = () => {
-            const voices = window.speechSynthesis.getVoices();
-            const charonVoice = voices.find(voice => voice.name.includes('Charon'));
-            setVoiceEnabled(!!charonVoice);
-            resolve();
-          };
-        });
+        try {
+          // First check if voices are already loaded
+          let voices = window.speechSynthesis.getVoices();
+          
+          if (voices.length === 0) {
+            // If voices aren't loaded yet, wait for them
+            await new Promise<void>(resolve => {
+              const voicesChangedHandler = () => {
+                voices = window.speechSynthesis.getVoices();
+                window.speechSynthesis.removeEventListener('voiceschanged', voicesChangedHandler);
+                resolve();
+              };
+              window.speechSynthesis.addEventListener('voiceschanged', voicesChangedHandler);
+              
+              // Set a timeout just in case the event never fires
+              setTimeout(resolve, 1000);
+            });
+          }
+          
+          // Look for the Charon voice or enable with any available voice
+          const charonVoice = voices.find(voice => voice.name.includes('Charon'));
+          setVoiceEnabled(voices.length > 0); // Enable if any voices are available
+        } catch (error) {
+          console.error('Error initializing voice synthesis:', error);
+          setVoiceEnabled(false);
+        }
+      } else {
+        console.warn('Speech synthesis not supported in this browser');
+        setVoiceEnabled(false);
       }
     };
 
     initVoice();
   }, []);
+
+  // Memoize spatial context updates
+  const currentSpatialContext = useMemo(() => spatialContext, [spatialContext]);
 
   const copilotConfig = useMemo(
     () => {
@@ -163,7 +219,7 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
             pitch: 1,
             rate: 1
           } : undefined,
-          spatialContext: spatialContext,
+          spatialContext: currentSpatialContext,
           agentic: {
             proactiveAssistance: true,
             learningEnabled: true,
@@ -176,34 +232,70 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
     [runtimeUrl, systemMessage, voiceEnabled, spatialContext, publicApiKey]
   );
 
-  // Initialize API key
+  // Initialize and validate API key
   useEffect(() => {
-    console.log('Direct env var:', import.meta.env.VITE_GEMINI_API_KEY);
-    console.log('API Key from hook:', apiKey);
+    if (isLoading) {
+      setConnectionStatus('connecting');
+      return; // Wait until loading is complete
+    }
     
     if (!apiKey) {
+      setConnectionStatus('error');
+      setConnectionError('API key not found');
       toast({
         title: 'AI Configuration Error',
         description: 'API key not found. Please check your configuration.',
         variant: 'destructive'
       });
+    } else {
+      // Test connection to the API
+      const testConnection = async () => {
+        try {
+          setConnectionStatus('connecting');
+          
+          // Simple test to verify API key works
+          const response = await fetch('https://generativelanguage.googleapis.com/v1/models?key=' + apiKey);
+          
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(`API connection failed: ${response.status} ${response.statusText}${
+              errorData.error ? ` - ${errorData.error.message || ''}` : ''
+            }`);
+          }
+          
+          setConnectionStatus('connected');
+          setConnectionError(null);
+        } catch (error) {
+          logDetailedError(error, {
+            component: 'CopilotProvider',
+            apiKeyLength: apiKey?.length,
+            apiKeyPresent: !!apiKey
+          });
+          
+          setConnectionStatus('error');
+          const errorMessage = formatErrorMessage(error);
+          setConnectionError(errorMessage);
+          
+          const errorCategory = categorizeError(error);
+          let toastTitle = 'API Connection Error';
+          let toastDescription = 'Failed to connect to the Gemini API. Please check your network connection.';
+          
+          if (errorCategory === 'auth') {
+            toastTitle = 'API Key Error';
+            toastDescription = 'Invalid or expired API key. Please check your API key configuration.';
+          }
+          
+          toast({
+            title: toastTitle,
+            description: toastDescription,
+            variant: 'destructive'
+          });
+        }
+      };
+      
+      testConnection();
     }
-  }, [apiKey]);
-
-  useEffect(() => {
-    const currentPath = location.pathname;
-    const pageName = currentPath === '/' ? 'home' : currentPath.substring(1);
-    setCurrentPage(pageName);
-
-    // Initialize spatial context
-    setSpatialContext({
-      pageSection: pageName,
-      elementType: 'page',
-      interactionType: 'navigation',
-      userBehavior: 'active',
-      timestamp: Date.now()
-    });
-  }, [location.pathname, setCurrentPage]);
+  }, [apiKey, isLoading]);
 
   // Update spatial context on scroll
   useEffect(() => {
@@ -233,13 +325,47 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  if (!apiKey) {
-    return <>{children}</>;
-  }
-
-  return copilotConfig ? (
-    <CopilotKit {...copilotConfig}>
-      {children}
-    </CopilotKit>
-  ) : null;
+  return (
+    <>
+      <ConnectionStatusIndicator 
+        status={connectionStatus}
+        error={connectionError}
+        onRetry={() => {
+          // Reset connection status and trigger a new connection test
+          setConnectionStatus('connecting');
+          // This will trigger the useEffect that tests the connection
+        }}
+      />
+      
+      {(connectionStatus === 'connected' && apiKey) ? (
+        // Render CopilotKit when connected
+        <CopilotKit 
+          publicApiKey={apiKey}
+          chatApiEndpoint="/api/ai/chat"
+          children={children}
+        />
+      ) : (
+        // Render children with fallback UI for chat components
+        <>
+          {React.Children.map(children, child => {
+            // Check if this is a chat component that needs a fallback
+            if (React.isValidElement(child) && 
+                (child.type as any)?.displayName?.includes('Chat')) {
+              // Replace chat components with fallback UI
+              return (
+                <FallbackChatUI 
+                  error={connectionError} 
+                  onRetry={() => {
+                    setConnectionStatus('connecting');
+                  }} 
+                />
+              );
+            }
+            // Return other components unchanged
+            return child;
+          })}
+        </>
+      )}
+    </>
+  );
 };

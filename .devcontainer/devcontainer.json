@@ -1,8 +1,7 @@
-
 {
-  "name": "React TypeScript Development",
-  "dockerFile": "Dockerfile",
-  "forwardPorts": [8080],
+  "name": "FB Consulting Dev Environment",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "forwardPorts": [8080, 8000],
   "settings": {
     "terminal.integrated.shell.linux": "/bin/bash"
   },
@@ -11,8 +10,23 @@
     "esbenp.prettier-vscode",
     "bradlc.vscode-tailwindcss",
     "ms-vscode.vscode-typescript-next",
-    "streetsidesoftware.code-spell-checker"
+    "streetsidesoftware.code-spell-checker",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "github.vscode-pull-request-github",
+    "eamodio.gitlens"
   ],
-  "postCreateCommand": "npm install",
-  "remoteUser": "node"
+  "postCreateCommand": "echo 'Installing dependencies...' && cd backend/gemini_service && python -m pip install --upgrade pip && pip install -r requirements.txt && pip list && cd ../.. && npm install",
+  "remoteUser": "node",
+  "containerEnv": {
+    "GOOGLE_API_KEY": "${localEnv:GOOGLE_API_KEY}",
+    "PYTHONUNBUFFERED": "1"
+  },
+  "features": {
+    "python": {
+      "version": "3.11",
+      "installTools": true
+    },
+    "git": "latest"
+  }
 }

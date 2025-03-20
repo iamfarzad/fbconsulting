@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,6 +14,7 @@ import { renderMobileMenuItem } from "./MobileMenuItem";
 import { MobileDarkModeToggle, DarkModeToggleProps } from "./DarkModeToggle";
 import { SearchButton } from "@/components/ui/search/SearchButton";
 import { SearchBar } from "@/components/ui/search/SearchBar";
+import { Logo3D } from "@/components/3d/Logo3D";
 
 interface NavbarLogoProps {
   url: string;
@@ -48,7 +48,7 @@ export const MobileNavbar: React.FC<MobileNavbarProps> = ({
     <div className="block lg:hidden">
       <div className="flex items-center justify-between">
         <a href={logo.url} className="flex items-center gap-2">
-          <img src={logo.src} className="w-8" alt={logo.alt} />
+          <Logo3D size="w-10 h-10" />
           <span className="text-lg font-semibold">{logo.title}</span>
         </a>
         <div className="flex items-center gap-2">
@@ -69,7 +69,7 @@ export const MobileNavbar: React.FC<MobileNavbarProps> = ({
               <SheetHeader>
                 <SheetTitle>
                   <a href={logo.url} className="flex items-center gap-2">
-                    <img src={logo.src} className="w-8" alt={logo.alt} />
+                    <Logo3D size="w-10 h-10" />
                     <span className="text-lg font-semibold">
                       {logo.title}
                     </span>

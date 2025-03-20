@@ -16,7 +16,11 @@ const Hero = () => {
   const useGeminiApi = hasApiKey();
   
   // Log API key information for debugging
-  console.log('✅ Google Gemini API Key Ready');
+  if (useGeminiApi) {
+    console.log('✅ Google Gemini API Key Ready');
+  } else {
+    console.warn('⚠️ No Gemini API Key found');
+  }
   
   const { 
     isListening, 

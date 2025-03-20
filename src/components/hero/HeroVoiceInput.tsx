@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AIChatInput } from '@/components/ui/ai-chat';
 import { cn } from '@/lib/utils';
 import { AnimatedBars } from '@/components/ui/AnimatedBars';
-import { VoiceControls } from '@/components/ui/ai-chat/VoiceControls';
 
 interface HeroVoiceInputProps {
   chatInputValue: string;
@@ -62,16 +61,7 @@ export const HeroVoiceInput: React.FC<HeroVoiceInputProps> = ({
           placeholderText={chatInputValue || "Ask me anything about AI automation..."}
         />
         
-        {isVoiceSupported && (
-          <div className="absolute right-2 -bottom-14 flex items-center gap-2">
-            <VoiceControls
-              isListening={isListening}
-              toggleListening={toggleListening}
-              disabled={false}
-              aiProcessing={isTranscribing}
-            />
-          </div>
-        )}
+        {/* Voice controls moved to ChatInput component for unified experience */}
       </motion.div>
     </>
   );
