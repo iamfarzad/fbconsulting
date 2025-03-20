@@ -1,137 +1,243 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useGeminiSpeechRecognition } from './useGeminiSpeechRecognition';
-import { useSpeechRecognition } from './useSpeechRecognition';
-import debounce from 'lodash/debounce';
-import { useGeminiInitialization } from './gemini/useGeminiInitialization';
-import { useToast } from './use-toast';
 
-export function useVoiceInput(setValue: (value: string) => void, onSend: () => void) {
-  const [aiProcessing, setAiProcessing] = useState(false);
+interface UseVoiceInputOptions {
+  onTranscriptChange?: (transcript: string) => void;
+  onTranscriptComplete?: (finalTranscript: string) => void;
+  autoStop?: boolean;
+  stopAfterSeconds?: number;
+  language?: string;
+  continuousListening?: boolean;
+}
+
+export const useVoiceInput = (
+  onTranscriptChange?: (transcript: string) => void,
+  onTranscriptComplete?: (finalTranscript: string) => void,
+  options: UseVoiceInputOptions = {}
+) => {
+  const {
+    autoStop = true,
+    stopAfterSeconds = 10,
+    language = 'en-US',
+    continuousListening = false
+  } = options;
+
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState('');
   const [isTranscribing, setIsTranscribing] = useState(false);
-  const processingRef = useRef(false);
-  const { hasApiKey, getApiKey } = useGeminiInitialization();
-  const { toast } = useToast();
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [aiProcessing, setAiProcessing] = useState(false);
+  const [isVoiceSupported, setIsVoiceSupported] = useState(false);
   
-  // Create debounced function only once
-  const debouncedProcessingRef = useRef(
-    debounce((command: string) => {
-      if (processingRef.current) return;
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Initialize speech recognition API
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Check browser support
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
       
-      processingRef.current = true;
-      setValue(command);
-      
-      // Only send if there's content
-      if (command.trim()) {
-        console.log('Voice command processed, sending:', command);
-        onSend();
+      if (SpeechRecognition) {
+        setIsVoiceSupported(true);
       } else {
-        console.log('Empty voice command, not sending');
+        setIsVoiceSupported(false);
+        console.log('Speech recognition is not supported in this browser');
       }
-      
-      // Reset processing flag after a delay
-      setTimeout(() => {
-        processingRef.current = false;
-        setAiProcessing(false);
-      }, 800); // Longer delay for smoother transitions
-    }, 700)
-  );
-  
-  // Memoize handleCommand to prevent unnecessary recreations
-  const handleCommand = useCallback(async (command: string) => {
-    console.log('Voice command received:', command);
-    setAiProcessing(true);
-    
-    try {
-      // Execute the debounced processing
-      debouncedProcessingRef.current(command);
-    } catch (error) {
-      console.error('Error processing voice command:', error);
-      setAiProcessing(false);
-      processingRef.current = false;
-      
-      toast({
-        title: "Voice Recognition Error",
-        description: "Failed to process voice command",
-        variant: "destructive"
-      });
-    }
-  }, [toast, setValue, onSend]);
-  
-  // Use Gemini or browser speech recognition based on API key availability
-  const useGeminiAPI = hasApiKey();
-  console.log('Using Gemini API for voice:', useGeminiAPI ? 'YES' : 'NO');
-  
-  const geminiSpeechRecognition = useGeminiSpeechRecognition(
-    getApiKey(),
-    handleCommand
-  );
-  
-  const browserSpeechRecognition = useSpeechRecognition(handleCommand);
-  
-  // Combine the two recognition systems
-  const { 
-    isListening, 
-    transcript, 
-    toggleListening,
-    voiceError,
-    isVoiceSupported 
-  } = useGeminiAPI ? geminiSpeechRecognition : browserSpeechRecognition;
-
-  // Enhanced animation state management
-  useEffect(() => {
-    let transcribingTimer: NodeJS.Timeout;
-    
-    if (isListening) {
-      console.log('Voice listening started, showing transcription UI');
-      // Add a small delay before showing transcribing state to prevent flashing
-      transcribingTimer = setTimeout(() => {
-        setIsTranscribing(true);
-      }, 150); // Small delay for smoother start
-    } else {
-      console.log('Voice listening ended, hiding transcription UI');
-      // Cancel any pending debounced operations when stopping listening
-      debouncedProcessingRef.current.cancel();
-      
-      // Increased delay when stopping to allow for smoother animations
-      transcribingTimer = setTimeout(() => {
-        setIsTranscribing(false);
-      }, 1000); // Increased for smoother exit
     }
     
     return () => {
-      if (transcribingTimer) {
-        clearTimeout(transcribingTimer);
+      // Clean up timeout on unmount
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
-    };
-  }, [isListening]);
-
-  // Extra cleanup on unmount
-  useEffect(() => {
-    return () => {
-      debouncedProcessingRef.current.cancel();
+      
+      // Stop recognition on unmount if active
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch (error) {
+          console.error('Error stopping speech recognition on unmount:', error);
+        }
+      }
     };
   }, []);
-
-  // Log whenever voice error changes
-  useEffect(() => {
-    if (voiceError) {
-      console.error('Voice input error:', voiceError);
-      toast({
-        title: "Voice Recognition Error",
-        description: voiceError,
-        variant: "destructive"
-      });
+  
+  // Function to update transcript
+  const updateTranscript = useCallback((newTranscript: string) => {
+    setTranscript(newTranscript);
+    
+    if (onTranscriptChange) {
+      onTranscriptChange(newTranscript);
     }
-  }, [voiceError, toast]);
-
+  }, [onTranscriptChange]);
+  
+  // Function to finalize transcript
+  const finalizeTranscript = useCallback((finalTranscript: string) => {
+    if (onTranscriptComplete && finalTranscript.trim()) {
+      onTranscriptComplete(finalTranscript);
+    }
+    
+    if (!continuousListening) {
+      setTranscript('');
+    }
+  }, [onTranscriptComplete, continuousListening]);
+  
+  // Toggle listening state
+  const toggleListening = useCallback(() => {
+    if (isListening) {
+      // Stop listening
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+          setIsListening(false);
+        } catch (error) {
+          console.error('Error stopping speech recognition:', error);
+          setVoiceError('Error stopping the voice input. Please try again.');
+        }
+      }
+      
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    } else {
+      // Start listening
+      try {
+        // Reset state
+        setVoiceError(null);
+        setIsTranscribing(true);
+        
+        // Create new recognition instance
+        const SpeechRecognition = 
+          window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (!SpeechRecognition) {
+          throw new Error('Speech recognition not supported');
+        }
+        
+        const recognition = new SpeechRecognition();
+        recognitionRef.current = recognition;
+        
+        // Configure recognition
+        recognition.lang = language;
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        
+        let finalTranscriptValue = '';
+        
+        // Set up event handlers
+        recognition.onstart = () => {
+          setIsListening(true);
+          updateTranscript('');
+        };
+        
+        recognition.onresult = (event) => {
+          let interimTranscript = '';
+          
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            
+            if (event.results[i].isFinal) {
+              finalTranscriptValue += transcript + ' ';
+            } else {
+              interimTranscript += transcript;
+            }
+          }
+          
+          // Update state with combined transcript
+          const combinedTranscript = finalTranscriptValue + interimTranscript;
+          updateTranscript(combinedTranscript.trim());
+        };
+        
+        recognition.onerror = (event) => {
+          console.error('Speech recognition error:', event.error);
+          
+          let errorMessage: string;
+          switch (event.error) {
+            case 'not-allowed':
+              errorMessage = 'Microphone access was denied. Please allow microphone access.';
+              break;
+            case 'no-speech':
+              errorMessage = 'No speech was detected. Please try again.';
+              break;
+            case 'network':
+              errorMessage = 'Network error occurred. Please check your connection.';
+              break;
+            default:
+              errorMessage = `Error with voice input: ${event.error}`;
+          }
+          
+          setVoiceError(errorMessage);
+          setIsListening(false);
+          setIsTranscribing(false);
+        };
+        
+        recognition.onend = () => {
+          if (finalTranscriptValue.trim()) {
+            finalizeTranscript(finalTranscriptValue.trim());
+          }
+          
+          setIsListening(false);
+          setIsTranscribing(false);
+          recognitionRef.current = null;
+          
+          // If continuous listening is enabled, restart
+          if (continuousListening && !voiceError) {
+            toggleListening();
+          }
+        };
+        
+        // Start recognition
+        recognition.start();
+        
+        // Set up auto-stop if configured
+        if (autoStop && stopAfterSeconds > 0) {
+          timeoutRef.current = setTimeout(() => {
+            if (recognitionRef.current) {
+              recognitionRef.current.stop();
+            }
+          }, stopAfterSeconds * 1000);
+        }
+      } catch (error) {
+        console.error('Error initializing speech recognition:', error);
+        setVoiceError(
+          error instanceof Error
+            ? error.message
+            : 'Failed to start voice input. Please try again.'
+        );
+        setIsListening(false);
+        setIsTranscribing(false);
+      }
+    }
+  }, [
+    isListening,
+    language,
+    autoStop,
+    stopAfterSeconds,
+    continuousListening,
+    updateTranscript,
+    finalizeTranscript,
+    voiceError
+  ]);
+  
   return {
     isListening,
     transcript,
     toggleListening,
+    isTranscribing,
     voiceError,
     aiProcessing,
-    isTranscribing,
+    setAiProcessing,
     isVoiceSupported
   };
+};
+
+// Add necessary type declarations for Speech Recognition
+declare global {
+  interface Window {
+    SpeechRecognition?: typeof SpeechRecognition;
+    webkitSpeechRecognition?: typeof SpeechRecognition;
+  }
 }

@@ -27,8 +27,11 @@ const CopilotChat: React.FC = () => {
     setInputValue('');
     
     try {
-      // Send message to Copilot
-      await chat.appendUserMessage(inputValue);
+      // Send message to Copilot - use appendMessage instead of appendUserMessage
+      await chat.appendMessage({ 
+        role: 'user', 
+        content: inputValue 
+      } as any);
     } catch (error) {
       console.error('Error sending message:', error);
       chat.appendMessage({ 
@@ -44,7 +47,7 @@ const CopilotChat: React.FC = () => {
         <CardTitle className="text-lg">Copilot Chat</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 overflow-auto p-4 space-y-4">
-        {chat.history.map((message, index) => (
+        {chat.messages && chat.messages.map((message, index) => (
           <div 
             key={index}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}

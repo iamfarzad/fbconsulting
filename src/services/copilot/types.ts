@@ -1,8 +1,9 @@
+
 /**
  * Types for Google GenAI configuration and chat functionality
  */
 
-export type VoiceType = 'Charon';
+export type VoiceType = 'Charon' | string;
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
