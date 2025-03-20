@@ -38,8 +38,8 @@ export const MediaRenderer: React.FC<MediaRendererProps> = ({ media, className }
         <LinkPreviewMedia
           title={media.linkTitle || media.name || 'Link'}
           description={media.linkDescription}
-          thumbnail={media.linkImage}
-          url={media.url || ''}
+          thumbnailUrl={media.linkImage}
+          linkUrl={media.url || ''}
           className={className}
         />
       );
