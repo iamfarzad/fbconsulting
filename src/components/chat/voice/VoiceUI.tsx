@@ -1,34 +1,36 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { AnimatedBars } from '@/components/ui/AnimatedBars';
 import { Button } from '@/components/ui/button';
-import { useVoiceRecognition } from '@/hooks/useVoiceRecognition';
+import { useVoiceService } from '@/hooks/useVoiceService';
 import { VoiceUIProps } from '@/types/voice';
 
 export const VoiceUI: React.FC<VoiceUIProps> = ({ 
   onCommand,
   aiProcessing = false
 }) => {
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = React.useState(false);
   
   const {
     isListening,
     transcript,
     toggleListening,
-    error,
-    isSupported
-  } = useVoiceRecognition({
-    onFinalResult: (text) => {
+    recognitionError,
+    recognitionSupported
+  } = useVoiceService({
+    onTranscriptComplete: (text) => {
       if (onCommand && text.trim()) {
         onCommand(text);
       }
     },
-    continuous: false,
-    language: 'en-US'
+    recognitionOptions: {
+      continuous: false,
+      language: 'en-US'
+    }
   });
   
-  if (!isSupported) {
+  if (!recognitionSupported) {
     return null;
   }
   
@@ -77,9 +79,9 @@ export const VoiceUI: React.FC<VoiceUIProps> = ({
         </div>
       )}
       
-      {error && (
+      {recognitionError && (
         <div className="error-message text-xs text-red-500">
-          {error}
+          {recognitionError}
         </div>
       )}
     </div>

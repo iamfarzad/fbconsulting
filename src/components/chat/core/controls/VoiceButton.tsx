@@ -3,26 +3,46 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Mic, MicOff, Loader2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useVoiceService } from '@/hooks/useVoiceService';
 
 interface VoiceButtonProps {
-  isListening: boolean;
-  onToggle: () => void;
-  isLoading: boolean;
-  isVoiceSupported?: boolean;
+  onToggle?: () => void;
+  isLoading?: boolean;
   tooltipText?: string;
+  onVoiceCommand?: (command: string) => void;
 }
 
 export const VoiceButton: React.FC<VoiceButtonProps> = ({
-  isListening,
   onToggle,
-  isLoading,
-  isVoiceSupported = true,
-  tooltipText = isListening ? 'Stop listening' : 'Start voice input',
+  isLoading = false,
+  tooltipText,
+  onVoiceCommand,
 }) => {
+  const {
+    isListening,
+    toggleListening,
+    recognitionSupported
+  } = useVoiceService({
+    onTranscriptComplete: (text) => {
+      if (onVoiceCommand && text.trim()) {
+        onVoiceCommand(text);
+      }
+    }
+  });
+
+  const handleToggle = () => {
+    toggleListening();
+    if (onToggle) {
+      onToggle();
+    }
+  };
+
   // Don't render the button if voice isn't supported
-  if (!isVoiceSupported) {
+  if (!recognitionSupported) {
     return null;
   }
+
+  const defaultTooltip = isListening ? 'Stop listening' : 'Start voice input';
 
   return (
     <TooltipProvider>
@@ -32,7 +52,7 @@ export const VoiceButton: React.FC<VoiceButtonProps> = ({
             type="button"
             variant={isListening ? "outline" : "ghost"}
             size="icon"
-            onClick={onToggle}
+            onClick={handleToggle}
             className={`rounded-full w-8 h-8 ${isListening ? 'bg-red-500 text-white hover:bg-red-600' : ''}`}
             disabled={isLoading}
           >
@@ -46,7 +66,7 @@ export const VoiceButton: React.FC<VoiceButtonProps> = ({
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{tooltipText}</p>
+          <p>{tooltipText || defaultTooltip}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
