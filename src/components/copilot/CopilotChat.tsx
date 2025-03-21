@@ -67,7 +67,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
     }
   }, [effectiveApiKey]);
   
-  // Add messages to state
+  // Add messages to state - this is the function that needs to be fixed
   const addMessage = (role: 'user' | 'assistant' | 'system' | 'error', content: string) => {
     const newMessage: Message = {
       role: role === 'error' ? 'system' : role,
@@ -75,6 +75,11 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
       timestamp: Date.now()
     };
     setMessages(prev => [...prev, newMessage]);
+  };
+  
+  // Adapter function to match the AIMessage parameter interface
+  const addMessageAdapter = (message: AIMessage) => {
+    addMessage(message.role, message.content);
   };
   
   // Handle errors
@@ -94,7 +99,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
   const { sendMessage } = useMessageHandler({
     messages: messages,
     apiKey: effectiveApiKey || null,
-    addMessage,
+    addMessage: addMessageAdapter, // Use the adapter function here
     setLoadingState: setIsLoading,
     handleError,
     getSystemPrompt,
