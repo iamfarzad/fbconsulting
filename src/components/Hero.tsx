@@ -30,6 +30,10 @@ const Hero = () => {
       setChatInputValue(command);
     }
   });
+
+  const handleInputChange = (value: string) => {
+    setChatInputValue(value);
+  };
   
   return (
     <section 
@@ -46,6 +50,7 @@ const Hero = () => {
         isVoiceSupported={isVoiceSupported}
         isTranscribing={isTranscribing}
         useGeminiApi={useGeminiApi}
+        onInputChange={handleInputChange}
       />
     </section>
   );

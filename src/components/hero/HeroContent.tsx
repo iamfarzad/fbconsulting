@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Flag } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -16,6 +16,7 @@ interface HeroContentProps {
   isVoiceSupported: boolean;
   isTranscribing: boolean;
   useGeminiApi: boolean;
+  onInputChange?: (value: string) => void;
 }
 
 export const HeroContent: React.FC<HeroContentProps> = ({
@@ -25,7 +26,8 @@ export const HeroContent: React.FC<HeroContentProps> = ({
   toggleListening,
   isVoiceSupported,
   isTranscribing,
-  useGeminiApi
+  useGeminiApi,
+  onInputChange
 }) => {
   const { t, language } = useLanguage();
   const isNorwegian = language === 'no';
@@ -89,6 +91,7 @@ export const HeroContent: React.FC<HeroContentProps> = ({
           isVoiceSupported={isVoiceSupported}
           isTranscribing={isTranscribing}
           useGeminiApi={useGeminiApi}
+          onInputChange={onInputChange}
         />
         
         <HeroActions />
