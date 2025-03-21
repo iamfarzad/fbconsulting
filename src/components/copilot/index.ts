@@ -1,9 +1,10 @@
 // Core Components
 export { GeminiChat } from './core/GeminiChat';
+export { CopilotChat } from './core/CopilotChat';
 export { CopilotConfig } from './core/CopilotConfig';
 
 // Providers
-export { CopilotProvider } from './providers/CopilotProvider';
+export { CopilotProvider, useCopilot } from './providers/CopilotProvider';
 export { GeminiProvider, useGemini } from './providers/GeminiProvider';
 export { GoogleGenAIConfig } from './providers/GoogleGenAIConfig';
 
