@@ -23,6 +23,13 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   isConnected = true,
   isLoading = false,
 }) => {
+  const handleToggleFullScreen = () => {
+    console.log('Toggle fullscreen button clicked in ChatHeader, current state:', isFullScreen);
+    if (onToggleFullScreen) {
+      onToggleFullScreen();
+    }
+  };
+
   return (
     <div className="flex items-center justify-between p-4 border-b bg-background rounded-t-lg">
       <div className="flex items-center">
@@ -52,7 +59,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           <Button
             variant="ghost"
             size="icon"
-            onClick={onToggleFullScreen}
+            onClick={handleToggleFullScreen}
             className="h-8 w-8 hover:bg-muted"
             title={isFullScreen ? "Minimize" : "Full screen"}
             aria-label={isFullScreen ? "Minimize chat" : "Expand chat to full screen"}

@@ -44,7 +44,16 @@ const UnifiedChatContent: React.FC<UnifiedChatContentProps> = ({
   
   // Use either prop or context value for fullScreen
   const isFullScreenMode = fullScreen || contextIsFullScreen;
-  const handleToggleFullScreen = onToggleFullScreen || toggleFullScreen;
+  
+  // Use the prop function if provided, otherwise use context function
+  const handleToggleFullScreen = () => {
+    console.log('Handle toggle fullscreen called from UnifiedChat');
+    if (onToggleFullScreen) {
+      onToggleFullScreen();
+    } else if (toggleFullScreen) {
+      toggleFullScreen();
+    }
+  };
   
   const hasMessages = messages.filter(m => m.role !== 'system').length > 0;
   
