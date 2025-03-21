@@ -32,9 +32,7 @@ export const HeroVoiceInput: React.FC<HeroVoiceInputProps> = ({
           <motion.div 
             className={cn(
               "flex items-center gap-3 backdrop-blur-sm px-4 py-2 rounded-full",
-              useGeminiApi 
-                ? "bg-black/5 border border-[#fe5a1d]/20 dark:bg-white/5" 
-                : "bg-black/5 dark:bg-white/5"
+              "bg-black/5 dark:bg-white/5"
             )}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -43,10 +41,9 @@ export const HeroVoiceInput: React.FC<HeroVoiceInputProps> = ({
             <AnimatedBars isActive={isListening} small={true} />
             <span className="text-sm">
               {isTranscribing 
-                ? (useGeminiApi ? "Gemini is processing..." : "Processing...") 
-                : transcript || (useGeminiApi ? "Listening with Gemini Charon..." : "Listening...")}
+                ? "Processing..." 
+                : transcript || "Listening..."}
             </span>
-            {useGeminiApi && <span className="text-xs text-[#fe5a1d] font-medium">Gemini Voice</span>}
           </motion.div>
         )}
       </AnimatePresence>
@@ -59,7 +56,7 @@ export const HeroVoiceInput: React.FC<HeroVoiceInputProps> = ({
       >
         <AIChatInput 
           autoFullScreen={false} 
-          placeholderText={chatInputValue || "Ask me anything about AI automation..."}
+          placeholderText={chatInputValue || "Hey, can you hear me? Can you talk back?"}
         />
         
         {isVoiceSupported && (
