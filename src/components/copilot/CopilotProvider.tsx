@@ -29,28 +29,28 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({
   voice: propVoice,
   agentic: propAgentic
 }) => {
-  // Refs to prevent excessive re-renders
-  const isInitializedRef = useRef(false);
-  
-  // Hooks for external data - only execute once
+  // External data hooks - always call these at the top level
   const { personaData, setCurrentPage } = usePersonaManagement();
   const { apiKey: contextApiKey } = useGeminiAPI();
-
-  // State hooks with initialization prevention
+  
+  // State management for spatial context
   const [spatialContext, setSpatialContext] = useState<SpatialContext | null>(null);
-
-  // Only initialize tracking if not already done
-  if (!isInitializedRef.current) {
-    // Track context and user behavior - with debouncing built in
-    useContextTracking(setCurrentPage, setSpatialContext);
-    isInitializedRef.current = true;
-  }
-
-  // Custom hooks for different functionalities
+  
+  // Ref to track initialization
+  const isInitializedRef = useRef(false);
+  
+  // Custom hooks for different functionalities - MUST be called unconditionally
   const { voiceConfig } = useVoiceInitialization(propVoice);
   const { apiKey } = useApiKeyManagement(propApiKey, contextApiKey);
   const { systemMessage } = useSystemMessage(personaData);
   const { agenticConfig } = useAgenticConfig(propAgentic);
+  
+  // Initialize tracking if not already done - this is safe because we use a ref
+  if (!isInitializedRef.current) {
+    // Track context and user behavior
+    useContextTracking(setCurrentPage, setSpatialContext);
+    isInitializedRef.current = true;
+  }
 
   // Runtime URL for the CopilotKit
   const runtimeUrl = useMemo(() => 'http://localhost:3000', []);
