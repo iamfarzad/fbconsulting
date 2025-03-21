@@ -1,3 +1,4 @@
+
 export interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
   resultIndex: number;
@@ -35,9 +36,6 @@ export interface SpeechRecognition extends EventTarget {
 
 export interface VoiceUIProps {
   onCommand?: (command: string) => void;
-<<<<<<< HEAD
   aiProcessing?: boolean;
-=======
->>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
   noFloatingButton?: boolean;
 }
