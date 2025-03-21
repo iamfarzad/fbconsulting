@@ -34,10 +34,8 @@ export function useContextTracking(
     }, delay);
   }, []);
   
-  // Handle user behavior tracking
+  // Handle user behavior tracking - always run this effect
   useEffect(() => {
-    if (!initializedRef.current) return;
-    
     const trackUserBehavior = (event: MouseEvent | KeyboardEvent) => {
       // Debounce the update to prevent excessive renders
       debouncedUpdate(() => {
@@ -103,7 +101,7 @@ export function useContextTracking(
     };
   }, [debouncedUpdate, setSpatialContext]);
   
-  // Initialize spatial context on route change
+  // Initialize spatial context on route change - always run this effect
   useEffect(() => {
     const currentPath = location.pathname;
     const pageName = currentPath === '/' ? 'home' : currentPath.substring(1);
@@ -111,7 +109,7 @@ export function useContextTracking(
     // Update current page
     setCurrentPage(pageName);
     
-    // Initialize spatial context - only if not already done
+    // Initialize spatial context
     if (!initializedRef.current) {
       setSpatialContext({
         pageSection: pageName,
@@ -126,8 +124,6 @@ export function useContextTracking(
   
   // Update spatial context on scroll - with debouncing
   useEffect(() => {
-    if (!initializedRef.current) return;
-    
     const handleScroll = () => {
       debouncedUpdate(() => {
         const sections = document.querySelectorAll('section');
