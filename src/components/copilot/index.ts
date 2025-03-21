@@ -1,17 +1,19 @@
 // Core Components
-export { GeminiChat as CopilotChat } from './core/GeminiChat';
-export * from './core/CopilotConfig';
+export { CopilotChat } from './core/CopilotChat';
+export { CopilotConfig } from './core/CopilotConfig';
+export { GeminiChat } from './core/GeminiChat';
 
-// Providers
-export * from './providers/CopilotProvider';
-export * from './providers/GeminiProvider';
-export * from './providers/GoogleGenAIConfig';
+// Providers - explicit paths to avoid confusion
+export { CopilotProvider } from './providers/CopilotProvider';
+export { GeminiProvider, useGemini } from './providers/GeminiProvider';
+export { GoogleGenAIConfig } from './providers/GoogleGenAIConfig';
 
 // UI Components
-export * from './ui/ConnectionStatusIndicator';
-export * from './ui/DocumentPreview';
-export * from './ui/FallbackChatUI';
+export { ConnectionStatusIndicator } from './ui/ConnectionStatusIndicator';
+export { DocumentPreview } from './ui/DocumentPreview';
 export { AnimatedBars } from './ui/AnimatedBars';
+
+// Chat Components
 export { ChatHeader } from './chat/ChatHeader';
 export { ChatMessages } from './chat/ChatMessages';
 export { ChatInputArea } from './chat/ChatInputArea';

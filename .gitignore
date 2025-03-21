@@ -1,48 +1,46 @@
-# Log files
-logs
-*.log
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+/dist
+
+# misc
+.DS_Store
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*
+
+# logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-# Node dependencies
-node_modules
-dist
-dist-ssr
+# editor
+.idea/
+.vscode/
+*.swp
+*.swo
 
-# Ignore local environment files (IMPORTANT)
-.env
-.env.local
-.env.development
-.env.production
-
-# Environment files
-.env
-.env.local
-.env.*.local
-src/.env
-backend/**/.env
-
-# But keep examples
-!.env.example
-!src/.env.example
-!backend/**/.env.example
-
-# Firebase
-src/mcp_custom/firebaseServiceKey.json
-**/serviceKey.json
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# vercel
 .vercel
-.env*.local
+
+# temporary files
+*.tmp
+*.temp
+.cache/
+
+# copilot temporary files
+src/components/copilot/**/*.backup
+src/components/copilot/**/*.tmp
+
+# typescript
+*.tsbuildinfo

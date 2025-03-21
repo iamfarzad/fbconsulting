@@ -3,10 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, Mic, ArrowUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { AnimatedBars } from '@/components/ui/AnimatedBars';
-<<<<<<< HEAD
 import { Button } from '@/components/ui/button';
-=======
->>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
 
 interface HeroVoiceInputProps {
   chatInputValue: string;
@@ -89,7 +86,6 @@ export const HeroVoiceInput: React.FC<HeroVoiceInputProps> = ({
           />
         </div>
         
-<<<<<<< HEAD
         <div className="border-t p-2 flex items-center justify-between">
           <div>
             <Button variant="ghost" size="sm" className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -129,9 +125,6 @@ export const HeroVoiceInput: React.FC<HeroVoiceInputProps> = ({
             </Button>
           </div>
         </div>
-=======
-        {/* Voice controls moved to ChatInput component for unified experience */}
->>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
       </motion.div>
     </>
   );
