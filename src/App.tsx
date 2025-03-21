@@ -1,7 +1,7 @@
 
 import React, { Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import ErrorBoundary from "./components/ErrorBoundary";
+import ErrorBoundaryWrapper from "./components/ErrorBoundaryWrapper";
 import ThemeProvider from "./components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import Index from "./pages/Index";
@@ -26,7 +26,7 @@ import LoadingFallback from "./components/LoadingFallback";
 function App() {
   return (
     <div className="App">
-      <ErrorBoundary>
+      <ErrorBoundaryWrapper>
         <BrowserRouter>
           <ThemeProvider>
             <LanguageProvider>
@@ -57,7 +57,7 @@ function App() {
             </LanguageProvider>
           </ThemeProvider>
         </BrowserRouter>
-      </ErrorBoundary>
+      </ErrorBoundaryWrapper>
     </div>
   );
 }
