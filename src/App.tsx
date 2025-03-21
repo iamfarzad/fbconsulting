@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, createContext, useContext, Suspense } from "react";
+import React, { Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ThemeProvider from "./components/ThemeProvider";
@@ -20,14 +20,8 @@ import TestUnifiedChat from "./pages/TestUnifiedChat";
 import AIDemo from "./pages/AIDemo";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { CopilotProvider } from "./components/copilot/CopilotProvider";
-import { GeminiAPIProvider, useGeminiAPI } from "./providers/GeminiAPIProvider";
-
-// Simple loading component
-const LoadingFallback = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-  </div>
-);
+import { GeminiAPIProvider } from "./providers/GeminiAPIProvider";
+import LoadingFallback from "./components/LoadingFallback";
 
 function App() {
   return (
