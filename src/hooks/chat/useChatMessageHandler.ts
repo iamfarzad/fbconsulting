@@ -1,7 +1,7 @@
+
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { LeadInfo } from '@/services/lead/leadExtractor';
-import { GeminiMultimodalChat } from '@/services/gemini';
 import { useChatInitialization } from './useChatInitialization';
 import { useMessageProcessor } from './useMessageProcessor';
 
@@ -9,7 +9,7 @@ interface UseChatMessageHandlerProps {
   addUserMessage: (message: string) => void;
   addAssistantMessage: (message: string) => void;
   setShowMessages: (show: boolean) => void;
-  clearFiles: () => void;  // Add this to fix the TypeScript error
+  clearFiles: () => void;
   messages: any[];
 }
 
