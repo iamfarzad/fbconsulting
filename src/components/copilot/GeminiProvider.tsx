@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { usePersonaManagement } from '../../mcp/hooks/usePersonaManagement';
-import { useGeminiAPI } from '../../App';
+import { useGeminiAPI } from '../../hooks/useGeminiAPI';
 import { toast } from 'sonner';
 import { 
   GoogleGenerativeAI as GenerativeAI,
