@@ -1,3 +1,4 @@
+
 # Vercel API Configuration
 
 ## Python Runtime
@@ -17,7 +18,6 @@ All services use consistent versions:
 
 ## Configuration
 Build and runtime settings are managed in root `vercel.json`:
-- Fluid Compute enabled for streaming
 - Memory: 1024MB
 - Max Duration: 30-60s depending on endpoint
 
@@ -28,4 +28,5 @@ Required:
 ## Deployment Notes
 - Uses Vercel's Python runtime
 - All services share common dependency versions
-- Fluid Compute optimized for streaming responses
+- Optimized for streaming responses
+

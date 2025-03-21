@@ -1,3 +1,4 @@
+
 # Recent Configuration Changes
 
 ## Python Runtime & Build Settings
@@ -16,7 +17,7 @@
 ## Configuration
 3. Updated Vercel Configuration
    - Added proper build settings
-   - Configured Fluid Compute for streaming
+   - Fixed invalid JSON schema properties (removed fluidCompute)
    - Set memory and duration limits
 
 ## Documentation
