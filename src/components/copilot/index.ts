@@ -1,8 +1,11 @@
-
 // Export components
-export { CopilotProvider } from './CopilotProvider';
-export { CopilotChat } from './CopilotChat';
-export { default as GoogleGenAIConfig } from './GoogleGenAIConfig';
+export { GeminiChat as CopilotChat } from './GeminiChat';
+export * from './CopilotProvider';
+export * from './GeminiProvider';
+export * from './GoogleGenAIConfig';
+export * from './ConnectionStatusIndicator';
+export * from './DocumentPreview';
+export * from './FallbackChatUI';
 
 // Export adapters
 export * from './adapters';
