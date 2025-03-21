@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-
-export { CopilotProvider } from './CopilotProvider';
-export { CopilotChat } from './CopilotChat';
-export { GoogleGenAIConfig } from './GoogleGenAIConfig';
-=======
 // Export components
 export { GeminiChat as CopilotChat } from './GeminiChat';
 export * from './CopilotProvider';
@@ -25,8 +19,6 @@ export const initializeCopilot = (options: {
   endpoint: string;
   deploymentName?: string;
 }) => {
-  // Here we would normally set up configuration or initialize services
-  // This is just a placeholder structure for now
   console.log('Initializing CopilotKit with Azure OpenAI', options);
   return {
     isInitialized: true,
@@ -41,11 +33,9 @@ export const initializeCopilotWithGoogleAI = (options: {
   temperature?: number;
   maxOutputTokens?: number;
 }) => {
-  // Here we would normally set up configuration or initialize services
   console.log('Initializing CopilotKit with Google GenAI', options);
   return {
     isInitialized: true,
     options
   };
 };
->>>>>>> 110ae04 (feat: Add initial project structure and configuration files)

@@ -8,7 +8,7 @@ interface ConnectionStatusIndicatorProps {
   onRetry?: () => void;
 }
 
-const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
+export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
   status,
   error,
   onRetry
@@ -50,5 +50,3 @@ const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
     </div>
   );
 };
-
-export default ConnectionStatusIndicator;

@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Loader2 } from "lucide-react";
-import { AnimatedBars } from '@/components/ui/AnimatedBars';
+import { AnimatedBars } from '../ui/AnimatedBars';
 import { AIMessage } from '@/services/chat/messageTypes';
 
 interface ChatMessagesProps {
