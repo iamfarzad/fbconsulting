@@ -19,6 +19,7 @@ const ChatButton = () => {
   };
   
   const toggleFullScreen = () => {
+    console.log('Toggle fullscreen clicked. Current state:', isFullScreen);
     setIsFullScreen(!isFullScreen);
   };
   
