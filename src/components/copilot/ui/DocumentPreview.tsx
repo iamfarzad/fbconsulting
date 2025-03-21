@@ -77,5 +77,3 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
     </div>
   );
 };
-
-export default DocumentPreview;

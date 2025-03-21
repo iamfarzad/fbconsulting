@@ -1,6 +1,6 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { usePersonaManagement } from '../../mcp/hooks/usePersonaManagement';
+import { usePersonaManagement } from '@/mcp/hooks/usePersonaManagement';
+import { PersonaData } from '@/mcp/protocols/personaManagement/types';
 import useGeminiAPI from '@/hooks/useGeminiAPI';
 import { toast } from 'sonner';
 import { 
@@ -9,17 +9,15 @@ import {
 } from '@google/generative-ai';
 import { initializeGemini } from '@/services/gemini';
 
-// Interface for Gemini context
 interface GeminiContextType {
   isInitialized: boolean;
   isLoading: boolean;
-  personaData: any;
+  personaData: PersonaData | null;
   error: string | null;
   model: GenerativeModel | null;
   visionModel: GenerativeModel | null;
 }
 
-// Create a context for Gemini-specific functionality
 const GeminiContext = createContext<GeminiContextType>({
   isInitialized: false,
   isLoading: true,
@@ -29,7 +27,6 @@ const GeminiContext = createContext<GeminiContextType>({
   visionModel: null
 });
 
-// Custom hook to access the Gemini context
 export const useGemini = () => useContext(GeminiContext);
 
 interface GeminiProviderProps {
@@ -44,32 +41,6 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
   const [error, setError] = useState<string | null>(null);
   const [model, setModel] = useState<GenerativeModel | null>(null);
   const [visionModel, setVisionModel] = useState<GenerativeModel | null>(null);
-  
-  // Default persona configuration
-  const defaultPersona = {
-    currentPersona: 'default',
-    personaDefinitions: {
-      default: {
-        name: 'Farzad AI Assistant',
-        welcomeMessage: 'Hello! I\'m Farzad AI Assistant. How can I help you with AI services and automation today?',
-        systemInstructions: `You are Farzad AI Assistant, an AI consultant built into the landing page of F.B Consulting. Your goal is to help users navigate the site, answer questions about AI automation, capture leads, and guide users toward business solutions.
-
-Key Capabilities:
-1. Answer questions about AI services, automation, and consulting  
-2. Help users fill out forms (Newsletter signup, Consultation request)  
-3. Guide users to book a meeting through the chat  
-4. Provide feature updates, site changes, and roadmap progress  
-5. Store user preferences & conversation history for a seamless experience  
-6. Offer a conversation summary via email when the session ends  
-
-Rules:
-- Always refer users to the correct page or function when asked  
-- If a user asks where to find something, guide them using chat links  
-- At the end of a session, ask if they want an email summary  
-- If the user is a potential lead, ask key questions about their needs`
-      }
-    }
-  };
   
   useEffect(() => {
     const initializeGeminiModels = async () => {
@@ -144,8 +115,6 @@ Rules:
             
             if (personaData) {
               console.log("Using persona data:", personaData.currentPersona);
-            } else {
-              console.log("Using default persona");
             }
             
             setIsInitialized(true);
@@ -186,7 +155,7 @@ Rules:
       isInitialized, 
       isLoading,
       error,
-      personaData: personaData || defaultPersona,
+      personaData,
       model,
       visionModel
     }}>

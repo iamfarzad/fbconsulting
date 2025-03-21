@@ -9,7 +9,7 @@ import { Slider } from '@/components/ui/slider';
 import { toast } from '@/components/ui/use-toast';
 import { testGoogleGenAIConnection } from '@/services/copilot/googleGenAIAdapter';
 
-const GoogleGenAIConfig: React.FC = () => {
+export const GoogleGenAIConfig: React.FC = () => {
   const { apiKey } = useGeminiAPI();
   const [formState, setFormState] = useState({
     apiKey: apiKey || '',
@@ -137,5 +137,3 @@ const GoogleGenAIConfig: React.FC = () => {
     </Card>
   );
 };
-
-export default GoogleGenAIConfig;

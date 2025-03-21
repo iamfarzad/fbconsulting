@@ -1,41 +1,42 @@
-// Export components
-export { GeminiChat as CopilotChat } from './GeminiChat';
-export * from './CopilotProvider';
-export * from './GeminiProvider';
-export * from './GoogleGenAIConfig';
-export * from './ConnectionStatusIndicator';
-export * from './DocumentPreview';
-export * from './FallbackChatUI';
+// Core Components
+export { GeminiChat } from './core/GeminiChat';
+export { CopilotConfig } from './core/CopilotConfig';
 
-// Export adapters
+// Providers
+export { CopilotProvider } from './providers/CopilotProvider';
+export { GeminiProvider, useGemini } from './providers/GeminiProvider';
+export { GoogleGenAIConfig } from './providers/GoogleGenAIConfig';
+
+// UI Components
+export { AnimatedBars } from './ui/AnimatedBars';
+export { ConnectionStatusIndicator } from './ui/ConnectionStatusIndicator';
+export { DocumentPreview } from './ui/DocumentPreview';
+
+// Chat Components
+export { ChatHeader } from './chat/ChatHeader';
+export { ChatMessages } from './chat/ChatMessages';
+export { ChatInputArea } from './chat/ChatInputArea';
+export { ErrorDisplay } from './chat/ErrorDisplay';
+
+// Adapters
 export * from './adapters';
 
-// Re-export necessary CopilotKit types and hooks for easier access
-export { useCopilotChat, useCopilotAction } from '@copilotkit/react-core';
+// Re-export necessary CopilotKit types and hooks
+export {
+  useCopilotChat,
+  useCopilotAction
+} from '@copilotkit/react-core';
 
-// Utility function to initialize the Copilot with Azure OpenAI
-export const initializeCopilot = (options: {
-  apiKey: string;
-  endpoint: string;
-  deploymentName?: string;
-}) => {
-  // Here we would normally set up configuration or initialize services
-  // This is just a placeholder structure for now
-  console.log('Initializing CopilotKit with Azure OpenAI', options);
-  return {
-    isInitialized: true,
-    options
-  };
-};
-
-// Utility function to initialize the Copilot with Google GenAI
-export const initializeCopilotWithGoogleAI = (options: {
+// Types
+export interface CopilotOptions {
   apiKey: string;
   modelName?: string;
   temperature?: number;
   maxOutputTokens?: number;
-}) => {
-  // Here we would normally set up configuration or initialize services
+}
+
+// Initialization utilities
+export const initializeCopilotWithGoogleAI = (options: CopilotOptions) => {
   console.log('Initializing CopilotKit with Google GenAI', options);
   return {
     isInitialized: true,

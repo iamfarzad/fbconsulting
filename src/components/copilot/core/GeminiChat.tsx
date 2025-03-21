@@ -3,10 +3,10 @@ import { useGeminiService, useGeminiConfig } from '@/hooks/gemini';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { useImageUpload } from '@/hooks/useImageUpload';
 import { useToast } from '@/hooks/use-toast';
-import { ChatHeader } from './chat/ChatHeader';
-import { ChatMessages } from './chat/ChatMessages';
-import { ChatInputArea } from './chat/ChatInputArea';
-import { ErrorDisplay } from './chat/ErrorDisplay';
+import { ChatHeader } from '../chat/ChatHeader';
+import { ChatMessages } from '../chat/ChatMessages';
+import { ChatInputArea } from '../chat/ChatInputArea';
+import { ErrorDisplay } from '../chat/ErrorDisplay';
 
 export const GeminiChat: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
