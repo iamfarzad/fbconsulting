@@ -7,10 +7,14 @@ export interface AIMessage {
   content: string;
   timestamp: number;
   id?: string;
+<<<<<<< HEAD
   metadata?: Record<string, any>;
   mediaItems?: MessageMedia[];
   isProcessing?: boolean;
   feedback?: MessageFeedback;
+=======
+  metadata?: Record<string, unknown>;
+>>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
 }
 
 // Type guard functions
