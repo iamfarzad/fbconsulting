@@ -13,11 +13,6 @@ import type {
 
 // Re-export ChatMessage type to be used in other modules
 export type { ChatMessage } from '../copilot/types';
-<<<<<<< HEAD
-=======
-
-// Using ChatMessage type from copilot/types
->>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
 
 // Chat service configuration
 export type GoogleGenAIChatServiceConfig = GoogleGenAIConfig & {
@@ -59,11 +54,7 @@ class GoogleGenAIChatService implements GeminiChatService {
 
     // Store sanitized config
     this.config = {
-<<<<<<< HEAD
       modelName: config.modelName || 'gemini-2.0-flash',
-=======
-      modelName: config.modelName || 'gemini-2.0-flash',  // Using Gemini Pro model for chat capabilities
->>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
       temperature: config.temperature ?? 0.9,
       maxOutputTokens: config.maxOutputTokens ?? 2048,
       topP: config.topP ?? 1.0,
@@ -176,9 +167,6 @@ class GoogleGenAIChatService implements GeminiChatService {
       'thank you', 'thanks', 'bye', 'goodbye', 'see you', 'talk to you later',
       'that\'s all', 'that is all', 'that\'s it', 'that is it'
     ];
-<<<<<<< HEAD
-    return userEndingPhrases.some(phrase => userMessage.toLowerCase().includes(phrase));
-=======
     
     const assistantEndingPhrases = [
       'thank you for contacting', 'have a great day', 'feel free to reach out',
@@ -385,7 +373,6 @@ class GoogleGenAIChatService implements GeminiChatService {
         }
       }
     }
->>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
   }
 
   public async sendMessage(message: string, leadInfo?: LeadInfo): Promise<string> {
@@ -417,12 +404,7 @@ class GoogleGenAIChatService implements GeminiChatService {
             : '';
 
         this.history.push({
-<<<<<<< HEAD
-          timestamp: Date.now(), role: 'assistant', content: responseText 
-        });
-=======
         timestamp: Date.now(), role: 'assistant', content: responseText });
->>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
 
         // If we have lead information and the conversation is ending, send an email summary
         if (leadInfo && this.isConversationEnding(message, responseText)) {
@@ -442,12 +424,7 @@ class GoogleGenAIChatService implements GeminiChatService {
               : '';
 
           this.history.push({
-<<<<<<< HEAD
-            timestamp: Date.now(), role: 'assistant', content: retryResponseText 
-          });
-=======
         timestamp: Date.now(), role: 'assistant', content: retryResponseText });
->>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
 
           return retryResponseText;
         } catch (retryError) {
