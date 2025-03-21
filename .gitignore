@@ -44,3 +44,4 @@ src/components/copilot/**/*.tmp
 
 # typescript
 *.tsbuildinfo
+*.sqlite-wal
