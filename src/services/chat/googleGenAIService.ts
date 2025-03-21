@@ -13,6 +13,11 @@ import type {
 
 // Re-export ChatMessage type to be used in other modules
 export type { ChatMessage } from '../copilot/types';
+<<<<<<< HEAD
+=======
+
+// Using ChatMessage type from copilot/types
+>>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
 
 // Chat service configuration
 export type GoogleGenAIChatServiceConfig = GoogleGenAIConfig & {
@@ -54,7 +59,11 @@ class GoogleGenAIChatService implements GeminiChatService {
 
     // Store sanitized config
     this.config = {
+<<<<<<< HEAD
       modelName: config.modelName || 'gemini-2.0-flash',
+=======
+      modelName: config.modelName || 'gemini-2.0-flash',  // Using Gemini Pro model for chat capabilities
+>>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
       temperature: config.temperature ?? 0.9,
       maxOutputTokens: config.maxOutputTokens ?? 2048,
       topP: config.topP ?? 1.0,
@@ -167,7 +176,216 @@ class GoogleGenAIChatService implements GeminiChatService {
       'thank you', 'thanks', 'bye', 'goodbye', 'see you', 'talk to you later',
       'that\'s all', 'that is all', 'that\'s it', 'that is it'
     ];
+<<<<<<< HEAD
     return userEndingPhrases.some(phrase => userMessage.toLowerCase().includes(phrase));
+=======
+    
+    const assistantEndingPhrases = [
+      'thank you for contacting', 'have a great day', 'feel free to reach out',
+      'don\'t hesitate to contact', 'please let me know if', 'is there anything else'
+    ];
+    
+    const userMessageLower = userMessage.toLowerCase();
+    const assistantResponseLower = assistantResponse.toLowerCase();
+    
+    const userEnding = userEndingPhrases.some(phrase => userMessageLower === phrase);
+    const assistantEnding = assistantEndingPhrases.some(phrase => assistantResponseLower === phrase);
+    
+    return userEnding || assistantEnding;
+  }
+
+  private async generateSystemPrompt(personaData: PersonaData): Promise<string> {
+    if (!personaData || !personaData.personaDefinitions) {
+      throw new Error('Persona data is missing or invalid');
+    }
+    const currentPersona = personaData.currentPersona;
+    const personaDetails = personaData.personaDefinitions[currentPersona];
+    
+    return `
+      You are Farzad AI Assistant, an AI consultant built into the landing page of F.B Consulting. 
+      Currently using the "${personaDetails.name}" persona.
+      
+      Tone: ${personaDetails.tone}
+      
+      Focus Areas:
+      ${personaDetails.focusAreas.map(area => `- ${area}`).join('\n')}
+      
+      Additional Context:
+      - User Role: ${personaData.userRole || 'Unknown'}
+      - User Industry: ${personaData.userIndustry || 'Unknown'}
+      - User Technical Level: ${personaData.userTechnicalLevel || 'beginner'}
+      - Current Page: ${personaData.currentPage || '/'}
+      
+      Remember to adjust your responses based on the user's technical level and industry context.
+      
+      When appropriate, you can include special card formats in your responses using this syntax:
+      [[CARD:type:title:description:style]]
+      
+      For example:
+      [[CARD:services:AI Strategy Consulting:I help businesses identify opportunities for AI integration:bordered]]
+    `;
+  }
+
+  /**
+   * Synthesize speech using Gemini's Multimodal Live API
+   */
+  // Cache for audio responses
+  private audioCache: Map<string, { data: ArrayBuffer; timestamp: number }> = new Map();
+  private readonly CACHE_DURATION = 3600000; // 1 hour in milliseconds
+
+  private getCacheKey(text: string, quality: string): string {
+    return `${text}:${quality}`;
+  }
+
+  // Performance metrics
+  private metrics = {
+    totalRequests: 0,
+    cacheHits: 0,
+    errors: 0,
+    avgResponseTime: 0
+  };
+
+  private logMetrics(startTime: number, cacheHit: boolean, error?: Error) {
+    const duration = Date.now() - startTime;
+    this.metrics.totalRequests++;
+    if (cacheHit) this.metrics.cacheHits++;
+    if (error) this.metrics.errors++;
+    
+    // Update average response time
+    this.metrics.avgResponseTime = (
+      (this.metrics.avgResponseTime * (this.metrics.totalRequests - 1) + duration) /
+      this.metrics.totalRequests
+    );
+
+    // Log metrics
+    console.info('Speech Synthesis Metrics:', {
+      ...this.metrics,
+      lastRequestDuration: duration,
+      cacheHitRate: (this.metrics.cacheHits / this.metrics.totalRequests * 100).toFixed(1) + '%',
+      errorRate: (this.metrics.errors / this.metrics.totalRequests * 100).toFixed(1) + '%'
+    });
+  }
+
+  private async synthesizeSpeech(text: string, voiceConfig: VoiceConfig): Promise<void> {
+    const startTime = Date.now();
+    try {
+      // Determine quality based on network speed
+      const connection = (navigator as any).connection;
+      let quality = 'medium';
+      if (connection) {
+        if (connection.effectiveType === '4g') quality = 'high';
+        if (connection.effectiveType === '3g') quality = 'medium';
+        if (['2g', 'slow-2g'].includes(connection.effectiveType)) quality = 'low';
+      }
+
+      // Check cache
+      const cacheKey = this.getCacheKey(text, quality);
+      const cached = this.audioCache.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < this.CACHE_DURATION) {
+        await this.playAudio(cached.data);
+        this.logMetrics(startTime, true);
+        return;
+      }
+
+      // Call Vercel serverless function
+      const response = await fetch('/api/gemini_audio', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text,
+          quality,
+          role: 'user'
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to synthesize speech');
+      }
+
+      // Get audio data from response
+      const audioData = await response.arrayBuffer();
+
+      // Log server metrics
+      const serverResponseTime = response.headers.get('X-Response-Time');
+      const cacheStatus = response.headers.get('X-Cache');
+      console.info('Server Metrics:', {
+        responseTime: serverResponseTime,
+        cacheStatus,
+        contentLength: audioData.byteLength
+      });
+
+      // Cache the response
+      this.audioCache.set(cacheKey, {
+        data: audioData,
+        timestamp: Date.now()
+      });
+
+      // Clean old cache entries
+      for (const [key, value] of this.audioCache.entries()) {
+        if (Date.now() - value.timestamp > this.CACHE_DURATION) {
+          this.audioCache.delete(key);
+        }
+      }
+
+      // Play the audio
+      await this.playAudio(audioData);
+      this.logMetrics(startTime, false);
+
+    } catch (error) {
+      console.error('Error synthesizing speech:', error);
+      this.logMetrics(startTime, false, error as Error);
+    }
+  }
+
+  private async playAudio(audioData: ArrayBuffer): Promise<void> {
+    const audioContext = new AudioContext();
+    const audioBuffer = await audioContext.decodeAudioData(audioData);
+    const source = audioContext.createBufferSource();
+    source.buffer = audioBuffer;
+    source.connect(audioContext.destination);
+    source.start(0);
+  }
+
+  private updateSpatialContext(context: Partial<SpatialContext>): void {
+    this.spatialContext = {
+      ...this.spatialContext,
+      ...context,
+      timestamp: Date.now()
+    } as SpatialContext;
+  }
+
+  private async handleProactiveAssistance(): Promise<void> {
+    if (!this.config.agentic?.proactiveAssistance) return;
+
+    const timeSinceLastInteraction = Date.now() - this.lastInteractionTime;
+    const inactivityThreshold = 60000; // 1 minute
+
+    if (timeSinceLastInteraction > inactivityThreshold) {
+      const context = this.spatialContext;
+      if (context) {
+        // Generate proactive suggestion based on context
+        const suggestion = await this.model.generateContent(
+          `Based on the user being in ${context.pageSection} and ${context.userBehavior}, what would be helpful to suggest?`
+        );
+        
+        if (suggestion) {
+          this.history.push({
+        timestamp: Date.now(),
+            role: 'assistant',
+            content: suggestion.response.text()
+          });
+
+          const responseText = suggestion.response?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+          if (this.config.voice?.enabled && responseText) {
+            await this.synthesizeSpeech(responseText, this.config.voice);
+          }
+        }
+      }
+    }
+>>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
   }
 
   public async sendMessage(message: string, leadInfo?: LeadInfo): Promise<string> {
@@ -199,8 +417,12 @@ class GoogleGenAIChatService implements GeminiChatService {
             : '';
 
         this.history.push({
+<<<<<<< HEAD
           timestamp: Date.now(), role: 'assistant', content: responseText 
         });
+=======
+        timestamp: Date.now(), role: 'assistant', content: responseText });
+>>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
 
         // If we have lead information and the conversation is ending, send an email summary
         if (leadInfo && this.isConversationEnding(message, responseText)) {
@@ -220,8 +442,12 @@ class GoogleGenAIChatService implements GeminiChatService {
               : '';
 
           this.history.push({
+<<<<<<< HEAD
             timestamp: Date.now(), role: 'assistant', content: retryResponseText 
           });
+=======
+        timestamp: Date.now(), role: 'assistant', content: retryResponseText });
+>>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
 
           return retryResponseText;
         } catch (retryError) {

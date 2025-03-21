@@ -35,8 +35,11 @@ export type {
   HealthCheckResponse
 } from './api/types';
 
-// Re-export necessary CopilotKit types and hooks for easier access
-export { useCopilotChat, useCopilotAction } from '@copilotkit/react-core';
+// Re-export necessary CopilotKit types and hooks
+export {
+  useCopilotChat,
+  useCopilotAction
+} from '@copilotkit/react-core';
 
 // Initialization utilities
 export const initializeCopilotWithGoogleAI = (options: {
