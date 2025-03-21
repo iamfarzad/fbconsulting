@@ -1,4 +1,3 @@
-
 /**
  * Types for AI Chat functionality
  */
@@ -13,6 +12,23 @@ export interface AIMessage {
   isProcessing?: boolean;
   feedback?: MessageFeedback;
 }
+
+// Type guard functions
+export const isUserMessage = (message: AIMessage): boolean => {
+  return message.role === 'user';
+};
+
+export const isAssistantMessage = (message: AIMessage): boolean => {
+  return message.role === 'assistant';
+};
+
+export const isSystemMessage = (message: AIMessage): boolean => {
+  return message.role === 'system';
+};
+
+export const isErrorMessage = (message: AIMessage): boolean => {
+  return message.role === 'error';
+};
 
 export type MessageRole = AIMessage['role'];
 

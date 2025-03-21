@@ -20,7 +20,7 @@ export function initializeGoogleGenAI(config: GoogleGenAIConfig): GoogleGenAICon
   // Return the full config
   return {
     apiKey: config.apiKey,
-    modelName: config.modelName || 'gemini-pro',
+    modelName: config.modelName || 'gemini-2.0-flash-exp',
     temperature: config.temperature || 0.7,
     maxOutputTokens: config.maxOutputTokens || 2048
   };
@@ -36,7 +36,7 @@ export async function testGoogleGenAIConnection(config: GoogleGenAIConfig): Prom
 
     // Try to generate a simple test message
     const result = await ai.models.generateContent({
-      model: config.modelName || 'gemini-pro',
+      model: config.modelName || 'gemini-2.0-flash-exp',
       contents: [{ text: "Hello" }]
     });
     
@@ -60,7 +60,7 @@ export async function troubleshootIssue(issueDescription: string) {
     }
 
     const result = await genAI.models.generateContent({
-      model: "gemini-pro",
+      model: "gemini-2.0-flash-exp",
       contents: [{
         text: `
           Please help troubleshoot the following issue:

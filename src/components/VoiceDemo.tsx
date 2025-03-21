@@ -59,7 +59,9 @@ const VoiceDemo = () => {
             <p className="text-xs text-muted-foreground mb-3 text-center">
               Try saying "Hello" or ask me a question
             </p>
-            <VoiceUI onCommand={handleVoiceCommand} />
+            <div className="mb-4">
+              <VoiceUI onCommand={handleVoiceCommand} noFloatingButton={true} />
+            </div>
           </div>
         </div>
       </motion.div>

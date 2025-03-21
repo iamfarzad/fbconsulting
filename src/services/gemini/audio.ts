@@ -19,7 +19,7 @@ export async function transcribeAudio(
     // Initialize the Gemini vision model (which handles multimodal inputs)
     const model = initializeGemini({
       ...config,
-      model: "gemini-2.0-vision" // Use vision model for multimodal inputs
+      model: "gemini-2.0-flash" // Use vision model for multimodal inputs
     });
     
     // Create prompt for audio transcription

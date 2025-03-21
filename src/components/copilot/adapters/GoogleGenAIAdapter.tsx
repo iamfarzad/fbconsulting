@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { GoogleGenAIConfig, initializeGoogleGenAI } from '@/services/copilot/googleGenAIAdapter';
-import { useGeminiAPI } from '@/hooks/useGeminiAPI';
+import useGeminiAPI from '@/hooks/useGeminiAPI';
 
 /**
  * GoogleGenAIAdapter

@@ -18,6 +18,22 @@ dist-ssr
 .env.development
 .env.production
 
+# Environment files
+.env
+.env.local
+.env.*.local
+src/.env
+backend/**/.env
+
+# But keep examples
+!.env.example
+!src/.env.example
+!backend/**/.env.example
+
+# Firebase
+src/mcp_custom/firebaseServiceKey.json
+**/serviceKey.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -46,19 +46,15 @@ export function UnifiedChatInput({
   
   const isMobile = useIsMobile();
 
-  // Automatically go fullscreen when messages are present and autoFullScreen is true
   useEffect(() => {
-    if (autoFullScreen && messages.length > 1 && !isFullScreen) { // > 1 to account for system message
-      // Add a small delay to ensure smooth transition
+    if (autoFullScreen && messages.length > 1 && !isFullScreen) {
       const timer = setTimeout(() => {
         setIsFullScreen(true);
       }, 300);
-      
       return () => clearTimeout(timer);
     }
   }, [messages.length, autoFullScreen, isFullScreen, setIsFullScreen]);
 
-  // If in fullscreen mode, show UnifiedFullScreenChat
   if (isFullScreen) {
     return (
       <AnimatePresence mode="wait">
