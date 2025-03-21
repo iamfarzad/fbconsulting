@@ -8,3 +8,4 @@ httpx==0.26.0
 pydantic==2.5.3
 typing-extensions==4.9.0
 starlette==0.35.1
+werkzeug==1.0.1
