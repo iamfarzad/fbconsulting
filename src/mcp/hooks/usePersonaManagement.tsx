@@ -3,7 +3,7 @@
  * Custom hook for using the Persona Management Protocol
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useRef } from 'react';
 import { useMCP } from './useMCP';
 import { 
   PersonaData, 
@@ -42,13 +42,18 @@ interface UsePersonaManagementResult {
 export function usePersonaManagement(
   options: UsePersonaManagementOptions = {}
 ): UsePersonaManagementResult {
-  const protocol = createPersonaManagementProtocol(options.initialData || {});
-  const [model, sendMessage] = useMCP(protocol);
+  // Create protocol once and store in a ref to prevent recreation
+  const protocolRef = useRef(createPersonaManagementProtocol(options.initialData || {}));
+  
+  const [model, sendMessage] = useMCP(protocolRef.current);
   
   // Track loading state and error
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
-
+  
+  // Debounce mechanism for page changes
+  const lastPageUpdateRef = useRef<string>('');
+  
   // Set the current persona
   const setCurrentPersona = useCallback((persona: PersonaType) => {
     sendMessage(createSetCurrentPersonaMessage(persona));
@@ -74,8 +79,14 @@ export function usePersonaManagement(
     sendMessage(createSetConversationContextMessage(context));
   }, [sendMessage]);
 
-  // Set the current page
+  // Set the current page with debouncing
   const setCurrentPage = useCallback((page: string) => {
+    // Skip duplicate updates to avoid loops
+    if (page === lastPageUpdateRef.current) {
+      return;
+    }
+    
+    lastPageUpdateRef.current = page;
     sendMessage(createSetCurrentPageMessage(page));
   }, [sendMessage]);
 

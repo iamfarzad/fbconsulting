@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { CopilotKit } from '@copilotkit/react-core';
 
 // Internal imports
@@ -29,12 +29,22 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({
   voice: propVoice,
   agentic: propAgentic
 }) => {
-  // Hooks for external data
+  // Refs to prevent excessive re-renders
+  const isInitializedRef = useRef(false);
+  
+  // Hooks for external data - only execute once
   const { personaData, setCurrentPage } = usePersonaManagement();
   const { apiKey: contextApiKey } = useGeminiAPI();
 
-  // State hooks
+  // State hooks with initialization prevention
   const [spatialContext, setSpatialContext] = useState<SpatialContext | null>(null);
+
+  // Only initialize tracking if not already done
+  if (!isInitializedRef.current) {
+    // Track context and user behavior - with debouncing built in
+    useContextTracking(setCurrentPage, setSpatialContext);
+    isInitializedRef.current = true;
+  }
 
   // Custom hooks for different functionalities
   const { voiceConfig } = useVoiceInitialization(propVoice);
@@ -42,15 +52,14 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({
   const { systemMessage } = useSystemMessage(personaData);
   const { agenticConfig } = useAgenticConfig(propAgentic);
 
-  // Track context and user behavior
-  useContextTracking(setCurrentPage, setSpatialContext);
-
   // Runtime URL for the CopilotKit
   const runtimeUrl = useMemo(() => 'http://localhost:3000', []);
 
-  // Configure CopilotKit
+  // Configure CopilotKit - memoize to prevent unnecessary recalculations
   const copilotConfig = useMemo(
     () => {
+      if (!apiKey) return null;
+      
       return {
         publicApiKey: apiKey,
         baseUrl: runtimeUrl,
@@ -72,13 +81,23 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({
         }
       };
     },
-    [runtimeUrl, systemMessage, voiceConfig, spatialContext, apiKey, propModelName, agenticConfig]
+    [
+      runtimeUrl, 
+      systemMessage, 
+      voiceConfig, 
+      spatialContext, 
+      apiKey, 
+      propModelName, 
+      agenticConfig
+    ]
   );
 
+  // Early return if no API key to prevent unnecessary processing
   if (!apiKey) {
     return <>{children}</>;
   }
 
+  // Only render CopilotKit if configuration is available
   return copilotConfig ? (
     <CopilotKit {...copilotConfig}>
       {children}
