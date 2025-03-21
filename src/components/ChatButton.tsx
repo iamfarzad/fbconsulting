@@ -2,8 +2,8 @@
 import React from 'react';
 import { Bot } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UnifiedChat } from './chat/UnifiedChat';
-import { UnifiedFullScreenChat } from './chat/UnifiedFullScreenChat';
+import { UnifiedChat } from '@/components/chat/UnifiedChat';
+import { UnifiedFullScreenChat } from '@/components/chat/UnifiedFullScreenChat';
 import { useToast } from '@/hooks/use-toast';
 
 const ChatButton = () => {
