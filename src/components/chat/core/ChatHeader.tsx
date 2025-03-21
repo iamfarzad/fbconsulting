@@ -53,8 +53,9 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             variant="ghost"
             size="icon"
             onClick={onToggleFullScreen}
-            className="h-8 w-8"
+            className="h-8 w-8 hover:bg-muted"
             title={isFullScreen ? "Minimize" : "Full screen"}
+            aria-label={isFullScreen ? "Minimize chat" : "Expand chat to full screen"}
           >
             {isFullScreen ? (
               <Minimize2 className="h-4 w-4" />
