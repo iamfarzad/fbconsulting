@@ -7,6 +7,8 @@ import SafeApp from './SafeApp.tsx'
 import './index.css'
 // Import voice-ui.css for voice component styling
 import './styles/voice-ui.css'
+// Import HelmetProvider for SEO
+import { HelmetProvider } from 'react-helmet-async'
 
 // Add error boundary for development debugging
 if (import.meta.env.DEV) {
@@ -24,6 +26,8 @@ if (import.meta.env.DEV) {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <SafeApp />
+    <HelmetProvider>
+      <SafeApp />
+    </HelmetProvider>
   </React.StrictMode>,
 )

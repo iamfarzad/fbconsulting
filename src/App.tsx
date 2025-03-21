@@ -1,4 +1,3 @@
-
 import React, { Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ErrorBoundaryWrapper from "./components/ErrorBoundaryWrapper";

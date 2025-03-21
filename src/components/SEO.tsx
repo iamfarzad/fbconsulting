@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
@@ -15,54 +14,60 @@ interface SEOProps {
 }
 
 const SEO: React.FC<SEOProps> = ({
-  title,
-  description,
+  title = 'F.B Consulting',
+  description = 'AI Automation Consulting Services',
   canonicalUrl,
   ogImage = '/og-image.png',
   ogType = 'website',
   structuredData,
-  keywords,
+  keywords = 'AI, Automation, Consulting',
   author = 'AI Automation Consultant',
-  language,
+  language = 'en',
 }) => {
   // Use a try-catch block to handle potential errors with window access
-  let siteUrl = '';
-  let pageUrl = '';
+  let siteUrl = 'https://fbconsulting.com';
+  let pageUrl = canonicalUrl || siteUrl;
+  
   try {
-    siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://fbconsulting.com';
-    pageUrl = canonicalUrl || (typeof window !== 'undefined' ? window.location.href : 'https://fbconsulting.com');
+    if (typeof window !== 'undefined' && window.location) {
+      siteUrl = window.location.origin;
+      pageUrl = canonicalUrl || window.location.href;
+    }
   } catch (error) {
     console.error('Error accessing window.location:', error);
-    // Fallback values
-    siteUrl = 'https://fbconsulting.com';
-    pageUrl = canonicalUrl || 'https://fbconsulting.com';
   }
   
-  const imageUrl = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`;
+  const imageUrl = ogImage ? (ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`) : `${siteUrl}/og-image.png`;
   
-  // Default organization structured data to be merged with page-specific data
-  const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "ProfessionalService",
-    "@id": `${siteUrl}/#organization`,
-    "name": "F.B Consulting",
-    "url": siteUrl,
-    "logo": `${siteUrl}/og-image.png`,
-    "description": "AI automation consulting services for businesses looking to reduce costs and increase efficiency",
-    "sameAs": [
-      "https://linkedin.com/in/yourprofile", 
-      "https://twitter.com/yourprofile"
-    ]
-  };
+  // Safely handle structured data
+  let fullStructuredData = [];
+  try {
+    // Default organization structured data to be merged with page-specific data
+    const organizationSchema = {
+      "@context": "https://schema.org",
+      "@type": "ProfessionalService",
+      "@id": `${siteUrl}/#organization`,
+      "name": "F.B Consulting",
+      "url": siteUrl,
+      "logo": `${siteUrl}/og-image.png`,
+      "description": "AI automation consulting services for businesses looking to reduce costs and increase efficiency",
+      "sameAs": [
+        "https://linkedin.com/in/yourprofile", 
+        "https://twitter.com/yourprofile"
+      ]
+    };
 
-  // Combine with page-specific structured data if provided
-  let fullStructuredData = structuredData;
-  if (Array.isArray(structuredData)) {
-    fullStructuredData = [organizationSchema, ...structuredData];
-  } else if (structuredData) {
-    fullStructuredData = [organizationSchema, structuredData];
-  } else {
-    fullStructuredData = [organizationSchema];
+    // Combine with page-specific structured data if provided
+    if (Array.isArray(structuredData)) {
+      fullStructuredData = [organizationSchema, ...structuredData];
+    } else if (structuredData) {
+      fullStructuredData = [organizationSchema, structuredData];
+    } else {
+      fullStructuredData = [organizationSchema];
+    }
+  } catch (error) {
+    console.error('Error processing structured data:', error);
+    fullStructuredData = [];
   }
   
   return (

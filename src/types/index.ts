@@ -1,7 +1,8 @@
 // Chat message types
 export interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
+  role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
+  timestamp: number;
 }
 
 // Lead information type

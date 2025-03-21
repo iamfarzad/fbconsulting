@@ -102,10 +102,8 @@ const Index = () => {
     homePageStructuredData
   ];
 
-  // Wrap SEO component in try-catch to prevent it from crashing the entire page
-  let seoComponent;
-  try {
-    seoComponent = (
+  return (
+    <>
       <SEO
         title={isNorwegian ? "AI Automatisering for Norske Bedrifter | F.B Consulting" : "AI Automation Ally - Automate Your Business with AI | F.B Consulting"}
         description={isNorwegian 
@@ -113,19 +111,10 @@ const Index = () => {
           : "Unlock the power of AI to automate your business processes, increase efficiency, and drive growth. Expert AI consulting services for workflow optimization and cost reduction."}
         keywords={isNorwegian 
           ? "AI Norge, AI automatisering Norge, GDPR samsvar, Norsk bedriftsautomatisering, virksomhetsautomatisering, AI konsulent Oslo" 
-          : "AI automation, business process automation, AI consulting, workflow optimization, cost reduction, AI implementation, virtual assistants, chatbots"}
-        structuredData={combinedStructuredData}
+          : "AI automation, business process automation, AI consulting, workflow optimization, cost reduction, AI implementation"}
         language={isNorwegian ? "no" : "en"}
+        structuredData={combinedStructuredData}
       />
-    );
-  } catch (error) {
-    console.error('Error rendering SEO component:', error);
-    seoComponent = <title>AI Automation Ally | F.B Consulting</title>;
-  }
-  
-  return (
-    <>
-      {seoComponent}
       <div className="min-h-screen flex flex-col bg-background">
         <Navbar />
         <main className="flex-grow relative">

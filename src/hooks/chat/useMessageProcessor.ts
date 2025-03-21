@@ -49,7 +49,7 @@ export function useMessageProcessor() {
         imageData,
         { 
           apiKey, 
-          model: images.length > 0 ? 'gemini-2.0-vision' : 'gemini-2.0-flash'
+          model: images.length > 0 ? 'gemini-2.0-flash' : 'gemini-2.0-flash'
         }
       );
     } catch (error) {

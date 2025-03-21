@@ -1,10 +1,10 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { NavigationMenu, NavigationMenuList } from "@/components/ui/navigation-menu";
 import { MenuItem, renderMenuItem } from "./MenuItem";
 import { DesktopDarkModeToggle, DarkModeToggleProps } from "./DarkModeToggle";
 import { SearchButton } from "@/components/ui/search/SearchButton";
+import { Logo3D } from "@/components/3d/Logo3D";
 
 interface NavbarLogoProps {
   url: string;
@@ -33,7 +33,7 @@ export const DesktopNavbar: React.FC<DesktopNavbarProps> = ({
     <nav className="hidden justify-between lg:flex">
       <div className="flex items-center gap-6">
         <a href={logo.url} className="flex items-center gap-2">
-          <img src={logo.src} className="w-8" alt={logo.alt} />
+          <Logo3D size="w-10 h-10" />
           <span className="text-lg font-semibold">{logo.title}</span>
         </a>
         <div className="flex items-center">
