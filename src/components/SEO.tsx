@@ -29,8 +29,8 @@ const SEO: React.FC<SEOProps> = ({
   let siteUrl = '';
   let pageUrl = '';
   try {
-    siteUrl = typeof window !== 'undefined' && window.location ? window.location.origin : '';
-    pageUrl = canonicalUrl || (typeof window !== 'undefined' && window.location ? window.location.href : '');
+    siteUrl = typeof window !== 'undefined' ? window.location.origin : 'https://fbconsulting.com';
+    pageUrl = canonicalUrl || (typeof window !== 'undefined' ? window.location.href : 'https://fbconsulting.com');
   } catch (error) {
     console.error('Error accessing window.location:', error);
     // Fallback values
@@ -65,18 +65,16 @@ const SEO: React.FC<SEOProps> = ({
     fullStructuredData = [organizationSchema];
   }
   
-  // Wrap the Helmet in a try-catch to prevent crashes
-  try {
-    return (
-      <Helmet>
-        {/* Basic meta tags */}
-        <title>{title}</title>
-        <meta name="description" content={description} />
-        <link rel="canonical" href={pageUrl} />
-        {keywords && <meta name="keywords" content={keywords} />}
-        {author && <meta name="author" content={author} />}
-        {language && <html lang={language} />}
-      
+  return (
+    <Helmet>
+      {/* Basic meta tags */}
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <link rel="canonical" href={pageUrl} />
+      {keywords && <meta name="keywords" content={keywords} />}
+      {author && <meta name="author" content={author} />}
+      {language && <html lang={language} />}
+    
       {/* OpenGraph tags */}
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
@@ -97,13 +95,8 @@ const SEO: React.FC<SEOProps> = ({
           {JSON.stringify(fullStructuredData)}
         </script>
       )}
-      </Helmet>
-    );
-  } catch (error) {
-    console.error('Error rendering Helmet:', error);
-    // Return null or a minimal component that won't crash
-    return <title>{title}</title>;
-  }
+    </Helmet>
+  );
 };
 
 export default SEO;
