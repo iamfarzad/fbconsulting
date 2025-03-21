@@ -22,7 +22,7 @@ const ChatButton = lazy(() => import("./components/ChatButton"));
 
 // Import providers
 import { LanguageProvider } from "./contexts/LanguageContext";
-import { CopilotProvider } from "./components/copilot/CopilotProvider";
+import { CopilotProvider } from "@/components/copilot/providers/CopilotProvider"; // Updated import path
 
 // Simple loading component
 const LoadingFallback = () => (
