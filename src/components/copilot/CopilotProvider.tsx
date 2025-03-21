@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { CopilotKit } from '@copilotkit/react-core';
 
 // Internal imports
@@ -45,12 +45,16 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({
   const { systemMessage } = useSystemMessage(personaData);
   const { agenticConfig } = useAgenticConfig(propAgentic);
   
-  // Initialize tracking if not already done - this is safe because we use a ref
-  if (!isInitializedRef.current) {
-    // Track context and user behavior
-    useContextTracking(setCurrentPage, setSpatialContext);
-    isInitializedRef.current = true;
-  }
+  // Use useEffect instead of conditional initialization to ensure hooks are called consistently
+  useEffect(() => {
+    if (!isInitializedRef.current) {
+      // Track context and user behavior
+      isInitializedRef.current = true;
+    }
+  }, []);
+  
+  // Always call useContextTracking unconditionally at the top level
+  useContextTracking(setCurrentPage, setSpatialContext);
 
   // Runtime URL for the CopilotKit
   const runtimeUrl = useMemo(() => 'http://localhost:3000', []);
