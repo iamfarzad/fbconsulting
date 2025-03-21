@@ -1,16 +1,19 @@
 
 import React, { Suspense } from "react";
 import { BrowserRouter } from "react-router-dom";
-import ErrorBoundary from "./components/ErrorBoundary";
+import ErrorBoundaryWrapper from "./components/ErrorBoundaryWrapper";
 import { Toaster } from "@/components/ui/toaster";
 import LoadingFallback from "./components/LoadingFallback";
 import AppRoutes from "./routes/AppRoutes";
 import ChatButtonWrapper from "./components/ChatButtonWrapper";
 import ProvidersWrapper from "./components/ProvidersWrapper";
 
+/**
+ * Main application component with error boundaries and providers.
+ */
 const SafeApp: React.FC = () => {
   return (
-    <ErrorBoundary>
+    <ErrorBoundaryWrapper>
       <BrowserRouter>
         <ProvidersWrapper>
           <Suspense fallback={<LoadingFallback />}>
@@ -20,7 +23,7 @@ const SafeApp: React.FC = () => {
           </Suspense>
         </ProvidersWrapper>
       </BrowserRouter>
-    </ErrorBoundary>
+    </ErrorBoundaryWrapper>
   );
 };
 

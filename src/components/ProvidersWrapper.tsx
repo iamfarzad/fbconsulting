@@ -1,6 +1,6 @@
 
 import React from "react";
-import ErrorBoundary from "./ErrorBoundary";
+import ErrorBoundaryWrapper from "./ErrorBoundaryWrapper";
 import ThemeProvider from "./ThemeProvider";
 import { LanguageProvider } from "../contexts/LanguageContext";
 import { CopilotProvider } from "./copilot/CopilotProvider";
@@ -10,27 +10,31 @@ interface ProvidersWrapperProps {
   children: React.ReactNode;
 }
 
+/**
+ * Wraps the application with all required providers in the correct order.
+ * Each provider is wrapped in an ErrorBoundaryWrapper to isolate failures.
+ */
 const ProvidersWrapper: React.FC<ProvidersWrapperProps> = ({ children }) => {
   return (
-    <ErrorBoundary>
+    <ErrorBoundaryWrapper>
       <ThemeProvider>
-        <ErrorBoundary>
+        <ErrorBoundaryWrapper>
           <LanguageProvider>
-            <ErrorBoundary>
+            <ErrorBoundaryWrapper>
               <CopilotProvider>
-                <ErrorBoundary>
+                <ErrorBoundaryWrapper>
                   <GeminiAPIProvider>
-                    <ErrorBoundary>
+                    <ErrorBoundaryWrapper>
                       {children}
-                    </ErrorBoundary>
+                    </ErrorBoundaryWrapper>
                   </GeminiAPIProvider>
-                </ErrorBoundary>
+                </ErrorBoundaryWrapper>
               </CopilotProvider>
-            </ErrorBoundary>
+            </ErrorBoundaryWrapper>
           </LanguageProvider>
-        </ErrorBoundary>
+        </ErrorBoundaryWrapper>
       </ThemeProvider>
-    </ErrorBoundary>
+    </ErrorBoundaryWrapper>
   );
 };
 
