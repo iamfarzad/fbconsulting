@@ -1,5 +1,6 @@
 
 import React from "react";
+import { HelmetProvider } from "react-helmet-async";
 import ErrorBoundaryWrapper from "./ErrorBoundaryWrapper";
 import ThemeProvider from "./ThemeProvider";
 import { LanguageProvider } from "../contexts/LanguageContext";
@@ -17,23 +18,25 @@ interface ProvidersWrapperProps {
 const ProvidersWrapper: React.FC<ProvidersWrapperProps> = ({ children }) => {
   return (
     <ErrorBoundaryWrapper>
-      <ThemeProvider>
-        <ErrorBoundaryWrapper>
-          <LanguageProvider>
-            <ErrorBoundaryWrapper>
-              <CopilotProvider>
-                <ErrorBoundaryWrapper>
-                  <GeminiAPIProvider>
-                    <ErrorBoundaryWrapper>
-                      {children}
-                    </ErrorBoundaryWrapper>
-                  </GeminiAPIProvider>
-                </ErrorBoundaryWrapper>
-              </CopilotProvider>
-            </ErrorBoundaryWrapper>
-          </LanguageProvider>
-        </ErrorBoundaryWrapper>
-      </ThemeProvider>
+      <HelmetProvider>
+        <ThemeProvider>
+          <ErrorBoundaryWrapper>
+            <LanguageProvider>
+              <ErrorBoundaryWrapper>
+                <CopilotProvider>
+                  <ErrorBoundaryWrapper>
+                    <GeminiAPIProvider>
+                      <ErrorBoundaryWrapper>
+                        {children}
+                      </ErrorBoundaryWrapper>
+                    </GeminiAPIProvider>
+                  </ErrorBoundaryWrapper>
+                </CopilotProvider>
+              </ErrorBoundaryWrapper>
+            </LanguageProvider>
+          </ErrorBoundaryWrapper>
+        </ThemeProvider>
+      </HelmetProvider>
     </ErrorBoundaryWrapper>
   );
 };
