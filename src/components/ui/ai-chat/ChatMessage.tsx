@@ -31,46 +31,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   const isAssistant = role === 'assistant';
   const isSystem = role === 'system';
   
-<<<<<<< HEAD
   // Format timestamp
   const formattedTime = timestamp 
     ? new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     : '';
-=======
-  const { textContent, cards, forms } = extractContentFromMessage(message.content);
-  const { media } = extractMediaContent(textContent);
-  
-  const renderForm = (formType: FormType, formData?: Record<string, string>) => {
-    switch (formType) {
-      case 'email-summary':
-        return <EmailSummaryForm onSubmit={handleFormSubmitted} />;
-      case 'newsletter-signup':
-        return <NewsletterSignup compact={true} />;
-      case 'booking-request':
-        return (
-          <div className="p-4 bg-black/5 rounded-lg">
-            <p className="text-sm text-muted-foreground">
-              Booking calendar will be available here soon.
-            </p>
-          </div>
-        );
-      case 'contact-form':
-        return (
-          <div className="p-4 bg-black/5 rounded-lg">
-            <p className="text-sm text-muted-foreground">
-              Contact form will be available here soon.
-            </p>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-  
-  const handleFormSubmitted = () => {
-    console.log('Form submitted successfully');
-  };
->>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
   
   return (
     <div 
@@ -120,59 +84,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             {formattedTime}
           </div>
         )}
-<<<<<<< HEAD
         
         {/* Media content */}
         {media && media.length > 0 && (
           <MessageMediaComponent media={media} className="mt-2" />
-=======
-        <div>
-          <p className={isUser ? "text-black" : "text-white"}>
-            {textContent}
-          </p>
-          
-          {media.length > 0 && (
-            <div className="space-y-2 mt-2">
-              {media.map((item, index) => (
-                <MessageMedia 
-                  key={`media-${index}`} 
-                  media={item}
-                />
-              ))}
-            </div>
-          )}
-          
-          {cards.length > 0 && (
-            <div className="mt-3">
-              <GraphicCardCollection cards={cards} />
-            </div>
-          )}
-          
-          {!isUser && forms.length > 0 && (
-            <div className="mt-3 space-y-3">
-              {forms.map((form, index) => (
-                <div key={`form-${index}`}>
-                  {renderForm(form.type, form.data)}
-                </div>
-              ))}
-            </div>
-          )}
-          
-          <div className={cn(
-            "text-xs mt-1",
-            isUser ? "text-black/70" : "text-white/70"
-          )}>
-            {new Date(message.timestamp).toLocaleTimeString([], { 
-              hour: '2-digit', 
-              minute: '2-digit' 
-            })}
-          </div>
-        </div>
-        {isUser && (
-          <div className="p-1.5 bg-white/30 rounded-full mt-0.5">
-            <CircleUserRound size={16} className="text-black" />
-          </div>
->>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
         )}
       </div>
       
