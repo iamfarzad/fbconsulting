@@ -20,32 +20,7 @@ import TestUnifiedChat from "./pages/TestUnifiedChat";
 import AIDemo from "./pages/AIDemo";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { CopilotProvider } from "./components/copilot/CopilotProvider";
-
-// Load Gemini API Key from environment variables
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
-
-// Create a Context for Gemini API
-const GeminiAPIContext = createContext<{ apiKey: string | null }>({ apiKey: null });
-
-// Custom hook to access the Gemini API Key
-export const useGeminiAPI = () => {
-  return useContext(GeminiAPIContext);
-};
-
-const GeminiAPIProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [apiKey, setApiKey] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!GEMINI_API_KEY) {
-      console.error("⚠️ Missing VITE_GEMINI_API_KEY in .env file");
-    } else {
-      setApiKey(GEMINI_API_KEY);
-      console.log("✅ Google Gemini API Key Loaded");
-    }
-  }, []);
-
-  return <GeminiAPIContext.Provider value={{ apiKey }}>{children}</GeminiAPIContext.Provider>;
-};
+import { GeminiAPIProvider, useGeminiAPI } from "./providers/GeminiAPIProvider";
 
 // Simple loading component
 const LoadingFallback = () => (
