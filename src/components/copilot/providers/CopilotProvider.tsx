@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, createContext, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
-import { CopilotKit, CopilotKitProps } from '@copilotkit/react-core';
+import { CopilotKit } from '@copilotkit/react-core';
 
 // Internal imports
 import { usePersonaManagement } from '@/mcp/hooks/usePersonaManagement';
@@ -10,16 +10,41 @@ import { ConnectionStatusIndicator } from '../ui/ConnectionStatusIndicator';
 import { formatErrorMessage, logDetailedError, categorizeError } from '@/utils/errorHandling';
 import type { 
   SpatialContext, 
-  VoiceConfig 
-} from '@/services/copilot/types';
+  VoiceConfig, 
+  Message,
+  CopilotConfig as CopilotConfigType
+} from '../types';
+
+// Basic Copilot Context for toggle functionality
+interface CopilotContextType {
+  enabled: boolean;
+  toggleCopilot: () => void;
+  isConnected: boolean;
+  isConnecting: boolean;
+  error: string | null;
+}
+
+const CopilotContext = createContext<CopilotContextType | undefined>(undefined);
+
+export const useCopilot = () => {
+  const context = useContext(CopilotContext);
+  if (context === undefined) {
+    throw new Error('useCopilot must be used within a CopilotProvider');
+  }
+  return context;
+};
 
 interface CopilotProviderProps {
   children: React.ReactNode;
 }
 
 export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) => {
+  // Basic toggle state
+  const [enabled, setEnabled] = useState(false);
+  const toggleCopilot = () => setEnabled(prev => !prev);
+
   // Hooks for external data
-  const { personaData, setCurrentPage } = usePersonaManagement();
+  const { personaData } = usePersonaManagement();
   const location = useLocation();
   const { apiKey, isLoading } = useGeminiAPI();
 
@@ -31,7 +56,6 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
 
   // Memoized values
   const publicApiKey = useMemo(() => {
-    // Safely use the API key without logging it
     return apiKey || '';
   }, [apiKey]);
 
@@ -62,44 +86,45 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
     `;
   }, [personaData]);
 
-  const copilotConfig = useMemo(
-    () => {
-      return {
-        apiKey: publicApiKey,
-        options: {
-          model: 'gemini-2.0-flash-001',
-          temperature: 0.7,
-          maxTokens: 2048,
-          initialMessages: [
-            {
-              role: 'system' as const,
-              content: systemMessage
-            }
-          ],
-          voice: voiceEnabled ? {
-            enabled: true,
-            voice: 'Charon',
-            pitch: 1,
-            rate: 1
-          } : undefined,
-          spatialContext: spatialContext,
-          agentic: {
-            proactiveAssistance: true,
-            learningEnabled: true,
-            contextAwareness: true,
-            behaviorPatterns: ['page_navigation', 'content_interaction', 'form_interaction']
-          }
+  const copilotConfig = useMemo<CopilotConfigType>(
+    () => ({
+      apiKey: publicApiKey,
+      options: {
+        model: 'gemini-2.0-flash-001',
+        temperature: 0.7,
+        maxTokens: 2048,
+        initialMessages: [
+          {
+            role: 'system',
+            content: systemMessage,
+            timestamp: Date.now()
+          } as Message
+        ],
+        voice: voiceEnabled ? {
+          enabled: true,
+          voice: 'Charon',
+          pitch: 1,
+          rate: 1
+        } : undefined,
+        spatialContext: spatialContext,
+        agentic: {
+          proactiveAssistance: true,
+          learningEnabled: true,
+          contextAwareness: true,
+          behaviorPatterns: ['page_navigation', 'content_interaction', 'form_interaction']
         }
-      };
-    },
+      }
+    }),
     [systemMessage, voiceEnabled, spatialContext, publicApiKey]
   );
 
   // Initialize and validate API key
   useEffect(() => {
+    if (!enabled) return; // Don't connect if copilot is disabled
+
     if (isLoading) {
       setConnectionStatus('connecting');
-      return; // Wait until loading is complete
+      return;
     }
     
     if (!apiKey) {
@@ -111,12 +136,10 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
         variant: 'destructive'
       });
     } else {
-      // Test connection to the API
       const testConnection = async () => {
         try {
           setConnectionStatus('connecting');
           
-          // Simple test to verify API key works
           const response = await fetch('https://generativelanguage.googleapis.com/v1/models?key=' + apiKey);
           
           if (!response.ok) {
@@ -158,18 +181,18 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
       
       testConnection();
     }
-  }, [apiKey, isLoading]);
+  }, [apiKey, isLoading, enabled]);
 
-  // Initialize voice synthesis
+  // Voice synthesis initialization
   useEffect(() => {
+    if (!enabled) return; // Don't initialize voice if copilot is disabled
+
     const initVoice = async () => {
       if ('speechSynthesis' in window) {
         try {
-          // First check if voices are already loaded
           let voices = window.speechSynthesis.getVoices();
           
           if (voices.length === 0) {
-            // If voices aren't loaded yet, wait for them
             await new Promise<void>(resolve => {
               const voicesChangedHandler = () => {
                 voices = window.speechSynthesis.getVoices();
@@ -177,15 +200,12 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
                 resolve();
               };
               window.speechSynthesis.addEventListener('voiceschanged', voicesChangedHandler);
-              
-              // Set a timeout just in case the event never fires
               setTimeout(resolve, 1000);
             });
           }
           
-          // Look for the Charon voice or enable with any available voice
           const charonVoice = voices.find(voice => voice.name.includes('Charon'));
-          setVoiceEnabled(voices.length > 0); // Enable if any voices are available
+          setVoiceEnabled(voices.length > 0);
         } catch (error) {
           console.error('Error initializing voice synthesis:', error);
           setVoiceEnabled(false);
@@ -197,11 +217,12 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
     };
 
     initVoice();
-  }, []);
+  }, [enabled]);
 
-  // Track user behavior and page context
+  // Spatial context tracking
   useEffect(() => {
-    // Initialize spatial context if needed
+    if (!enabled) return; // Don't track context if copilot is disabled
+
     if (!spatialContext) {
       const currentPath = location.pathname;
       const pageName = currentPath === '/' ? 'home' : currentPath.substring(1);
@@ -213,34 +234,37 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
         userBehavior: 'active',
         timestamp: Date.now()
       });
-      return; // Exit early as we just initialized
     }
-  }, [location, spatialContext]);
+  }, [location, spatialContext, enabled]);
 
-  // Only show status indicator when there is an error or connecting
   const showConnectionStatus = connectionStatus === 'error' || connectionStatus === 'connecting';
 
+  // Provide the combined context value
+  const contextValue = {
+    enabled,
+    toggleCopilot,
+    isConnected: connectionStatus === 'connected',
+    isConnecting: connectionStatus === 'connecting',
+    error: connectionError
+  };
+
   return (
-    <>
-      {showConnectionStatus && (
+    <CopilotContext.Provider value={contextValue}>
+      {showConnectionStatus && enabled && (
         <ConnectionStatusIndicator 
           status={connectionStatus}
           error={connectionError}
-          onRetry={() => {
-            // Reset connection status and trigger a new connection test
-            setConnectionStatus('connecting');
-            // This will trigger the useEffect that tests the connection
-          }}
+          onRetry={() => setConnectionStatus('connecting')}
         />
       )}
       
-      {(connectionStatus === 'connected' && apiKey) ? (
+      {(enabled && connectionStatus === 'connected' && apiKey) ? (
         <CopilotKit {...copilotConfig}>
           {children}
         </CopilotKit>
       ) : (
         children
       )}
-    </>
+    </CopilotContext.Provider>
   );
 };
