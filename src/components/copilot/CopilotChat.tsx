@@ -1,13 +1,16 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 import { ChatHeader } from './chat/ChatHeader';
 import { ChatMessages } from './chat/ChatMessages';
 import { ChatInputArea } from './chat/ChatInputArea';
 import { ErrorDisplay } from './chat/ErrorDisplay';
 import { AIMessage } from '@/services/chat/messageTypes';
+import { useGeminiAPI } from '@/hooks/useGeminiAPI';
+import { useMessageHandler } from '@/hooks/chat/useMessageHandler';
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
@@ -22,19 +25,22 @@ interface CopilotChatProps {
 }
 
 export const CopilotChat: React.FC<CopilotChatProps> = ({
-  apiKey,
+  apiKey: propApiKey,
   systemMessage = 'You are a helpful AI assistant.',
   className = '',
 }) => {
+  const { toast } = useToast();
+  const { apiKey: contextApiKey } = useGeminiAPI();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [inputValue, setInputValue] = useState('');
-  const [errorVisible, setErrorVisible] = useState(false);
-  const [isVoiceSupported, setIsVoiceSupported] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [voiceError, setVoiceError] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isListening, setIsListening] = useState(false);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [isVoiceSupported, setIsVoiceSupported] = useState(false);
+  const [transcript, setTranscript] = useState('');
   
   // Check for voice support
   useEffect(() => {
@@ -46,46 +52,64 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
     };
     
     setIsVoiceSupported(checkVoiceSupport());
-    setIsInitialized(!!apiKey);
-  }, [apiKey]);
+  }, []);
   
-  // Show error if there's an issue
+  // Determine which API key to use
+  const effectiveApiKey = propApiKey || contextApiKey || import.meta.env.VITE_GEMINI_API_KEY;
+  
+  // Set initialized state based on API key
   useEffect(() => {
-    if (error) {
-      setErrorVisible(true);
-      setTimeout(() => setErrorVisible(false), 5000);
+    setIsInitialized(!!effectiveApiKey);
+    if (!effectiveApiKey) {
+      setError("No API key found. Please provide an API key.");
+    } else {
+      setError(null);
     }
-  }, [error]);
+  }, [effectiveApiKey]);
   
-  // Handle sending message
-  const handleSubmitMessage = (newMessage: Message) => {
+  // Add messages to state
+  const addMessage = (role: 'user' | 'assistant' | 'system' | 'error', content: string) => {
+    const newMessage: Message = {
+      role: role === 'error' ? 'system' : role,
+      content,
+      timestamp: Date.now()
+    };
     setMessages(prev => [...prev, newMessage]);
-    setIsLoading(true);
-    
-    // Simulate API response
-    setTimeout(() => {
-      const response: Message = {
-        role: 'assistant',
-        content: `This is a mock response to: "${newMessage.content}"`,
-        timestamp: Date.now()
-      };
-      
-      setMessages(prev => [...prev, response]);
-      setIsLoading(false);
-    }, 1000);
   };
+  
+  // Handle errors
+  const handleError = (errorMessage: string) => {
+    setError(errorMessage);
+    toast({
+      title: "Error",
+      description: errorMessage,
+      variant: "destructive"
+    });
+  };
+  
+  // Get system prompt function for messageHandler
+  const getSystemPrompt = () => systemMessage;
+  
+  // Use message handler from hooks
+  const { sendMessage } = useMessageHandler({
+    messages: messages,
+    apiKey: effectiveApiKey || null,
+    addMessage,
+    setLoadingState: setIsLoading,
+    handleError,
+    getSystemPrompt,
+    modelName: 'gemini-2.0-flash'
+  });
   
   // Handle sending message
   const handleSendMessage = () => {
     if (!inputValue.trim()) return;
     
-    const newMessage: Message = {
-      role: 'user',
-      content: inputValue,
-      timestamp: Date.now()
-    };
+    if (isListening) {
+      setIsListening(false);
+    }
     
-    handleSubmitMessage(newMessage);
+    sendMessage(inputValue);
     setInputValue('');
   };
   
@@ -100,8 +124,20 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
   // Handle voice input toggle
   const toggleListening = () => {
     setIsListening(prev => !prev);
-    // Voice functionality would be implemented here
+    // Voice functionality would be implemented here with a proper hook
   };
+  
+  // Clear messages
+  const clearMessages = () => {
+    setMessages([]);
+  };
+  
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
   
   // Convert messages to AIMessage format for ChatMessages component
   const aiMessages: AIMessage[] = messages.map(msg => ({
@@ -123,17 +159,17 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
         <ChatMessages 
           messages={aiMessages} 
           isLoading={isLoading}
-          isProviderLoading={false}
+          isProviderLoading={!isInitialized}
           isListening={isListening}
-          transcript=""
+          transcript={transcript}
           error={error}
-          messagesEndRef={{ current: null }}
+          messagesEndRef={messagesEndRef}
           isInitialized={isInitialized}
         />
       </div>
       
       {/* Error display */}
-      {errorVisible && <ErrorDisplay error={error || "Unknown error"} />}
+      {error && <ErrorDisplay error={error} />}
       
       {/* Input area */}
       <ChatInputArea 
@@ -145,7 +181,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
         isLoading={isLoading}
         isListening={isListening}
         isInitialized={isInitialized}
-        isProviderLoading={false}
+        isProviderLoading={!isInitialized}
         isVoiceSupported={isVoiceSupported}
         error={error}
         voiceError={voiceError}

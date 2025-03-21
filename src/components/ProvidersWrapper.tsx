@@ -4,7 +4,7 @@ import { HelmetProvider } from "react-helmet-async";
 import ErrorBoundaryWrapper from "./ErrorBoundaryWrapper";
 import ThemeProvider from "./ThemeProvider";
 import { LanguageProvider } from "../contexts/LanguageContext";
-import { CopilotProvider } from "./copilot/CopilotProvider";
+import { CopilotProvider } from "@/components/copilot";
 import { GeminiAPIProvider } from "../providers/GeminiAPIProvider";
 
 interface ProvidersWrapperProps {
