@@ -5,8 +5,29 @@
       "src": "api/gemini/**/*.py",
       "use": "@vercel/python",
       "config": {
-        "runtime": "python3.9"
+        "runtime": "python3.12"
       }
     }
-  ]
+  ],
+  "functions": {
+    "api/gemini/stream.py": {
+      "memory": 1024,
+      "maxDuration": 60,
+      "runtime": "python3.12",
+      "fluidCompute": true
+    },
+    "api/gemini/audio.py": {
+      "memory": 1024,
+      "maxDuration": 30,
+      "runtime": "python3.12",
+      "fluidCompute": true
+    }
+  },
+  "routes": [
+    { "src": "/api/gemini/stream", "dest": "/api/gemini/stream.py" },
+    { "src": "/api/gemini/audio", "dest": "/api/gemini/audio.py" }
+  ],
+  "env": {
+    "GOOGLE_API_KEY": "${GOOGLE_API_KEY}"
+  }
 }
