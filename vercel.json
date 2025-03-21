@@ -1,15 +1,6 @@
 
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/gemini/**/*.py",
-      "use": "@vercel/python",
-      "config": {
-        "runtime": "python3.12"
-      }
-    }
-  ],
   "functions": {
     "api/gemini/stream.py": {
       "memory": 1024,
