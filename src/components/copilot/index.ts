@@ -18,8 +18,34 @@ export { ChatMessages } from './chat/ChatMessages';
 export { ChatInputArea } from './chat/ChatInputArea';
 export { ErrorDisplay } from './chat/ErrorDisplay';
 
-// Adapters
-export * from './adapters';
+// Common Types
+export type { Message, WebSocketMessage, MessageHandler, VoiceConfig, ChatConfig } from './types';
+
+// API Types
+export type {
+  // Response Types
+  StreamResponse,
+  AudioResponse,
+  VisionResponse,
+  
+  // Request Types
+  ChatRequest,
+  AudioRequest,
+  VisionRequest,
+  
+  // WebSocket Types
+  WebSocketRequest,
+  WebSocketResponse,
+  
+  // Configuration
+  FluidComputeConfig,
+  
+  // Error Types
+  APIError,
+  
+  // Health Check
+  HealthCheckResponse
+} from './api/types';
 
 // Re-export necessary CopilotKit types and hooks
 export {
@@ -27,19 +53,22 @@ export {
   useCopilotAction
 } from '@copilotkit/react-core';
 
-// Types
-export interface CopilotOptions {
+// Initialization utilities
+export const initializeCopilotWithGoogleAI = (options: {
   apiKey: string;
   modelName?: string;
   temperature?: number;
   maxOutputTokens?: number;
-}
-
-// Initialization utilities
-export const initializeCopilotWithGoogleAI = (options: CopilotOptions) => {
-  console.log('Initializing CopilotKit with Google GenAI', options);
+}) => {
+  console.log('Initializing CopilotKit with Google GenAI', {
+    ...options,
+    apiKey: '[REDACTED]'
+  });
   return {
     isInitialized: true,
-    options
+    options: {
+      ...options,
+      apiKey: '[REDACTED]'
+    }
   };
 };
