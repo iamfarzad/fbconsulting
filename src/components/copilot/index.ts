@@ -1,26 +1,16 @@
-<<<<<<< HEAD
-// Export components
+// Core Components
 export { GeminiChat as CopilotChat } from './core/GeminiChat';
 export * from './core/CopilotConfig';
+
+// Providers
 export * from './providers/CopilotProvider';
 export * from './providers/GeminiProvider';
 export * from './providers/GoogleGenAIConfig';
+
+// UI Components
 export * from './ui/ConnectionStatusIndicator';
 export * from './ui/DocumentPreview';
 export * from './ui/FallbackChatUI';
-=======
-// Core Components
-export { GeminiChat } from './core/GeminiChat';
-export { CopilotChat } from './core/CopilotChat';
-export { CopilotConfig } from './core/CopilotConfig';
-
-// Providers
-export { CopilotProvider, useCopilot } from './providers/CopilotProvider';
-export { GeminiProvider, useGemini } from './providers/GeminiProvider';
-export { GoogleGenAIConfig } from './providers/GoogleGenAIConfig';
->>>>>>> 6df6dfe (Fix: Remove reference to non-existent CopilotChat module)
-
-// UI Components
 export { AnimatedBars } from './ui/AnimatedBars';
 export { ChatHeader } from './chat/ChatHeader';
 export { ChatMessages } from './chat/ChatMessages';
