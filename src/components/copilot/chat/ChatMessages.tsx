@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Loader2 } from "lucide-react";
 import { AnimatedBars } from '../ui/AnimatedBars';
-import { AIMessage } from '@/services/chat/messageTypes';
+import { useGemini } from '../providers/GeminiProvider';
+import { Message } from '../types';
 
 interface ChatMessagesProps {
-  messages: AIMessage[];
+  messages: Message[];
   isLoading: boolean;
   isProviderLoading: boolean;
   isListening: boolean;
@@ -12,6 +13,7 @@ interface ChatMessagesProps {
   error: string | null;
   messagesEndRef: React.RefObject<HTMLDivElement>;
   isInitialized: boolean;
+  onNewMessage?: (message: Message) => void;
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
@@ -22,23 +24,43 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   transcript,
   error,
   messagesEndRef,
-  isInitialized
+  isInitialized,
+  onNewMessage
 }) => {
-  // Provider not initialized or loading
-  if (isProviderLoading || !isInitialized) {
+  const { isConnected } = useGemini();
+
+  useEffect(() => {
+    // Scroll to bottom when new messages arrive
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, messagesEndRef]);
+
+  // Show loading state when not connected to backend
+  if (!isConnected || isProviderLoading) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="flex flex-col items-center">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-2" />
           <p className="text-muted-foreground text-center">
-            Initializing AI Assistant...
+            Connecting to AI Assistant...
           </p>
         </div>
       </div>
     );
   }
 
-  // No messages state
+  // Show error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="p-4 bg-destructive/10 text-destructive rounded-lg">
+          <p className="font-medium">Error</p>
+          <p className="text-sm">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state
   if (isInitialized && messages.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -68,13 +90,14 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           >
             <div className="whitespace-pre-wrap">{message.content}</div>
             
-            {/* Timestamp */}
-            <div className="mt-1 text-xs opacity-70">
-              {new Date(message.timestamp).toLocaleTimeString([], { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-              })}
-            </div>
+            {message.timestamp && (
+              <div className="mt-1 text-xs opacity-70">
+                {new Date(message.timestamp).toLocaleTimeString([], { 
+                  hour: '2-digit', 
+                  minute: '2-digit' 
+                })}
+              </div>
+            )}
           </div>
         </div>
       ))}
@@ -83,11 +106,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
       {isLoading && (
         <div className="flex justify-start">
           <div className="max-w-[80%] p-3 rounded-lg bg-muted">
-            <div className="flex space-x-2">
-              <div className="w-2 h-2 rounded-full bg-foreground/40 animate-bounce"></div>
-              <div className="w-2 h-2 rounded-full bg-foreground/40 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-              <div className="w-2 h-2 rounded-full bg-foreground/40 animate-bounce" style={{ animationDelay: '0.4s' }}></div>
-            </div>
+            <AnimatedBars isActive={true} small={true} />
           </div>
         </div>
       )}
