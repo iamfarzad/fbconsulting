@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useGeminiSpeechRecognition } from '@/hooks/useGeminiSpeechRecognition';
@@ -10,11 +10,12 @@ import { HeroBackground } from './hero/HeroBackground';
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const { language } = useLanguage();
-  const [chatInputValue, setChatInputValue] = React.useState('');
+  const [chatInputValue, setChatInputValue] = useState('');
   const { hasApiKey, getApiKey } = useGeminiInitialization();
   
   const useGeminiApi = hasApiKey();
   
+  // Log API key information for debugging
   console.log('✅ Google Gemini API Key Ready');
   
   const { 
@@ -33,7 +34,7 @@ const Hero = () => {
   return (
     <section 
       ref={heroRef}
-      className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 overflow-hidden pt-20"
+      className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 overflow-hidden pt-16"
     >
       <HeroBackground />
       

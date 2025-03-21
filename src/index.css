@@ -3,28 +3,3 @@
 @import './styles/animations.css';
 @import './styles/components.css';
 @import './styles/layout.css';
-
-body {
-  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Main container styles */
-#root {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-/* Fix space for fixed navbar */
-main {
-  padding-top: 64px;
-}
-
-/* Custom styles */
-.text-gradient {
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
