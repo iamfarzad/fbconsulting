@@ -20,9 +20,7 @@ const ChatButton = lazy(() => import("./components/ChatButton"));
 
 // Import providers
 import { LanguageProvider } from "./contexts/LanguageContext";
-import { CopilotProvider } from "./components/copilot/CopilotProvider";
-
-// Simple loading component
+import { CopilotProvider } from "@/components/copilot/providers/CopilotProvider"; // Updated import path
 
 // Simple loading component
 const LoadingFallback = () => (
@@ -30,8 +28,6 @@ const LoadingFallback = () => (
     <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
   </div>
 );
-
-// Loading component moved here
 
 const SafeApp: React.FC = () => {
   return (

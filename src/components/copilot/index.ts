@@ -1,17 +1,16 @@
 // Core Components
 export { GeminiChat } from './core/GeminiChat';
-export { CopilotChat } from './core/CopilotChat';
+// export { CopilotChat } from './core/CopilotChat'; // Removed as it doesn't exist
 export { CopilotConfig } from './core/CopilotConfig';
 
 // Providers
-export { CopilotProvider, useCopilot } from './providers/CopilotProvider';
+export { CopilotProvider } from './providers/CopilotProvider';
 export { GeminiProvider, useGemini } from './providers/GeminiProvider';
 export { GoogleGenAIConfig } from './providers/GoogleGenAIConfig';
 
 // UI Components
-export { AnimatedBars } from './ui/AnimatedBars';
-export { ConnectionStatusIndicator } from './ui/ConnectionStatusIndicator';
-export { DocumentPreview } from './ui/DocumentPreview';
+// export { ConnectionStatusIndicator } from './ui/ConnectionStatusIndicator'; // Removed as it doesn't exist
+// export { DocumentPreview } from './ui/DocumentPreview'; // Removed as it doesn't exist
 
 // Chat Components
 export { ChatHeader } from './chat/ChatHeader';

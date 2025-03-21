@@ -29,3 +29,30 @@ export interface ChatConfig {
   topP?: number;
   voice?: VoiceConfig;
 }
+
+// Copilot Types
+export interface SpatialContext {
+  pageSection: string;
+  elementType: string;
+  interactionType: string;
+  userBehavior: string;
+  timestamp: number;
+}
+
+export interface CopilotConfig {
+  apiKey: string;
+  options: {
+    model: string;
+    temperature: number;
+    maxTokens: number;
+    initialMessages: Message[];
+    voice?: VoiceConfig;
+    spatialContext?: SpatialContext;
+    agentic?: {
+      proactiveAssistance: boolean;
+      learningEnabled: boolean;
+      contextAwareness: boolean;
+      behaviorPatterns: string[];
+    };
+  };
+}
