@@ -9,48 +9,58 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Key, Info, Check, AlertCircle } from 'lucide-react';
 
 export const GoogleGenAIConfig: React.FC = () => {
-  const [apiKey, setApiKey] = useState('');
-  const [model, setModel] = useState('gemini-pro');
+  const { apiKey } = useGeminiAPI();
+  const [formState, setFormState] = useState({
+    apiKey: apiKey || '',
+    modelName: 'gemini-pro',
+    temperature: 0.7,
+    maxOutputTokens: 2048,
+  });
   const [testStatus, setTestStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [testMessage, setTestMessage] = useState('');
-  
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormState(prev => ({ ...prev, [name]: value }));
+  };
+
   const saveAPIKey = () => {
-    if (!apiKey) return;
-    
-    localStorage.setItem('gemini-api-key', apiKey);
+    if (!formState.apiKey) return;
+
+    localStorage.setItem('gemini-api-key', formState.apiKey);
     setTestMessage('API key saved to local storage');
     setTestStatus('success');
-    
+
     // Reset status after 3 seconds
     setTimeout(() => {
       setTestStatus('idle');
       setTestMessage('');
     }, 3000);
   };
-  
+
   const testConnection = async () => {
     setTestStatus('loading');
     setTestMessage('Testing connection...');
-    
+
     try {
       // Simple test request would go here
       // For demo purposes, we'll simulate a successful test
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
+
       setTestStatus('success');
       setTestMessage('Connection successful!');
     } catch (error) {
       setTestStatus('error');
       setTestMessage('Connection failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
-    
+
     // Reset status after 3 seconds
     setTimeout(() => {
       setTestStatus('idle');
       setTestMessage('');
     }, 3000);
   };
-  
+
   return (
     <div className="space-y-6">
       <Card>
@@ -66,13 +76,14 @@ export const GoogleGenAIConfig: React.FC = () => {
             <div className="flex space-x-2">
               <Input 
                 id="api-key"
+                name="apiKey"
                 type="password"
                 placeholder="Enter your Google API key"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
+                value={formState.apiKey}
+                onChange={handleInputChange}
                 className="flex-1"
               />
-              <Button onClick={saveAPIKey} disabled={!apiKey}>
+              <Button onClick={saveAPIKey} disabled={!formState.apiKey}>
                 <Key className="mr-2 h-4 w-4" />
                 Save Key
               </Button>
@@ -84,7 +95,7 @@ export const GoogleGenAIConfig: React.FC = () => {
           
           <div className="space-y-2">
             <Label htmlFor="model">Model</Label>
-            <Select value={model} onValueChange={setModel}>
+            <Select value={formState.modelName} onValueChange={(value) => setFormState(prev => ({ ...prev, modelName: value }))}>
               <SelectTrigger id="model" className="w-full">
                 <SelectValue placeholder="Select a model" />
               </SelectTrigger>
@@ -98,7 +109,7 @@ export const GoogleGenAIConfig: React.FC = () => {
           <Button 
             onClick={testConnection} 
             variant="outline" 
-            disabled={!apiKey || testStatus === 'loading'}
+            disabled={!formState.apiKey || testStatus === 'loading'}
             className="w-full"
           >
             {testStatus === 'loading' ? (

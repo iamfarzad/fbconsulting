@@ -1,19 +1,15 @@
-import ConnectionStatusIndicator from './ConnectionStatusIndicator';
-import FallbackChatUI from './FallbackChatUI';
-import { formatErrorMessage, logDetailedError, categorizeError } from '@/utils/errorHandling';
-import type { 
-  SpatialContext, 
-  VoiceConfig 
-} from '@/services/copilot/types';
-import { 
-  useContextTracking,
-  useVoiceInitialization,
-  useApiKeyManagement,
-  useSystemMessage,
-  useAgenticConfig
-} from './hooks';
-import { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
+import { CopilotKit } from '@copilotkit/react-core';
+
+// Internal imports
+import { usePersonaManagement } from '@/mcp/hooks/usePersonaManagement';
+import { toast } from '@/components/ui/use-toast';
+import { useGeminiAPI } from '@/hooks/useGeminiAPI';
+import { ConnectionStatusIndicator } from '../ui/ConnectionStatusIndicator';
+import { formatErrorMessage, logDetailedError, categorizeError } from '@/utils/errorHandling';
+import type { SpatialContext, VoiceConfig } from '@/services/copilot/types';
+import { useContextTracking, useVoiceInitialization, useApiKeyManagement, useSystemMessage, useAgenticConfig } from './hooks';
 
 interface CopilotProviderProps {
   children: React.ReactNode;
@@ -42,14 +38,7 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
   // Memoized values
-  const publicApiKey = useMemo(() => {
-    // Safely use the API key without logging it
-    return apiKey || '';
-  }, [apiKey]);
-  const runtimeUrl = useMemo(
-    () => 'http://localhost:3000',
-    []
-  );
+  const publicApiKey = useMemo(() => apiKey || '', [apiKey]);
 
   const systemMessage = useMemo(() => {
     if (!personaData?.personaDefinitions || !personaData.currentPersona) {
@@ -163,8 +152,8 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({
       window.removeEventListener('keypress', trackUserBehavior);
       clearTimeout(inactivityTimeout);
     };
-  }, []);
-  
+  }, [location, spatialContext]);
+
   // Always call useContextTracking unconditionally at the top level
   useContextTracking(setCurrentPage, setSpatialContext);
 
@@ -207,35 +196,29 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({
     initVoice();
   }, []);
 
-  // Memoize spatial context updates
-  const currentSpatialContext = useMemo(() => spatialContext, [spatialContext]);
-
   const copilotConfig = useMemo(
     () => {
       if (!apiKey) return null;
       
       return {
-        publicApiKey: apiKey,
-        baseUrl: runtimeUrl,
-        chatOptions: {
+        apiKey: publicApiKey,
+        options: {
+          model: propModelName || 'gemini-2.0-flash-001',
+          temperature: 0.7,
+          maxTokens: 2048,
           initialMessages: [
             {
               role: 'system' as const,
               content: systemMessage
             }
           ],
-          model: propModelName || 'gemini-2.0-flash-001',
-          temperature: 0.7,
-          maxTokens: 2048,
-          topP: 0.95,
-          topK: 40,
           voice: voiceEnabled ? {
             enabled: true,
             voice: 'Charon',
             pitch: 1,
             rate: 1
           } : undefined,
-          spatialContext: currentSpatialContext,
+          spatialContext: spatialContext,
           agentic: {
             proactiveAssistance: true,
             learningEnabled: true,
@@ -245,13 +228,7 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({
         }
       };
     },
-    [
-      runtimeUrl, 
-      systemMessage, 
-      apiKey, 
-      propModelName, 
-      currentSpatialContext
-    ]
+    [systemMessage, voiceEnabled, spatialContext, publicApiKey]
   );
 
   // Initialize and validate API key
@@ -319,74 +296,29 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({
     }
   }, [apiKey, isLoading]);
 
-  // Update spatial context on scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      const sections = document.querySelectorAll('section');
-      const scrollPosition = window.scrollY + window.innerHeight / 2;
-
-      for (const section of sections) {
-        const rect = section.getBoundingClientRect();
-        const sectionTop = rect.top + window.scrollY;
-        const sectionBottom = sectionTop + rect.height;
-
-        if (scrollPosition >= sectionTop && scrollPosition <= sectionBottom) {
-          setSpatialContext(prev => ({
-            ...prev!,
-            pageSection: section.id || 'unknown',
-            elementType: 'section',
-            interactionType: 'scroll',
-            timestamp: Date.now()
-          }));
-          break; // Exit after finding the first matching section
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  // Only show status indicator when there is an error or connecting
+  const showConnectionStatus = connectionStatus === 'error' || connectionStatus === 'connecting';
 
   return (
     <>
-      <ConnectionStatusIndicator 
-        status={connectionStatus}
-        error={connectionError}
-        onRetry={() => {
-          // Reset connection status and trigger a new connection test
-          setConnectionStatus('connecting');
-          // This will trigger the useEffect that tests the connection
-        }}
-      />
+      {showConnectionStatus && (
+        <ConnectionStatusIndicator 
+          status={connectionStatus}
+          error={connectionError}
+          onRetry={() => {
+            // Reset connection status and trigger a new connection test
+            setConnectionStatus('connecting');
+            // This will trigger the useEffect that tests the connection
+          }}
+        />
+      )}
       
       {(connectionStatus === 'connected' && apiKey) ? (
-        // Render CopilotKit when connected
-        <CopilotKit 
-          publicApiKey={apiKey}
-          chatApiEndpoint="/api/ai/chat"
-          children={children}
-        />
+        <CopilotKit {...copilotConfig}>
+          {children}
+        </CopilotKit>
       ) : (
-        // Render children with fallback UI for chat components
-        <>
-          {React.Children.map(children, child => {
-            // Check if this is a chat component that needs a fallback
-            if (React.isValidElement(child) && 
-                (child.type as any)?.displayName?.includes('Chat')) {
-              // Replace chat components with fallback UI
-              return (
-                <FallbackChatUI 
-                  error={connectionError} 
-                  onRetry={() => {
-                    setConnectionStatus('connecting');
-                  }} 
-                />
-              );
-            }
-            // Return other components unchanged
-            return child;
-          })}
-        </>
+        children
       )}
     </>
   );
