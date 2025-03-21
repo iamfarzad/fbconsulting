@@ -1,79 +1,31 @@
-# Gemini Audio Synthesis API
+# Vercel API Configuration
 
-This Vercel serverless function provides audio synthesis capabilities using Google's Gemini Multimodal Live API. It's designed to work seamlessly with the frontend React application.
+## Python Runtime
+- Version: Python 3.12
+- Specified in `runtime.txt`
 
-## Features
+## Dependencies
+All services use consistent versions:
+- FastAPI 0.109.0
+- google-generativeai 0.3.2
+- See `requirements.txt` for complete list
 
-- Real-time audio synthesis using Gemini's Multimodal Live API
-- Charon voice model integration
-- Error handling and validation
-- Efficient audio streaming
+## Service Structure
+- `/gemini/` - Core Gemini API endpoints
+- `/gemini_image/` - Image processing endpoints
+- `/gemini_document/` - Document processing endpoints
 
-## Setup
+## Configuration
+Build and runtime settings are managed in root `vercel.json`:
+- Fluid Compute enabled for streaming
+- Memory: 1024MB
+- Max Duration: 30-60s depending on endpoint
 
-1. Configure Vercel Environment Variables:
-```bash
-vercel env add GOOGLE_API_KEY
-```
+## Environment Variables
+Required:
+- `GOOGLE_API_KEY` - Google AI API key
 
-2. Deploy to Vercel:
-```bash
-vercel
-```
-
-## API Endpoint
-
-### POST /api/gemini_audio
-
-Synthesize speech from text using Gemini's Multimodal Live API.
-
-**Request Body:**
-```json
-{
-  "text": "Text to synthesize",
-  "role": "user"
-}
-```
-
-**Response:**
-- Success: Audio data (audio/wav)
-- Error: JSON error message
-```json
-{
-  "error": "Error message"
-}
-```
-
-## Development
-
-1. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-2. Create a `.env` file:
-```env
-GOOGLE_API_KEY=your_api_key_here
-```
-
-3. Run locally with Vercel dev:
-```bash
-vercel dev
-```
-
-## Integration with Frontend
-
-The frontend's `googleGenAIService.ts` is configured to call this API endpoint. When `synthesizeSpeech()` is called, it will:
-
-1. Send text to `/api/gemini_audio`
-2. Receive audio data
-3. Play the audio using Web Audio API
-
-## Error Handling
-
-The API implements comprehensive error handling:
-- Input validation
-- API errors
-- Audio synthesis errors
-
-All errors are returned with appropriate HTTP status codes and error messages.
+## Deployment Notes
+- Uses Vercel's Python runtime
+- All services share common dependency versions
+- Fluid Compute optimized for streaming responses
