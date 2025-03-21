@@ -1,0 +1,8 @@
+# Ignore duplicate files in root
+/.DS_Store
+/CopilotChat.tsx
+/CopilotProvider.tsx
+
+# Allow these files in subdirectories
+!core/CopilotChat.tsx
+!providers/CopilotProvider.tsx
