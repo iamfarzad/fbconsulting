@@ -1,9 +1,7 @@
-from http.server import BaseHTTPRequestHandler
 import google.generativeai as genai
 import json
 import os
 from typing import Dict, Any
-from pydub import AudioSegment
 import io
 import tempfile
 from datetime import datetime
@@ -59,7 +57,7 @@ def handler(request):
         })
         
         # Get audio data
-        audio_data = response.audio
+        audio_data = response['audio']
         
         # Send response
         return {
