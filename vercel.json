@@ -1,4 +1,14 @@
 {
+  "builds": [
+    {
+      "src": "api/gemini/**/*.py",
+      "use": "@vercel/python",
+      "config": {
+        "runtime": "python3.12",
+        "maxLambdaSize": "15mb"
+      }
+    }
+  ],
   "functions": {
     "api/gemini/stream.py": {
       "memory": 1024,
