@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { APIKeyInput } from './config/APIKeyInput';
-import { ModelSelector } from './config/ModelSelector';
-import { ConnectionTester } from './config/ConnectionTester';
-import { EnvironmentKeyAlert } from './config/EnvironmentKeyAlert';
-import { useGeminiConfig } from './config/useGeminiConfig';
+import { APIKeyInput } from '../config/APIKeyInput';
+import { ModelSelector } from '../config/ModelSelector';
+import { ConnectionTester } from '../config/ConnectionTester';
+import { EnvironmentKeyAlert } from '../config/EnvironmentKeyAlert';
+import { useGeminiConfig } from '../config/useGeminiConfig';
 
 export const CopilotConfig: React.FC = () => {
   const {
