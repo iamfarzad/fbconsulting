@@ -1,164 +1,178 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { usePersonaManagement } from '@/mcp/hooks/usePersonaManagement';
-import { PersonaData } from '@/mcp/protocols/personaManagement/types';
-import useGeminiAPI from '@/hooks/useGeminiAPI';
-import { toast } from 'sonner';
-import { 
-  GoogleGenerativeAI as GenerativeAI,
-  GenerativeModel 
-} from '@google/generative-ai';
-import { initializeGemini } from '@/services/gemini';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { toast } from '@/components/ui/use-toast';
+import { Message, WebSocketMessage, MessageHandler, VoiceConfig } from '../types';
 
 interface GeminiContextType {
-  isInitialized: boolean;
-  isLoading: boolean;
-  personaData: PersonaData | null;
+  sendMessage: (content: string) => Promise<void>;
+  sendAudioRequest: (text: string) => Promise<Blob | null>;
+  isConnected: boolean;
+  isConnecting: boolean;
   error: string | null;
-  model: GenerativeModel | null;
-  visionModel: GenerativeModel | null;
+  resetError: () => void;
 }
 
-const GeminiContext = createContext<GeminiContextType>({
-  isInitialized: false,
-  isLoading: true,
-  personaData: null,
-  error: null,
-  model: null,
-  visionModel: null
-});
+const GeminiContext = createContext<GeminiContextType | null>(null);
 
-export const useGemini = () => useContext(GeminiContext);
+export const useGemini = () => {
+  const context = useContext(GeminiContext);
+  if (!context) {
+    throw new Error('useGemini must be used within a GeminiProvider');
+  }
+  return context;
+};
 
 interface GeminiProviderProps {
   children: React.ReactNode;
 }
 
 export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
-  const { personaData } = usePersonaManagement();
-  const { apiKey: contextApiKey } = useGeminiAPI();
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [model, setModel] = useState<GenerativeModel | null>(null);
-  const [visionModel, setVisionModel] = useState<GenerativeModel | null>(null);
-  
-  useEffect(() => {
-    const initializeGeminiModels = async () => {
-      setIsLoading(true);
+  const wsRef = useRef<WebSocket | null>(null);
+  const messageHandlersRef = useRef<Map<string, MessageHandler>>(new Map());
+
+  const connectWebSocket = useCallback(() => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) return;
+
+    setIsConnecting(true);
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${window.location.host}/api/gemini/stream`;
+
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      setIsConnected(true);
+      setIsConnecting(false);
       setError(null);
-      
+    };
+
+    ws.onmessage = (event) => {
       try {
-        // Get API key from environment variable or context
-        const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
-        let activeApiKey = contextApiKey || envApiKey;
+        const data = JSON.parse(event.data) as WebSocketMessage;
+        let errorMessage: string;
         
-        console.log("GeminiProvider - ENV API Key:", envApiKey ? "✅ Found" : "❌ Not found");
-        console.log("GeminiProvider - Context API Key:", contextApiKey ? "✅ Found" : "❌ Not found");
-        
-        // Check localStorage for user-provided key (takes precedence)
-        const savedConfig = localStorage.getItem('GEMINI_CONFIG');
-        let modelName = "gemini-2.0-flash"; // Using the standard Gemini Pro model
-        let keySource = "unknown";
-        
-        if (savedConfig) {
-          try {
-            const config = JSON.parse(savedConfig);
-            if (config.apiKey) {
-              activeApiKey = config.apiKey;
-              keySource = "localStorage";
-              console.log("GeminiProvider - Using localStorage API key");
+        // Handle different message types
+        switch (data.type) {
+          case 'text':
+            if (data.content) {
+              messageHandlersRef.current.get('text')?.(data.content);
             }
-            if (config.modelName) {
-              modelName = config.modelName;
-            }
-          } catch (error) {
-            console.error('Error parsing saved configuration:', error);
-          }
-        } else if (envApiKey) {
-          keySource = "environment";
-          console.log("GeminiProvider - Using environment API key");
-        } else if (contextApiKey) {
-          keySource = "context";
-          console.log("GeminiProvider - Using context API key");
-        }
-        
-        if (!activeApiKey) {
-          setError('No Gemini API key found');
-          console.warn("No Gemini API key found in environment, localStorage, or context");
-          console.log("Environment variables:", import.meta.env);
-          setIsLoading(false);
-          return;
-        }
-        
-        console.log(`GeminiProvider - Initializing with API key from ${keySource}, model: ${modelName}`);
-        
-        // Initialize the Gemini API with the SDK
-        const genAI = new GenerativeAI(activeApiKey);
-        
-        // Initialize text model
-        const geminiModel = genAI.getGenerativeModel({ model: modelName });
-        setModel(geminiModel);
-        
-        // Initialize vision model
-        const visionModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash-vision" }); // Using the Gemini Pro Vision model
-        setVisionModel(visionModel);
-        
-        // Test API key with a simple generation
-        try {
-          const result = await geminiModel.generateContent("Hello, this is a test message.");
-          const response = result.response.text();
-          
-          if (response) {
-            console.log(`✅ Gemini initialized successfully with model: ${modelName}`);
-            console.log(`✅ Vision model initialized: gemini-2.0-flash-vision`);
-            console.log(`✅ API key source: ${keySource}`);
-            
-            if (personaData) {
-              console.log("Using persona data:", personaData.currentPersona);
-            }
-            
-            setIsInitialized(true);
-            toast.success('Farzad AI Ready', {
-              description: `Has been successfully initialized.`
+            break;
+          case 'error':
+            errorMessage = data.error || data.content || 'Unknown error';
+            setError(errorMessage);
+            toast({
+              title: 'Error',
+              description: errorMessage,
+              variant: 'destructive',
             });
-          } else {
-            const error = new Error("Empty response from Gemini API test");
-            console.error("API test failed - empty response");
-            throw error;
-          }
-        } catch (error) {
-          console.error("API test failed:", error);
-          throw error;
+            break;
+          case 'connection':
+            if (data.status === 'connected') {
+              setIsConnected(true);
+              setIsConnecting(false);
+            }
+            break;
         }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error initializing Gemini';
-        console.error("Error initializing Gemini:", {
-          error,
-          errorMessage,
-          hasEnvKey: !!import.meta.env.VITE_GEMINI_API_KEY,
-          hasContextKey: !!contextApiKey
-        });
-        setError(errorMessage);
-        toast.error('AI Assistant Error', {
-          description: `Failed to initialize Gemini AI: ${errorMessage}`
-        });
-      } finally {
-        setIsLoading(false);
+      } catch (e) {
+        console.error('Failed to parse WebSocket message:', e);
       }
     };
-    
-    initializeGeminiModels();
-  }, [contextApiKey, personaData]);
-  
+
+    ws.onerror = (event) => {
+      setError('WebSocket error occurred');
+      setIsConnected(false);
+      console.error('WebSocket error:', event);
+    };
+
+    ws.onclose = () => {
+      setIsConnected(false);
+      setIsConnecting(false);
+      setTimeout(() => {
+        connectWebSocket(); // Attempt to reconnect
+      }, 3000);
+    };
+
+    wsRef.current = ws;
+  }, []);
+
+  useEffect(() => {
+    connectWebSocket();
+    return () => {
+      wsRef.current?.close();
+    };
+  }, [connectWebSocket]);
+
+  const sendMessage = useCallback(async (content: string) => {
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+      throw new Error('WebSocket is not connected');
+    }
+
+    const message: Message = {
+      role: 'user',
+      content,
+      timestamp: Date.now()
+    };
+
+    return new Promise<void>((resolve, reject) => {
+      try {
+        wsRef.current?.send(JSON.stringify({
+          type: 'chat',
+          messages: [message]
+        }));
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }, []);
+
+  const sendAudioRequest = useCallback(async (text: string): Promise<Blob | null> => {
+    try {
+      const voiceConfig: VoiceConfig = {
+        voice: 'female',
+        pitch: 1.0,
+        rate: 1.0
+      };
+
+      const response = await fetch('/api/gemini/audio', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text,
+          config: voiceConfig
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.blob();
+    } catch (error) {
+      console.error('Failed to generate audio:', error);
+      return null;
+    }
+  }, []);
+
+  const resetError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  const value = {
+    sendMessage,
+    sendAudioRequest,
+    isConnected,
+    isConnecting,
+    error,
+    resetError,
+  };
+
   return (
-    <GeminiContext.Provider value={{ 
-      isInitialized, 
-      isLoading,
-      error,
-      personaData,
-      model,
-      visionModel
-    }}>
+    <GeminiContext.Provider value={value}>
       {children}
     </GeminiContext.Provider>
   );
