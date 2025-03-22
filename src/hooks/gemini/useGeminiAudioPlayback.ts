@@ -1,99 +1,151 @@
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 export interface UseGeminiAudioPlaybackOptions {
   onPlaybackComplete?: () => void;
-  onPlaybackError?: (error: Error) => void;
+  onPlaybackError?: (error: string) => void;
 }
 
-/**
- * Hook for managing audio playback from Gemini API
- */
-const useGeminiAudioPlayback = (options: UseGeminiAudioPlaybackOptions = {}) => {
-  const [audioData, setAudioData] = useState<Blob | null>(null);
+export function useGeminiAudioPlayback(options: UseGeminiAudioPlaybackOptions = {}) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [error, setError] = useState('');
   const [progress, setProgress] = useState(0);
-  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
   
-  // Clean up audio element on unmount
+  const audioChunksRef = useRef<Blob[]>([]);
+  const audioElementRef = useRef<HTMLAudioElement | null>(null);
+  
+  // Initialize audio element
   useEffect(() => {
-    return () => {
-      if (audioElement) {
-        audioElement.pause();
-        URL.revokeObjectURL(audioElement.src);
-      }
-    };
-  }, [audioElement]);
-
-  // Play audio blob
-  const playAudio = useCallback(async (audioBlob: Blob) => {
-    try {
-      setError('');
-      setAudioData(audioBlob);
+    if (typeof window !== 'undefined') {
+      audioElementRef.current = new Audio();
       
-      // Create URL for audio blob
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      // Create and configure audio element
-      const audio = new Audio(audioUrl);
-      setAudioElement(audio);
+      const audioElement = audioElementRef.current;
       
       // Set up event listeners
-      audio.addEventListener('ended', () => {
+      audioElement.addEventListener('play', () => setIsPlaying(true));
+      audioElement.addEventListener('pause', () => setIsPlaying(false));
+      audioElement.addEventListener('ended', () => {
         setIsPlaying(false);
         setProgress(100);
-        options.onPlaybackComplete?.();
-        URL.revokeObjectURL(audioUrl);
+        if (options.onPlaybackComplete) {
+          options.onPlaybackComplete();
+        }
       });
-      
-      audio.addEventListener('error', (e) => {
-        const error = new Error(`Audio playback error: ${e.type}`);
-        setError(error.message);
-        setIsPlaying(false);
-        options.onPlaybackError?.(error);
-        URL.revokeObjectURL(audioUrl);
+      audioElement.addEventListener('timeupdate', () => {
+        if (audioElement.duration) {
+          setCurrentTime(audioElement.currentTime);
+          setProgress((audioElement.currentTime / audioElement.duration) * 100);
+        }
       });
-      
-      audio.addEventListener('timeupdate', () => {
-        if (audio.duration) {
-          const progressValue = (audio.currentTime / audio.duration) * 100;
-          setProgress(progressValue);
+      audioElement.addEventListener('durationchange', () => {
+        setDuration(audioElement.duration);
+      });
+      audioElement.addEventListener('error', (e) => {
+        const errorMessage = 'Audio playback error';
+        setError(errorMessage);
+        if (options.onPlaybackError) {
+          options.onPlaybackError(errorMessage);
         }
       });
       
-      // Start playback
-      await audio.play();
-      setIsPlaying(true);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown audio playback error';
-      setError(errorMessage);
-      options.onPlaybackError?.(new Error(errorMessage));
-      setIsPlaying(false);
+      // Clean up event listeners on unmount
+      return () => {
+        audioElement.pause();
+        audioElement.src = '';
+        audioElement.removeEventListener('play', () => setIsPlaying(true));
+        audioElement.removeEventListener('pause', () => setIsPlaying(false));
+        audioElement.removeEventListener('ended', () => {
+          setIsPlaying(false);
+          if (options.onPlaybackComplete) {
+            options.onPlaybackComplete();
+          }
+        });
+        audioElement.removeEventListener('timeupdate', () => {});
+        audioElement.removeEventListener('durationchange', () => {});
+        audioElement.removeEventListener('error', () => {});
+      };
     }
   }, [options]);
-
-  // Stop audio playback
-  const stopAudio = useCallback(() => {
-    if (audioElement) {
-      audioElement.pause();
-      audioElement.currentTime = 0;
-      setIsPlaying(false);
-      setProgress(0);
+  
+  // Handle audio chunks
+  const handleAudioChunk = useCallback((chunk: Blob) => {
+    audioChunksRef.current.push(chunk);
+  }, []);
+  
+  // Handle audio metadata
+  const handleAudioMetadata = useCallback((metadata: {size: number}) => {
+    // Handle metadata if needed
+  }, []);
+  
+  // Play audio from accumulated chunks
+  const playAudioChunks = useCallback(() => {
+    if (audioChunksRef.current.length === 0) {
+      if (options.onPlaybackError) {
+        options.onPlaybackError('No audio data available');
+      }
+      return;
+    }
+    
+    try {
+      // Create a combined audio blob
+      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(audioBlob);
       
-      if (audioElement.src) {
-        URL.revokeObjectURL(audioElement.src);
+      if (audioElementRef.current) {
+        audioElementRef.current.src = audioUrl;
+        audioElementRef.current.play().catch(err => {
+          console.error('Error playing audio:', err);
+          if (options.onPlaybackError) {
+            options.onPlaybackError('Failed to play audio');
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error playing audio chunks:', error);
+      setError('Failed to play audio');
+      if (options.onPlaybackError) {
+        options.onPlaybackError('Failed to play audio');
       }
     }
-  }, [audioElement]);
-
+  }, [options]);
+  
+  // Stop audio playback
+  const stopAudio = useCallback(() => {
+    if (audioElementRef.current) {
+      audioElementRef.current.pause();
+      setIsPlaying(false);
+    }
+  }, []);
+  
+  // Clear audio data
+  const clearAudio = useCallback(() => {
+    audioChunksRef.current = [];
+    if (audioElementRef.current) {
+      audioElementRef.current.pause();
+      audioElementRef.current.src = '';
+    }
+    setIsPlaying(false);
+    setProgress(0);
+    setCurrentTime(0);
+    setDuration(0);
+    setError(null);
+  }, []);
+  
   return {
+    handleAudioChunk,
+    handleAudioMetadata,
     isPlaying,
-    error,
     progress,
-    playAudio,
-    stopAudio
+    error,
+    duration,
+    currentTime,
+    playAudioChunks,
+    stopAudio,
+    clearAudio
   };
-};
+}
 
+// Make sure to export the main hook
 export default useGeminiAudioPlayback;
