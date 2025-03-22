@@ -1,58 +1,33 @@
-from http.server import BaseHTTPRequestHandler
-import google.generativeai as genai
-import json
-import os
-from typing import Dict, Any
-import io
-import tempfile
-from datetime import datetime
-import hashlib
 import time
-import logging
+from gemini import Client
+from flask import jsonify, Response
 
 def handler(request):
-    """Handle HTTP requests for audio synthesis."""
-    try:
-        # Parse request body
-        body = json.loads(request.body)
+    if request.method == 'POST':
+        body = request.get_json()
         
-        # Validate request
-        if 'text' not in body:
-            return {
-                'statusCode': 400,
-                'body': json.dumps({'error': 'Missing text in request body'})
-            }
-        
-        # Initialize Gemini client
-        api_key = os.environ.get('GOOGLE_API_KEY')
-        if not api_key:
-            return {
-                'statusCode': 500,
-                'body': json.dumps({'error': 'GOOGLE_API_KEY environment variable is required'})
-            }
-        
-        genai.configure(api_key=api_key)
-        client = genai.Client()
-        
-        # Configure live session with Charon voice
+        if not body or 'text' not in body:
+            return jsonify({
+                'error': 'Missing required text in request body'
+            }), 400
+
+        client = Client()
         config = {
-            "response_modalities": ["TEXT", "AUDIO"],
-            "speech_config": {
-                "voice_config": {
-                    "prebuilt_voice_config": {
-                        "voice_name": "Charon"
-                    }
-                }
+            "model": {
+                "provider": "anthropic",
+                "name": "claude-3-opus-20240229",
+                "temperature": 0.7,
+                "max_tokens": 1000
             }
         }
-        
-        # Start live session and send text with timeout
+
+        # Start live session and send text with timeout and retry logic
         session = None
         start_time = time.time()
         max_retries = 2
         retry_count = 0
         audio_data = None
-        
+
         while retry_count <= max_retries and time.time() - start_time < 45:  # Overall timeout of 45 seconds
             try:
                 session = client.connect("gemini-2.0-flash", config)
@@ -62,53 +37,37 @@ def handler(request):
                         "role": "user"
                     }],
                     "turn_complete": True
-                }, timeout=15)  # 15 second timeout per attempt
+                })
+
+                if response and response.get('audio'):
+                    audio_data = response['audio']
+                    break
                 
-                # Get audio data and break if successful
-                audio_data = response.audio
-                break
-                
-            except Exception as e:
-                logging.warning(f"Attempt {retry_count + 1} failed: {str(e)}")
                 retry_count += 1
+                time.sleep(1)  # Brief pause between retries
                 
-                # Close the session if it exists
-                if session:
-                    try:
-                        session.close()
-                    except Exception as se:
-                        logging.warning(f"Error closing session: {se}")
-                    session = None
-                
-                # Wait before retrying
-                if retry_count <= max_retries:
-                    time.sleep(1)
-        
-        if not audio_data:
-            raise Exception("Failed to generate audio after multiple attempts")
-            
-        # Always clean up the session in a separate try block
-        if session:
-            try:
-                session.close()
             except Exception as e:
-                logging.warning(f"Error closing Gemini session: {e}")
-        
-        # Send response
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Content-Type': 'audio/mpeg',
-                'Content-Length': str(len(audio_data))
-            },
-            'body': audio_data,
-            'isBase64Encoded': True
-        }
-        
-    except Exception as e:
-        logging.error(f"Error in gemini_audio handler: {str(e)}")
-        return {
-            'statusCode': 500,
-            'headers': {'Content-Type': 'application/json'},
-            'body': json.dumps({'error': str(e)})
-        }
+                retry_count += 1
+                if retry_count > max_retries:
+                    return jsonify({
+                        'error': f'Failed to generate audio after {max_retries} attempts: {str(e)}'
+                    }), 500
+                continue
+
+        if not audio_data:
+            return jsonify({
+                'error': 'Failed to generate audio response'
+            }), 500
+
+        # Return audio data as response
+        return Response(
+            audio_data,
+            mimetype='audio/mp3',
+            headers={
+                'Content-Disposition': 'attachment; filename=response.mp3'
+            }
+        )
+
+    return jsonify({
+        'error': 'Method not allowed'
+    }), 405

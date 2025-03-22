@@ -1,16 +1,26 @@
-
 {
   "version": 2,
+  "builds": [
+    {
+      "src": "api/gemini/**/*.py",
+      "use": "@vercel/python@3.1.0",
+      "config": {
+        "runtime": "python3.12"
+      }
+    }
+  ],
   "functions": {
     "api/gemini/stream.py": {
       "memory": 1024,
       "maxDuration": 60,
-      "runtime": "python3.12"
+      "runtime": "@vercel/python@3.1.0",
+      "fluidCompute": true
     },
     "api/gemini/audio.py": {
       "memory": 1024,
       "maxDuration": 30,
-      "runtime": "python3.12"
+      "runtime": "@vercel/python@3.1.0",
+      "fluidCompute": true
     }
   },
   "routes": [
