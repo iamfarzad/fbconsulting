@@ -14,14 +14,12 @@
     "api/gemini/stream.py": {
       "memory": 1024,
       "maxDuration": 60,
-      "runtime": "python3.12",
-      "fluidCompute": true
+      "runtime": "python3.12"
     },
     "api/gemini/audio.py": {
       "memory": 1024,
       "maxDuration": 30,
-      "runtime": "python3.12",
-      "fluidCompute": true
+      "runtime": "python3.12"
     }
   },
   "routes": [
