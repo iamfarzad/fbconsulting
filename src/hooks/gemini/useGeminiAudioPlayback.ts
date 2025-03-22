@@ -1,7 +1,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 
-interface UseGeminiAudioPlaybackOptions {
+export interface UseGeminiAudioPlaybackOptions {
   onPlaybackComplete?: () => void;
   onPlaybackError?: (error: Error) => void;
 }

@@ -1,82 +1,59 @@
-/**
- * Error handling utilities for API connections and service initialization
- */
 
 /**
- * Formats an error object into a user-friendly message
- * @param error The error object to format
- * @returns A user-friendly error message string
+ * Formats an error message from different error types
  */
-export function formatErrorMessage(error: unknown): string {
-    if (error instanceof Error) {
-      return error.message;
-    }
-    
-    if (typeof error === 'string') {
-      return error;
-    }
-    
-    return 'An unknown error occurred';
+export const formatErrorMessage = (error: any): string => {
+  if (typeof error === 'string') {
+    return error;
   }
   
-  /**
-   * Logs detailed error information to the console
-   * @param error The error object to log
-   * @param context Additional context information
-   */
-  export function logDetailedError(error: unknown, context: Record<string, unknown> = {}): void {
-    console.error('Error details:', {
-      error,
-      message: error instanceof Error ? error.message : 'Unknown error',
-      name: error instanceof Error ? error.name : 'Unknown',
-      stack: error instanceof Error ? error.stack : undefined,
-      ...context
-    });
+  if (error instanceof Error) {
+    return error.message;
   }
   
-  /**
-   * Determines if an error is related to API connectivity
-   * @param error The error to check
-   * @returns True if the error is related to API connectivity
-   */
-  export function isApiConnectionError(error: unknown): boolean {
-    const errorMessage = error instanceof Error ? error.message.toLowerCase() : 
-                        typeof error === 'string' ? error.toLowerCase() : '';
-    
-    return errorMessage.includes('api') || 
-           errorMessage.includes('network') || 
-           errorMessage.includes('connection') ||
-           errorMessage.includes('fetch') ||
-           errorMessage.includes('timeout');
+  if (error && typeof error === 'object' && 'message' in error) {
+    return String(error.message);
   }
   
-  /**
-   * Categorizes an error based on its content
-   * @param error The error to categorize
-   * @returns The error category
-   */
-  export function categorizeError(error: unknown): 'api' | 'auth' | 'validation' | 'unknown' {
-    const errorMessage = error instanceof Error ? error.message.toLowerCase() : 
-                        typeof error === 'string' ? error.toLowerCase() : '';
-    
-    if (errorMessage.includes('api') || 
-        errorMessage.includes('network') || 
-        errorMessage.includes('connection')) {
-      return 'api';
-    }
-    
-    if (errorMessage.includes('auth') || 
-        errorMessage.includes('key') || 
-        errorMessage.includes('token') ||
-        errorMessage.includes('permission')) {
-      return 'auth';
-    }
-    
-    if (errorMessage.includes('valid') || 
-        errorMessage.includes('format') || 
-        errorMessage.includes('required')) {
-      return 'validation';
-    }
-    
-    return 'unknown';
+  return 'An unknown error occurred';
+};
+
+/**
+ * Logs detailed error information for debugging
+ */
+export const logDetailedError = (error: any, context: Record<string, any> = {}): void => {
+  console.error('Error details:', {
+    message: formatErrorMessage(error),
+    stack: error instanceof Error ? error.stack : undefined,
+    context
+  });
+};
+
+/**
+ * Categorizes errors by type for appropriate handling
+ */
+export const categorizeError = (error: any): 'api' | 'auth' | 'validation' | 'unknown' => {
+  const errorMessage = formatErrorMessage(error).toLowerCase();
+  
+  if (errorMessage.includes('network') || 
+      errorMessage.includes('connect') || 
+      errorMessage.includes('timeout')) {
+    return 'api';
   }
+  
+  if (errorMessage.includes('auth') || 
+      errorMessage.includes('key') || 
+      errorMessage.includes('permission') ||
+      errorMessage.includes('credential')) {
+    return 'auth';
+  }
+  
+  if (errorMessage.includes('valid') || 
+      errorMessage.includes('required') || 
+      errorMessage.includes('empty') ||
+      errorMessage.includes('format')) {
+    return 'validation';
+  }
+  
+  return 'unknown';
+};
