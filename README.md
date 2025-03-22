@@ -56,3 +56,28 @@ pip install -r requirements.txt
 ```
 
 For individual services, their requirements.txt files will automatically include the base requirements.
+
+## How to Merge Branches
+
+To merge all the changes in the different branches, you can follow these steps:
+
+1. Ensure you have the latest changes from all branches by pulling the latest updates.
+2. Switch to the branch you want to merge into (usually the main branch).
+3. Use the `git merge` command to merge each branch into the main branch one by one.
+4. Resolve any conflicts that arise during the merge process.
+5. Commit the merged changes.
+6. Push the updated main branch to the remote repository.
+
+### Steps for Resolving Conflicts
+
+1. When a conflict occurs, Git will mark the conflicted areas in the affected files.
+2. Open the conflicted files and look for the conflict markers (`<<<<<<<`, `=======`, `>>>>>>>`).
+3. Decide if you want to keep the changes from the current branch, the changes from the branch being merged, or a combination of both.
+4. Edit the file to remove the conflict markers and make the necessary changes.
+5. After resolving all conflicts, add the resolved files to the staging area using `git add`.
+6. Commit the changes with a message indicating that conflicts have been resolved.
+7. Continue with the merge process.
+
+## Documentation Updates
+
+The documentation has been updated to reflect the latest changes, including the new section on how to merge branches and resolve conflicts.
