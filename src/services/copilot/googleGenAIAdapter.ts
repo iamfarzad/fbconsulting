@@ -1,4 +1,4 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI } from "google-generativeai";
 
 // Configuration type
 export interface GoogleGenAIConfig {

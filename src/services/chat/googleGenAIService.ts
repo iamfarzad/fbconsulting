@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, GenerativeModel, GenerateContentResult } from '@google/generative-ai';
+import { GoogleGenerativeAI, GenerativeModel, GenerateContentResult } from 'google-generativeai';
 import { PersonaData } from '@/types/persona';
 
 export interface ChatMessage {
