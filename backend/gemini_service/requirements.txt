@@ -29,3 +29,4 @@ python-json-logger>=2.0.0
 
 # CORS & middleware
 starlette>=0.14.2
+werkzeug==3.0.1
