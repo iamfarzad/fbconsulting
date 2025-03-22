@@ -20,6 +20,7 @@ services:
       - WS_PING_INTERVAL=30
       - WS_PING_TIMEOUT=10
       - RELOAD=true
+      - PYTHON_VERSION=3.12
     env_file:
       - .env
     restart: unless-stopped
