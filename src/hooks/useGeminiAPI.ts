@@ -1,41 +1,29 @@
-import { useState, useCallback } from 'react';
-import { ChatMessage, getChatService } from '@/services/chat/googleGenAIService';
+import { useState } from 'react';
 
-const useGeminiAPI = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export const useGeminiAPI = () => {
+  const [error, setError] = useState<Error | null>(null);
 
-  const sendMessage = useCallback(async (message: string) => {
-    setIsLoading(true);
-    setError(null);
+  const sendMessage = async (message: string) => {
     try {
-      const chatService = getChatService();
-      const response = await chatService.sendMessage(message);
-      return response;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      const response = await fetch('/api/gemini/ask', {
+        method: 'POST',
+        body: JSON.stringify({ prompt: message }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
 
-  const getHistory = useCallback((): ChatMessage[] => {
-    try {
-      const chatService = getChatService();
-      return chatService.getHistory();
+      const data = await response.json();
+      return data.text;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      return [];
+      setError(err instanceof Error ? err : new Error('Unknown error'));
+      throw err;
     }
-  }, []);
-
-  return {
-    sendMessage,
-    getHistory,
-    isLoading,
-    error
   };
-};
 
-export default useGeminiAPI;
+  return { sendMessage, error };
+};
+// Already declared above with `export const useGeminiAPI = () => { ... }`
+// So nothing else is needed.

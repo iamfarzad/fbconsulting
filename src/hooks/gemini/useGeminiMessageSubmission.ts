@@ -1,6 +1,5 @@
-
 import { useState, useCallback } from 'react';
-import { useGemini } from '@/components/copilot/GeminiProvider';
+import { useGemini } from '@/components/copilot/providers/GeminiProvider';
 import { GeminiMultimodalChat } from '@/services/gemini';
 import { AIMessage } from '@/services/chat/messageTypes';
 
