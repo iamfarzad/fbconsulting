@@ -22,7 +22,7 @@
     "github.vscode-pull-request-github",
     "eamodio.gitlens"
   ],
-  "postCreateCommand": "echo 'Installing dependencies...' && cd backend/gemini_service && python -m pip install --upgrade pip && pip install -r requirements.txt && pip list && cd ../.. && npm install",
+  "postCreateCommand": "echo 'Installing dependencies...' && cd backend/gemini_service && python3.12 -m pip install --upgrade pip && pip3.12 install -r requirements.txt && pip3.12 list && cd ../.. && npm install",
   "remoteUser": "node",
   "containerEnv": {
     "GOOGLE_API_KEY": "${localEnv:GOOGLE_API_KEY}",
@@ -30,7 +30,7 @@
   },
   "features": {
     "python": {
-      "version": "3.11",
+      "version": "3.12",
       "installTools": true
     },
     "git": "latest"
