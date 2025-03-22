@@ -60,7 +60,6 @@
     "embla-carousel-react": "^8.3.0",
     "framer-motion": "^12.4.12",
     "input-otp": "^1.2.4",
-    "lovable-tagger": "^1.1.7",
     "lucide-react": "^0.462.0",
     "next-themes": "^0.3.0",
     "path": "^0.12.7",
@@ -81,7 +80,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
-    "@omlet/cli": "^1.13.2",
+    "@vitest/runner": "^3.0.9",
     "@tailwindcss/typography": "^0.5.15",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
@@ -89,7 +88,7 @@
     "@types/node": "^22.5.5",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react-swc": "^3.8.0",
+    "@vitejs/plugin-react-swc": "^3.9.0",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
@@ -100,7 +99,7 @@
     "tailwindcss": "^3.4.11",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
-    "vite": "^5.4.14",
+    "vite": "^5.1.4",
     "vitest": "^3.0.9"
   }
 }
