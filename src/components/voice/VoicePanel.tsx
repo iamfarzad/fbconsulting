@@ -4,9 +4,10 @@ import { Mic, MicOff, X, Volume2, VolumeOff, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '../ui/button';
 import { AnimatedBars } from '../ui/AnimatedBars';
-import { useGeminiService, useGeminiAudioPlayback } from '@/hooks/gemini';
+import { useGeminiService } from '@/hooks/gemini';
 import { Progress } from '../ui/progress';
 import { useMessage } from '@/contexts/MessageContext';
+import useGeminiAudioPlayback from '@/hooks/gemini/useGeminiAudioPlayback';
 
 interface VoicePanelProps {
   isListening: boolean;
@@ -24,7 +25,7 @@ export const VoicePanel: React.FC<VoicePanelProps> = ({
   aiResponse,
 }) => {
   const { error: serviceError, isLoading, progress } = useGeminiService();
-  const { isPlaying, error: audioError, stopAudio, handleAudioChunk, playAudioChunks } = useGeminiAudioPlayback({
+  const { isPlaying, error: audioError, stopAudio, playAudio } = useGeminiAudioPlayback({
     onPlaybackError: console.error
   });
 
@@ -33,10 +34,10 @@ export const VoicePanel: React.FC<VoicePanelProps> = ({
   useEffect(() => {
     // Automatically play audio when message is received in context
     if (message && audioEnabled) {
-      handleAudioChunk(new Blob([message], { type: 'text/plain' }));
-      playAudioChunks().catch(console.error);
+      const messageBlob = new Blob([message], { type: 'text/plain' });
+      playAudio(messageBlob).catch(console.error);
     }
-  }, [message, audioEnabled, handleAudioChunk, playAudioChunks]);
+  }, [message, audioEnabled, playAudio]);
 
   const handleAudioControl = () => {
     if (isPlaying || isLoading) {
@@ -44,10 +45,11 @@ export const VoicePanel: React.FC<VoicePanelProps> = ({
       setAudioEnabled(false);
     } else if (message) {
       setAudioEnabled(true);
-      handleAudioChunk(new Blob([message], { type: 'text/plain' }));
-      playAudioChunks().catch(console.error);
+      const messageBlob = new Blob([message], { type: 'text/plain' });
+      playAudio(messageBlob).catch(console.error);
     }
   };
+  
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20, scale: 0.9 }}

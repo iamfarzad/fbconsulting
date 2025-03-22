@@ -9,6 +9,7 @@ import { useLocation } from 'react-router-dom';
 import useGeminiAPI from '@/hooks/useGeminiAPI';
 import { PersonaData, PersonaType } from '@/mcp/protocols/personaManagement/types';
 import { formatErrorMessage, logDetailedError, categorizeError } from '@/utils/errorHandling';
+import { useVoiceInput } from '@/hooks/useVoiceInput';
 
 interface UseUnifiedChatOptions {
   useCopilotKit?: boolean;
@@ -18,7 +19,7 @@ interface UseUnifiedChatOptions {
 
 export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
   const { useCopilotKit = false, apiKey, modelName } = options;
-  const [messages, setMessages] = useState<AIMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -31,6 +32,10 @@ export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
   // Refs
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const location = useLocation();
+  const currentPath = location.pathname;
+  const copilotChat = useCopilotKit();
+  const { currentPersona, personaData } = usePersonaManagement();
 
   // Voice input integration
   const {
@@ -283,7 +288,7 @@ export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
       setIsLoading(true);
       
       // Create user message
-      const userMessage: AIMessage = {
+      const userMessage: ChatMessage = {
         role: 'user',
         content: inputValue,
         timestamp: Date.now(),
@@ -296,7 +301,7 @@ export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
       // In a real implementation, this would call the chat service
       // For now, we'll use a mock response
       setTimeout(() => {
-        const botMessage: AIMessage = {
+        const botMessage: ChatMessage = {
           role: 'assistant',
           content: `This is a response to: ${userMessage.content}`,
           timestamp: Date.now(),
