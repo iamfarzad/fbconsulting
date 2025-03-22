@@ -1,53 +1,50 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
+import { GoogleGenAIChatService } from '@/services/chat/googleGenAIService';
 
-/**
- * Custom hook to manage the Gemini API key
- * @returns Object containing the API key and loading state
- */
-export const useGeminiAPI = () => {
-  const [apiKey, setApiKey] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+let chatService: GoogleGenAIChatService | null = null;
 
-  useEffect(() => {
-    // First check environment variable
-    let key = import.meta.env.VITE_GEMINI_API_KEY;
+export function useGeminiAPI() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const apiKey = process.env.VITE_GOOGLE_API_KEY || '';
 
-    // If not in env, check localStorage
-    if (!key) {
-      try {
-        const config = localStorage.getItem('GEMINI_CONFIG');
-        if (config) {
-          const { apiKey: storedKey } = JSON.parse(config);
-          if (storedKey && typeof storedKey === 'string' && storedKey.trim()) {
-            key = storedKey.trim();
-          }
-        }
-      } catch (error) {
-        console.error('Error reading Gemini config from localStorage:', error);
-      }
+  const initializeService = useCallback(() => {
+    if (!chatService && apiKey) {
+      chatService = new GoogleGenAIChatService({
+        apiKey,
+        modelName: 'gemini-2.0-flash',
+        temperature: 0.7,
+        maxOutputTokens: 2048
+      });
     }
+    return chatService;
+  }, [apiKey]);
 
-    // Validate and clean the key
-    if (key && typeof key === 'string') {
-      key = key.trim();
-      if (!key) {
-        console.error('API key is empty after trimming');
-        key = null;
+  const sendMessage = useCallback(async (message: string): Promise<string> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const service = initializeService();
+      if (!service) {
+        throw new Error('Chat service not initialized');
       }
-    } else {
-      console.error('Invalid API key format');
-      key = null;
-    }
 
-    // Set the API key from either source
-    setApiKey(key || null);
-    setIsLoading(false);
-  }, []);
+      const response = await service.sendMessage(message);
+      return response;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [initializeService]);
 
   return {
-    apiKey,
-    isLoading
+    sendMessage,
+    isLoading,
+    error,
+    apiKey
   };
-};
-
-export default useGeminiAPI;
+}
