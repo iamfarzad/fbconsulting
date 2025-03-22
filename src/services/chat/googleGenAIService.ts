@@ -1,4 +1,3 @@
-
 import { GoogleGenerativeAI, GenerativeModel, ChatSession } from '@google/generative-ai';
 import { LeadInfo } from '@/types';
 import { PersonaData } from '@/mcp/protocols/personaManagement/types';
@@ -27,7 +26,7 @@ export type GoogleGenAIChatServiceConfig = GoogleGenAIConfig & {
 /**
  * Google GenAI service for chat
  */
-class GoogleGenAIChatService {
+class GoogleGenAIChatService implements GeminiChatService {
   private apiKey: string;
   private config: GoogleGenAIChatServiceConfig;
   private ai: GoogleGenerativeAI;
@@ -35,8 +34,6 @@ class GoogleGenAIChatService {
   private chat: ChatSession;
   private history: ChatMessage[] = [];
   private maxHistoryLength: number = 50;
-  private spatialContext: SpatialContext | null = null;
-  private lastInteractionTime: number = Date.now();
 
   private trimHistory() {
     if (this.history.length > this.maxHistoryLength) {
@@ -132,27 +129,15 @@ class GoogleGenAIChatService {
           maxOutputTokens: this.config.maxOutputTokens,
           topP: this.config.topP,
           topK: this.config.topK
-        },
-        // Additional configurations for multimodal capabilities
-        systemInstruction: {
-          role: 'system',
-          parts: [{ text: 'You are a helpful assistant that can process text, images, and audio.' }]
         }
       });
-
-      this.chat = this.model.startChat();
-
-      // Initialize history with system prompt if persona data is provided
+      
+      // Add initial system message if persona data is provided
       if (personaData) {
-        const systemPrompt = await this.generateSystemPrompt(personaData);
-        this.history = [{
-          role: 'system',
-          content: systemPrompt,
-          timestamp: Date.now()
-        }];
-      } else {
-        this.history = [];
+        await this.addSystemMessage(personaData);
       }
+
+      return true;
     } catch (error) {
       console.error('Failed to initialize chat:', error);
       throw error;
@@ -179,8 +164,8 @@ class GoogleGenAIChatService {
     const userMessageLower = userMessage.toLowerCase();
     const assistantResponseLower = assistantResponse.toLowerCase();
     
-    const userEnding = userEndingPhrases.some(phrase => userMessageLower.includes(phrase));
-    const assistantEnding = assistantEndingPhrases.some(phrase => assistantResponseLower.includes(phrase));
+    const userEnding = userEndingPhrases.some(phrase => userMessageLower === phrase);
+    const assistantEnding = assistantEndingPhrases.some(phrase => assistantResponseLower === phrase);
     
     return userEnding || assistantEnding;
   }
@@ -279,7 +264,7 @@ class GoogleGenAIChatService {
       }
 
       // Call Vercel serverless function
-      const response = await fetch('/api/gemini/audio', {
+      const response = await fetch('/api/gemini_audio', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -326,18 +311,18 @@ class GoogleGenAIChatService {
       this.logMetrics(startTime, false);
 
     } catch (error) {
-      console.error('Error synthesizing speech:', error);
-      this.logMetrics(startTime, false, error as Error);
+      console.error('Connection test failed:', error);
+      return false;
     }
   }
 
-  private async playAudio(audioData: ArrayBuffer): Promise<void> {
-    const audioContext = new AudioContext();
-    const audioBuffer = await audioContext.decodeAudioData(audioData);
-    const source = audioContext.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(audioContext.destination);
-    source.start(0);
+  private async addSystemMessage(personaData: PersonaData): Promise<void> {
+    const systemMessage: ChatMessage = {
+      timestamp: Date.now(),
+      role: 'system',
+      content: this.generateSystemPrompt(personaData)
+    };
+    this.history.push(systemMessage);
   }
 
   private updateSpatialContext(context: Partial<SpatialContext>): void {
@@ -364,7 +349,7 @@ class GoogleGenAIChatService {
         
         if (suggestion) {
           this.history.push({
-            timestamp: Date.now(),
+        timestamp: Date.now(),
             role: 'assistant',
             content: suggestion.response.text()
           });
@@ -407,10 +392,7 @@ class GoogleGenAIChatService {
             : '';
 
         this.history.push({
-          timestamp: Date.now(), 
-          role: 'assistant', 
-          content: responseText 
-        });
+        timestamp: Date.now(), role: 'assistant', content: responseText });
 
         // If we have lead information and the conversation is ending, send an email summary
         if (leadInfo && this.isConversationEnding(message, responseText)) {
@@ -430,28 +412,36 @@ class GoogleGenAIChatService {
               : '';
 
           this.history.push({
-            timestamp: Date.now(), 
-            role: 'assistant', 
-            content: retryResponseText 
-          });
+        timestamp: Date.now(), role: 'assistant', content: retryResponseText });
 
-          return retryResponseText;
-        } catch (retryError) {
-          console.error('Retry failed, reinitializing chat...', retryError);
-          await this.initializeChat();
-        }
-      }
-
-      return 'Chat service is currently unavailable.';
+      return retryResponseText;
     } catch (error) {
-      console.error('Error sending message to Google Gen AI:', error);
-      throw new Error('Failed to get response from AI');
+      console.error('Error handling retry response:', error);
+      throw error;
     }
   }
 
-  /**
-   * Get the current chat history
-   */
+  private async isConversationEnding(message: string, response: string): Promise<boolean> {
+    const endingPatterns = [
+      /goodbye/i,
+      /thank.*you/i,
+      /bye/i,
+      /that.*all/i,
+      /end.*conversation/i
+    ];
+
+    return endingPatterns.some(pattern => 
+      pattern.test(message.toLowerCase()) || 
+      pattern.test(response.toLowerCase())
+    );
+  }
+
+  private async sendConversationSummary(leadInfo: LeadInfo): Promise<void> {
+    // Implementation for sending conversation summary
+    // This would typically integrate with your email service
+    console.log('Sending conversation summary for:', leadInfo);
+  }
+
   public getHistory(): ChatMessage[] {
     return [...this.history];
   }
@@ -459,17 +449,16 @@ class GoogleGenAIChatService {
   /**
    * Clear the chat history
    */
-  public async clearHistory(personaData?: PersonaData): Promise<void> {
-    if (personaData) {
-      const systemPrompt = await this.generateSystemPrompt(personaData);
-      this.history = [{
-        role: 'system',
-        content: systemPrompt,
-        timestamp: Date.now()
-      }];
-    } else {
-      this.history = [];
+  public async clearHistory(personaData: PersonaData): Promise<void> {
+    if (!personaData) {
+      throw new Error('Cannot clear history without persona data.');
     }
+    const systemPrompt = await this.generateSystemPrompt(personaData);
+    this.history = [{
+      role: 'system',
+      content: systemPrompt,
+      timestamp: Date.now()
+    }];
   }
 
   /**
@@ -506,12 +495,4 @@ class GoogleGenAIChatService {
       return false;
     }
   }
-}
-
-// Export the service class
-export { GoogleGenAIChatService };
-
-// Factory function to create a chat service
-export async function getChatService(config: GoogleGenAIChatServiceConfig): Promise<GoogleGenAIChatService> {
-  return new GoogleGenAIChatService(config);
 }
