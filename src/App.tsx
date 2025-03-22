@@ -24,8 +24,10 @@ import LoadingFallback from "./components/LoadingFallback";
 import { UnifiedVoiceUI } from "@/components/voice/UnifiedVoiceUI";
 import { useGeminiService } from "@/hooks/gemini";
 import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider';
+import { GeminiProvider } from '@/components/copilot/providers/GeminiProvider';
 
-function App() {
+// Create a new component for the main content
+function MainContent() {
   const {
     isLoading,
     isConnected,
@@ -48,53 +50,61 @@ function App() {
   }, []);
 
   return (
+    <AnimatePresence mode="wait">
+      <Toaster key="toaster" />
+      <ChatButton key="chat-button" />
+      <header className="mb-8">
+        <h1 className="text-2xl font-bold">Gemini Chat</h1>
+      </header>
+      <main>
+        <UnifiedVoiceUI 
+          isListening={isListening}
+          toggleListening={toggleListening}
+          isPlaying={isPlaying}
+          progress={progress}
+          stopAudio={stopAudio}
+          onVoiceInput={handleVoiceInput}
+          disabled={!isConnected || isLoading}
+        />
+      </main>
+      <Routes key="routes">
+        <Route path="/" element={<Index />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:slug" element={<BlogPost />} />
+        <Route path="/test" element={<TestPage />} />
+        <Route path="/test-mcp" element={<TestMCP />} />
+        <Route path="/test-google-ai" element={<TestGoogleAI />} />
+        <Route path="/test-unified-chat" element={<TestUnifiedChat />} />
+        <Route path="/ai-demo" element={<AIDemo />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </AnimatePresence>
+  );
+}
+
+function App() {
+  return (
     <div className="App">
       <ErrorBoundaryWrapper>
-        <BrowserRouter>
-          <ThemeProvider>
-            <LanguageProvider>
-              <GeminiAPIProvider>
-                <CopilotProvider>
-                  <Suspense fallback={<LoadingFallback />}>
-                    <AnimatePresence mode="wait">
-                      <Toaster key="toaster" />
-                      <ChatButton key="chat-button" />
-                      <header className="mb-8">
-                        <h1 className="text-2xl font-bold">Gemini Chat</h1>
-                      </header>
-                      <main>
-                        <UnifiedVoiceUI 
-                          isListening={isListening}
-                          toggleListening={toggleListening}
-                          isPlaying={isPlaying}
-                          progress={progress}
-                          stopAudio={stopAudio}
-                          onVoiceInput={handleVoiceInput}
-                          disabled={!isConnected || isLoading}
-                        />
-                      </main>
-                      <Routes key="routes">
-                        <Route path="/" element={<Index />} />
-                        <Route path="/services" element={<Services />} />
-                        <Route path="/about" element={<About />} />
-                        <Route path="/contact" element={<Contact />} />
-                        <Route path="/blog" element={<Blog />} />
-                        <Route path="/blog/:slug" element={<BlogPost />} />
-                        <Route path="/test" element={<TestPage />} />
-                        <Route path="/test-mcp" element={<TestMCP />} />
-                        <Route path="/test-google-ai" element={<TestGoogleAI />} />
-                        <Route path="/test-unified-chat" element={<TestUnifiedChat />} />
-                        <Route path="/ai-demo" element={<AIDemo />} />
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </AnimatePresence>
-                  </Suspense>
-                  <AnalyticsProvider />
-                </CopilotProvider>
-              </GeminiAPIProvider>
-            </LanguageProvider>
-          </ThemeProvider>
-        </BrowserRouter>
+        <GeminiProvider>
+          <BrowserRouter>
+            <ThemeProvider>
+              <LanguageProvider>
+                <GeminiAPIProvider>
+                  <CopilotProvider>
+                    <Suspense fallback={<LoadingFallback />}>
+                      <MainContent />
+                    </Suspense>
+                    <AnalyticsProvider />
+                  </CopilotProvider>
+                </GeminiAPIProvider>
+              </LanguageProvider>
+            </ThemeProvider>
+          </BrowserRouter>
+        </GeminiProvider>
       </ErrorBoundaryWrapper>
     </div>
   );
