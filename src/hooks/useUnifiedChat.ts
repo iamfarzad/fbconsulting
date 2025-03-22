@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useCopilotChat } from '@copilotkit/react-core';
 import { usePersonaManagement } from '@/mcp/hooks/usePersonaManagement';
@@ -26,11 +27,7 @@ export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
   const [chatService, setChatService] = useState<GoogleGenAIChatService | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle');
   const [connectionError, setConnectionError] = useState<string | null>(null);
-<<<<<<< HEAD
-
-=======
   
->>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
   // Refs
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -355,19 +352,7 @@ export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
       setConnectionError(null);
     },
     addUserMessage,
-<<<<<<< HEAD
     addAssistantMessage
-=======
-    addAssistantMessage,
-    chatService,
-    connectionStatus,
-    connectionError,
-    retryConnection: () => {
-      setChatService(null);
-      setConnectionStatus('idle');
-      setConnectionError(null);
-    }
->>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
   };
 }
 

@@ -7,7 +7,7 @@
       "maxDuration": 60,
       "runtime": "python3.12"
     },
-    "api/gemini/audio.py": {
+    "api/gemini_audio.py": {
       "memory": 1024,
       "maxDuration": 30,
       "runtime": "python3.12"
@@ -15,7 +15,7 @@
   },
   "routes": [
     { "src": "/api/gemini/stream", "dest": "/api/gemini/stream.py" },
-    { "src": "/api/gemini/audio", "dest": "/api/gemini/audio.py" }
+    { "src": "/api/gemini/audio", "dest": "/api/gemini_audio.py" }
   ],
   "env": {
     "GOOGLE_API_KEY": "${GOOGLE_API_KEY}"
