@@ -21,6 +21,9 @@ def generate_response(
 
         configure(api_key=api_key)
         
+        if not model_name:
+            return {"error": "Model name cannot be empty", "status": HTTPStatus.BAD_REQUEST}
+        
         # Map CopilotKit message format to Gemini format
         gemini_messages = []
         for message in messages:
