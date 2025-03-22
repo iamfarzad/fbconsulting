@@ -41,6 +41,7 @@
     }
   ],
   "env": {
-    "GOOGLE_API_KEY": "${GOOGLE_API_KEY}"
+    "GOOGLE_API_KEY": "${GOOGLE_API_KEY}",
+    "VERCEL_API_KEY": "${VERCEL_API_KEY}"
   }
 }
