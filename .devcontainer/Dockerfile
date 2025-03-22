@@ -25,11 +25,23 @@ USER node
 # Set the working directory permissions
 RUN mkdir -p /app && chown -R node:node /app
 
-# Install Python
+# Install SSL and Python dependencies
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends python3-pip python3-venv \
+    && apt-get install -y --no-install-recommends \
+        software-properties-common \
+        build-essential \
+        libssl-dev \
+        libffi-dev \
+        python3-dev \
+        python3-pip \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update \
+    && apt-get install -y python3.12 python3.12-venv python3.12-dev python3.12-distutils \
+    && ln -s /usr/bin/python3.12 /usr/local/bin/python3 \
+    && ln -s /usr/bin/python3.12 /usr/local/bin/python \
+    && curl -sS https://bootstrap.pypa.io/get-pip.py | python3.12 \
     && rm -rf /var/lib/apt/lists/*
 
-# Create and activate virtual environment
-RUN python3 -m venv /workspace/venv
+# Create and activate virtual environment with Python 3.12
+RUN python3.12 -m venv /workspace/venv
 ENV PATH="/workspace/venv/bin:$PATH"
