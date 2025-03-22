@@ -15,6 +15,12 @@ export default async function handler(req, res) {
       return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    // Check for the Google API key
+    const googleApiKey = process.env.GOOGLE_API_KEY;
+    if (!googleApiKey) {
+      return res.status(401).json({ error: 'Missing Google API key' });
+    }
+
     // Generate a temporary file to store the request body
     const tempFilePath = join(tmpdir(), `${uuid()}.json`);
     await writeFile(tempFilePath, JSON.stringify(req.body));
