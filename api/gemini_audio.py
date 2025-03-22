@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import Response, JSONResponse
+from mangum import Mangum
 import time
 from .gemini import Client
 
@@ -83,6 +84,5 @@ async def handle_audio(request: Request):
             detail=str(e)
         )
 
-# Vercel requires a handler function
-def handler(request: Request):
-    return app(request._scope, request._receive)
+# Create Mangum handler for AWS Lambda / Vercel
+handler = Mangum(app, lifespan="off")

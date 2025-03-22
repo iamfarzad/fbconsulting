@@ -9,3 +9,4 @@ pydantic==2.6.3
 typing-extensions==4.10.0
 starlette==0.36.3
 werkzeug==3.0.1
+mangum==0.17.0  # For AWS Lambda / Vercel serverless compatibility
