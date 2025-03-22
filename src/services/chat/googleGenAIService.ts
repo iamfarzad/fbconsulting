@@ -27,7 +27,7 @@ export type GoogleGenAIChatServiceConfig = GoogleGenAIConfig & {
 /**
  * Google GenAI service for chat
  */
-class GoogleGenAIChatService implements GeminiChatService {
+class GoogleGenAIChatService {
   private apiKey: string;
   private config: GoogleGenAIChatServiceConfig;
   private ai: GoogleGenerativeAI;
@@ -459,16 +459,17 @@ class GoogleGenAIChatService implements GeminiChatService {
   /**
    * Clear the chat history
    */
-  public async clearHistory(personaData: PersonaData): Promise<void> {
-    if (!personaData) {
-      throw new Error('Cannot clear history without persona data.');
+  public async clearHistory(personaData?: PersonaData): Promise<void> {
+    if (personaData) {
+      const systemPrompt = await this.generateSystemPrompt(personaData);
+      this.history = [{
+        role: 'system',
+        content: systemPrompt,
+        timestamp: Date.now()
+      }];
+    } else {
+      this.history = [];
     }
-    const systemPrompt = await this.generateSystemPrompt(personaData);
-    this.history = [{
-      role: 'system',
-      content: systemPrompt,
-      timestamp: Date.now()
-    }];
   }
 
   /**

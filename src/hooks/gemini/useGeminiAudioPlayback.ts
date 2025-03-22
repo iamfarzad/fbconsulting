@@ -1,140 +1,99 @@
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
-export interface UseGeminiAudioPlaybackProps {
-  onPlaybackStart?: () => void;
+interface UseGeminiAudioPlaybackOptions {
   onPlaybackComplete?: () => void;
-  onPlaybackError?: (error: string) => void;
+  onPlaybackError?: (error: Error) => void;
 }
 
 /**
- * Hook to manage audio playback for Gemini services
+ * Hook for managing audio playback from Gemini API
  */
-export function useGeminiAudioPlayback({
-  onPlaybackStart,
-  onPlaybackComplete,
-  onPlaybackError
-}: UseGeminiAudioPlaybackProps = {}) {
+const useGeminiAudioPlayback = (options: UseGeminiAudioPlaybackOptions = {}) => {
+  const [audioData, setAudioData] = useState<Blob | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState('');
   const [progress, setProgress] = useState(0);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
   
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const sourceNodeRef = useRef<AudioBufferSourceNode | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  // Initialize audio context
+  // Clean up audio element on unmount
   useEffect(() => {
-    if (!audioContextRef.current) {
-      try {
-        audioContextRef.current = new (window.AudioContext || 
-          (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-      } catch (e) {
-        console.error('Failed to create AudioContext:', e);
-        setError('Failed to initialize audio system');
-        if (onPlaybackError) {
-          onPlaybackError('Failed to initialize audio system');
-        }
-      }
-    }
     return () => {
-      audioContextRef.current?.close();
+      if (audioElement) {
+        audioElement.pause();
+        URL.revokeObjectURL(audioElement.src);
+      }
     };
-  }, [onPlaybackError]);
+  }, [audioElement]);
 
-  // Cleanup function
-  const cleanup = useCallback(() => {
-    if (sourceNodeRef.current) {
-      sourceNodeRef.current.stop();
-      sourceNodeRef.current.disconnect();
-      sourceNodeRef.current = null;
-    }
-    
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.src = '';
-    }
-    
-    setIsPlaying(false);
-    setProgress(0);
-  }, []);
-
-  // Play audio from blob
+  // Play audio blob
   const playAudio = useCallback(async (audioBlob: Blob) => {
     try {
-      // Clean up any existing audio
-      cleanup();
+      setError('');
+      setAudioData(audioBlob);
       
-      // Create URL for the blob
+      // Create URL for audio blob
       const audioUrl = URL.createObjectURL(audioBlob);
       
-      // Create audio element
-      if (!audioRef.current) {
-        audioRef.current = new Audio();
-        
-        audioRef.current.addEventListener('timeupdate', () => {
-          if (audioRef.current) {
-            const currentProgress = (audioRef.current.currentTime / audioRef.current.duration) * 100;
-            setProgress(currentProgress);
-          }
-        });
-        
-        audioRef.current.addEventListener('ended', () => {
-          setIsPlaying(false);
-          setProgress(100);
-          if (onPlaybackComplete) {
-            onPlaybackComplete();
-          }
-        });
-        
-        audioRef.current.addEventListener('error', (e) => {
-          const errorMessage = 'Error playing audio';
-          setError(errorMessage);
-          if (onPlaybackError) {
-            onPlaybackError(errorMessage);
-          }
-        });
-      }
+      // Create and configure audio element
+      const audio = new Audio(audioUrl);
+      setAudioElement(audio);
       
-      // Set source and play
-      audioRef.current.src = audioUrl;
+      // Set up event listeners
+      audio.addEventListener('ended', () => {
+        setIsPlaying(false);
+        setProgress(100);
+        options.onPlaybackComplete?.();
+        URL.revokeObjectURL(audioUrl);
+      });
       
-      // Play audio
-      const playPromise = audioRef.current.play();
-      if (playPromise) {
-        await playPromise;
-        setIsPlaying(true);
-        if (onPlaybackStart) {
-          onPlaybackStart();
+      audio.addEventListener('error', (e) => {
+        const error = new Error(`Audio playback error: ${e.type}`);
+        setError(error.message);
+        setIsPlaying(false);
+        options.onPlaybackError?.(error);
+        URL.revokeObjectURL(audioUrl);
+      });
+      
+      audio.addEventListener('timeupdate', () => {
+        if (audio.duration) {
+          const progressValue = (audio.currentTime / audio.duration) * 100;
+          setProgress(progressValue);
         }
-      }
+      });
+      
+      // Start playback
+      await audio.play();
+      setIsPlaying(true);
     } catch (error) {
-      console.error('Error playing audio:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Error playing audio';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown audio playback error';
       setError(errorMessage);
-      if (onPlaybackError) {
-        onPlaybackError(errorMessage);
-      }
+      options.onPlaybackError?.(new Error(errorMessage));
+      setIsPlaying(false);
     }
-  }, [cleanup, onPlaybackStart, onPlaybackComplete, onPlaybackError]);
+  }, [options]);
 
   // Stop audio playback
   const stopAudio = useCallback(() => {
-    cleanup();
-  }, [cleanup]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return cleanup;
-  }, [cleanup]);
+    if (audioElement) {
+      audioElement.pause();
+      audioElement.currentTime = 0;
+      setIsPlaying(false);
+      setProgress(0);
+      
+      if (audioElement.src) {
+        URL.revokeObjectURL(audioElement.src);
+      }
+    }
+  }, [audioElement]);
 
   return {
     isPlaying,
     error,
     progress,
     playAudio,
-    stopAudio,
+    stopAudio
   };
-}
+};
 
 export default useGeminiAudioPlayback;

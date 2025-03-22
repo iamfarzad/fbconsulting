@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { cn } from "@/lib/utils";
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
@@ -69,11 +69,11 @@ export const UnifiedVoiceUI: React.FC<UnifiedVoiceUIProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (!isVoiceSupported) {
-      console.warn('Voice recognition not supported');
+  const handleVoiceCommand = useCallback((command: string) => {
+    if (command.trim()) {
+      onVoiceInput(command);
     }
-  }, [isVoiceSupported]);
+  }, [onVoiceInput]);
 
   if (!isVoiceSupported) return null;
 
