@@ -16,23 +16,7 @@ export const GeminiChat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { sendMessage: sendMessageFromAPI, error } = useGeminiAPI();
-
-  const sendMessage = async (message: string) => {
-    try {
-      const response = await fetch('/api/gemini/ask', {
-        method: 'POST',
-        body: JSON.stringify({ prompt: message }),
-        headers: { 'Content-Type': 'application/json' }
-      });
-      
-      const { text } = await response.json();
-      return text;
-    } catch (error) {
-      console.error('Error calling Gemini API:', error);
-      throw error;
-    }
-  };
+  const { sendMessage, error } = useGeminiAPI();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

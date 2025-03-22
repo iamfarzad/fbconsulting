@@ -23,6 +23,7 @@ import { GeminiAPIProvider } from "./providers/GeminiAPIProvider";
 import LoadingFallback from "./components/LoadingFallback";
 import { UnifiedVoiceUI } from "@/components/voice/UnifiedVoiceUI";
 import { useGeminiService } from "@/hooks/gemini";
+import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider';
 
 function App() {
   const {
@@ -88,6 +89,7 @@ function App() {
                       </Routes>
                     </AnimatePresence>
                   </Suspense>
+                  <AnalyticsProvider />
                 </CopilotProvider>
               </GeminiAPIProvider>
             </LanguageProvider>
