@@ -1,59 +1,86 @@
 
 /**
- * Formats an error message from different error types
+ * Error handling utilities for consistent error management
  */
-export const formatErrorMessage = (error: any): string => {
-  if (typeof error === 'string') {
-    return error;
-  }
-  
+
+// Define error categories for better organization
+export type ErrorCategory = 'api' | 'auth' | 'validation' | 'unknown' | 'ui';
+
+/**
+ * Formats error messages to be user-friendly
+ */
+export function formatErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
+  } else if (typeof error === 'string') {
+    return error;
+  } else if (error && typeof error === 'object' && 'message' in error) {
+    return String((error as any).message);
+  } else {
+    return 'An unknown error occurred';
+  }
+}
+
+/**
+ * Categorizes errors to handle them appropriately
+ */
+export function categorizeError(error: unknown): ErrorCategory {
+  if (error instanceof Error) {
+    const message = error.message.toLowerCase();
+    
+    if (message.includes('api') || message.includes('network') || message.includes('fetch') || message.includes('request')) {
+      return 'api';
+    } else if (message.includes('auth') || message.includes('unauthorized') || message.includes('forbidden') || message.includes('permission') || message.includes('key')) {
+      return 'auth';
+    } else if (message.includes('validation') || message.includes('invalid') || message.includes('required')) {
+      return 'validation';
+    } else if (message.includes('ui') || message.includes('render') || message.includes('component')) {
+      return 'ui';
+    }
   }
   
-  if (error && typeof error === 'object' && 'message' in error) {
-    return String(error.message);
-  }
-  
-  return 'An unknown error occurred';
-};
+  return 'unknown';
+}
 
 /**
  * Logs detailed error information for debugging
  */
-export const logDetailedError = (error: any, context: Record<string, any> = {}): void => {
+export function logDetailedError(error: unknown, context: Record<string, any> = {}): void {
   console.error('Error details:', {
-    message: formatErrorMessage(error),
-    stack: error instanceof Error ? error.stack : undefined,
-    context
+    error: error instanceof Error ? {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    } : error,
+    category: categorizeError(error),
+    context,
+    timestamp: new Date().toISOString(),
   });
-};
+}
 
 /**
- * Categorizes errors by type for appropriate handling
+ * Creates a user-friendly error message based on the error category
  */
-export const categorizeError = (error: any): 'api' | 'auth' | 'validation' | 'unknown' => {
-  const errorMessage = formatErrorMessage(error).toLowerCase();
+export function getUserFriendlyErrorMessage(error: unknown): string {
+  const category = categorizeError(error);
   
-  if (errorMessage.includes('network') || 
-      errorMessage.includes('connect') || 
-      errorMessage.includes('timeout')) {
-    return 'api';
+  switch (category) {
+    case 'api':
+      return 'There was a problem connecting to the server. Please check your internet connection and try again.';
+    case 'auth':
+      return 'Authentication failed. Please check your credentials or API key and try again.';
+    case 'validation':
+      return 'There was an issue with the data provided. Please check your inputs and try again.';
+    case 'ui':
+      return 'There was a problem with the user interface. Please refresh the page and try again.';
+    default:
+      return 'An unexpected error occurred. Please try again later.';
   }
-  
-  if (errorMessage.includes('auth') || 
-      errorMessage.includes('key') || 
-      errorMessage.includes('permission') ||
-      errorMessage.includes('credential')) {
-    return 'auth';
-  }
-  
-  if (errorMessage.includes('valid') || 
-      errorMessage.includes('required') || 
-      errorMessage.includes('empty') ||
-      errorMessage.includes('format')) {
-    return 'validation';
-  }
-  
-  return 'unknown';
+}
+
+export default {
+  formatErrorMessage,
+  categorizeError,
+  logDetailedError,
+  getUserFriendlyErrorMessage
 };

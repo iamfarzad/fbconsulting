@@ -1,12 +1,16 @@
 
-// Re-export all hooks from the gemini directory
-export { default as useGeminiService } from './useGeminiService';
-export { default as useGeminiInitialization } from './useGeminiInitialization';
-export { default as useGeminiMessages } from './useGeminiMessages';
-export { default as useGeminiMessageSubmission } from './useGeminiMessageSubmission';
-export { default as useGeminiWebSocket } from './useGeminiWebSocket';
-export { default as useGeminiConfig } from './useGeminiConfig';
-export { default as useImageUpload } from './useImageUpload';
-export { default as useDocumentUpload } from './useDocumentUpload';
-export { default as useGeminiAudioPlayback } from './useGeminiAudioPlayback';
+// Main hooks
+export { useGeminiInitialization } from './useGeminiInitialization';
+export { useGeminiMessages } from './useGeminiMessages';
+export { useGeminiMessageSubmission } from './useGeminiMessageSubmission';
+export { useGeminiWebSocket } from './useGeminiWebSocket';
+export { useGeminiAudioPlayback } from './useGeminiAudioPlayback';
+export { useGeminiService } from './useGeminiService';
+
+// Utility and upload hooks
+export { useGeminiConfig } from './useGeminiConfig';
+export { useDocumentUpload } from './useDocumentUpload';
+export { useImageUpload } from './useImageUpload';
+
+// Types
 export type { UseGeminiAudioPlaybackOptions } from './useGeminiAudioPlayback';

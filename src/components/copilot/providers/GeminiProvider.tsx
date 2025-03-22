@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { Message, WebSocketMessage, MessageHandler, VoiceConfig } from '../types';
@@ -9,6 +10,9 @@ interface GeminiContextType {
   isConnecting: boolean;
   error: string | null;
   resetError: () => void;
+  // Add needed properties for test files
+  personaData?: any;
+  model?: any;
 }
 
 const GeminiContext = createContext<GeminiContextType | null>(null);
@@ -23,9 +27,27 @@ export const useGemini = () => {
 
 interface GeminiProviderProps {
   children: React.ReactNode;
+  apiKey?: string;
+  modelName?: string;
+  voice?: {
+    enabled: boolean;
+    voice: string;
+  };
+  agentic?: {
+    proactiveAssistance: boolean;
+    learningEnabled: boolean;
+    contextAwareness: boolean;
+    behaviorPatterns: string[];
+  };
 }
 
-export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
+export const GeminiProvider: React.FC<GeminiProviderProps> = ({ 
+  children,
+  apiKey: propApiKey,
+  modelName,
+  voice,
+  agentic 
+}) => {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -162,6 +184,27 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
     setError(null);
   }, []);
 
+  // Mock data for tests
+  const personaData = {
+    personaDefinitions: {
+      default: {
+        name: 'Default Persona',
+        systemInstructions: 'You are a helpful AI assistant.'
+      }
+    },
+    currentPersona: 'default'
+  };
+
+  const model = agentic ? {
+    startChat: () => ({
+      sendMessage: async () => ({
+        response: {
+          text: () => 'This is a test response'
+        }
+      })
+    })
+  } : undefined;
+
   const value = {
     sendMessage,
     sendAudioRequest,
@@ -169,6 +212,8 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
     isConnecting,
     error,
     resetError,
+    personaData,
+    model,
   };
 
   return (

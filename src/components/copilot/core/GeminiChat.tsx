@@ -1,164 +1,128 @@
-import React, { Suspense, useState, useEffect, useRef } from 'react';
-import { useGeminiService, useGeminiConfig } from '@/hooks/gemini';
-import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
-import { useImageUpload } from '@/hooks/useImageUpload';
-import { useToast } from '@/hooks/use-toast';
-import { ChatHeader } from '../chat/ChatHeader';
-import { ChatMessages } from '../chat/ChatMessages';
-import { ChatInputArea } from '../chat/ChatInputArea';
-import { ErrorDisplay } from '../chat/ErrorDisplay';
 
-export const GeminiChat: React.FC = () => {
-  const [inputValue, setInputValue] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+import React, { useState, useEffect, useRef } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/components/ui/use-toast';
+import { Message } from '../types';
+
+interface GeminiChatProps {
+  apiKey?: string;
+  className?: string;
+}
+
+export const GeminiChat: React.FC<GeminiChatProps> = ({
+  apiKey,
+  className = '',
+}) => {
   const { toast } = useToast();
-  
-  // Core Gemini service functionality
-  const {
-    messages,
-    isLoading,
-    error: serviceError,
-    sendMessage,
-    clearMessages,
-    isConnected,
-    isConnecting
-  } = useGeminiService({
-    onError: (error) => {
-      toast({
-        title: "AI Service Error",
-        description: error,
-        variant: "destructive"
-      });
-    }
-  });
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Configuration validation
-  const { apiKey: hasValidApiKey, modelName: currentPersonaName } = useGeminiConfig();
-  
-  // Image upload functionality
-  const {
-    images,
-    uploadImage,
-    removeImage,
-    clearImages,
-    isUploading
-  } = useImageUpload();
-
-  // Voice recognition with auto-send
-  const {
-    isListening,
-    transcript,
-    toggleListening,
-    voiceError,
-    isVoiceSupported
-  } = useSpeechRecognition((command) => {
-    if (command.trim()) {
-      setInputValue(command);
-      setTimeout(() => {
-        handleMessageSend(command);
-        setInputValue('');
-      }, 500);
-    }
-  });
-
-  // Auto scroll to bottom on new messages
+  // Scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
 
-  // Voice error handling
-  useEffect(() => {
-    if (voiceError) {
-      toast({
-        title: "Voice Recognition Error",
-        description: voiceError,
-        variant: "destructive"
-      });
-    }
-  }, [voiceError, toast]);
+  const handleSendMessage = async () => {
+    if (!inputValue.trim()) return;
 
-  // Message sending handler
-  const handleMessageSend = async (content: string) => {
-    if (!content.trim()) return;
-    
     try {
-      // First, upload any images if present
-      let messageText = content;
-      if (images.length > 0) {
-        // Call the image upload API here
-        // For now, append image info to the message
-        messageText += `\n\nWith ${images.length} attached image(s)`;
-      }
+      setIsLoading(true);
       
-      await sendMessage(messageText);
+      // Add user message to chat
+      const userMessage: Message = {
+        role: 'user',
+        content: inputValue.trim(),
+        timestamp: Date.now()
+      };
+      
+      setMessages(prev => [...prev, userMessage]);
       setInputValue('');
-      clearImages();
+      
+      // Simple mock response for now
+      setTimeout(() => {
+        const assistantMessage: Message = {
+          role: 'assistant',
+          content: 'This is a placeholder response from the Gemini API. The actual integration will be implemented soon.',
+          timestamp: Date.now()
+        };
+        
+        setMessages(prev => [...prev, assistantMessage]);
+        setIsLoading(false);
+      }, 1000);
+      
     } catch (error) {
       console.error('Error sending message:', error);
       toast({
-        title: "Error",
-        description: "Failed to send message",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Failed to send message',
+        variant: 'destructive',
       });
+      setIsLoading(false);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleMessageSend(inputValue);
+      handleSendMessage();
     }
   };
 
-  const error = serviceError || voiceError;
-  const isProviderLoading = isConnecting;
-  const isInitialized = isConnected;
-  
   return (
-    <div className="flex flex-col h-full bg-background border rounded-lg shadow-sm overflow-hidden">
-      <ChatHeader 
-        personaName={currentPersonaName}
-        isLoading={isProviderLoading}
-        messagesCount={messages.length}
-        onClear={clearMessages}
-        isUsingMockData={!hasValidApiKey}
-        isConnected={isInitialized}
-      />
-      
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {error && <ErrorDisplay error={error} />}
-        
-        <ChatMessages 
-          messages={messages}
-          isLoading={isLoading}
-          isProviderLoading={isProviderLoading}
-          isListening={isListening}
-          transcript={transcript}
-          error={error}
-          messagesEndRef={messagesEndRef}
-          isInitialized={isInitialized}
-        />
-      </div>
-      
-      <ChatInputArea 
-        inputValue={inputValue}
-        setInputValue={setInputValue}
-        handleKeyDown={handleKeyDown}
-        handleSendMessage={() => handleMessageSend(inputValue)}
-        toggleListening={toggleListening}
-        isLoading={isLoading}
-        isListening={isListening}
-        isInitialized={isInitialized}
-        isProviderLoading={isProviderLoading}
-        isVoiceSupported={isVoiceSupported}
-        error={error}
-        voiceError={voiceError}
-        images={images}
-        onUploadImage={uploadImage}
-        onRemoveImage={removeImage}
-        isUploading={isUploading}
-      />
-    </div>
+    <Card className={`overflow-hidden ${className}`}>
+      <CardHeader>
+        <CardTitle>Gemini Chat</CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="h-[400px] overflow-y-auto p-4 flex flex-col gap-2">
+          {messages.map((message, index) => (
+            <div
+              key={index}
+              className={`p-2 rounded-lg max-w-[80%] ${
+                message.role === 'user' 
+                  ? 'bg-primary text-primary-foreground ml-auto' 
+                  : 'bg-muted self-start'
+              }`}
+            >
+              {message.content}
+            </div>
+          ))}
+          {isLoading && (
+            <div className="p-2 rounded-lg bg-muted self-start">
+              <div className="flex gap-1">
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+        <div className="p-4 border-t flex">
+          <Input
+            className="flex-1"
+            placeholder="Type a message..."
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={isLoading}
+          />
+          <Button
+            className="ml-2"
+            onClick={handleSendMessage}
+            disabled={isLoading || !inputValue.trim()}
+          >
+            Send
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
