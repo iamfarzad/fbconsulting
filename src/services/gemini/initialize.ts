@@ -1,7 +1,7 @@
 import { 
   GoogleGenerativeAI as GenerativeAI,
   GenerativeModel
-} from '@google/generative-ai';
+} from 'google-generativeai';
 import { GeminiConfig, DEFAULT_CONFIG, DEFAULT_SAFETY_SETTINGS } from './types';
 
 /**

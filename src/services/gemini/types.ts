@@ -5,7 +5,7 @@ import {
   SafetySetting,
   GenerationConfig,
   Part 
-} from '@google/generative-ai';
+} from 'google-generativeai';
 
 // Types for Gemini message formats
 export interface GeminiMessage {

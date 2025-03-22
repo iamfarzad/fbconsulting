@@ -1,7 +1,7 @@
 
 import { initializeGemini } from './initialize';
 import { GeminiConfig, DEFAULT_SPEECH_CONFIG } from './types';
-import { Part, Content } from '@google/generative-ai';
+import { Part, Content } from 'google-generativeai';
 
 /**
  * Send a multimodal request to Gemini (text + images + audio + documents)
