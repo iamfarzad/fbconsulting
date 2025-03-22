@@ -1,9 +1,7 @@
-from http.server import BaseHTTPRequestHandler
 import google.generativeai as genai
 import json
 import os
 from typing import Dict, Any
-from pydub import AudioSegment
 import io
 import tempfile
 from datetime import datetime
@@ -84,7 +82,7 @@ def optimize_audio(audio_data: bytes, quality: str = 'medium') -> bytes:
         print(f"Audio optimization failed: {e}")
         return audio_data  # Return original if optimization fails
 
-class handler(BaseHTTPRequestHandler):
+class handler:
     def do_POST(self):
         """Handle POST requests for audio synthesis."""
         metrics = None
@@ -167,7 +165,7 @@ class handler(BaseHTTPRequestHandler):
             })
             
             # Get and optimize audio
-            audio_data = optimize_audio(response.audio, quality)
+            audio_data = optimize_audio(response['audio'], quality)
             
             # Cache response
             response_cache[cache_key] = (audio_data, datetime.now())
