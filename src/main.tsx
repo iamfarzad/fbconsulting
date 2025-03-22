@@ -1,4 +1,3 @@
-
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 // Use SafeApp with comprehensive error handling
@@ -9,6 +8,7 @@ import './index.css'
 import './styles/voice-ui.css'
 // Import HelmetProvider for SEO
 import { HelmetProvider } from 'react-helmet-async'
+import { GeminiProvider } from '@/components/copilot/providers/GeminiProvider'
 
 // Add error boundary for development debugging
 if (import.meta.env.DEV) {
@@ -27,7 +27,9 @@ if (import.meta.env.DEV) {
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <HelmetProvider>
-      <SafeApp />
+      <GeminiProvider>
+        <SafeApp />
+      </GeminiProvider>
     </HelmetProvider>
   </React.StrictMode>,
 )
