@@ -14,16 +14,6 @@
       "use": "@vercel/node"
     }
   ],
-  "functions": {
-    "api/gemini/stream.py": {
-      "memory": 1024,
-      "maxDuration": 60
-    },
-    "api/gemini/audio.py": {
-      "memory": 1024,
-      "maxDuration": 30
-    }
-  },
   "routes": [
     { 
       "src": "/api/gemini/stream",
@@ -41,6 +31,7 @@
     }
   ],
   "env": {
-    "GOOGLE_API_KEY": "${GOOGLE_API_KEY}"
+    "GOOGLE_API_KEY": "${GOOGLE_API_KEY}",
+    "VERCEL_API_KEY": "${VERCEL_API_KEY}"
   }
 }
