@@ -1,33 +1,9 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/gemini/**/*.py",
-      "use": "@vercel/python@3.1.0",
-      "config": {
-        "runtime": "python3.12",
-        "maxLambdaSize": "15mb"
-      }
-    },
-    {
-      "src": "package.json",
-      "use": "@vercel/node"
-    }
-  ],
   "routes": [
     { 
-      "src": "/api/gemini/stream",
-      "dest": "/api/gemini/stream.py",
-      "methods": ["POST"]
-    },
-    { 
-      "src": "/api/gemini/audio",
-      "dest": "/api/gemini/audio.py",
-      "methods": ["POST"]
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/"
+      "src": "/api/(.*)",
+      "dest": "/api/$1.py"
     }
   ],
   "env": {
