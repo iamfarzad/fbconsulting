@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/javascript-node:18
+FROM mcr.microsoft.com/devcontainers/javascript-node:20
 
 # Set working directory
 WORKDIR /app

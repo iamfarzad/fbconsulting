@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { GoogleGenerativeAI, GenerativeModel, ChatSession } from '@google/generative-ai';
 import { LeadInfo } from '@/types';
 import { PersonaData } from '@/mcp/protocols/personaManagement/types';
@@ -10,12 +11,19 @@ import type {
   ChatMessage,
   AgenticConfig
 } from '../copilot/types';
+=======
+import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
+import { PersonaData } from '@/types/persona';
 
-// Re-export ChatMessage type to be used in other modules
-export type { ChatMessage } from '../copilot/types';
+export interface ChatMessage {
+  timestamp: number;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
+>>>>>>> fix-technical-level-types
 
-// Chat service configuration
-export type GoogleGenAIChatServiceConfig = GoogleGenAIConfig & {
+export interface GoogleGenAIChatServiceConfig {
+  apiKey: string;
   modelName: string;
   temperature?: number;
   maxOutputTokens?: number;
@@ -23,6 +31,7 @@ export type GoogleGenAIChatServiceConfig = GoogleGenAIConfig & {
   topK?: number;
 }
 
+<<<<<<< HEAD
 /**
  * Google GenAI service for chat
  */
@@ -34,95 +43,33 @@ class GoogleGenAIChatService implements GeminiChatService {
   private chat: ChatSession;
   private history: ChatMessage[] = [];
   private maxHistoryLength: number = 50;
+=======
+export interface LeadInfo {
+  name?: string;
+  email?: string;
+  company?: string;
+  interest?: string;
+}
+>>>>>>> fix-technical-level-types
 
-  private trimHistory() {
-    if (this.history.length > this.maxHistoryLength) {
-      this.history = this.history.slice(-this.maxHistoryLength);
-    }
-  }
+export class GoogleGenAIChatService {
+  private config: GoogleGenAIChatServiceConfig;
+  private history: ChatMessage[];
+  private genClient: GoogleGenerativeAI | null;
+  private model: GenerativeModel | null;
 
   constructor(config: GoogleGenAIChatServiceConfig) {
-    // Validate API key
-    if (!config.apiKey) {
-      throw new Error('API key is required');
-    }
-
-    const trimmedKey = config.apiKey.trim();
-    if (trimmedKey === '') {
-      throw new Error('API key cannot be empty');
-    }
-
-    // Store sanitized config
-    this.config = {
-      modelName: config.modelName || 'gemini-2.0-flash',
-      temperature: config.temperature ?? 0.9,
-      maxOutputTokens: config.maxOutputTokens ?? 2048,
-      topP: config.topP ?? 1.0,
-      topK: config.topK ?? 1,
-      apiKey: trimmedKey
-    };
-
-    try {
-      // Log initialization attempt (without sensitive data)
-      console.log('Initializing Google Gen AI with config:', {
-        modelName: this.config.modelName,
-        temperature: this.config.temperature,
-        maxOutputTokens: this.config.maxOutputTokens,
-        topP: this.config.topP,
-        topK: this.config.topK,
-        apiKeyPresent: !!this.config.apiKey
-      });
-
-      // Initialize the API client
-      this.ai = new GoogleGenerativeAI(config.apiKey);
-      
-      // Initialize the model
-      this.model = this.ai.getGenerativeModel({
-        model: 'gemini-2.0-flash'
-      });
-
-      // Start a chat session
-      this.chat = this.model.startChat({
-        history: [],
-        generationConfig: {
-          temperature: 0.9,
-          maxOutputTokens: 2048
-        }
-      });
-
-      // Test the connection
-      (async () => {
-        try {
-          const result = await this.chat.sendMessage("Hi");
-          if (!result.response) {
-            throw new Error('Model initialization test failed');
-          }
-
-          // Initialize chat
-          await this.initializeChat();
-          console.log('Successfully initialized Google Gen AI');
-        } catch (error) {
-          console.error('Error during async initialization:', error);
-          throw error;
-        }
-      })();
-      
-      console.log('Successfully initialized Google Gen AI');
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown initialization error';
-      console.error('Failed to initialize:', errorMessage);
-      throw new Error(`Failed to initialize chat service: ${errorMessage}`);
-    }
+    this.config = config;
+    this.history = [];
+    this.genClient = null;
+    this.model = null;
   }
 
-  /**
-   * Initialize or reinitialize the chat session
-   * @param personaData Optional persona data to initialize with system instructions
-   */
-  public async initializeChat(personaData?: PersonaData): Promise<void> {
+  public async initializeChat(personaData: PersonaData): Promise<boolean> {
     try {
-      // Initialize the chat model with support for multimodal capabilities
-      this.model = this.ai.getGenerativeModel({
+      // Initialize Gemini client
+      this.genClient = new GoogleGenerativeAI(this.config.apiKey);
+      this.model = this.genClient.getGenerativeModel({
         model: this.config.modelName,
         generationConfig: {
           temperature: this.config.temperature,
@@ -139,11 +86,84 @@ class GoogleGenAIChatService implements GeminiChatService {
 
       return true;
     } catch (error) {
-      console.error('Failed to initialize chat:', error);
+      console.error('Error initializing chat:', error);
+      return false;
+    }
+  }
+
+  public async testConnection(): Promise<boolean> {
+    try {
+      if (!this.genClient) {
+        this.genClient = new GoogleGenerativeAI(this.config.apiKey);
+      }
+      const model = this.genClient.getGenerativeModel({ model: this.config.modelName });
+      const result = await model.generateContent('test');
+      return result !== null;
+    } catch (error) {
+      console.error('Connection test failed:', error);
+      return false;
+    }
+  }
+
+  private async addSystemMessage(personaData: PersonaData): Promise<void> {
+    const systemMessage: ChatMessage = {
+      timestamp: Date.now(),
+      role: 'system',
+      content: this.generateSystemPrompt(personaData)
+    };
+    this.history.push(systemMessage);
+  }
+
+  private generateSystemPrompt(personaData: PersonaData): string {
+    const { personaDefinitions, currentPersona, userRole, userIndustry, userTechnicalLevel } = personaData;
+    const persona = currentPersona ? personaDefinitions[currentPersona] : null;
+    
+    // Map technical level to more descriptive terms for the prompt
+    const technicalLevelDescriptions = {
+      'beginner': 'basic understanding of concepts',
+      'intermediate': 'solid understanding of concepts and some practical experience',
+      'expert': 'deep technical knowledge and extensive experience'
+    };
+
+    const technicalLevelDescription = userTechnicalLevel ? 
+      technicalLevelDescriptions[userTechnicalLevel] : 
+      technicalLevelDescriptions.beginner;
+
+    return `You are an AI assistant with the following characteristics:
+${persona ? `Name: ${persona.name}
+Tone: ${persona.tone}
+Focus Areas: ${persona.focusAreas.join(', ')}` : ''}
+
+User Context:
+- Role: ${userRole || 'Unknown'}
+- Industry: ${userIndustry || 'Unknown'}
+- Technical Level: ${technicalLevelDescription}
+
+Please adjust your responses accordingly.`;
+  }
+
+  private async handleChatResponse(message: string, responseText: string, leadInfo?: LeadInfo): Promise<string> {
+    try {
+      // Add message to history
+      this.history.push({
+        timestamp: Date.now(),
+        role: 'assistant',
+        content: responseText
+      });
+
+      // If we have lead information and the conversation is ending, send an email summary
+      if (leadInfo && await this.isConversationEnding(message, responseText)) {
+        await this.sendConversationSummary(leadInfo);
+      }
+
+      return responseText;
+    } catch (error) {
+      console.error('Error handling chat response:', error);
       throw error;
     }
   }
 
+<<<<<<< HEAD
   /**
    * Determines if a conversation is likely ending based on the content of messages
    * @param userMessage The user's message
@@ -378,12 +398,18 @@ class GoogleGenAIChatService implements GeminiChatService {
       }
 
       // Add user message to history
+=======
+  private async handleRetryResponse(message: string, retryResponseText: string): Promise<string> {
+    try {
+      // Add retry response to history
+>>>>>>> fix-technical-level-types
       this.history.push({
         timestamp: Date.now(),
-        role: 'user',
-        content: message
+        role: 'assistant',
+        content: retryResponseText
       });
 
+<<<<<<< HEAD
       try {
         console.log('Sending message:', message);
         const result = await this.chat.sendMessage(message);
@@ -414,6 +440,8 @@ class GoogleGenAIChatService implements GeminiChatService {
           this.history.push({
         timestamp: Date.now(), role: 'assistant', content: retryResponseText });
 
+=======
+>>>>>>> fix-technical-level-types
       return retryResponseText;
     } catch (error) {
       console.error('Error handling retry response:', error);
@@ -445,6 +473,7 @@ class GoogleGenAIChatService implements GeminiChatService {
   public getHistory(): ChatMessage[] {
     return [...this.history];
   }
+<<<<<<< HEAD
 
   /**
    * Clear the chat history
@@ -495,4 +524,6 @@ class GoogleGenAIChatService implements GeminiChatService {
       return false;
     }
   }
+=======
+>>>>>>> fix-technical-level-types
 }

@@ -1,5 +1,11 @@
 {
-  "name": "FB Consulting Dev Environment",
+  "name": "Docker Dev",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest"
+    }
+  },
+  "postCreateCommand": "docker version",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
   "forwardPorts": [8080, 8000],
   "settings": {

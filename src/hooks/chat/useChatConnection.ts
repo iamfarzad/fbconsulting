@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { GoogleGenAIChatService, GoogleGenAIChatServiceConfig } from '@/services/chat/googleGenAIService';
 import { logDetailedError } from '@/utils/errorHandling';
-import { PersonaData } from '@/mcp/protocols/personaManagement/types';
+import { PersonaData } from '@/types/persona';
 
 export interface UseChatConnectionOptions {
   apiKey?: string;
