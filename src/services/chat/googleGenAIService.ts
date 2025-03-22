@@ -1,3 +1,4 @@
+
 import { GoogleGenerativeAI, GenerativeModel, ChatSession } from '@google/generative-ai';
 import { LeadInfo } from '@/types';
 import { PersonaData } from '@/mcp/protocols/personaManagement/types';
@@ -13,11 +14,6 @@ import type {
 
 // Re-export ChatMessage type to be used in other modules
 export type { ChatMessage } from '../copilot/types';
-<<<<<<< HEAD
-=======
-
-// Using ChatMessage type from copilot/types
->>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
 
 // Chat service configuration
 export type GoogleGenAIChatServiceConfig = GoogleGenAIConfig & {
@@ -39,6 +35,8 @@ class GoogleGenAIChatService implements GeminiChatService {
   private chat: ChatSession;
   private history: ChatMessage[] = [];
   private maxHistoryLength: number = 50;
+  private spatialContext: SpatialContext | null = null;
+  private lastInteractionTime: number = Date.now();
 
   private trimHistory() {
     if (this.history.length > this.maxHistoryLength) {
@@ -59,11 +57,7 @@ class GoogleGenAIChatService implements GeminiChatService {
 
     // Store sanitized config
     this.config = {
-<<<<<<< HEAD
       modelName: config.modelName || 'gemini-2.0-flash',
-=======
-      modelName: config.modelName || 'gemini-2.0-flash',  // Using Gemini Pro model for chat capabilities
->>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
       temperature: config.temperature ?? 0.9,
       maxOutputTokens: config.maxOutputTokens ?? 2048,
       topP: config.topP ?? 1.0,
@@ -176,9 +170,6 @@ class GoogleGenAIChatService implements GeminiChatService {
       'thank you', 'thanks', 'bye', 'goodbye', 'see you', 'talk to you later',
       'that\'s all', 'that is all', 'that\'s it', 'that is it'
     ];
-<<<<<<< HEAD
-    return userEndingPhrases.some(phrase => userMessage.toLowerCase().includes(phrase));
-=======
     
     const assistantEndingPhrases = [
       'thank you for contacting', 'have a great day', 'feel free to reach out',
@@ -188,8 +179,8 @@ class GoogleGenAIChatService implements GeminiChatService {
     const userMessageLower = userMessage.toLowerCase();
     const assistantResponseLower = assistantResponse.toLowerCase();
     
-    const userEnding = userEndingPhrases.some(phrase => userMessageLower === phrase);
-    const assistantEnding = assistantEndingPhrases.some(phrase => assistantResponseLower === phrase);
+    const userEnding = userEndingPhrases.some(phrase => userMessageLower.includes(phrase));
+    const assistantEnding = assistantEndingPhrases.some(phrase => assistantResponseLower.includes(phrase));
     
     return userEnding || assistantEnding;
   }
@@ -288,7 +279,7 @@ class GoogleGenAIChatService implements GeminiChatService {
       }
 
       // Call Vercel serverless function
-      const response = await fetch('/api/gemini_audio', {
+      const response = await fetch('/api/gemini/audio', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -373,7 +364,7 @@ class GoogleGenAIChatService implements GeminiChatService {
         
         if (suggestion) {
           this.history.push({
-        timestamp: Date.now(),
+            timestamp: Date.now(),
             role: 'assistant',
             content: suggestion.response.text()
           });
@@ -385,7 +376,6 @@ class GoogleGenAIChatService implements GeminiChatService {
         }
       }
     }
->>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
   }
 
   public async sendMessage(message: string, leadInfo?: LeadInfo): Promise<string> {
@@ -417,12 +407,10 @@ class GoogleGenAIChatService implements GeminiChatService {
             : '';
 
         this.history.push({
-<<<<<<< HEAD
-          timestamp: Date.now(), role: 'assistant', content: responseText 
+          timestamp: Date.now(), 
+          role: 'assistant', 
+          content: responseText 
         });
-=======
-        timestamp: Date.now(), role: 'assistant', content: responseText });
->>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
 
         // If we have lead information and the conversation is ending, send an email summary
         if (leadInfo && this.isConversationEnding(message, responseText)) {
@@ -442,12 +430,10 @@ class GoogleGenAIChatService implements GeminiChatService {
               : '';
 
           this.history.push({
-<<<<<<< HEAD
-            timestamp: Date.now(), role: 'assistant', content: retryResponseText 
+            timestamp: Date.now(), 
+            role: 'assistant', 
+            content: retryResponseText 
           });
-=======
-        timestamp: Date.now(), role: 'assistant', content: retryResponseText });
->>>>>>> 44c511508503dd095b03982951210a7fcbaaf248
 
           return retryResponseText;
         } catch (retryError) {
@@ -519,4 +505,12 @@ class GoogleGenAIChatService implements GeminiChatService {
       return false;
     }
   }
+}
+
+// Export the service class
+export { GoogleGenAIChatService };
+
+// Factory function to create a chat service
+export async function getChatService(config: GoogleGenAIChatServiceConfig): Promise<GoogleGenAIChatService> {
+  return new GoogleGenAIChatService(config);
 }
