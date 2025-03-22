@@ -316,7 +316,7 @@ export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
         variant: "destructive",
       });
     }
-  }, [inputValue, toast]);
+  };
 
   // Clear all messages
   const handleClear = useCallback(() => {
