@@ -55,9 +55,9 @@ last_activity: Dict[str, float] = {}
 @app.get("/health")
 async def health_check():
     try:
-        api_key = os.getenv("GOOGLE_API_KEY")
+        api_key = os.getenv("VITE_GEMINI_API_KEY")
         if not api_key:
-            raise HTTPException(status_code=500, detail="GOOGLE_API_KEY not configured")
+            raise HTTPException(status_code=500, detail="VITE_GEMINI_API_KEY not configured")
         return {"status": "healthy", "timestamp": datetime.now().isoformat()}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -74,9 +74,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
         logger.info(f"Active connections: {active_connections + 1}")
         
         # Initialize Gemini client with more detailed error
-        api_key = os.getenv("GOOGLE_API_KEY")
+        api_key = os.getenv("VITE_GEMINI_API_KEY")
         if not api_key:
-            error_msg = "Missing GOOGLE_API_KEY - Please configure in .env file"
+            error_msg = "Missing VITE_GEMINI_API_KEY - Please configure in .env file"
             logger.error(error_msg)
             await websocket.close(code=4000, reason=error_msg)
             return

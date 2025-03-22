@@ -32,7 +32,7 @@ pip install -r requirements.txt
 3. Set up environment variables:
 ```bash
 cp .env.example .env
-# Edit .env and add your GOOGLE_API_KEY
+# Edit .env and add your GOOGLE_API_KEY and VITE_GEMINI_API_KEY
 ```
 
 4. Start the service:
@@ -64,6 +64,7 @@ curl http://localhost:8000/health
 
 Environment variables in `.env`:
 - `GOOGLE_API_KEY`: Your Google API key
+- `VITE_GEMINI_API_KEY`: Your Gemini API key
 - `HOST`: Server host (default: 0.0.0.0)
 - `PORT`: Server port (default: 8000)
 - `LOG_LEVEL`: Logging level (default: INFO)
