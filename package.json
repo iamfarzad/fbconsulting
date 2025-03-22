@@ -16,7 +16,6 @@
   "dependencies": {
     "@copilotkit/react-core": "^1.7.1",
     "@copilotkit/react-textarea": "^1.6.0",
-    "@copilotkit/react-ui": "^0.2.0",
     "@copilotkit/shared": "^1.7.1",
     "@google-cloud/text-to-speech": "^6.0.0",
     "@google/generative-ai": "^0.24.0",
@@ -59,8 +58,9 @@
     "dotted-map": "^2.2.3",
     "embla-carousel-react": "^8.3.0",
     "framer-motion": "^12.4.12",
+    "highlight.js": "^11.9.0",
     "input-otp": "^1.2.4",
-    "lucide-react": "^0.462.0",
+    "lucide-react": "^0.483.0",
     "next-themes": "^0.3.0",
     "path": "^0.12.7",
     "react": "^18.3.1",
@@ -71,11 +71,11 @@
     "react-resizable-panels": "^2.1.3",
     "react-router-dom": "^6.26.2",
     "recharts": "^2.12.7",
-    "sonner": "^1.5.0",
+    "sonner": "^2.0.1",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
-    "three": "^0.160.1",
-    "vaul": "^0.9.3",
+    "three": "^0.174.0",
+    "vaul": "^1.1.2",
     "zod": "^3.23.8"
   },
   "devDependencies": {
