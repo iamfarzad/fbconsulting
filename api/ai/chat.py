@@ -15,9 +15,9 @@ def generate_response(
 ) -> Dict[str, Any]:
     """Generate a response from a Gemini model."""
     try:
-        api_key = os.environ.get("GOOGLE_API_KEY", "")
+        api_key = os.environ.get("VITE_GEMINI_API_KEY", "")
         if not api_key:
-            return {"error": "Missing Google API key", "status": HTTPStatus.UNAUTHORIZED}
+            return {"error": "Missing VITE_GEMINI_API_KEY", "status": HTTPStatus.UNAUTHORIZED}
 
         configure(api_key=api_key)
         
