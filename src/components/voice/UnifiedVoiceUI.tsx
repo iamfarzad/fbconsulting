@@ -1,10 +1,11 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { cn } from "@/lib/utils";
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Mic, Pause, Play, StopCircle } from 'lucide-react';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
+import useGeminiAudioPlayback from '@/hooks/gemini/useGeminiAudioPlayback';
 
 interface UnifiedVoiceUIProps {
   isListening: boolean;
@@ -13,6 +14,7 @@ interface UnifiedVoiceUIProps {
   progress: number;
   stopAudio: () => void;
   onVoiceInput: (text: string) => void;
+  onGenerateAudio?: (text: string) => Promise<Blob | null>;
   className?: string;
   disabled?: boolean;
 }
@@ -24,6 +26,7 @@ export const UnifiedVoiceUI: React.FC<UnifiedVoiceUIProps> = ({
   progress,
   stopAudio,
   onVoiceInput,
+  onGenerateAudio,
   className,
   disabled = false
 }) => {
@@ -36,6 +39,35 @@ export const UnifiedVoiceUI: React.FC<UnifiedVoiceUIProps> = ({
       onVoiceInput(command);
     }
   });
+
+  const { 
+    playAudio,
+    error: audioError
+  } = useGeminiAudioPlayback({
+    onPlaybackComplete: () => {
+      console.log('Audio playback completed');
+    }
+  });
+
+  const [pendingText, setPendingText] = useState<string>('');
+
+  // Handle text-to-speech request
+  const handleTTS = async (text: string) => {
+    if (!onGenerateAudio || !text.trim()) return;
+    
+    try {
+      setPendingText(text);
+      const audioBlob = await onGenerateAudio(text);
+      setPendingText('');
+      
+      if (audioBlob) {
+        await playAudio(audioBlob);
+      }
+    } catch (error) {
+      console.error('Error generating audio:', error);
+      setPendingText('');
+    }
+  };
 
   useEffect(() => {
     if (!isVoiceSupported) {
@@ -75,6 +107,18 @@ export const UnifiedVoiceUI: React.FC<UnifiedVoiceUIProps> = ({
         </Button>
       )}
 
+      {onGenerateAudio && (
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => handleTTS(transcript || pendingText || 'Hello, this is a test of the Gemini TTS system.')}
+          disabled={disabled || isPlaying || !onGenerateAudio}
+          className="relative"
+        >
+          <Play className="h-4 w-4" />
+        </Button>
+      )}
+
       {(isListening || isPlaying) && (
         <Progress 
           value={isListening ? undefined : progress} 
@@ -83,9 +127,9 @@ export const UnifiedVoiceUI: React.FC<UnifiedVoiceUIProps> = ({
         />
       )}
       
-      {voiceError && (
+      {(voiceError || audioError) && (
         <p className="text-xs text-red-500 absolute -bottom-6 left-0">
-          {voiceError}
+          {voiceError || audioError}
         </p>
       )}
     </div>

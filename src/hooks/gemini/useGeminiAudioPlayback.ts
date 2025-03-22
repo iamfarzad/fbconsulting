@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 export interface UseGeminiAudioPlaybackProps {
@@ -6,13 +7,8 @@ export interface UseGeminiAudioPlaybackProps {
   onPlaybackError?: (error: string) => void;
 }
 
-interface AudioMetadata {
-  totalSize: number;
-  chunkSize: number;
-}
-
 /**
- * Hook to manage audio playback for Gemini services with improved streaming support
+ * Hook to manage audio playback for Gemini services
  */
 export function useGeminiAudioPlayback({
   onPlaybackStart,
@@ -25,11 +21,9 @@ export function useGeminiAudioPlayback({
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceNodeRef = useRef<AudioBufferSourceNode | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const metadataRef = useRef<AudioMetadata | null>(null);
-  const receivedBytesRef = useRef<number>(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Initialize AudioContext
+  // Initialize audio context
   useEffect(() => {
     if (!audioContextRef.current) {
       try {
@@ -56,92 +50,73 @@ export function useGeminiAudioPlayback({
       sourceNodeRef.current = null;
     }
     
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = '';
+    }
+    
     setIsPlaying(false);
     setProgress(0);
-    audioChunksRef.current = [];
-    metadataRef.current = null;
-    receivedBytesRef.current = 0;
   }, []);
 
-  // Handle audio metadata
-  const handleAudioMetadata = useCallback((metadata: { total_size: number; chunk_size: number }) => {
-    metadataRef.current = {
-      totalSize: metadata.total_size,
-      chunkSize: metadata.chunk_size
-    };
-    receivedBytesRef.current = 0;
-    audioChunksRef.current = [];
-  }, []);
-
-  // Handle audio chunk
-  const handleAudioChunk = useCallback((chunk: Blob) => {
-    if (!metadataRef.current) {
-      console.error('Received audio chunk without metadata');
-      return;
-    }
-
-    audioChunksRef.current.push(chunk);
-    receivedBytesRef.current += chunk.size;
-    
-    // Update progress
-    const progress = (receivedBytesRef.current / metadataRef.current.totalSize) * 100;
-    setProgress(Math.min(progress, 100));
-    
-    // If we have all the chunks, start playback automatically
-    if (receivedBytesRef.current >= metadataRef.current.totalSize) {
-      playAudioChunks();
-    }
-  }, []);
-
-  // Play audio from chunks
-  const playAudioChunks = useCallback(async () => {
-    if (!audioContextRef.current || audioChunksRef.current.length === 0) {
-      return;
-    }
-
+  // Play audio from blob
+  const playAudio = useCallback(async (audioBlob: Blob) => {
     try {
-      // Combine all chunks into one blob
-      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/mpeg' });
-      const arrayBuffer = await audioBlob.arrayBuffer();
-      const audioBuffer = await audioContextRef.current.decodeAudioData(arrayBuffer);
-
-      // Resume audio context if suspended (browsers require user gesture)
-      if (audioContextRef.current.state === 'suspended') {
-        await audioContextRef.current.resume();
-      }
-
-      // Stop any currently playing audio
-      if (sourceNodeRef.current) {
-        sourceNodeRef.current.stop();
-        sourceNodeRef.current.disconnect();
-      }
-
-      sourceNodeRef.current = audioContextRef.current.createBufferSource();
-      sourceNodeRef.current.buffer = audioBuffer;
-      sourceNodeRef.current.connect(audioContextRef.current.destination);
-
-      sourceNodeRef.current.onended = () => {
-        setIsPlaying(false);
-        setProgress(100);
-        if (onPlaybackComplete) {
-          onPlaybackComplete();
-        }
-      };
-
-      setIsPlaying(true);
-      if (onPlaybackStart) {
-        onPlaybackStart();
+      // Clean up any existing audio
+      cleanup();
+      
+      // Create URL for the blob
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      // Create audio element
+      if (!audioRef.current) {
+        audioRef.current = new Audio();
+        
+        audioRef.current.addEventListener('timeupdate', () => {
+          if (audioRef.current) {
+            const currentProgress = (audioRef.current.currentTime / audioRef.current.duration) * 100;
+            setProgress(currentProgress);
+          }
+        });
+        
+        audioRef.current.addEventListener('ended', () => {
+          setIsPlaying(false);
+          setProgress(100);
+          if (onPlaybackComplete) {
+            onPlaybackComplete();
+          }
+        });
+        
+        audioRef.current.addEventListener('error', (e) => {
+          const errorMessage = 'Error playing audio';
+          setError(errorMessage);
+          if (onPlaybackError) {
+            onPlaybackError(errorMessage);
+          }
+        });
       }
       
-      sourceNodeRef.current.start(0);
+      // Set source and play
+      audioRef.current.src = audioUrl;
+      
+      // Play audio
+      const playPromise = audioRef.current.play();
+      if (playPromise) {
+        await playPromise;
+        setIsPlaying(true);
+        if (onPlaybackStart) {
+          onPlaybackStart();
+        }
+      }
     } catch (error) {
       console.error('Error playing audio:', error);
-      setError(error instanceof Error ? error.message : 'Error playing audio');
+      const errorMessage = error instanceof Error ? error.message : 'Error playing audio';
+      setError(errorMessage);
       if (onPlaybackError) {
-        onPlaybackError(error instanceof Error ? error.message : 'Error playing audio');
+        onPlaybackError(errorMessage);
       }
     }
-  }, [onPlaybackStart, onPlaybackComplete, onPlaybackError]);
+  }, [cleanup, onPlaybackStart, onPlaybackComplete, onPlaybackError]);
 
   // Stop audio playback
   const stopAudio = useCallback(() => {
@@ -157,11 +132,8 @@ export function useGeminiAudioPlayback({
     isPlaying,
     error,
     progress,
-    handleAudioChunk,
-    handleAudioMetadata,
-    playAudioChunks,
+    playAudio,
     stopAudio,
-    clearAudio: cleanup
   };
 }
 
