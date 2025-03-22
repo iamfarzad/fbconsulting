@@ -1,0 +1,14 @@
+
+{
+  "version": "1.0.0",
+  "features": {
+    "select": true,
+    "componentLibrary": true,
+    "dynamicRendering": true,
+    "advancedCodeEditing": true
+  },
+  "settings": {
+    "allowCodeDownload": true,
+    "enableDevTools": true
+  }
+}
