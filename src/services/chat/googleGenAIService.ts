@@ -196,3 +196,15 @@ Please adjust your responses accordingly.`;
     this.history = [];
   }
 }
+
+let chatServiceInstance: GoogleGenAIChatService | null = null;
+
+export function getChatService(config?: GoogleGenAIChatServiceConfig): GoogleGenAIChatService {
+  if (!chatServiceInstance && config) {
+    chatServiceInstance = new GoogleGenAIChatService(config);
+  }
+  if (!chatServiceInstance) {
+    throw new Error('Chat service not initialized');
+  }
+  return chatServiceInstance;
+}
