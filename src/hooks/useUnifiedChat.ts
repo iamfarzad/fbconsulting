@@ -1,11 +1,10 @@
-
 import { useCallback } from 'react';
 import { useCopilotChat } from '@copilotkit/react-core';
+import { TextMessage, Role } from '@copilotkit/runtime-client-gql';
+import { useToast } from '@/components/ui/use-toast';
 import { usePersonaManagement } from '@/mcp/hooks/usePersonaManagement';
 import { LeadInfo } from '@/services/lead/leadExtractor';
 import { FileAttachment } from '@/services/chat/types';
-
-// Import our refactored hooks
 import { useChatConnection } from './chat/useChatConnection';
 import { useChatMessages } from './chat/useChatMessages';
 import { useChatUI } from './chat/useChatUI';
@@ -19,12 +18,13 @@ interface UseUnifiedChatOptions {
 
 export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
   const { useCopilotKit = false, apiKey, modelName } = options;
-  
+  const { toast } = useToast();
+
   // Get persona data
   const { personaData } = usePersonaManagement();
   
-  // CopilotKit integration
-  const copilotChat = useCopilotKit();
+  // CopilotKit integration - always call the hook but only use result if enabled
+  const copilotChat = useCopilotChat();
   
   // Setup chat connection
   const {
@@ -33,7 +33,17 @@ export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
     connectionError,
     retryConnection,
     initializeWithPersona
-  } = useChatConnection({ apiKey, modelName });
+  } = useChatConnection({ 
+    apiKey, 
+    modelName,
+    onError: (error) => {
+      toast({
+        title: "Chat Service Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
   
   // Setup messages state and operations
   const {
@@ -64,7 +74,14 @@ export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
   
   // Send a message with all integrations
   const handleSend = useCallback(async (mediaItems: FileAttachment[] = []) => {
-    if (!inputValue.trim() && mediaItems.length === 0) return;
+    if (!inputValue.trim() && mediaItems.length === 0) {
+      toast({
+        title: 'Message is empty',
+        description: 'Please enter a message before sending.',
+        variant: 'destructive',
+      });
+      return;
+    }
     
     try {
       // Send to chat service
@@ -75,11 +92,13 @@ export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
       
       // If using CopilotKit, also send message there
       if (useCopilotKit && !copilotChat.isLoading) {
-        // Use type assertion to match the expected type
-        copilotChat.appendMessage({
-          type: 'user-message',
-          payload: { content: inputValue }
-        } as any);
+        const copilotMessage = new TextMessage({
+          role: Role.User,
+          content: inputValue,
+          id: Date.now().toString(),
+          createdAt: new Date()
+        });
+        copilotChat.appendMessage(copilotMessage);
       }
       
       // Show messages container if it's hidden
@@ -88,8 +107,13 @@ export function useUnifiedChat(options: UseUnifiedChatOptions = {}) {
       }
     } catch (error) {
       console.error("Error sending message:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        variant: "destructive",
+      });
     }
-  }, [inputValue, sendChatMessage, setInputValue, useCopilotKit, copilotChat, showMessages, setShowMessages]);
+  }, [inputValue, sendChatMessage, setInputValue, useCopilotKit, copilotChat, showMessages, setShowMessages, toast]);
   
   // Setup voice integration
   const {

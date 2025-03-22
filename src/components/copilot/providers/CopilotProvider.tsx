@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, createContext, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import { CopilotKit } from '@copilotkit/react-core';

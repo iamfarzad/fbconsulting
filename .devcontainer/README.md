@@ -42,3 +42,39 @@ The container will automatically:
 You can customize this configuration by editing the following files:
 - `.devcontainer/devcontainer.json` - Container settings and VS Code configuration
 - `.devcontainer/Dockerfile` - Base image and environment setup
+
+## Docker Setup in GitHub Codespaces
+
+To use Docker in GitHub Codespaces, follow these steps:
+
+* Open a codespace:
+  - Go to any repository you own (or create a blank one).
+  - Click: `Code` → `Codespaces` → `Create codespace on main`.
+
+* Enable Docker support (if not already):
+  - Add the following to `.devcontainer/devcontainer.json`:
+    ```json
+    {
+      "name": "Docker Dev",
+      "features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {
+          "version": "latest"
+        }
+      },
+      "postCreateCommand": "docker version"
+    }
+    ```
+  - Rebuild the container: `Ctrl+Shift+P` → "Rebuild Container".
+
+* Run Docker inside your codespace:
+  - Execute the following commands:
+    ```sh
+    docker version
+    docker run hello-world
+    ```
+
+* (Optional) VS Code integration:
+  - If you’re using the VS Code desktop app:
+    - Install the “GitHub Codespaces” extension.
+    - Connect directly from VS Code to the cloud.
+    - Full GUI, terminal, file access, and Docker inside Codespace.

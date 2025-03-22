@@ -1,15 +1,21 @@
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import Response, JSONResponse
+from mangum import Mangum
 import time
-from gemini import Client
-from flask import jsonify, Response
+from .gemini import Client
 
-def handler(request):
-    if request.method == 'POST':
-        body = request.get_json()
+app = FastAPI()
+
+@app.post("/api/gemini/audio")
+async def handle_audio(request: Request):
+    try:
+        body = await request.json()
         
         if not body or 'text' not in body:
-            return jsonify({
-                'error': 'Missing required text in request body'
-            }), 400
+            raise HTTPException(
+                status_code=400,
+                detail="Missing required text in request body"
+            )
 
         client = Client()
         config = {
@@ -49,25 +55,34 @@ def handler(request):
             except Exception as e:
                 retry_count += 1
                 if retry_count > max_retries:
-                    return jsonify({
-                        'error': f'Failed to generate audio after {max_retries} attempts: {str(e)}'
-                    }), 500
+                    raise HTTPException(
+                        status_code=500,
+                        detail=f"Failed to generate audio after {max_retries} attempts: {str(e)}"
+                    )
                 continue
 
         if not audio_data:
-            return jsonify({
-                'error': 'Failed to generate audio response'
-            }), 500
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to generate audio response"
+            )
 
         # Return audio data as response
         return Response(
-            audio_data,
-            mimetype='audio/mp3',
+            content=audio_data,
+            media_type='audio/mp3',
             headers={
                 'Content-Disposition': 'attachment; filename=response.mp3'
             }
         )
 
-    return jsonify({
-        'error': 'Method not allowed'
-    }), 405
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+
+# Create Mangum handler for AWS Lambda / Vercel
+handler = Mangum(app, lifespan="off")
