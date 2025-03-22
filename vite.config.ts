@@ -1,15 +1,17 @@
-
-import { defineConfig } from 'vite'
+/// <reference types="vite/client" />
+import { defineConfig, UserConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
-import { componentTagger } from "lovable-tagger"
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode }: UserConfig) => ({
   plugins: [
-    react(),
-    mode === 'development' && componentTagger(),
-  ].filter(Boolean),
+    react()
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -24,13 +26,18 @@ export default defineConfig(({ mode }) => ({
     strictPort: true,
     hmr: {
       clientPort: 443,
-    },
-    allowedHosts: [
-      '2f9b3b4a-cce5-4f23-8845-9ac62943cb08.lovableproject.com',
-      'lovable.app',
-      '*.lovable.app',
-      '*.lovable.dev',
-      '*.lovableproject.com'
-    ],
+    }
+  },
+  build: {
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          'copilot-vendor': ['@copilotkit/react-core', '@copilotkit/react-textarea'],
+          'gemini-vendor': ['@google/generative-ai']
+        }
+      }
+    }
   }
 }))
