@@ -1,30 +1,15 @@
-
-import { 
-  HarmCategory,
-  HarmBlockThreshold,
-  SafetySetting,
-  GenerationConfig,
-  Part 
-} from 'google-generativeai';
-
-// Types for Gemini message formats
-export interface GeminiMessage {
-  role: 'user' | 'model';
-  parts: {
-    text?: string;
-    inlineData?: {
-      mimeType: string;
-      data: string;
-    };
-  }[];
+export interface GeminiResponse {
+  text: string;
+  error?: string;
 }
 
-// Speech configuration for Gemini
-export interface SpeechConfig {
-  voice_name: 'Aoede' | 'Charon' | 'Fenrir' | 'Kore' | 'Puck';
-  audio_format?: string; // 'wav' | 'mp3' | 'aiff' | 'aac' | 'ogg' | 'flac'
-  speaking_rate?: number; // 0.25 to 4.0, default 1.0
-  pitch?: number; // -20.0 to 20.0, default 0
+export interface GeminiRequest {
+  prompt: string;
+  images?: Array<{
+    mimeType: string;
+    data: string;
+  }>;
+  persona?: string;
 }
 
 export interface GeminiConfig {
@@ -35,40 +20,31 @@ export interface GeminiConfig {
   topK?: number;
   maxOutputTokens?: number;
   stopSequences?: string[];
-  safetySettings?: SafetySetting[];
-  speechConfig?: SpeechConfig;
+  safetySettings?: Array<{
+    category: string;
+    threshold: string;
+  }>;
 }
 
-// Default configuration for Gemini chat
-export const DEFAULT_CONFIG: Partial<GenerationConfig> = {
-  temperature: 0.7,
-  topP: 0.95,
+export interface SpeechConfig {
+  voice_name: string;
+  audio_format?: string;
+  speaking_rate?: number;
+  pitch?: number;
+}
+
+// Default configuration for requests
+export const DEFAULT_CONFIG: Partial<GeminiConfig> = {
+  temperature: 0.9,
+  topP: 1,
   topK: 40,
-  maxOutputTokens: 1024,
+  maxOutputTokens: 2048
 };
 
-// Default speech configuration
-export const DEFAULT_SPEECH_CONFIG: SpeechConfig = {
-  voice_name: 'Charon',
-  audio_format: 'mp3'
-};
-
-// Default safety settings
-export const DEFAULT_SAFETY_SETTINGS: SafetySetting[] = [
-  {
-    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-  },
-  {
-    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-  },
-  {
-    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-  },
-  {
-    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-  },
+// Safety settings for content filtering
+export const DEFAULT_SAFETY_SETTINGS = [
+  { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+  { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+  { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+  { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' }
 ];

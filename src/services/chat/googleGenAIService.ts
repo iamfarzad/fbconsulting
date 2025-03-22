@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI, GenerativeModel, GenerateContentResult } from 'google-generativeai';
 import { PersonaData } from '@/types/persona';
+import { GeminiRequest, GeminiResponse } from '../gemini/types';
 
 export interface ChatMessage {
   timestamp: number;
@@ -194,6 +195,33 @@ Please adjust your responses accordingly.`;
 
   public clearHistory(): void {
     this.history = [];
+  }
+}
+
+export class GoogleGenAIService {
+  async generateContent(prompt: string, options?: { images?: any[] }) {
+    try {
+      const request: GeminiRequest = {
+        prompt,
+        images: options?.images
+      };
+
+      const response = await fetch('/api/gemini/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate content');
+      }
+
+      const data: GeminiResponse = await response.json();
+      return data.text;
+    } catch (error) {
+      console.error('Error in generateContent:', error);
+      throw error;
+    }
   }
 }
 
