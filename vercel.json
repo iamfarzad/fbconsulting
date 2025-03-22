@@ -8,23 +8,37 @@
         "runtime": "python3.12",
         "maxLambdaSize": "15mb"
       }
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/node"
     }
   ],
   "functions": {
     "api/gemini/stream.py": {
       "memory": 1024,
-      "maxDuration": 60,
-      "runtime": "python3.12"
+      "maxDuration": 60
     },
     "api/gemini/audio.py": {
       "memory": 1024,
-      "maxDuration": 30,
-      "runtime": "python3.12"
+      "maxDuration": 30
     }
   },
   "routes": [
-    { "src": "/api/gemini/stream", "dest": "/api/gemini/stream.py" },
-    { "src": "/api/gemini/audio", "dest": "/api/gemini/audio.py" }
+    { 
+      "src": "/api/gemini/stream",
+      "dest": "/api/gemini/stream.py",
+      "methods": ["POST"]
+    },
+    { 
+      "src": "/api/gemini/audio",
+      "dest": "/api/gemini/audio.py",
+      "methods": ["POST"]
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/"
+    }
   ],
   "env": {
     "GOOGLE_API_KEY": "${GOOGLE_API_KEY}"
