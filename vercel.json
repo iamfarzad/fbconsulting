@@ -1,5 +1,11 @@
 {
   "version": 2,
+  "builds": [
+    {
+      "src": "api/server.py",
+      "use": "@vercel/python"
+    }
+  ],
   "routes": [
     { 
       "src": "/api/gemini/audio",
@@ -12,6 +18,10 @@
     { 
       "src": "/api/gemini_image/(.*)",
       "dest": "/api/gemini_image/$1.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "api/server.py"
     }
   ],
   "env": {

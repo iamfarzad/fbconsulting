@@ -1,13 +1,25 @@
-from http.server import HTTPServer
-from gemini.ask import handler
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from dotenv import load_dotenv
 import os
+import uvicorn
+from pathlib import Path
 
-def run(server_class=HTTPServer, handler_class=handler, port=8080):
-    server_address = ('', port)
-    httpd = server_class(server_address, handler_class)
-    print(f"Server running on http://localhost:{port}")
-    httpd.serve_forever()
+# Load the correct .env file
+dotenv_path = Path(".env.local") if Path(".env.local").exists() else Path(".env")
+load_dotenv(dotenv_path)
 
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8080))
-    run(port=port)
+from api.gemini.ask import handler
+
+app = FastAPI()
+
+@app.post("/api/gemini/ask")
+async def ask_gemini(request: Request):
+    data = await request.json()
+    return handler(data)
+
+@app.get("/")
+async def root():
+    return {"status": "Server running. Send POST to /api/gemini/ask"}
+
+# Remove the uvicorn runner for Vercel deployment
