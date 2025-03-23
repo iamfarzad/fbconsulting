@@ -11,7 +11,10 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:watch": "vitest watch",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "api": "node api/server.ts",
+    "dev:all": "concurrently \"npm run dev\" \"npm run api:python\"",
+    "api:python": "python api/server.py"
   },
   "dependencies": {
     "@copilotkit/react-core": "^1.7.1",
@@ -112,6 +115,9 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.1.0",
-    "vitest": "^3.0.9"
+    "vitest": "^3.0.9",
+    "concurrently": "^8.0.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
   }
 }
