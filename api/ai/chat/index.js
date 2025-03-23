@@ -6,7 +6,7 @@ import { writeFile } from 'fs/promises';
 import { v4 as uuid } from 'uuid';
 
 // Path to the Python executable inside the Vercel environment
-const pythonBinary = process.env.PYTHON_PATH || 'python3';
+const pythonBinary = process.env.PYTHON_PATH || 'python3.12';
 
 export default async function handler(req, res) {
   try {
