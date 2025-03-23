@@ -2,12 +2,20 @@
   "version": 2,
   "routes": [
     { 
-      "src": "/api/(.*)",
-      "dest": "/api/$1.py"
+      "src": "/api/gemini/audio",
+      "dest": "/api/gemini/audio.py"
+    },
+    { 
+      "src": "/api/gemini_document/(.*)",
+      "dest": "/api/gemini_document/$1.py"
+    },
+    { 
+      "src": "/api/gemini_image/(.*)",
+      "dest": "/api/gemini_image/$1.py"
     }
   ],
   "env": {
-    "GOOGLE_API_KEY": "${GOOGLE_API_KEY}",
-    "VERCEL_API_KEY": "${VERCEL_API_KEY}"
+    "GOOGLE_API_KEY": "@google_api_key",
+    "VERCEL_API_KEY": "@vercel_api_key"
   }
 }
