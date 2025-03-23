@@ -4,12 +4,26 @@
     {
       "src": "api/vercel_handler.py",
       "use": "@vercel/python"
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
     }
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "/api/vercel_handler.py"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
       "src": "/(.*)",
-      "dest": "api/vercel_handler.py"
+      "dest": "/index.html"
     }
   ]
 }
