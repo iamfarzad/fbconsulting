@@ -1,7 +1,7 @@
 
 import { initializeGemini } from './initialize';
 import { GeminiConfig, DEFAULT_SPEECH_CONFIG } from './types';
-import { Content } from '@google/generative-ai';
+import { Content } from 'google-generativeai';
 
 /**
  * Transcribes audio using Gemini's audio processing capabilities

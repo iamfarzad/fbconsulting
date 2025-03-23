@@ -1,5 +1,5 @@
 
-import { Part, Content } from '@google/generative-ai';
+import { Part, Content } from 'google-generativeai';
 import { GeminiMessage } from './types';
 
 /**

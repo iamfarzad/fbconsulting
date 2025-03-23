@@ -1,5 +1,5 @@
-import { GoogleGenerativeAI, GenerativeModel, GenerateContentResult } from '@google/generative-ai';
 import { PersonaData } from '@/types/persona';
+import { GeminiRequest, GeminiResponse } from '../gemini/types';
 
 export interface ChatMessage {
   timestamp: number;
@@ -26,31 +26,28 @@ export interface LeadInfo {
 export class GoogleGenAIChatService {
   private config: GoogleGenAIChatServiceConfig;
   private history: ChatMessage[];
-  private genClient: GoogleGenerativeAI | null;
-  private model: GenerativeModel | null;
 
   constructor(config: GoogleGenAIChatServiceConfig) {
     this.config = config;
     this.history = [];
-    this.genClient = null;
-    this.model = null;
   }
 
   public async initializeChat(personaData: PersonaData): Promise<boolean> {
     try {
-      // Initialize Gemini client
-      this.genClient = new GoogleGenerativeAI(this.config.apiKey);
-      this.model = this.genClient.getGenerativeModel({
-        model: this.config.modelName,
-        generationConfig: {
-          temperature: this.config.temperature,
-          maxOutputTokens: this.config.maxOutputTokens,
-          topP: this.config.topP,
-          topK: this.config.topK
-        }
+      const response = await fetch('/api/gemini/initialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey: this.config.apiKey,
+          model: this.config.modelName,
+          config: this.config
+        })
       });
-      
-      // Add initial system message if persona data is provided
+
+      if (!response.ok) {
+        throw new Error('Failed to initialize chat');
+      }
+
       if (personaData) {
         await this.addSystemMessage(personaData);
       }
@@ -64,12 +61,21 @@ export class GoogleGenAIChatService {
 
   public async testConnection(): Promise<boolean> {
     try {
-      if (!this.genClient) {
-        this.genClient = new GoogleGenerativeAI(this.config.apiKey);
+      const response = await fetch('/api/gemini/test-connection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey: this.config.apiKey,
+          model: this.config.modelName
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Connection test failed');
       }
-      const model = this.genClient.getGenerativeModel({ model: this.config.modelName });
-      const result = await model.generateContent('test');
-      return result !== null;
+
+      const result = await response.json();
+      return result.success;
     } catch (error) {
       console.error('Connection test failed:', error);
       return false;
@@ -114,32 +120,37 @@ Please adjust your responses accordingly.`;
   }
 
   public async sendMessage(message: string, leadInfo?: LeadInfo): Promise<string> {
-    if (!this.model) {
-      throw new Error('Chat not initialized. Please call initializeChat() first.');
-    }
-
     try {
-      // Convert history to chat format
-      const historyContent = this.history
-        .map(msg => msg.content)
-        .join('\n\n');
+      const response = await fetch('/api/gemini/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: message,
+          history: this.history,
+          config: this.config
+        })
+      });
 
-      // Generate response
-      const result = await this.model.generateContent(
-        historyContent + '\n\nUser: ' + message
-      );
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
 
-      const response = result.response;
-      const responseText = response.text();
-
-      // Add the messages to history
+      const { text } = await response.json();
+      
+      // Add messages to history
       this.history.push({
         timestamp: Date.now(),
         role: 'user',
         content: message
       });
 
-      return await this.handleChatResponse(message, responseText, leadInfo);
+      this.history.push({
+        timestamp: Date.now(),
+        role: 'assistant',
+        content: text
+      });
+
+      return text;
     } catch (error) {
       console.error('Error sending message:', error);
       throw error;
@@ -195,4 +206,43 @@ Please adjust your responses accordingly.`;
   public clearHistory(): void {
     this.history = [];
   }
+}
+
+export class GoogleGenAIService {
+  async generateContent(prompt: string, options?: { images?: any[] }) {
+    try {
+      const request: GeminiRequest = {
+        prompt,
+        images: options?.images
+      };
+
+      const response = await fetch('/api/gemini/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate content');
+      }
+
+      const data: GeminiResponse = await response.json();
+      return data.text;
+    } catch (error) {
+      console.error('Error in generateContent:', error);
+      throw error;
+    }
+  }
+}
+
+let chatServiceInstance: GoogleGenAIChatService | null = null;
+
+export function getChatService(config?: GoogleGenAIChatServiceConfig): GoogleGenAIChatService {
+  if (!chatServiceInstance && config) {
+    chatServiceInstance = new GoogleGenAIChatService(config);
+  }
+  if (!chatServiceInstance) {
+    throw new Error('Chat service not initialized');
+  }
+  return chatServiceInstance;
 }

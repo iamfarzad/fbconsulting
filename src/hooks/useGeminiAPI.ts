@@ -1,50 +1,29 @@
-import { useState, useCallback } from 'react';
-import { GoogleGenAIChatService } from '@/services/chat/googleGenAIService';
+import { useState } from 'react';
 
-let chatService: GoogleGenAIChatService | null = null;
+export const useGeminiAPI = () => {
+  const [error, setError] = useState<Error | null>(null);
 
-export function useGeminiAPI() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const apiKey = process.env.VITE_GOOGLE_API_KEY || '';
-
-  const initializeService = useCallback(() => {
-    if (!chatService && apiKey) {
-      chatService = new GoogleGenAIChatService({
-        apiKey,
-        modelName: 'gemini-2.0-flash',
-        temperature: 0.7,
-        maxOutputTokens: 2048
-      });
-    }
-    return chatService;
-  }, [apiKey]);
-
-  const sendMessage = useCallback(async (message: string): Promise<string> => {
-    setIsLoading(true);
-    setError(null);
-
+  const sendMessage = async (message: string) => {
     try {
-      const service = initializeService();
-      if (!service) {
-        throw new Error('Chat service not initialized');
+      const response = await fetch('/api/gemini/ask', {
+        method: 'POST',
+        body: JSON.stringify({ prompt: message }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to send message');
       }
 
-      const response = await service.sendMessage(message);
-      return response;
+      const data = await response.json();
+      return data.text;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      setError(errorMessage);
+      setError(err instanceof Error ? err : new Error('Unknown error'));
       throw err;
-    } finally {
-      setIsLoading(false);
     }
-  }, [initializeService]);
-
-  return {
-    sendMessage,
-    isLoading,
-    error,
-    apiKey
   };
-}
+
+  return { sendMessage, error };
+};
+// Already declared above with `export const useGeminiAPI = () => { ... }`
+// So nothing else is needed.
