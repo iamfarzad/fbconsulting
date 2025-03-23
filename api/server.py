@@ -2,7 +2,6 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 import os
-import uvicorn
 from pathlib import Path
 
 # Load the correct .env file
@@ -21,5 +20,3 @@ async def ask_gemini(request: Request):
 @app.get("/")
 async def root():
     return {"status": "Server running. Send POST to /api/gemini/ask"}
-
-# Remove the uvicorn runner for Vercel deployment
