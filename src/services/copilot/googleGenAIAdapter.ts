@@ -1,6 +1,3 @@
-import { GoogleGenAI } from "@google/genai";
-
-// Configuration type
 export interface GoogleGenAIConfig {
   apiKey: string;
   modelName?: string;
@@ -8,77 +5,53 @@ export interface GoogleGenAIConfig {
   maxOutputTokens?: number;
 }
 
-// Global instance
-let genAI: GoogleGenAI | null = null;
-
-// Initialize the Google GenAI instance
-export function initializeGoogleGenAI(config: GoogleGenAIConfig): GoogleGenAIConfig {
-  genAI = new GoogleGenAI({
-    apiKey: config.apiKey
-  });
-
-  // Return the full config
-  return {
-    apiKey: config.apiKey,
-    modelName: config.modelName || 'gemini-2.0-flash-exp',
-    temperature: config.temperature || 0.7,
-    maxOutputTokens: config.maxOutputTokens || 2048
-  };
-}
-
-// Test the connection with the provided configuration
-export async function testGoogleGenAIConnection(config: GoogleGenAIConfig): Promise<boolean> {
+// Export the test connection function
+export const testGoogleGenAIConnection = async (apiKey: string): Promise<boolean> => {
   try {
-    // Initialize with the new config
-    const ai = new GoogleGenAI({
-      apiKey: config.apiKey
+    const response = await fetch('/api/gemini/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey })
     });
-
-    // Try to generate a simple test message
-    const result = await ai.models.generateContent({
-      model: config.modelName || 'gemini-2.0-flash-exp',
-      contents: [{ text: "Hello" }]
-    });
-    
-    if (!result.candidates || result.candidates.length === 0) {
-      return false;
-    }
-    
-    const text = result.candidates[0].content.parts[0].text;
-    return text.length > 0;
+    return response.ok;
   } catch (error) {
-    console.error("Failed to test Google GenAI connection:", error);
+    console.error('Connection test failed:', error);
     return false;
   }
-}
+};
 
-// Troubleshoot issues using the AI
-export async function troubleshootIssue(issueDescription: string) {
-  try {
-    if (!genAI) {
-      throw new Error("Google GenAI not initialized");
+export class GoogleGenAIAdapter {
+  async testConnection(apiKey: string): Promise<boolean> {
+    try {
+      const response = await fetch('/api/gemini/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey })
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('Connection test failed:', error);
+      return false;
     }
+  }
 
-    const result = await genAI.models.generateContent({
-      model: "gemini-2.0-flash-exp",
-      contents: [{
-        text: `
-          Please help troubleshoot the following issue:
-          ---
-          ${issueDescription}
-          ---
-          Provide a clear and concise solution.
-        `
-      }]
-    });
-    
-    if (!result.candidates || result.candidates.length === 0) {
-      throw new Error("No response generated");
+  async generateResponse(prompt: string) {
+    try {
+      const response = await fetch('/api/gemini/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate response');
+      }
+
+      const data = await response.json();
+      return data.text;
+    } catch (error) {
+      console.error('Adapter error:', error);
+      throw error;
     }
-    
-    return result.candidates[0].content.parts[0].text;
-  } catch (error) {
-    console.error("❌ Troubleshooting failed:", error);
-    return "Could not process troubleshooting request.";
   }
 }

@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { GeminiChat } from '@/components/copilot/GeminiChat';
 import PageHeader from '@/components/PageHeader';
-import { CopilotConfig } from '@/components/copilot/CopilotConfig';
+import CopilotConfig from "@/components/copilot/core/CopilotConfig"; // Updated path
 
 const TestMCP: React.FC = () => {
   return (

@@ -1,30 +1,22 @@
-import { 
-  GoogleGenerativeAI as GenerativeAI,
-  GenerativeModel
-} from '@google/generative-ai';
-import { GeminiConfig, DEFAULT_CONFIG, DEFAULT_SAFETY_SETTINGS } from './types';
+import { GeminiConfig } from './types';
 
-/**
- * Initialize the Gemini API with the specified configuration
- */
-export function initializeGemini(config: GeminiConfig): GenerativeModel {
-  if (!config.apiKey) {
-    throw new Error('Gemini API key is required');
+export async function initializeGemini(config: GeminiConfig) {
+  try {
+    const response = await fetch('/api/gemini/initialize', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(config)
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to initialize Gemini');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error initializing Gemini:', error);
+    throw error;
   }
-  
-  // Create the GenerativeAI instance with the API key and explicitly set API version to v1
-  const genAI = new GenerativeAI(config.apiKey, { apiVersion: 'v1' });
-  
-  // Get the model with the specified configuration
-  return genAI.getGenerativeModel({ 
-    model: config.model || "gemini-2.0-flash", // Using the standard Gemini Pro model
-    generationConfig: {
-      temperature: config.temperature ?? DEFAULT_CONFIG.temperature,
-      topP: config.topP ?? DEFAULT_CONFIG.topP,
-      topK: config.topK ?? DEFAULT_CONFIG.topK,
-      maxOutputTokens: config.maxOutputTokens ?? DEFAULT_CONFIG.maxOutputTokens,
-      stopSequences: config.stopSequences ?? DEFAULT_CONFIG.stopSequences,
-    },
-    safetySettings: config.safetySettings ?? DEFAULT_SAFETY_SETTINGS,
-  });
 }
