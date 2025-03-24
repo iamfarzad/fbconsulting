@@ -25,12 +25,11 @@ export const API_CONFIG = {
     : 'ws://localhost:8000',
 };
 
-// Make sure environment variables are accessed correctly
+// Make sure environment variables are accessed correctly using Vite's import.meta.env
 export const apiConfig = {
-  geminiApiKey: process.env.GEMINI_API_KEY || '',
-  googleApiKey: process.env.Google_API_KEY || '',
-  resendApiKey: process.env.RESEND_API_KEY || '',
-  // Remove any hardcoded fallback to demo API
+  geminiApiKey: import.meta.env.VITE_GEMINI_API_KEY || '',
+  googleApiKey: import.meta.env.VITE_Google_API_KEY || '',
+  resendApiKey: import.meta.env.VITE_RESEND_API_KEY || '',
 };
 
 // Ensure we're not using demo by default

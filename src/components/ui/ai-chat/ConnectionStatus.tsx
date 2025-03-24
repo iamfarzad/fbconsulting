@@ -1,54 +1,31 @@
-
 import React from 'react';
-import { cn } from '@/lib/utils';
-import { AlertCircle, CheckCircle, Wifi, WifiOff } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useConnectionStatus } from '@/hooks/useConnectionStatus';
+import { apiConfig } from '@/config/api';
 
 interface ConnectionStatusProps {
-  isConnected: boolean;
-  isMockData: boolean;
-  className?: string;
+    className?: string;
 }
 
-export function ConnectionStatus({ isConnected, isMockData, className }: ConnectionStatusProps) {
-  return (
-    <TooltipProvider>
-      <Tooltip delayDuration={300}>
-        <TooltipTrigger asChild>
-          <div className={cn("flex items-center gap-1.5 text-xs", className)}>
-            {isConnected ? (
-              <>
-                <Wifi className="w-3.5 h-3.5 text-green-500" />
-                <span className={cn(
-                  "font-medium",
-                  isMockData ? "text-amber-500" : "text-green-500"
-                )}>
-                  {isMockData ? "Demo Mode" : "Connected"}
-                </span>
-              </>
-            ) : (
-              <>
-                <WifiOff className="w-3.5 h-3.5 text-red-500" />
-                <span className="text-red-500 font-medium">Offline</span>
-              </>
-            )}
-          </div>
-        </TooltipTrigger>
-        <TooltipContent>
-          {isConnected ? (
-            isMockData ? (
-              <div className="flex flex-col gap-1">
-                <p>Using demo responses (mock data)</p>
-                <p className="text-xs text-muted-foreground">Set up Gemini API Key for real responses</p>
-              </div>
-            ) : (
-              <p>Connected to Google Gemini API</p>
-            )
-          ) : (
-            <p>Not connected to AI service</p>
-          )}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
+export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({ className }) => {
+    const { isConnected } = useConnectionStatus();
+    const { geminiApiKey } = apiConfig;
+    
+    const isUsingRealApi = Boolean(geminiApiKey);
+    
+    return (
+        <div className={`connection-status ${className || ''}`}>
+            <div className="flex items-center">
+                <div className={`w-3 h-3 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                {isConnected ? (
+                    isUsingRealApi ? (
+                        <p>Connected to Gemini API</p>
+                    ) : (
+                        <p>Using production API</p>
+                    )
+                ) : (
+                    <p>Disconnected from API</p>
+                )}
+            </div>
+        </div>
+    );
 }
