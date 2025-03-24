@@ -4,6 +4,9 @@
   "outputDirectory": "dist",
   "devCommand": "npm run dev",
   "framework": "vite",
+  "rewrites": [
+    { "source": "/api/gemini", "destination": "/api/gemini/route" }
+  ],
   "functions": {
     "api/**/*": {
       "runtime": "@vercel/node@3.0.0"
