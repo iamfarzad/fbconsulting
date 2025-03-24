@@ -6,7 +6,8 @@
   "framework": "vite",
   "functions": {
     "api/**/*": {
-      "runtime": "@vercel/node@3.0.0"
+      "memory": 1024,
+      "maxDuration": 10
     }
   },
   "headers": [
@@ -20,6 +21,8 @@
       ]
     }
   ],
+  "regions": ["fra1"],
+  "public": true,
   "rewrites": [
     { "source": "/api/gemini", "destination": "/api/gemini/route" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
