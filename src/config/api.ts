@@ -1,4 +1,3 @@
-
 // Environment-based configuration
 const isProd = import.meta.env.PROD;
 const isVercel = import.meta.env.VITE_DEPLOYMENT_ENV === 'vercel';
@@ -25,6 +24,17 @@ export const API_CONFIG = {
     ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`
     : 'ws://localhost:8000',
 };
+
+// Make sure environment variables are accessed correctly
+export const apiConfig = {
+  geminiApiKey: process.env.GEMINI_API_KEY || '',
+  googleApiKey: process.env.Google_API_KEY || '',
+  resendApiKey: process.env.RESEND_API_KEY || '',
+  // Remove any hardcoded fallback to demo API
+};
+
+// Ensure we're not using demo by default
+export const useRealApi = true; // Force to true instead of checking for API keys
 
 // Gemini API configuration
 export const GEMINI_API_CONFIG = {
