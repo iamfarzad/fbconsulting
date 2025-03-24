@@ -1,17 +1,46 @@
 import { NextRequest } from "next/server";
-import { GeminiRequest } from "../../src/services/gemini/types";
+import { GeminiRequest, GeminiConfig } from "../../src/services/gemini/types";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || "");
+// Utility functions
+function formatGeminiResponse(text: string): string {
+  return text
+    .trim()
+    .replace(/\n{3,}/g, '\n\n')
+    .replace(/```/g, '')
+    .replace(/\*\*/g, '');
+}
+
+function sanitizePrompt(prompt: string): string {
+  return prompt
+    .trim()
+    .replace(/[^\w\s.,?!-]/g, '')
+    .substring(0, 1000);
+}
+
+function initializeGemini(options: { model?: string; temperature?: number } = {}) {
+  const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || "");
+  return genAI.getGenerativeModel({
+    model: options.model || "gemini-pro",
+    generationConfig: {
+      temperature: options.temperature
+    }
+  });
+}
+
+const defaultModel = initializeGemini();
 
 export async function POST(req: NextRequest) {
   try {
-    const { prompt, model = "gemini-pro", temperature = 0.9 } = (await req.json()) as GeminiRequest;
+    const { prompt: rawPrompt, model = "gemini-pro", temperature = 0.9 } = (await req.json()) as GeminiRequest;
     
-    const geminiModel = genAI.getGenerativeModel({ model });
+    // Sanitize prompt
+    const prompt = sanitizePrompt(rawPrompt);
+    
+    const geminiModel = initializeGemini({ model, temperature });
     const result = await geminiModel.generateContent(prompt);
     const response = await result.response;
-    const text = response.text();
+    const text = formatGeminiResponse(response.text());
     
     return new Response(JSON.stringify({ text }), {
       headers: { "Content-Type": "application/json" },
@@ -31,14 +60,14 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    const result = await model.generateContent("Test connection to Gemini API");
+    const result = await defaultModel.generateContent("Test connection to Gemini API");
     const response = await result.response;
+    const text = formatGeminiResponse(response.text());
     
     return new Response(JSON.stringify({ 
       status: "ok",
       message: "Gemini API connection successful",
-      test_response: response.text()
+      test_response: text
     }), {
       headers: { "Content-Type": "application/json" },
     });
