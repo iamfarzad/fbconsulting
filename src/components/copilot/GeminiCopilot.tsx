@@ -146,10 +146,8 @@ export const GeminiCopilot: React.FC<GeminiCopilotProps> = ({ className }) => {
                 </div>
               ))
             ) : (
-              <div className="flex items-center justify-center h-full">
-                <div className="p-4 bg-destructive/10 text-destructive rounded-lg">
-                  <p className="font-medium">Error: Invalid chat history format</p>
-                </div>
+              <div className="text-center text-red-500">
+                Invalid messages format. Please try again.
               </div>
             )}
           </div>
