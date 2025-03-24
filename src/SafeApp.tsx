@@ -15,10 +15,6 @@ const Contact = lazy(() => import("./pages/Contact"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const TestPage = lazy(() => import("./pages/TestPage"));
-const TestMCP = lazy(() => import("./pages/TestMCP"));
-const TestGoogleAI = lazy(() => import("./pages/TestGoogleAI"));
-const TestUnifiedChat = lazy(() => import("./pages/TestUnifiedChat"));
 const ChatButton = lazy(() => import("./components/ChatButton"));
 
 // Simple loading component
@@ -92,34 +88,6 @@ const SafeApp: React.FC = () => {
                             <ErrorBoundary>
                               <Suspense fallback={<LoadingFallback />}>
                                 <BlogPost />
-                              </Suspense>
-                            </ErrorBoundary>
-                          } />
-                          <Route path="/test" element={
-                            <ErrorBoundary>
-                              <Suspense fallback={<LoadingFallback />}>
-                                <TestPage />
-                              </Suspense>
-                            </ErrorBoundary>
-                          } />
-                          <Route path="/test-mcp" element={
-                            <ErrorBoundary>
-                              <Suspense fallback={<LoadingFallback />}>
-                                <TestMCP />
-                              </Suspense>
-                            </ErrorBoundary>
-                          } />
-                          <Route path="/test-google-ai" element={
-                            <ErrorBoundary>
-                              <Suspense fallback={<LoadingFallback />}>
-                                <TestGoogleAI />
-                              </Suspense>
-                            </ErrorBoundary>
-                          } />
-                          <Route path="/test-unified-chat" element={
-                            <ErrorBoundary>
-                              <Suspense fallback={<LoadingFallback />}>
-                                <TestUnifiedChat />
                               </Suspense>
                             </ErrorBoundary>
                           } />
