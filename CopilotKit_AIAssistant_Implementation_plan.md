@@ -175,7 +175,7 @@ export default function Chatbox() {
 
 ## **🎯 Final Checklist**
 
-✅ **Set Instructions & Context in Azure**  
+
 ✅ **Integrate CopilotKit for Chat**  
 ✅ **Enable Lead Capture & Email Summaries**  
 ✅ **Train AI on Real User Data**  
