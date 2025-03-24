@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "nodeVersion": "18.x",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "devCommand": "npm run dev",

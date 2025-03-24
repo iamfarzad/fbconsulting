@@ -1,5 +1,11 @@
 import { Content } from '@google/generative-ai';
 
+export interface GeminiRequest {
+  prompt: string;
+  model?: string;
+  temperature?: number;
+}
+
 export interface GeminiConfig {
   apiKey: string;
   temperature?: number;
