@@ -1,4 +1,3 @@
-
 import { ChatState, ChatAction } from './types';
 
 // Reducer function to handle all state updates
@@ -7,13 +6,13 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
     case 'ADD_MESSAGE':
       return {
         ...state,
-        messages: [...state.messages, action.payload],
+        messages: Array.isArray(state.messages) ? [...state.messages, action.payload] : [action.payload],
         showMessages: true,
       };
     case 'SET_MESSAGES':
       return {
         ...state,
-        messages: action.payload,
+        messages: Array.isArray(action.payload) ? action.payload : [],
       };
     case 'CLEAR_MESSAGES':
       return {
