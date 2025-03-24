@@ -11,6 +11,7 @@
   },
   "rewrites": [
     { "source": "/api/gemini", "destination": "/api/gemini/route" },
+    { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
