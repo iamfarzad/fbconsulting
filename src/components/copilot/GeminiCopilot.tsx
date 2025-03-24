@@ -131,19 +131,27 @@ export const GeminiCopilot: React.FC<GeminiCopilotProps> = ({ className }) => {
         <>
           {/* Messages */}
           <div className="flex-1 overflow-y-auto space-y-4">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={cn(
-                  "p-4 rounded-lg max-w-[80%]",
-                  message.role === "user" 
-                    ? "bg-primary text-primary-foreground ml-auto" 
-                    : "bg-muted"
-                )}
-              >
-                {message.content}
+            {Array.isArray(messages) ? (
+              messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    "p-4 rounded-lg max-w-[80%]",
+                    message.role === "user" 
+                      ? "bg-primary text-primary-foreground ml-auto" 
+                      : "bg-muted"
+                  )}
+                >
+                  {message.content}
+                </div>
+              ))
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <div className="p-4 bg-destructive/10 text-destructive rounded-lg">
+                  <p className="font-medium">Error: Invalid chat history format</p>
+                </div>
               </div>
-            ))}
+            )}
           </div>
 
           {/* Voice Controls */}
