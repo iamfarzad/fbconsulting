@@ -12,9 +12,5 @@
   "rewrites": [
     { "source": "/api/gemini", "destination": "/api/gemini/route" },
     { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "env": {
-    "GOOGLE_API_KEY": "AIzaSyC77mmHQCmDsUSk86pP4IbGwtSjL-fa9qc",
-    "GEMINI_API_KEY": "AIzaSyC77mmHQCmDsUSk86pP4IbGwtSjL-fa9qc"
-  }
+  ]
 }
