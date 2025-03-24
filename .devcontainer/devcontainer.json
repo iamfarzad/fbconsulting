@@ -1,15 +1,14 @@
 {
-  "name": "Docker Dev",
-  "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {
-      "version": "latest"
-    }
-  },
-  "postCreateCommand": "docker version",
+  "name": "FB Consulting Dev Environment",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
-  "forwardPorts": [8080, 8000],
+  "forwardPorts": [8080, 8000, 3000, 5173],
   "settings": {
-    "terminal.integrated.shell.linux": "/bin/bash"
+    "terminal.integrated.shell.linux": "/bin/bash",
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    }
   },
   "extensions": [
     "dbaeumer.vscode-eslint",
@@ -20,19 +19,38 @@
     "ms-python.python",
     "ms-python.vscode-pylance",
     "github.vscode-pull-request-github",
-    "eamodio.gitlens"
+    "eamodio.gitlens",
+    "github.copilot",
+    "github.copilot-chat"
   ],
-  "postCreateCommand": "echo 'Installing dependencies...' && cd backend/gemini_service && python3.12 -m pip install --upgrade pip && pip3.12 install -r requirements.txt && pip3.12 list && cd ../.. && npm install",
+  "postCreateCommand": "echo 'Setting up environment...' && npm install && python3 -m pip install --upgrade pip && pip install -r requirements.txt",
   "remoteUser": "node",
   "containerEnv": {
     "GOOGLE_API_KEY": "${localEnv:GOOGLE_API_KEY}",
-    "PYTHONUNBUFFERED": "1"
+    "PYTHONUNBUFFERED": "1",
+    "NODE_OPTIONS": "--max-old-space-size=4096"
   },
   "features": {
-    "python": {
-      "version": "3.12",
-      "installTools": true
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.9"
     },
-    "git": "latest"
-  }
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": true
+      }
+    }
+  },
+  "mounts": [
+    "source=${localWorkspaceFolder}/node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume"
+  ]
 }

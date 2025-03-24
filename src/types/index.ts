@@ -1,63 +1,38 @@
-// Chat message types
 export interface ChatMessage {
-  role: 'user' | 'assistant' | 'system' | 'error';
+  role: 'user' | 'assistant';
   content: string;
-  timestamp: number;
 }
 
-// Lead information type
-export interface LeadInfo {
-  email?: string;
-  name?: string;
-  phone?: string;
-  company?: string;
-  role?: string;
-  interests?: string[];
-  challenges?: string[];
-  budget?: string;
-  timeframe?: string;
-  stage?: 'discovery' | 'qualification' | 'interested' | 'ready-to-book';
-  notes?: string;
-  message?: string;
-  timestamp?: string;
-}
-
-// Persona data types
-export interface PersonaData {
-  currentPersona: string;
-  personas: Record<string, Persona>;
-  currentPage: string;
-}
-
-export interface Persona {
+export interface GeminiUserInfo {
   name: string;
-  description: string;
-  systemPrompt: string;
-  suggestedResponses?: string[];
+  email: string;
 }
 
-// Chat service types
-export interface ChatService {
-  sendMessage: (message: string, leadInfo?: LeadInfo) => Promise<string>;
-  getHistory: () => ChatMessage[];
-  clearHistory: () => void;
-  initializeChat: (personaData: PersonaData) => void;
+export type ChatStep = 'intro' | 'form' | 'chat' | 'proposal' | 'chooseAction';
+
+export interface ProposalData {
+  summary: string[];
+  pricing: Array<{
+    service: string;
+    price: number;
+    description: string;
+  }>;
+  recommendations: string[];
 }
 
-// Google GenAI adapter types
-export interface GoogleGenAIAdapterOptions {
-  modelName: string;
-  temperature: number;
-  maxOutputTokens: number;
-  topP?: number;
-  topK?: number;
-}
+export type GeminiAction =
+  | { type: 'SET_MESSAGES'; payload: ChatMessage[] }
+  | { type: 'ADD_MESSAGE'; payload: ChatMessage }
+  | { type: 'CLEAR_MESSAGES' }
+  | { type: 'SET_USER_INFO'; payload: GeminiUserInfo | null }
+  | { type: 'SET_STEP'; payload: ChatStep }
+  | { type: 'SET_PROPOSAL'; payload: ProposalData | null }
+  | { type: 'RESTORE_STATE'; payload: GeminiState }
+  | { type: 'RESET_STATE' };
 
-export interface GoogleGenAIAdapter {
-  apiKey: string;
-  modelName: string;
-  temperature: number;
-  maxOutputTokens: number;
-  topP?: number;
-  topK?: number;
+export interface GeminiState {
+  messages: ChatMessage[];
+  userInfo: GeminiUserInfo | null;
+  step: ChatStep;
+  proposal: ProposalData | null;
 }

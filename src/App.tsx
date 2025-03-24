@@ -1,112 +1,46 @@
-import React, { Suspense } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import ErrorBoundaryWrapper from "./components/ErrorBoundaryWrapper";
-import ThemeProvider from "./components/ThemeProvider";
-import { Toaster } from "@/components/ui/toaster";
-import Index from "./pages/Index";
-import Services from "./pages/Services";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import Blog from "./pages/Blog";
-import BlogPost from "./pages/BlogPost";
-import NotFound from "./pages/NotFound";
-import TestPage from "./pages/TestPage";
-import { AnimatePresence } from "framer-motion";
-import ChatButton from "./components/ChatButton";
-import TestMCP from "./pages/TestMCP";
-import TestGoogleAI from "./pages/TestGoogleAI";
-import TestUnifiedChat from "./pages/TestUnifiedChat";
-import AIDemo from "./pages/AIDemo";
-import { LanguageProvider } from "./contexts/LanguageContext";
-import { CopilotProvider } from "./components/copilot/CopilotProvider";
-import { GeminiAPIProvider } from "./providers/GeminiAPIProvider";
-import LoadingFallback from "./components/LoadingFallback";
-import { UnifiedVoiceUI } from "@/components/voice/UnifiedVoiceUI";
-import { useGeminiService } from "@/hooks/gemini";
-import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider';
-import { GeminiProvider } from '@/components/copilot/providers/GeminiProvider';
-
-// Create a new component for the main content
-function MainContent() {
-  const {
-    isLoading,
-    isConnected,
-    isPlaying,
-    progress,
-    stopAudio,
-    sendMessage,
-  } = useGeminiService();
-
-  const [isListening, setIsListening] = React.useState(false);
-
-  const handleVoiceInput = React.useCallback((text: string) => {
-    if (text.trim()) {
-      sendMessage(text);
-    }
-  }, [sendMessage]);
-
-  const toggleListening = React.useCallback(() => {
-    setIsListening(prev => !prev);
-  }, []);
-
-  return (
-    <AnimatePresence mode="wait">
-      <Toaster key="toaster" />
-      <ChatButton key="chat-button" />
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold">Gemini Chat</h1>
-      </header>
-      <main>
-        <UnifiedVoiceUI 
-          isListening={isListening}
-          toggleListening={toggleListening}
-          isPlaying={isPlaying}
-          progress={progress}
-          stopAudio={stopAudio}
-          onVoiceInput={handleVoiceInput}
-          disabled={!isConnected || isLoading}
-        />
-      </main>
-      <Routes key="routes">
-        <Route path="/" element={<Index />} />
-        <Route path="/services" element={<Services />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/:slug" element={<BlogPost />} />
-        <Route path="/test" element={<TestPage />} />
-        <Route path="/test-mcp" element={<TestMCP />} />
-        <Route path="/test-google-ai" element={<TestGoogleAI />} />
-        <Route path="/test-unified-chat" element={<TestUnifiedChat />} />
-        <Route path="/ai-demo" element={<AIDemo />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </AnimatePresence>
-  );
-}
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import CopilotDemo from '@/pages/CopilotDemo';
+import './App.css';
 
 function App() {
   return (
-    <div className="App">
-      <ErrorBoundaryWrapper>
-        <GeminiProvider>
-          <BrowserRouter>
-            <ThemeProvider>
-              <LanguageProvider>
-                <GeminiAPIProvider>
-                  <CopilotProvider>
-                    <Suspense fallback={<LoadingFallback />}>
-                      <MainContent />
-                    </Suspense>
-                    <AnalyticsProvider />
-                  </CopilotProvider>
-                </GeminiAPIProvider>
-              </LanguageProvider>
-            </ThemeProvider>
-          </BrowserRouter>
-        </GeminiProvider>
-      </ErrorBoundaryWrapper>
-    </div>
+    <Router>
+      <div className="app">
+        <nav className="fixed top-0 w-full bg-background border-b z-50 px-4 py-2">
+          <ul className="flex gap-4">
+            <li>
+              <Link 
+                to="/" 
+                className="text-foreground hover:text-primary transition-colors"
+              >
+                Home
+              </Link>
+            </li>
+            <li>
+              <Link 
+                to="/copilot" 
+                className="text-foreground hover:text-primary transition-colors"
+              >
+                Copilot Demo
+              </Link>
+            </li>
+          </ul>
+        </nav>
+
+        <div className="pt-16"> {/* Add padding for fixed navbar */}
+          <Routes>
+            <Route path="/" element={
+              <div className="container mx-auto p-4">
+                <h1 className="text-4xl font-bold mb-4">Welcome</h1>
+                <p className="mb-4">Select a demo from the navigation menu above.</p>
+              </div>
+            } />
+            <Route path="/copilot" element={<CopilotDemo />} />
+          </Routes>
+        </div>
+      </div>
+    </Router>
   );
 }
 

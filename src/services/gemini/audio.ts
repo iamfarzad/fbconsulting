@@ -3,6 +3,45 @@ import { initializeGemini } from './initialize';
 import { GeminiConfig, DEFAULT_SPEECH_CONFIG } from './types';
 import { Content } from 'google-generativeai';
 
+const API_ENDPOINT = '/api/gemini/tts';
+
+/**
+ * Convert text to speech using Gemini's TTS capabilities
+ */
+export async function textToSpeech(
+  text: string,
+  config: GeminiConfig
+): Promise<Blob> {
+  if (!config.apiKey) {
+    throw new Error('Gemini API key is not available');
+  }
+
+  try {
+    const response = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text,
+        voice: config.voice || DEFAULT_SPEECH_CONFIG.voice,
+        languageCode: config.languageCode || DEFAULT_SPEECH_CONFIG.languageCode
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`TTS request failed: ${response.statusText}`);
+    }
+
+    const audioBlob = await response.blob();
+    return audioBlob;
+  } catch (error) {
+    console.error('Error generating speech with Gemini:', error);
+    throw error;
+  }
+}
+
+
 /**
  * Transcribes audio using Gemini's audio processing capabilities
  */

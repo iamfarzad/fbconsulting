@@ -1,20 +1,26 @@
 # Dev Container for FB Consulting Project
 
-This Dev Container configuration provides a consistent development environment for both React/TypeScript frontend and Python backend development.
+This Dev Container configuration provides a consistent development environment for both React/TypeScript frontend and Python backend development, with special support for Gemini AI audio integration.
 
 ## What's Included
 
 ### Frontend Environment
-- Node.js 18
+- Node.js 20
 - NPM (latest version)
 - React/TypeScript extensions
 - Tailwind CSS IntelliSense
+- Audio playback and streaming support
 
 ### Backend Environment
-- Python 3.x with pip
-- Virtual environment
-- Python extensions for VS Code
-- Auto-installs requirements.txt
+- Python 3.9 with pip
+- Google Generative AI SDK
+- FastAPI for API endpoints
+- Audio processing capabilities
+
+### AI Features
+- Gemini Pro integration
+- Text-to-Speech capabilities
+- Interactive voice UI
 
 ## Getting Started
 
@@ -24,18 +30,28 @@ To use this Dev Container:
 2. Install the [VS Code Remote - Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 3. Open this project in VS Code
 4. When prompted, click "Reopen in Container" or run the "Remote-Containers: Reopen in Container" command from the VS Code command palette
+5. Ensure your `.env` file has the necessary `GOOGLE_API_KEY` for Gemini API access
 
 ## Using the Dev Container
 
-- The development server will be accessible at http://localhost:8080
+- The development server will be accessible at http://localhost:5173
 - Run `npm run dev` to start the development server
-- All VS Code settings and extensions are configured for React and TypeScript development
+- Run `npm run api:python` to start the Python API server
+- Run `npm run dev:all` to start both servers together
 
-## Post-Setup
-The container will automatically:
-1. Create a Python virtual environment
-2. Install Python dependencies from requirements.txt
-3. Install Node.js dependencies from package.json
+## Audio Implementation
+
+The project implements audio capabilities through:
+- `/api/gemini/audio.py` - Text-to-speech API endpoint
+- `src/hooks/useGeminiAudio.ts` - Client-side audio hook
+- Audio streaming with proper browser playback
+
+## Troubleshooting
+
+If you encounter issues with Vite or other dependencies:
+1. Run `node scripts/fix-vite.js` to diagnose and fix common Vite issues
+2. Run `node scripts/cleanup-config.js` to fix any misplaced configuration files
+3. Check your environment variables with `node scripts/check-deployment.js`
 
 ## Customizing
 
@@ -45,36 +61,8 @@ You can customize this configuration by editing the following files:
 
 ## Docker Setup in GitHub Codespaces
 
-To use Docker in GitHub Codespaces, follow these steps:
-
-* Open a codespace:
-  - Go to any repository you own (or create a blank one).
-  - Click: `Code` → `Codespaces` → `Create codespace on main`.
-
-* Enable Docker support (if not already):
-  - Add the following to `.devcontainer/devcontainer.json`:
-    ```json
-    {
-      "name": "Docker Dev",
-      "features": {
-        "ghcr.io/devcontainers/features/docker-in-docker:2": {
-          "version": "latest"
-        }
-      },
-      "postCreateCommand": "docker version"
-    }
-    ```
-  - Rebuild the container: `Ctrl+Shift+P` → "Rebuild Container".
-
-* Run Docker inside your codespace:
-  - Execute the following commands:
-    ```sh
-    docker version
-    docker run hello-world
-    ```
-
-* (Optional) VS Code integration:
-  - If you’re using the VS Code desktop app:
-    - Install the “GitHub Codespaces” extension.
-    - Connect directly from VS Code to the cloud.
-    - Full GUI, terminal, file access, and Docker inside Codespace.
+Docker-in-Docker is already configured for GitHub Codespaces. You can verify it's working with:
+```sh
+docker version
+docker run hello-world
+```

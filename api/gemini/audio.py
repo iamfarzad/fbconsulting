@@ -3,81 +3,87 @@ from fastapi.responses import StreamingResponse
 import google.generativeai as genai
 import os
 import io
-import json
-from typing import Dict, Any
+import asyncio
 import logging
+from typing import Optional
 
 app = FastAPI()
 logger = logging.getLogger("gemini-audio")
 logger.setLevel(logging.INFO)
 
+async def validate_gemini_live_api() -> Optional[str]:
+    """Validate Gemini Live API is working"""
+    try:
+        api_key = os.environ.get("GOOGLE_API_KEY")
+        if not api_key:
+            return "Missing API key"
+        genai.configure(api_key=api_key)
+        client = genai.AsyncClient()
+        return None
+    except Exception as e:
+        return str(e)
+
 @app.post("/api/gemini/audio")
 async def generate_audio(request: Request):
-    """
-    Generate audio from text using Gemini's text-to-speech capability
-    """
     try:
-        # Read and parse request
+        # Validate Live API availability
+        validation_error = await validate_gemini_live_api()
+        if validation_error:
+            logger.error(f"Gemini Live API validation failed: {validation_error}")
+            raise HTTPException(status_code=503, detail=f"Gemini Live API unavailable: {validation_error}")
+
+        # Parse request
         body = await request.json()
-        
-        if 'text' not in body:
+        text = body.get("text")
+        if not text:
             raise HTTPException(status_code=400, detail="Text is required")
-        
-        text = body['text']
-        voice_config = body.get('config', {})
-        
-        # Get API key from environment
-        api_key = os.environ.get('GOOGLE_API_KEY')
+
+        # Get API key
+        api_key = os.environ.get("GOOGLE_API_KEY")
         if not api_key:
-            raise HTTPException(status_code=500, detail="API key not found")
-        
+            raise HTTPException(status_code=500, detail="Missing API key")
+
         # Configure Gemini
         genai.configure(api_key=api_key)
-        client = genai.Client()
-        
-        # Configure speech settings with Charon voice
-        speech_config = {
-            "response_modalities": ["TEXT", "AUDIO"],
+        client = genai.AsyncClient()
+
+        model = "models/gemini-2.0-flash"
+        voice = body.get("config", {}).get("voice", "Charon")
+
+        config = {
+            "response_modalities": ["AUDIO"],
             "speech_config": {
                 "voice_config": {
-                    "prebuilt_voice_config": {
-                        "voice_name": voice_config.get('voice', "Charon")
-                    }
+                    "prebuilt_voice": voice
                 }
             }
         }
-        
-        # Start live session and send text
-        logger.info(f"Generating audio for text length: {len(text)}")
-        session = client.connect("gemini-2.0-flash", speech_config)
-        
-        response = session.send({
-            "turns": [{
-                "parts": [{"text": text}],
-                "role": "user"
-            }],
-            "turn_complete": True
-        })
-        
-        # Get audio data
-        audio_data = response.audio
-        
-        # Create an in-memory buffer
-        buffer = io.BytesIO(audio_data)
+
+        buffer = io.BytesIO()
+
+        try:
+            async with client.aio.live.connect(model=model, config=config) as session:
+                await session.send(text, end_of_turn=True)
+
+                async for chunk in session.receive():
+                    if chunk.server_content and chunk.server_content.interrupted:
+                        logger.warning("Audio generation interrupted.")
+                        break
+                    if chunk.data:
+                        buffer.write(chunk.data)
+        except Exception as e:
+            logger.error(f"Audio streaming error: {e}")
+            raise HTTPException(status_code=502, detail=f"Audio streaming failed: {str(e)}")
+
         buffer.seek(0)
-        
-        # Return the audio file as a streaming response
         return StreamingResponse(
             buffer,
-            media_type="audio/mpeg",
-            headers={
-                "Content-Disposition": "attachment;filename=speech.mp3"
-            }
+            media_type="audio/wav",
+            headers={"Content-Disposition": "attachment; filename=speech.wav"}
         )
-        
+
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Audio generation failed: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Audio generation failed: {str(e)}"
-        )
+        logger.error(f"Unexpected TTS error: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")

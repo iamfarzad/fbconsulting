@@ -1,22 +1,27 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "api/vercel_handler.py",
-      "use": "@vercel/python"
-    },
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "devCommand": "npm run dev",
+  "framework": "vite",
+  "functions": {
+    "api/**/*.py": {
+      "runtime": "python3.9",
+      "memory": 1024
     }
-  ],
+  },
   "routes": [
     {
+      "src": "/api/gemini/audio",
+      "dest": "/api/gemini/audio.py",
+      "headers": {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Content-Type": "audio/wav" 
+      }
+    },
+    {
       "src": "/api/(.*)",
-      "dest": "/api/vercel_handler.py"
+      "dest": "/api/$1.py"
     },
     {
       "handle": "filesystem"
@@ -25,5 +30,8 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ]
+  ],
+  "env": {
+    "GOOGLE_API_KEY": "@google_api_key"
+  }
 }
