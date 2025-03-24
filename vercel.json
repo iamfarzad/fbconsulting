@@ -1,28 +1,16 @@
 {
   "version": 2,
+  "nodeVersion": "18.x",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "devCommand": "npm run dev",
   "framework": "vite",
   "functions": {
-    "api/**/*.py": {
-      "runtime": "@vercel/python@3.1.0",
-      "memory": 1024
+    "api/**/*": {
+      "runtime": "@vercel/node@3.0.0"
     }
   },
   "routes": [
-    {
-      "src": "/api/gemini/audio",
-      "dest": "/api/gemini/audio.py",
-      "headers": {
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        "Content-Type": "audio/wav" 
-      }
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1.py"
-    },
     {
       "handle": "filesystem"
     },
