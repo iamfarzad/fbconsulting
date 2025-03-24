@@ -38,12 +38,11 @@ export const UnifiedChatMessageList: React.FC<UnifiedChatMessageListProps> = ({
 
   // Check if messages is an array
   if (!Array.isArray(messages)) {
-    console.log("💥 Chat messages:", messages);
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="p-4 bg-destructive/10 text-destructive rounded-lg">
-          <p className="font-medium">Error: Invalid chat history format</p>
-        </div>
+        <p className="text-muted-foreground text-center">
+          Invalid messages format. Please try again.
+        </p>
       </div>
     );
   }
