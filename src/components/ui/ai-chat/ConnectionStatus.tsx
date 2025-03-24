@@ -10,6 +10,10 @@ export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({ className })
     const { isConnected } = useConnectionStatus();
     const { geminiApiKey } = apiConfig;
     
+    // Add some debug logging
+    console.log("API Config key exists:", !!geminiApiKey);
+    console.log("Connection status:", isConnected);
+    
     const isUsingRealApi = Boolean(geminiApiKey);
     
     return (

@@ -7,7 +7,11 @@ const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
 // Make sure we're not using any fallback demo response
 export const fetchGeminiResponse = async (message) => {
   try {
-    const response = await fetch(`${apiBaseUrl}/api/gemini/main`, { // Updated path
+    console.log('Fetching from API:', `${apiBaseUrl}/api/gemini/main`);
+    console.log('With message:', message);
+    console.log('Using API key:', apiKey ? 'API key exists' : 'No API key');
+    
+    const response = await fetch(`${apiBaseUrl}/api/gemini/main`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -19,22 +23,33 @@ export const fetchGeminiResponse = async (message) => {
     });
     
     if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error('API error response:', errorText);
+      throw new Error(`API error: ${response.status} - ${errorText}`);
     }
     
     // Safely handle the response
-    const data = await response.json();
+    const rawData = await response.json();
+    console.log('Raw API response:', rawData);
     
-    // Ensure data.data is always an array to prevent t.map is not a function errors
-    if (data && !Array.isArray(data.data)) {
-      data.data = data.data ? [data.data] : [];
-    }
+    // Construct a safe response object
+    const safeData = {
+      text: rawData?.text || '',
+      status: rawData?.status || 'success',
+      // Ensure data is ALWAYS an array
+      data: Array.isArray(rawData?.data) ? rawData.data : 
+            rawData?.data ? [rawData.data] : 
+            rawData?.text ? [{role: 'assistant', content: rawData.text}] : 
+            []
+    };
     
-    return data;
+    console.log('Processed safe data:', safeData);
+    return safeData;
   } catch (error) {
     console.error('Error calling Gemini API:', error);
     // Return a properly structured error response
     return { 
+      text: error.message,
       error: error.message, 
       status: 'error',
       data: [] // Always return an array
