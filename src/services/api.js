@@ -22,10 +22,23 @@ export const fetchGeminiResponse = async (message) => {
       throw new Error(`API error: ${response.status}`);
     }
     
-    return response;
+    // Safely handle the response
+    const data = await response.json();
+    
+    // Ensure data.data is always an array to prevent t.map is not a function errors
+    if (data && !Array.isArray(data.data)) {
+      data.data = data.data ? [data.data] : [];
+    }
+    
+    return data;
   } catch (error) {
     console.error('Error calling Gemini API:', error);
-    throw error; // Don't return a mock response here
+    // Return a properly structured error response
+    return { 
+      error: error.message, 
+      status: 'error',
+      data: [] // Always return an array
+    };
   }
 };
 

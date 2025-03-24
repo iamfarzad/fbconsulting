@@ -20,13 +20,21 @@ export async function POST(request) {
     const response = await result.response;
     const text = response.text();
     
-    // Return real response, not a mock
-    return Response.json({ text });
+    // Ensure we return a properly formatted response
+    return Response.json({ 
+      text,
+      status: 'success',
+      data: [] // Ensure we always return an array for data if needed
+    });
     
   } catch (error) {
     console.error('Error in Gemini API route:', error);
     return Response.json(
-      { error: error.message },
+      { 
+        error: error.message, 
+        status: 'error',
+        data: [] // Always return an array for any data property
+      },
       { status: 500 }
     );
   }
