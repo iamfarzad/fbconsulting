@@ -4,22 +4,14 @@
   "outputDirectory": "dist",
   "devCommand": "npm run dev",
   "framework": "vite",
-  "rewrites": [
-    { "source": "/api/gemini", "destination": "/api/gemini/route" }
-  ],
   "functions": {
     "api/**/*": {
       "runtime": "@vercel/node@3.0.0"
     }
   },
-  "routes": [
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+  "rewrites": [
+    { "source": "/api/gemini", "destination": "/api/gemini/route" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "env": {
     "GOOGLE_API_KEY": "AIzaSyC77mmHQCmDsUSk86pP4IbGwtSjL-fa9qc",
