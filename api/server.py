@@ -9,8 +9,12 @@ dotenv_path = Path(".env.local") if Path(".env.local").exists() else Path(".env"
 load_dotenv(dotenv_path)
 
 from api.gemini.ask import handler
+from api.proposals.send import router as proposals_router
 
 app = FastAPI()
+
+# Include proposals router
+app.include_router(proposals_router)
 
 @app.post("/api/gemini/ask")
 async def ask_gemini(request: Request):

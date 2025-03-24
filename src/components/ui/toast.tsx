@@ -110,6 +110,32 @@ const ToastDescription = React.forwardRef<
 ))
 ToastDescription.displayName = ToastPrimitives.Description.displayName
 
+import React from 'react';
+import { Toaster as SonnerToaster, toast as sonnerToast } from 'sonner';
+
+export { toast } from 'sonner';
+
+interface ToasterProps {
+  position?: 'top-right' | 'top-center' | 'top-left' | 'bottom-right' | 'bottom-center' | 'bottom-left';
+  theme?: 'light' | 'dark' | 'system';
+}
+
+export function Toaster({ 
+  position = 'top-right',
+  theme = 'system'
+}: ToasterProps = {}) {
+  return (
+    <SonnerToaster 
+      position={position}
+      theme={theme}
+      toastOptions={{
+        duration: 4000,
+        className: 'rounded-md border bg-background text-foreground'
+      }}
+    />
+  );
+}
+
 type ToastProps = React.ComponentPropsWithoutRef<typeof Toast>
 
 type ToastActionElement = React.ReactElement<typeof ToastAction>

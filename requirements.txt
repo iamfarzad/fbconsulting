@@ -9,3 +9,4 @@ pydantic==2.5.3
 typing-extensions==4.9.0
 starlette==0.35.1
 werkzeug>=2.0.0
+resend==0.7.2
