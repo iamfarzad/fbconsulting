@@ -2,10 +2,6 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/vercel_handler.py",
-      "use": "@vercel/python"
-    },
-    {
       "src": "package.json",
       "use": "@vercel/static-build",
       "config": {
@@ -14,10 +10,6 @@
     }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/vercel_handler.py"
-    },
     {
       "handle": "filesystem"
     },
