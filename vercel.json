@@ -6,7 +6,11 @@
   "framework": "vite",
   "functions": {
     "api/**/*": {
-      "runtime": "@vercel/node@3.0.0"
+      "runtime": "@vercel/node@3.0.0",
+      "config": {
+        "maxDuration": 10
+      },
+      "auth": false
     }
   },
   "rewrites": [
