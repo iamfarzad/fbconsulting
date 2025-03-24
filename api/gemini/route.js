@@ -1,6 +1,7 @@
+// Rename this file to /Users/farzad/windsurf_projects/fbconsulting/api/gemini/primary.js
+
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Changed to main.js to avoid conflicts with route.ts
 export async function POST(request) {
   try {
     const { message, apiKey } = await request.json();
