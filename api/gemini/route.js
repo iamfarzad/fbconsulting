@@ -9,7 +9,7 @@ export async function POST(request) {
     
     // First try to use the API key from the request
     // Then fall back to environment variables
-    const key = apiKey || process.env.GEMINI_API_KEY || import.meta.env?.VITE_GEMINI_API_KEY;
+    const key = apiKey || process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
     
     if (!key) {
       throw new Error('API key is required');
