@@ -7,7 +7,7 @@ const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
 // Make sure we're not using any fallback demo response
 export const fetchGeminiResponse = async (message) => {
   try {
-    const response = await fetch(`${apiBaseUrl}/api/gemini/stream`, {
+    const response = await fetch(`${apiBaseUrl}/api/gemini/main`, { // Updated path
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

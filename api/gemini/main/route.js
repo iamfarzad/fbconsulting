@@ -1,6 +1,5 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Changed to main.js to avoid conflicts with route.ts
 export async function POST(request) {
   try {
     const { message, apiKey } = await request.json();
@@ -22,7 +21,7 @@ export async function POST(request) {
     const text = response.text();
     
     // Return real response, not a mock
-    return Response.json({ text: text });
+    return Response.json({ text });
     
   } catch (error) {
     console.error('Error in Gemini API route:', error);

@@ -8,6 +8,7 @@ export const API_PATHS = {
   WEBSOCKET_BASE: isProd ? (isVercel ? '/api/gemini/stream' : '/api/gemini/stream') : 'ws://localhost:8000/ws',
   GEMINI_AUDIO: '/api/gemini/audio',
   GEMINI_STREAM: '/api/gemini/stream',
+  GEMINI_MAIN: '/api/gemini/main', // Updated path to avoid conflicts
   EMAIL_SERVICE: isProd ? '/api/email' : 'http://localhost:8000/api/email',
   LEAD_CAPTURE: isProd ? '/api/lead' : 'http://localhost:8000/api/lead',
 };
