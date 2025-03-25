@@ -106,9 +106,53 @@ export const GeminiCopilotProvider: React.FC<{ children: React.ReactNode }> = ({
     proposal: state.proposal
   });
 
-  const sendMessage = useCallback((text: string) => {
-    dispatch({ type: 'ADD_MESSAGE', payload: { role: 'user', content: text } });
-    // TODO: Add actual message handling logic here
+  const sendMessage = useCallback(async (content: string) => {
+    // Add user message immediately
+    dispatch({ 
+      type: 'ADD_MESSAGE', 
+      payload: { 
+        role: 'user', 
+        content,
+        id: Date.now().toString()
+      } 
+    });
+
+    try {
+      // Show loading state
+      const loadingId = Date.now().toString();
+      dispatch({ 
+        type: 'ADD_MESSAGE', 
+        payload: { 
+          role: 'assistant', 
+          content: '...', 
+          id: loadingId 
+        } 
+      });
+
+      // TODO: Replace with actual API call
+      const response = await new Promise<string>(resolve => 
+        setTimeout(() => resolve("This is a mock AI response. Replace with actual Gemini API call."), 1000)
+      );
+
+      // Replace loading message with actual response
+      dispatch({
+        type: 'SET_MESSAGES',
+        payload: state.messages.filter(m => m.id !== loadingId).concat({
+          role: 'assistant',
+          content: response,
+          id: Date.now().toString()
+        })
+      });
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Failed to send message');
+      // Remove loading message on error
+      dispatch({
+        type: 'SET_MESSAGES',
+        payload: state.messages.filter(m => m.id !== Date.now().toString())
+      });
+    }
   }, []);
 
   const setStep = useCallback((step: ChatStep) => {
