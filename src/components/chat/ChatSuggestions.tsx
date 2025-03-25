@@ -46,6 +46,9 @@ export function ChatSuggestions({
     }
   }, [checkScroll])
 
+  // Ensure suggestions are always an array
+  const safeSuggestions = Array.isArray(suggestions) ? suggestions : []
+
   return (
     <div className={cn("relative", className)}>
       {/* Left shadow */}
@@ -74,7 +77,7 @@ export function ChatSuggestions({
         className="overflow-x-auto scrollbar-none -mx-4 px-4"
       >
         <div className="flex gap-2 py-2 min-w-max">
-          {suggestions.map((suggestion) => (
+          {safeSuggestions.map((suggestion) => (
             <motion.button
               key={suggestion.id}
               onClick={() => onSuggestionClick(suggestion.text)}

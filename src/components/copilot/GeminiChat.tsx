@@ -57,12 +57,15 @@ export function GeminiChat({ expanded = false, onExpand, className }: GeminiChat
     }
   }, [messages, generateAndPlayAudio])
 
+  // Ensure messages are always an array
+  const safeMessages = Array.isArray(messages) ? messages : []
+
   return (
     <div className={cn("relative w-full h-full", className)}>
       <HeroChat
         expanded={expanded}
         onExpand={onExpand}
-        messages={messages.map((msg, index) => ({
+        messages={safeMessages.map((msg, index) => ({
           id: index.toString(),
           content: msg.content,
           sender: msg.role === "user" ? "user" : "ai",

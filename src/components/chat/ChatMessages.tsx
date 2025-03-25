@@ -31,10 +31,13 @@ export function ChatMessages({ messages, className }: ChatMessagesProps) {
     scrollToBottom()
   }, [messages, scrollToBottom])
 
+  // Ensure messages are always an array
+  const safeMessages = Array.isArray(messages) ? messages : []
+
   return (
     <div className={cn("flex flex-col space-y-4 p-4", className)}>
       <AnimatePresence initial={false}>
-        {messages.map((message) => (
+        {safeMessages.map((message) => (
           <motion.div
             key={message.id}
             initial={{ opacity: 0, y: 20 }}
