@@ -35,11 +35,11 @@ export function useGeminiMessageSubmission({
     setError(null);
     
     try {
-      const response = await fetch('/api/gemini/ask', {
+      const response = await fetch('/api/gemini/main', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          prompt: inputValue,
+          message: inputValue,
           images,
           persona: personaData?.currentPersona
         })
