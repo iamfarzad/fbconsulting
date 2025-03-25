@@ -22,7 +22,7 @@ export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({ className })
                 <div className={`w-3 h-3 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
                 {isConnected ? (
                     isUsingRealApi ? (
-                        <p>Connected to Gemini API</p>
+                        <p>Connected to Farzad-AI</p>
                     ) : (
                         <p>Using production API</p>
                     )

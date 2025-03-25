@@ -1,5 +1,13 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+export async function GET(request) {
+  return Response.json({ 
+    status: 'error',
+    error: 'GET method not supported. Please use POST with a message and optional API key.',
+    data: []
+  }, { status: 405 });
+}
+
 export async function POST(request) {
   try {
     const { message, apiKey } = await request.json();

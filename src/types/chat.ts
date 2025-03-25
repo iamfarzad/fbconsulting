@@ -1,5 +1,3 @@
-
-// Basic message types
 export interface Message {
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
@@ -18,7 +16,6 @@ export interface MessageMedia {
   metadata?: Record<string, any>;
 }
 
-// Form types that can be embedded in messages
 export type FormType = 'email-summary' | 'newsletter-signup' | 'booking-request' | 'contact-form';
 
 export interface FormData {
@@ -26,7 +23,6 @@ export interface FormData {
   data?: Record<string, string>;
 }
 
-// Card types for structured display
 export interface Card {
   title: string;
   description?: string;
