@@ -30,3 +30,8 @@ export default class ErrorBoundary3D extends Component<Props, State> {
     return this.props.children;
   }
 }
+
+// Confirm THREE.js renderer handles GPU loss gracefully
+window.addEventListener('webglcontextlost', (event) => {
+  console.error('THREE.WebGLRenderer context lost:', event);
+});
