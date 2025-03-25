@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export async function POST(request) {
   try {
-    const { message, apiKey } = await request.json();
+    const { message, images, persona, apiKey } = await request.json();
     
     // First try to use the API key from the request
     // Then fall back to environment variables
@@ -14,9 +14,35 @@ export async function POST(request) {
     
     // Initialize the API with the key
     const genAI = new GoogleGenerativeAI(key);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     
-    const result = await model.generateContent(message);
+    // Choose model based on whether we have images
+    const modelName = images && images.length > 0 ? 'gemini-pro-vision' : 'gemini-1.5-flash';
+    const model = genAI.getGenerativeModel({ model: modelName });
+    
+    // Prepare content parts
+    const parts = [];
+    
+    // Add persona context if provided
+    if (persona) {
+      parts.push(`You are acting as: ${persona}\n\n`);
+    }
+    
+    // Add the main message
+    parts.push(message);
+    
+    // Add images if provided
+    if (images && images.length > 0) {
+      for (const image of images) {
+        parts.push({
+          inlineData: {
+            mimeType: image.mimeType,
+            data: image.data
+          }
+        });
+      }
+    }
+    
+    const result = await model.generateContent(parts);
     const response = await result.response;
     const text = response.text();
     
