@@ -1,50 +1,51 @@
-import React, { useEffect, useRef } from 'react';
-import { Box, Text } from '@chakra-ui/react';
-import { ChatMessage } from '../../types/chat';
-import MessageItem from './MessageItem';
+import { useGeminiMessageSubmission, useGeminiInitialization } from '@/features/gemini';
+import { useState, useEffect } from 'react';
+import { Message } from '@/features/gemini/types';
 
-interface UnifiedChatMessageListProps {
-  messages: ChatMessage[];
-  isLoading?: boolean;
-}
-
-const UnifiedChatMessageList: React.FC<UnifiedChatMessageListProps> = ({ 
-  messages, 
-  isLoading = false 
-}) => {
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+export function UnifiedChatMessageList() {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const { submitMessage } = useGeminiMessageSubmission();
+  const { isReady } = useGeminiInitialization();
 
   useEffect(() => {
-    // Scroll to bottom when messages change
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]);
+    if (!isReady) return;
+    
+    // Initial setup if needed
+    console.log('Gemini chat initialized');
+  }, [isReady]);
 
-  // Safely handle messages array that might be undefined or null
-  const safeMessages = Array.isArray(messages) ? messages : [];
+  const handleNewMessage = async (content: string) => {
+    const newMessage: Message = {
+      role: 'user',
+      content,
+      timestamp: new Date().toISOString()
+    };
+    
+    setMessages(prev => [...prev, newMessage]);
+    
+    const response = await submitMessage(content);
+    
+    const assistantMessage: Message = {
+      role: 'assistant',
+      content: response,
+      timestamp: new Date().toISOString()
+    };
+    
+    setMessages(prev => [...prev, assistantMessage]);
+  };
 
   return (
-    <Box 
-      overflowY="auto" 
-      maxHeight="60vh" 
-      height="100%" 
-      p={2}
-    >
-      {safeMessages.map((message, index) => (
-        <MessageItem 
+    <div className="flex flex-col gap-4">
+      {messages.map((message, index) => (
+        <div
           key={index}
-          message={message} 
-        />
+          className={`p-4 rounded-lg ${
+            message.role === 'user' ? 'bg-blue-100 ml-auto' : 'bg-gray-100'
+          }`}
+        >
+          {message.content}
+        </div>
       ))}
-      {isLoading && (
-        <Text fontStyle="italic" color="gray.500">
-          Thinking...
-        </Text>
-      )}
-      <div ref={messagesEndRef} />
-    </Box>
+    </div>
   );
-};
-
-export default UnifiedChatMessageList;
+}
