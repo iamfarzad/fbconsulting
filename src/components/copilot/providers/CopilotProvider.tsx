@@ -6,7 +6,7 @@ import { CopilotKit } from '@copilotkit/react-core';
 import { usePersonaManagement } from '@/mcp/hooks/usePersonaManagement';
 import { toast } from '@/components/ui/use-toast';
 import { useGeminiAPI } from '@/hooks/useGeminiAPI';
-import { ConnectionStatusIndicator } from '../ui/ConnectionStatusIndicator';
+import ConnectionStatusIndicator from '@/components/ui/ConnectionStatusIndicator';
 import { formatErrorMessage, logDetailedError, categorizeError } from '@/utils/errorHandling';
 import type { 
   SpatialContext, 
@@ -252,9 +252,7 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
     <CopilotContext.Provider value={contextValue}>
       {showConnectionStatus && enabled && (
         <ConnectionStatusIndicator 
-          status={connectionStatus}
-          error={connectionError}
-          onRetry={() => setConnectionStatus('connecting')}
+          status={connectionStatus === 'connecting' ? 'connecting' : connectionStatus === 'connected' ? 'connected' : 'disconnected'} 
         />
       )}
       
