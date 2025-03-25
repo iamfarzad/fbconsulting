@@ -1,3 +1,10 @@
+import { 
+  GeminiAdapter,
+  GeminiConfig,
+  useGeminiMessageSubmission,
+  useGeminiInitialization,
+  useGeminiAudio,
+} from '@/features/gemini';
 import React, { createContext, useContext, useReducer, useCallback } from 'react';
 import { useVoice } from '@/hooks/useVoice';
 import { useLocalStorage } from '@/hooks/useLocalStorage';

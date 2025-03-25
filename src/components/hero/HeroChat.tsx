@@ -1,118 +1,62 @@
-"use client"
+import { useGeminiMessageSubmission } from '@/features/gemini';
+import { useState } from 'react';
 
-import * as React from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { cn } from "@/lib/utils"
-import { ChatMessages } from "@/components/chat/ChatMessages"
-import { HeroInput } from "@/components/hero/HeroInput"
+export function HeroChat() {
+  const [message, setMessage] = useState('');
+  const [response, setResponse] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { submitMessage } = useGeminiMessageSubmission();
 
-interface HeroChatProps {
-  className?: string
-  expanded?: boolean
-  onExpand?: () => void
-  messages: Array<{
-    id: string | number
-    content: string
-    sender: "user" | "ai"
-  }>
-  onSend: (message: string) => void
-  onVoice?: () => void
-  loading?: boolean
-}
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!message.trim()) return;
 
-export function HeroChat({
-  className,
-  expanded = false,
-  onExpand,
-  messages,
-  onSend,
-  onVoice,
-  loading
-}: HeroChatProps) {
-  const containerRef = React.useRef<HTMLDivElement>(null)
-  
-  // Auto-focus on mobile when expanded
-  React.useEffect(() => {
-    if (expanded && containerRef.current) {
-      const input = containerRef.current.querySelector("textarea")
-      if (input && window.innerWidth < 640) {
-        input.focus()
-      }
+    setIsLoading(true);
+    try {
+      const result = await submitMessage(message);
+      setResponse(result);
+      setMessage('');
+    } catch (error) {
+      console.error('Chat error:', error);
+      setResponse('Sorry, there was an error processing your request.');
+    } finally {
+      setIsLoading(false);
     }
-  }, [expanded])
-
-  const containerVariants = {
-    collapsed: {
-      height: "auto",
-      maxHeight: "144px" // Matches 3 lines of text + padding
-    },
-    expanded: {
-      height: "100dvh",
-      maxHeight: "100dvh"
-    }
-  }
-
-  // Ensure messages are always an array
-  const safeMessages = Array.isArray(messages) ? messages : []
+  };
 
   return (
-    <motion.div
-      ref={containerRef}
-      variants={containerVariants}
-      initial="collapsed"
-      animate={expanded ? "expanded" : "collapsed"}
-      className={cn(
-        "relative w-full bg-background",
-        expanded ? "fixed inset-0 z-50" : "rounded-lg border",
-        className
-      )}
-    >
-      <div
-        className={cn(
-          "absolute inset-0 flex flex-col",
-          expanded ? "pb-0" : "pb-4"
-        )}
-      >
-        <div 
-          className={cn(
-            "flex-1 overflow-hidden",
-            !expanded && "cursor-pointer"
+    <div className="w-full max-w-2xl mx-auto p-4">
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="min-h-[200px] mb-4">
+          {response && (
+            <div className="prose">
+              <p>{response}</p>
+            </div>
           )}
-          onClick={() => !expanded && onExpand?.()}
-        >
-          <AnimatePresence mode="wait">
-            {(expanded || safeMessages.length > 0) ? (
-              <ChatMessages 
-                messages={safeMessages}
-                className={cn(
-                  "h-full",
-                  !expanded && "max-h-[144px]"
-                )}
-              />
-            ) : (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex items-center justify-center h-full p-4 text-sm text-muted-foreground"
-              >
-                Click to start a conversation
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {isLoading && (
+            <div className="flex justify-center items-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            </div>
+          )}
         </div>
 
-        <HeroInput
-          onSend={onSend}
-          onVoice={onVoice}
-          loading={loading}
-          className={cn(
-            !expanded && "pointer-events-none opacity-60",
-            "transition-opacity"
-          )}
-          disabled={!expanded}
-        />
+        <form onSubmit={handleSubmit} className="flex gap-2">
+          <input
+            type="text"
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Ask me anything..."
+            className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="submit"
+            disabled={isLoading || !message.trim()}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+          >
+            Send
+          </button>
+        </form>
       </div>
-    </motion.div>
-  )
+    </div>
+  );
 }
