@@ -81,7 +81,7 @@ export const GeminiCopilot: React.FC<GeminiCopilotProps> = ({ className }) => {
       {/* Step-based UI */}
       {step === 'intro' && (
         <div className="text-center p-4">
-          <h2 className="text-2xl font-bold mb-4">Welcome to Gemini Copilot</h2>
+          <h2 className="text-2xl font-bold mb-4">Welcome to Farzad-AI</h2>
           <p className="mb-4">Let's get started by getting to know you better.</p>
           <button
             onClick={() => setStep('chooseAction')}
