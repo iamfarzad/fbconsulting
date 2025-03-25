@@ -52,6 +52,9 @@ export function HeroChat({
     }
   }
 
+  // Ensure messages are always an array
+  const safeMessages = Array.isArray(messages) ? messages : []
+
   return (
     <motion.div
       ref={containerRef}
@@ -78,9 +81,9 @@ export function HeroChat({
           onClick={() => !expanded && onExpand?.()}
         >
           <AnimatePresence mode="wait">
-            {(expanded || messages.length > 0) ? (
+            {(expanded || safeMessages.length > 0) ? (
               <ChatMessages 
-                messages={messages}
+                messages={safeMessages}
                 className={cn(
                   "h-full",
                   !expanded && "max-h-[144px]"
