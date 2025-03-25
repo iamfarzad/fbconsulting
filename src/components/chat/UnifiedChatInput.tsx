@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { useChat } from '@/contexts/ChatContext';
@@ -198,7 +197,7 @@ export const UnifiedChatInput: React.FC<UnifiedChatInputProps> = ({
           setShowMediaUpload={setShowMediaUpload}
           onImageUpload={handleImageUpload}
           onFileUpload={handleFileUpload}
-          hasMessages={messages.filter(m => m.role !== 'system').length > 0}
+          hasMessages={Array.isArray(messages) && messages.filter(m => m.role !== 'system').length > 0}
           aiProcessing={aiProcessing}
         />
       </div>
@@ -206,6 +205,13 @@ export const UnifiedChatInput: React.FC<UnifiedChatInputProps> = ({
       {/* Error message */}
       {voiceError && (
         <p className="mt-2 text-xs text-destructive">{voiceError}</p>
+      )}
+      
+      {/* Fallback UI for invalid messages format */}
+      {!Array.isArray(messages) && (
+        <div className="text-center text-red-500">
+          Invalid messages format. Please try again.
+        </div>
       )}
     </div>
   );
