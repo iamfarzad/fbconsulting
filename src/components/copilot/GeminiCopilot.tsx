@@ -1,3 +1,10 @@
+import { 
+  GeminiAdapter,
+  GeminiConfig,
+  useGeminiMessageSubmission,
+  useGeminiInitialization,
+  useGeminiAudio,
+} from '@/features/gemini';
 import React, { useState, useEffect } from 'react';
 import { Box, Flex, Heading, Spinner, useToast } from '@chakra-ui/react';
 import ChatInput from './chat/ChatInput';
