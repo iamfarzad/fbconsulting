@@ -1,92 +1,84 @@
-import React, { useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2 } from 'lucide-react';
-import { useGeminiAPI } from '@/hooks/useGeminiAPI';
-import { formatErrorMessage } from '@/utils/errorHandling';
+"use client"
 
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
+import * as React from "react"
+import { useGeminiCopilot } from "./GeminiCopilotProvider"
+import { ChatMessages } from "@/components/chat/ChatMessages"
+import { ChatSuggestions } from "@/components/chat/ChatSuggestions"
+import { HeroChat } from "@/components/hero/HeroChat"
+import { cn } from "@/lib/utils"
+
+const suggestions = [
+  { id: 1, text: "Tell me about your services" },
+  { id: 2, text: "What technologies do you use?" },
+  { id: 3, text: "How can you help my business?" },
+  { id: 4, text: "What's your development process?" },
+]
+
+interface GeminiChatProps {
+  expanded?: boolean
+  onExpand?: () => void
+  className?: string
 }
 
-export const GeminiChat: React.FC = () => {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { sendMessage, error } = useGeminiAPI();
+export function GeminiChat({ expanded = false, onExpand, className }: GeminiChatProps) {
+  const {
+    messages,
+    sendMessage,
+    isLoading,
+    transcript,
+    isListening,
+    toggleListening,
+    generateAndPlayAudio,
+  } = useGeminiCopilot()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
+  const handleSuggestionClick = React.useCallback(
+    (text: string) => {
+      sendMessage(text)
+    },
+    [sendMessage]
+  )
 
-    const userMessage = input.trim();
-    setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
-    setIsLoading(true);
+  const handleVoiceInput = React.useCallback(() => {
+    toggleListening()
+  }, [toggleListening])
 
-    try {
-      const response = await sendMessage(userMessage);
-      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
-    } catch (err) {
-      const errorMessage = formatErrorMessage(err);
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: `Error: ${errorMessage}. Please try again.` 
-      }]);
-    } finally {
-      setIsLoading(false);
+  // Send transcript when voice input is received
+  React.useEffect(() => {
+    if (transcript && !isListening) {
+      sendMessage(transcript)
     }
-  };
+  }, [transcript, isListening, sendMessage])
+
+  // Generate and play audio for AI messages
+  React.useEffect(() => {
+    const lastMessage = messages[messages.length - 1]
+    if (lastMessage?.role === "assistant") {
+      generateAndPlayAudio(lastMessage.content)
+    }
+  }, [messages, generateAndPlayAudio])
 
   return (
-    <Card className="flex flex-col h-full">
-      <ScrollArea className="flex-1 p-4">
-        {messages.map((message, i) => (
-          <div
-            key={i}
-            className={`mb-4 ${
-              message.role === 'user' ? 'text-right' : 'text-left'
-            }`}
-          >
-            <div
-              className={`inline-block p-3 rounded-lg ${
-                message.role === 'user'
-                  ? 'bg-primary text-primary-foreground ml-12'
-                  : 'bg-muted mr-12'
-              }`}
-            >
-              {message.content}
-            </div>
-          </div>
-        ))}
-        {isLoading && (
-          <div className="flex items-center justify-center">
-            <Loader2 className="h-6 w-6 animate-spin" />
-          </div>
-        )}
-      </ScrollArea>
+    <div className={cn("relative w-full h-full", className)}>
+      <HeroChat
+        expanded={expanded}
+        onExpand={onExpand}
+        messages={messages.map((msg, index) => ({
+          id: index.toString(),
+          content: msg.content,
+          sender: msg.role === "user" ? "user" : "ai",
+        }))}
+        onSend={sendMessage}
+        onVoice={handleVoiceInput}
+        loading={isLoading || isListening}
+      />
 
-      <form onSubmit={handleSubmit} className="p-4 border-t">
-        <div className="flex gap-2">
-          <Input
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Type your message..."
-            disabled={isLoading}
-          />
-          <Button type="submit" disabled={isLoading || !input.trim()}>
-            Send
-          </Button>
-        </div>
-        {error && (
-          <p className="text-sm text-destructive mt-2">
-            Error: {formatErrorMessage(error)}
-          </p>
-        )}
-      </form>
-    </Card>
-  );
-};
+      {(!expanded || messages.length === 0) && (
+        <ChatSuggestions
+          suggestions={suggestions}
+          onSuggestionClick={handleSuggestionClick}
+          className="mt-4"
+        />
+      )}
+    </div>
+  )
+}
