@@ -40,6 +40,12 @@ export function HeroInput({ onSend, onVoice, className, loading, ...props }: Her
     }
   }
 
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const input = e.target.value
+    const safeInput = typeof input === "string" ? input : ""
+    setMessage(safeInput)
+  }
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -54,7 +60,7 @@ export function HeroInput({ onSend, onVoice, className, loading, ...props }: Her
           <textarea
             ref={textareaRef}
             value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            onChange={handleChange}
             onKeyDown={handleKeyDown}
             rows={1}
             placeholder="Type a message..."
