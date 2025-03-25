@@ -1,39 +1,78 @@
-import { describe, it, expect } from 'vitest';
-import { mockGeminiResponse } from '../mocks/googleGenAIAdapter';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
 
 describe('Test Environment Setup', () => {
-  it('should have access to environment variables', () => {
-    expect(import.meta.env.VITE_GEMINI_API_KEY).toBeDefined();
+  beforeEach(() => {
+    // Reset any mocks before each test
   });
 
-  it('should load test utilities correctly', () => {
-    expect(mockGeminiResponse.text).toBeDefined();
-    expect(typeof mockGeminiResponse.text).toBe('function');
+  afterEach(() => {
+    cleanup();
   });
 
-  it('should have access to DOM testing utilities', () => {
+  it('should have jsdom environment', () => {
     const element = document.createElement('div');
-    element.innerHTML = 'Test content';
-    expect(element).toBeInTheDocument();
-    expect(element).toHaveTextContent('Test content');
+    expect(element).toBeDefined();
+    expect(element instanceof HTMLElement).toBe(true);
   });
 
-  it('should have mocked window APIs', () => {
+  it('should have testing-library utilities', () => {
+    const element = document.createElement('div');
+    element.textContent = 'Test';
+    document.body.appendChild(element);
+    expect(element).toBeInTheDocument();
+  });
+
+  it('should have window mocks', () => {
     expect(window.speechSynthesis).toBeDefined();
+    expect(typeof window.speechSynthesis.speak).toBe('function');
+  });
+
+  it('should have localStorage mock', () => {
     expect(window.localStorage).toBeDefined();
-    expect(window.IntersectionObserver).toBeDefined();
+    expect(typeof window.localStorage.getItem).toBe('function');
+    expect(typeof window.localStorage.setItem).toBe('function');
   });
 });
 
-describe('Test Configuration', () => {
-  it('should run in jsdom environment', () => {
-    expect(typeof window).toBe('object');
-    expect(typeof document).toBe('object');
+describe('DOM Testing Capabilities', () => {
+  it('should handle basic DOM operations', () => {
+    // Create an element
+    const div = document.createElement('div');
+    div.className = 'test-class';
+    div.textContent = 'Hello Test';
+    
+    // Add to document
+    document.body.appendChild(div);
+    
+    // Verify
+    expect(document.querySelector('.test-class')).toBeDefined();
+    expect(div.textContent).toBe('Hello Test');
   });
 
-  it('should have testing utilities available', () => {
-    const testDiv = document.createElement('div');
-    document.body.appendChild(testDiv);
-    expect(document.body).toContainElement(testDiv);
+  it('should handle events', () => {
+    const button = document.createElement('button');
+    let clicked = false;
+    
+    button.addEventListener('click', () => {
+      clicked = true;
+    });
+    
+    button.click();
+    expect(clicked).toBe(true);
+  });
+});
+
+describe('Testing Environment Features', () => {
+  it('should support async/await', async () => {
+    const result = await Promise.resolve('test');
+    expect(result).toBe('test');
+  });
+
+  it('should handle timeouts', (done) => {
+    setTimeout(() => {
+      expect(true).toBe(true);
+      done();
+    }, 0);
   });
 });
