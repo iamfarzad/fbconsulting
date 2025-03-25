@@ -3,6 +3,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "devCommand": "npm run dev",
+  "installCommand": "npm install",
   "framework": "vite",
   "functions": {
     "api/**/*": {
@@ -12,7 +13,6 @@
   },
   "headers": [
     {
-<<<<<<< HEAD
       "source": "/api/(.*)",
       "headers": [
         { "key": "Access-Control-Allow-Credentials", "value": "true" },
@@ -24,27 +24,14 @@
   ],
   "regions": ["fra1"],
   "public": true,
+  "environment": {
+    "VITE_GEMINI_API_KEY": "@gemini-api-key",
+    "NODE_ENV": "production"
+  },
   "rewrites": [
     { "source": "/api/gemini", "destination": "/api/gemini/route" },
     { "source": "/api/gemini/stream", "destination": "/api/gemini/stream" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
-=======
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
->>>>>>> origin/vercel-native-migration
   ]
 }
