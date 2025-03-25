@@ -1,10 +1,10 @@
-import { Message as BaseCopilotMessage } from '@copilotkit/react-core';
-
-export interface CopilotMessage extends BaseCopilotMessage {
-  text: string;
+export interface ChatMessage {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  id?: string | number;
 }
 
-export interface CopilotMessageWithRole {
-  role: 'user' | 'assistant' | 'system';
-  text: string;
+// Helper function to get message text content
+export function getMessageText(message: ChatMessage): string {
+  return message.content;
 }
