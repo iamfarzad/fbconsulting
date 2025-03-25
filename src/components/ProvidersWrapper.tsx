@@ -1,4 +1,3 @@
-
 import React from "react";
 import { HelmetProvider } from "react-helmet-async";
 import ErrorBoundaryWrapper from "./ErrorBoundaryWrapper";
@@ -19,23 +18,25 @@ const ProvidersWrapper: React.FC<ProvidersWrapperProps> = ({ children }) => {
   return (
     <ErrorBoundaryWrapper>
       <HelmetProvider>
-        <ThemeProvider>
-          <ErrorBoundaryWrapper>
-            <LanguageProvider>
-              <ErrorBoundaryWrapper>
-                <CopilotProvider>
-                  <ErrorBoundaryWrapper>
-                    <GeminiAPIProvider>
-                      <ErrorBoundaryWrapper>
-                        {children}
-                      </ErrorBoundaryWrapper>
-                    </GeminiAPIProvider>
-                  </ErrorBoundaryWrapper>
-                </CopilotProvider>
-              </ErrorBoundaryWrapper>
-            </LanguageProvider>
-          </ErrorBoundaryWrapper>
-        </ThemeProvider>
+        <ErrorBoundaryWrapper>
+          <ThemeProvider>
+            <ErrorBoundaryWrapper>
+              <LanguageProvider>
+                <ErrorBoundaryWrapper>
+                  <CopilotProvider>
+                    <ErrorBoundaryWrapper>
+                      <GeminiAPIProvider>
+                        <ErrorBoundaryWrapper>
+                          {children}
+                        </ErrorBoundaryWrapper>
+                      </GeminiAPIProvider>
+                    </ErrorBoundaryWrapper>
+                  </CopilotProvider>
+                </ErrorBoundaryWrapper>
+              </LanguageProvider>
+            </ErrorBoundaryWrapper>
+          </ThemeProvider>
+        </ErrorBoundaryWrapper>
       </HelmetProvider>
     </ErrorBoundaryWrapper>
   );

@@ -5,6 +5,7 @@ import { GeminiState, GeminiAction, GeminiUserInfo, ChatStep, ProposalData } fro
 import { useCopilotReadable } from '@copilot-kit/react-core';
 import { useGeminiAudio } from '@/hooks/useGeminiAudio';
 import { toast } from '@/components/ui/toast';
+import ErrorBoundaryWrapper from '../ErrorBoundaryWrapper';
 
 // GeminiConnectionManager.tsx
 const GeminiConnectionManagerContext = createContext(null);
@@ -29,9 +30,11 @@ const GeminiConnectionManager = ({ children }) => {
   };
 
   return (
-    <GeminiConnectionManagerContext.Provider value={contextValue}>
-      {children}
-    </GeminiConnectionManagerContext.Provider>
+    <ErrorBoundaryWrapper>
+      <GeminiConnectionManagerContext.Provider value={contextValue}>
+        {children}
+      </GeminiConnectionManagerContext.Provider>
+    </ErrorBoundaryWrapper>
   );
 };
 
@@ -148,9 +151,11 @@ const GeminiChatProvider = ({ children }) => {
   };
 
   return (
-    <GeminiChatContext.Provider value={contextValue}>
-      {children}
-    </GeminiChatContext.Provider>
+    <ErrorBoundaryWrapper>
+      <GeminiChatContext.Provider value={contextValue}>
+        {children}
+      </GeminiChatContext.Provider>
+    </ErrorBoundaryWrapper>
   );
 };
 
@@ -164,9 +169,13 @@ export const useGeminiChat = () => {
 
 // GeminiCopilotProvider.tsx
 export const GeminiCopilotProvider = ({ children }) => (
-  <GeminiConnectionManager>
-    <GeminiChatProvider>
-      {children}
-    </GeminiChatProvider>
-  </GeminiConnectionManager>
+  <ErrorBoundaryWrapper>
+    <GeminiConnectionManager>
+      <ErrorBoundaryWrapper>
+        <GeminiChatProvider>
+          {children}
+        </GeminiChatProvider>
+      </ErrorBoundaryWrapper>
+    </GeminiConnectionManager>
+  </ErrorBoundaryWrapper>
 );

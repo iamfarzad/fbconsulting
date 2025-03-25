@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { ProposalPreview } from './ProposalPreview';
 import { sendProposal } from '@/services/proposal/sendProposal';
 import ChooseAction from '@/components/cta/ChooseAction';
+import ErrorBoundaryWrapper from '../ErrorBoundaryWrapper';
 
 interface GeminiCopilotProps {
   className?: string;
@@ -63,129 +64,133 @@ export const GeminiCopilot: React.FC<GeminiCopilotProps> = ({ className }) => {
   };
 
   return (
-    <div className={cn("flex flex-col gap-4 p-4 relative", className)}>
-      {/* Loading Overlay */}
-      {isLoading && (
-        <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      )}
+    <ErrorBoundaryWrapper>
+      <div className={cn("flex flex-col gap-4 p-4 relative", className)}>
+        {/* Loading Overlay */}
+        {isLoading && (
+          <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        )}
 
-      {/* Chat Error */}
-      {chatError && (
-        <div className="bg-destructive/10 text-destructive p-4 rounded-lg">
-          {chatError}
-        </div>
-      )}
+        {/* Chat Error */}
+        {chatError && (
+          <div className="bg-destructive/10 text-destructive p-4 rounded-lg">
+            {chatError}
+          </div>
+        )}
 
-      {/* Step-based UI */}
-      {step === 'intro' && (
-        <div className="text-center p-4">
-          <h2 className="text-2xl font-bold mb-4">Welcome to Gemini Copilot</h2>
-          <p className="mb-4">Let's get started by getting to know you better.</p>
-          <button
-            onClick={() => setStep('chooseAction')}
-            className="bg-primary text-primary-foreground px-4 py-2 rounded"
-          >
-            Get Started
-          </button>
-        </div>
-      )}
-
-      {step === 'chooseAction' && <ChooseAction />}
-
-      {step === 'form' && (
-        <div className="space-y-4 p-4">
-          <h3 className="text-xl font-semibold">Your Information</h3>
-          <div className="space-y-2">
-            <input
-              type="text"
-              placeholder="Name"
-              className="w-full p-2 border rounded"
-              onChange={(e) => setUserInfo({ ...userInfo || { email: '' }, name: e.target.value })}
-              value={userInfo?.name || ''}
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              className="w-full p-2 border rounded"
-              onChange={(e) => setUserInfo({ ...userInfo || { name: '' }, email: e.target.value })}
-              value={userInfo?.email || ''}
-            />
+        {/* Step-based UI */}
+        {step === 'intro' && (
+          <div className="text-center p-4">
+            <h2 className="text-2xl font-bold mb-4">Welcome to Gemini Copilot</h2>
+            <p className="mb-4">Let's get started by getting to know you better.</p>
             <button
-              onClick={() => {
-                if (userInfo?.name && userInfo?.email) {
-                  setStep('chat');
-                }
-              }}
+              onClick={() => setStep('chooseAction')}
               className="bg-primary text-primary-foreground px-4 py-2 rounded"
-              disabled={!userInfo?.name || !userInfo?.email}
             >
-              Continue
+              Get Started
             </button>
           </div>
-        </div>
-      )}
+        )}
 
-      {step === 'chat' && (
-        <>
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto space-y-4">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={cn(
-                  "p-4 rounded-lg max-w-[80%]",
-                  message.role === "user" 
-                    ? "bg-primary text-primary-foreground ml-auto" 
-                    : "bg-muted"
-                )}
+        {step === 'chooseAction' && <ChooseAction />}
+
+        {step === 'form' && (
+          <div className="space-y-4 p-4">
+            <h3 className="text-xl font-semibold">Your Information</h3>
+            <div className="space-y-2">
+              <input
+                type="text"
+                placeholder="Name"
+                className="w-full p-2 border rounded"
+                onChange={(e) => setUserInfo({ ...userInfo || { email: '' }, name: e.target.value })}
+                value={userInfo?.name || ''}
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                className="w-full p-2 border rounded"
+                onChange={(e) => setUserInfo({ ...userInfo || { name: '' }, email: e.target.value })}
+                value={userInfo?.email || ''}
+              />
+              <button
+                onClick={() => {
+                  if (userInfo?.name && userInfo?.email) {
+                    setStep('chat');
+                  }
+                }}
+                className="bg-primary text-primary-foreground px-4 py-2 rounded"
+                disabled={!userInfo?.name || !userInfo?.email}
               >
-                {message.content}
-              </div>
-            ))}
+                Continue
+              </button>
+            </div>
           </div>
+        )}
 
-          {/* Voice Controls */}
-          <div className="flex items-center gap-4">
-            {transcript && (
-              <div className="flex-1 p-2 bg-muted rounded">
-                {transcript}
+        {step === 'chat' && (
+          <>
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto space-y-4">
+              {messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    "p-4 rounded-lg max-w-[80%]",
+                    message.role === "user" 
+                      ? "bg-primary text-primary-foreground ml-auto" 
+                      : "bg-muted"
+                  )}
+                >
+                  {message.content}
+                </div>
+              ))}
+            </div>
+
+            {/* Voice Controls */}
+            <div className="flex items-center gap-4">
+              {transcript && (
+                <div className="flex-1 p-2 bg-muted rounded">
+                  {transcript}
+                </div>
+              )}
+              <UnifiedVoiceUI
+                isListening={isListening}
+                toggleListening={toggleListening}
+                isPlaying={isPlaying}
+                progress={progress}
+                stopAudio={stopAudio}
+                onVoiceInput={sendMessage}
+                onGenerateAudio={async (text) => {
+                  await generateAndPlayAudio(text);
+                  // Return a dummy Blob since we handle audio playback internally
+                  return new Blob([''], { type: 'audio/mpeg' });
+                }}
+              />
+            </div>
+
+            {/* Error Display */}
+            {voiceError && (
+              <div className="text-sm text-red-500">
+                {voiceError}
               </div>
             )}
-            <UnifiedVoiceUI
-              isListening={isListening}
-              toggleListening={toggleListening}
-              isPlaying={isPlaying}
-              progress={progress}
-              stopAudio={stopAudio}
-              onVoiceInput={sendMessage}
-              onGenerateAudio={async (text) => {
-                await generateAndPlayAudio(text);
-                // Return a dummy Blob since we handle audio playback internally
-                return new Blob([''], { type: 'audio/mpeg' });
-              }}
+          </>
+        )}
+
+        {step === 'proposal' && proposal && (
+          <ErrorBoundaryWrapper>
+            <ProposalPreview
+              userInfo={userInfo!}
+              messages={messages}
+              onSend={handleSendProposal}
+              onStartOver={handleStartOver}
             />
-          </div>
-
-          {/* Error Display */}
-          {voiceError && (
-            <div className="text-sm text-red-500">
-              {voiceError}
-            </div>
-          )}
-        </>
-      )}
-
-      {step === 'proposal' && proposal && (
-        <ProposalPreview
-          userInfo={userInfo!}
-          messages={messages}
-          onSend={handleSendProposal}
-          onStartOver={handleStartOver}
-        />
-      )}
-    </div>
+          </ErrorBoundaryWrapper>
+        )}
+      </div>
+    </ErrorBoundaryWrapper>
   );
 };
 
