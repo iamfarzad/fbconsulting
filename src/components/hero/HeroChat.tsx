@@ -1,3 +1,10 @@
+import { 
+  GeminiAdapter,
+  GeminiConfig,
+  useGeminiMessageSubmission,
+  useGeminiInitialization,
+  useGeminiAudio,
+} from '@/features/gemini';
 "use client"
 
 import * as React from "react"

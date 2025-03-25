@@ -1,3 +1,10 @@
+import { 
+  GeminiAdapter,
+  GeminiConfig,
+  useGeminiMessageSubmission,
+  useGeminiInitialization,
+  useGeminiAudio,
+} from '@/features/gemini';
 import React from 'react';
 import { useChat, ChatProvider } from '@/contexts/ChatContext';
 import { ChatHeader } from './core/ChatHeader';

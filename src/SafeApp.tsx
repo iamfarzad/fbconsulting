@@ -5,7 +5,7 @@ import ThemeProvider from "./components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import ChatButtonWrapper from "./components/ChatButtonWrapper";
 import { LanguageProvider } from "./contexts/LanguageContext";
-import { CopilotProvider } from "@/components/copilot/providers/CopilotProvider";
+import { CopilotProvider } from "@/features/gemini/config/CopilotProvider";
 
 // Lazy load components to reduce initial load time
 const Index = lazy(() => import("./pages/Index"));
