@@ -85,5 +85,7 @@ def handler(request):
         
         return response
         
+    except json.JSONDecodeError as e:
+        return {"error": f"Invalid JSON: {str(e)}", "status": HTTPStatus.BAD_REQUEST}
     except Exception as e:
         return {"error": f"Error processing request: {str(e)}", "status": HTTPStatus.INTERNAL_SERVER_ERROR}
