@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -78,6 +77,12 @@ export const UnifiedFullScreenChat: React.FC<UnifiedFullScreenChatProps> = ({
               subtitle={subtitle}
               className="h-full border-0 rounded-none shadow-none"
             />
+            {/* Fallback UI for invalid messages format */}
+            {!Array.isArray(messages) && (
+              <div className="text-center text-red-500">
+                Invalid messages format. Please try again.
+              </div>
+            )}
           </ChatProvider>
         </div>
       </motion.div>

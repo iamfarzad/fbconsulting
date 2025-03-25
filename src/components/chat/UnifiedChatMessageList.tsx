@@ -1,112 +1,50 @@
 import React, { useEffect, useRef } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Bot } from 'lucide-react';
-import { useChat } from '@/contexts/ChatContext';
-import { ChatMessage } from './core/ChatMessage';
-import { TypingIndicator } from './core/TypingIndicator';
+import { Box, Text } from '@chakra-ui/react';
+import { ChatMessage } from '../../types/chat';
+import MessageItem from './MessageItem';
 
 interface UnifiedChatMessageListProps {
-  showEmptyState?: boolean;
-  emptyStateTitle?: string;
-  emptyStateDescription?: string;
-  className?: string;
+  messages: ChatMessage[];
+  isLoading?: boolean;
 }
 
-export const UnifiedChatMessageList: React.FC<UnifiedChatMessageListProps> = ({
-  showEmptyState = true,
-  emptyStateTitle = 'How can I help you today?',
-  emptyStateDescription = 'Ask me anything about AI automation, workflow optimization, or customized solutions for your business.',
-  className
+const UnifiedChatMessageList: React.FC<UnifiedChatMessageListProps> = ({ 
+  messages, 
+  isLoading = false 
 }) => {
-  const { state } = useChat();
-  const { messages, isLoading, showMessages } = state;
-  
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  // Scroll to bottom when new messages arrive or when loading state changes
+
   useEffect(() => {
+    // Scroll to bottom when messages change
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, isLoading]);
-  
-  // Don't render anything if there are no messages and showMessages is false
-  if (!showMessages && messages.length === 0) {
-    return null;
-  }
+  }, [messages]);
 
-  // Check if messages is an array
-  if (!Array.isArray(messages)) {
-    console.log("💥 Chat messages:", messages);
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="p-4 bg-destructive/10 text-destructive rounded-lg">
-          <p className="font-medium">Error: Invalid chat history format</p>
-        </div>
-      </div>
-    );
-  }
-  
+  // Safely handle messages array that might be undefined or null
+  const safeMessages = Array.isArray(messages) ? messages : [];
+
   return (
-    <div 
-      ref={containerRef}
-      className={cn(
-        "border border-border rounded-lg overflow-y-auto",
-        className
-      )}
-      style={{
-        minHeight: '120px',
-        maxHeight: '400px',
-        scrollBehavior: 'smooth'
-      }}
+    <Box 
+      overflowY="auto" 
+      maxHeight="60vh" 
+      height="100%" 
+      p={2}
     >
-      <AnimatePresence>
-        {messages.length === 0 && showEmptyState ? (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-center justify-center h-full text-center py-10"
-          >
-            <Bot size={40} className="mb-4" />
-            <h3 className="text-lg font-medium mb-2">
-              {emptyStateTitle}
-            </h3>
-            <p className="text-muted-foreground max-w-lg">
-              {emptyStateDescription}
-            </p>
-          </motion.div>
-        ) : (
-          <div className="flex flex-col space-y-4 p-4">
-            {messages.filter(msg => msg.role !== 'system').map((msg, index) => (
-              <ChatMessage 
-                key={index} 
-                message={msg} 
-                isLastMessage={index === messages.length - 1}
-              />
-            ))}
-            
-            <AnimatePresence>
-              {isLoading && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <TypingIndicator />
-                </motion.div>
-              )}
-            </AnimatePresence>
-            
-            <div ref={messagesEndRef} />
-          </div>
-        )}
-      </AnimatePresence>
-    </div>
+      {safeMessages.map((message, index) => (
+        <MessageItem 
+          key={index}
+          message={message} 
+        />
+      ))}
+      {isLoading && (
+        <Text fontStyle="italic" color="gray.500">
+          Thinking...
+        </Text>
+      )}
+      <div ref={messagesEndRef} />
+    </Box>
   );
 };
 
-// Helper function to conditionally join class names
-const cn = (...classes: (string | undefined)[]) => {
-  return classes.filter(Boolean).join(' ');
-};
+export default UnifiedChatMessageList;
