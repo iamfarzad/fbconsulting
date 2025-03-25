@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useChat, ChatProvider } from '@/contexts/ChatContext';
 import { ChatHeader } from './core/ChatHeader';
@@ -76,6 +75,12 @@ const UnifiedChatContent: React.FC<UnifiedChatContentProps> = ({
         {/* Only show messages if we have some or if showMessages is true */}
         {(showMessages || hasMessages) && (
           <UnifiedChatMessageList />
+        )}
+        {/* Fallback UI for invalid messages format */}
+        {!Array.isArray(messages) && (
+          <div className="text-center text-red-500">
+            Invalid messages format. Please try again.
+          </div>
         )}
       </div>
       
