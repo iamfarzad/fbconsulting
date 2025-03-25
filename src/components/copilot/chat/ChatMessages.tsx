@@ -41,7 +41,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
         <div className="flex flex-col items-center">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-2" />
           <p className="text-muted-foreground text-center">
-            Connecting to AI Assistant...
+            Connecting to Farzad-AI...
           </p>
         </div>
       </div>
