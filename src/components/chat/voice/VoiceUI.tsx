@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 import { AnimatedBars } from '@/components/ui/AnimatedBars';
@@ -82,6 +81,13 @@ export const VoiceUI: React.FC<VoiceUIProps> = ({
       {recognitionError && (
         <div className="error-message text-xs text-red-500">
           {recognitionError}
+        </div>
+      )}
+
+      {/* Fallback UI for invalid messages format */}
+      {!Array.isArray(transcript) && (
+        <div className="text-center text-red-500">
+          Invalid messages format. Please try again.
         </div>
       )}
     </div>
