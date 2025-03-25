@@ -1,12 +1,21 @@
 # Gemini Feature - Phase 2 Plan
 
 ## 1. Testing Infrastructure ✅
-- [x] Set up Jest/Vitest configuration for the feature
-- [x] Add test utilities and mocks
+- [x] Set up Vitest configuration with jsdom environment
+- [x] Add test utilities and mock implementations
 - [x] Create test fixtures for common scenarios
 - [x] Configure test runner and scripts
+- [x] Set up CI/CD with GitHub Actions
+- [x] Configure coverage reporting
 
-## 2. Test Coverage (In Progress)
+## 2. Test Development Tools ✅
+- [x] Create test utilities
+- [x] Add mock implementations
+- [x] Create TestProvider component
+- [x] Add HOC utilities
+- [x] Add testing hooks
+
+## 3. Test Coverage (In Progress)
 - [x] Unit tests for core services
   - [x] GeminiAdapter
   - [x] Initialization service
@@ -15,48 +24,62 @@
   - [x] useGeminiMessageSubmission
   - [x] useGeminiInitialization
   - [ ] useGeminiAudio
+- [ ] Component tests
+  - [ ] HeroChat
+  - [ ] UnifiedChatMessageList
+  - [ ] ChatDisplay
 - [ ] Integration tests
   - [x] End-to-end chat flow
   - [ ] Error handling scenarios
   - [ ] Audio processing
 
-## 3. Documentation (Next)
+## 4. Documentation (Next)
 - [ ] Add JSDoc comments to all exports
 - [ ] Create Storybook stories
   - [ ] Basic usage examples
   - [ ] Advanced scenarios
   - [ ] Error states
-- [ ] Update main README
+- [ ] Update README
 - [ ] Add architecture diagrams
 
-## 4. Component Updates (Pending)
+## 5. Component Updates (Pending)
 - [ ] Identify remaining components using old imports
 - [ ] Create migration schedule
 - [ ] Update components systematically
 - [ ] Add tests for each migrated component
 
-## 5. Cleanup (Pending)
-- [ ] Remove deprecated code paths
-- [ ] Clean up unused imports
-- [ ] Archive old implementations
-- [ ] Update dependency graph
+## Next Immediate Tasks
+1. Add component tests using TestProvider
+2. Complete remaining hook tests
+3. Add integration tests for error scenarios
+4. Start JSDoc documentation
 
-## Success Criteria
-1. 80%+ test coverage
-2. All components using new feature module
-3. Complete documentation
-4. No deprecated code paths
-5. Passing CI/CD pipeline
+## Progress Summary
+✅ Testing Infrastructure
+- GitHub Actions workflow configured
+- Coverage reporting set up
+- Test utilities and mocks created
+- TestProvider component added
+
+🏗 In Progress
+- Component testing setup
+- Integration test scenarios
+- Documentation structure
+
+⏳ Pending
+- Remaining hook tests
+- Component migration
+- Documentation completion
 
 ## Timeline
-- Week 1: Testing infrastructure and core tests ✅
-- Week 2: Component migration and testing
-- Week 3: Documentation and cleanup
-- Week 4: Review and refinement
+- Week 1: ✅ Testing infrastructure & utilities
+- Week 2: 🔄 Component tests & integration (Current)
+- Week 3: Documentation & migration
+- Week 4: Review & refinement
 
-## Current Progress
-- Testing infrastructure setup complete
-- Core service and hook tests implemented
-- Integration tests partially complete
-- Package.json updated with test scripts
-- CI/CD setup pending
+## Notes
+- All new components should use TestProvider for testing
+- Maintain 80%+ coverage requirement
+- Document test patterns as they emerge
+- Keep test utils up to date
+
