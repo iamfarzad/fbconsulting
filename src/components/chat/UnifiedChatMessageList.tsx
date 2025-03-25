@@ -24,6 +24,20 @@ const UnifiedChatMessageList: React.FC<UnifiedChatMessageListProps> = ({
   // Safely handle messages array that might be undefined or null
   const safeMessages = Array.isArray(messages) ? messages : [];
 
+<<<<<<< HEAD
+=======
+  // Check if messages is an array
+  if (!Array.isArray(messages)) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-muted-foreground text-center">
+          Invalid messages format. Please try again.
+        </p>
+      </div>
+    );
+  }
+  
+>>>>>>> origin/fix-map-bug
   return (
     <Box 
       overflowY="auto" 

@@ -96,6 +96,7 @@ const GeminiCopilot: React.FC = () => {
             height="100%"
             color="gray.500"
           >
+<<<<<<< HEAD
             <Box mb={4}>Start a conversation with Gemini</Box>
           </Flex>
         ) : (
@@ -106,6 +107,113 @@ const GeminiCopilot: React.FC = () => {
       
       <ChatInput onSendMessage={handleSendMessage} disabled={isLoading || !connected} />
     </Box>
+=======
+            Get Started
+          </button>
+        </div>
+      )}
+
+      {step === 'chooseAction' && <ChooseAction />}
+
+      {step === 'form' && (
+        <div className="space-y-4 p-4">
+          <h3 className="text-xl font-semibold">Your Information</h3>
+          <div className="space-y-2">
+            <input
+              type="text"
+              placeholder="Name"
+              className="w-full p-2 border rounded"
+              onChange={(e) => setUserInfo({ ...userInfo || { email: '' }, name: e.target.value })}
+              value={userInfo?.name || ''}
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              className="w-full p-2 border rounded"
+              onChange={(e) => setUserInfo({ ...userInfo || { name: '' }, email: e.target.value })}
+              value={userInfo?.email || ''}
+            />
+            <button
+              onClick={() => {
+                if (userInfo?.name && userInfo?.email) {
+                  setStep('chat');
+                }
+              }}
+              className="bg-primary text-primary-foreground px-4 py-2 rounded"
+              disabled={!userInfo?.name || !userInfo?.email}
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      )}
+
+      {step === 'chat' && (
+        <>
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto space-y-4">
+            {Array.isArray(messages) ? (
+              messages.map((message, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    "p-4 rounded-lg max-w-[80%]",
+                    message.role === "user" 
+                      ? "bg-primary text-primary-foreground ml-auto" 
+                      : "bg-muted"
+                  )}
+                >
+                  {message.content}
+                </div>
+              ))
+            ) : (
+              <div className="text-center text-red-500">
+                Invalid messages format. Please try again.
+              </div>
+            )}
+          </div>
+
+          {/* Voice Controls */}
+          <div className="flex items-center gap-4">
+            {transcript && (
+              <div className="flex-1 p-2 bg-muted rounded">
+                {transcript}
+              </div>
+            )}
+            <UnifiedVoiceUI
+              isListening={isListening}
+              toggleListening={toggleListening}
+              isPlaying={isPlaying}
+              progress={progress}
+              stopAudio={stopAudio}
+              onVoiceInput={sendMessage}
+              onGenerateAudio={async (text) => {
+                await generateAndPlayAudio(text);
+                // Return a dummy Blob since we handle audio playback internally
+                return new Blob([''], { type: 'audio/mpeg' });
+              }}
+            />
+          </div>
+
+          {/* Error Display */}
+          {voiceError && (
+            <div className="text-sm text-red-500">
+              {voiceError}
+            </div>
+          )}
+        </>
+      )}
+
+      {step === 'proposal' && proposal && (
+        <ProposalPreview
+          userInfo={userInfo!}
+          messages={messages}
+          onSend={handleSendProposal}
+          onStartOver={handleStartOver}
+        />
+      )}
+    </div>
+>>>>>>> origin/fix-map-bug
   );
 };
 
