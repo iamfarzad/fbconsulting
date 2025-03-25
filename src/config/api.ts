@@ -5,7 +5,7 @@ const isVercel = import.meta.env.VITE_DEPLOYMENT_ENV === 'vercel';
 // API Paths
 export const API_PATHS = {
   GOOGLE_GENERATIVE_AI: 'https://generativelanguage.googleapis.com/v1beta',
-  WEBSOCKET_BASE: isProd ? (isVercel ? '/api/gemini/stream' : '/api/gemini/stream') : 'ws://localhost:8000/ws',
+  WEBSOCKET_BASE: isProd ? (isVercel ? 'wss://fbconsulting-24cken69i-iamfarzads-projects.vercel.app/api/gemini/stream' : 'wss://fbconsulting.vercel.app/api/gemini/stream') : 'ws://localhost:8000/ws',
   GEMINI_AUDIO: '/api/gemini/audio',
   GEMINI_STREAM: '/api/gemini/stream',
   GEMINI_MAIN: '/api/gemini/main', // Updated path to avoid conflicts

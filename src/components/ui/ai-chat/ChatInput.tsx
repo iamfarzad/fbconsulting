@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -133,7 +132,7 @@ export function ChatInput({
               "text-black/90 text-sm",
               "focus:outline-none",
               "focus-visible:ring-0 focus-visible:ring-offset-0",
-              "placeholder:text-black/50 placeholder:text-sm",
+              "placeholder:text-gray-600 placeholder:text-sm",
               "min-h-[60px] rounded-2xl"
             )}
             style={{ overflow: "hidden" }}
