@@ -1,3 +1,10 @@
+import { 
+  GeminiAdapter,
+  GeminiConfig,
+  useGeminiMessageSubmission,
+  useGeminiInitialization,
+  useGeminiAudio,
+} from '@/features/gemini';
 import { useState } from 'react';
 
 export const useGeminiAPI = () => {
