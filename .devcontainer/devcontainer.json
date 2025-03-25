@@ -51,6 +51,6 @@
     }
   },
   "mounts": [
-    "source=${localWorkspaceFolder}-node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume,consistency=cached"
+    "source=fbconsulting_node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume"
   ]
 }
