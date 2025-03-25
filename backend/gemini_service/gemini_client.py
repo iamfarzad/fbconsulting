@@ -154,3 +154,37 @@ class GeminiClient:
                 logger.info("Live session closed")
             except Exception as e:
                 logger.error(f"Error closing session: {e}")
+
+    async def stream_chat(self, messages: list) -> AsyncIterable[str]:
+        """Stream chat responses from Gemini"""
+        try:
+            for message in messages:
+                async for response in self.send_message(message["content"], message["role"]):
+                    if response["type"] == "text":
+                        yield response["content"]
+        except Exception as e:
+            logger.error(f"Error streaming chat: {str(e)}")
+            yield f"Error: {str(e)}"
+
+    async def generate_audio(self, text: str, voice_config: Optional[Dict[str, Any]] = None) -> bytes:
+        """Generate audio from text using Gemini"""
+        try:
+            if voice_config:
+                await self.update_voice_settings(**voice_config)
+            async for response in self.send_message(text, enable_tts=True):
+                if response["type"] == "audio_chunk":
+                    return response["content"]
+        except Exception as e:
+            logger.error(f"Error generating audio: {str(e)}")
+            raise RuntimeError(f"Error generating audio: {str(e)}")
+
+    def health_check(self) -> Dict[str, Any]:
+        """Perform a health check on the Gemini client"""
+        try:
+            if self.session:
+                return {"status": "healthy"}
+            else:
+                return {"status": "unhealthy", "message": "Session not initialized"}
+        except Exception as e:
+            logger.error(f"Health check failed: {str(e)}")
+            return {"status": "unhealthy", "message": str(e)}
