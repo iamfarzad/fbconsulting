@@ -219,3 +219,27 @@ Regularly managing your branches ensures a streamlined and organized repository.
     "message": "Proposal sent successfully"
   }
   ```
+
+## Secure Key Management
+
+To ensure secure key management, follow these steps:
+
+1. **Environment Variables**: Store sensitive keys and credentials in environment variables. This prevents them from being hardcoded in the source code.
+2. **Secret Managers**: Use secret management tools like Google Secret Manager or Vercel Environment Variables to securely store and access keys.
+3. **Configuration**: Update your configuration files to use environment variables for sensitive information.
+
+Example of using environment variables in a configuration file:
+
+```javascript
+const apiKey = process.env.GOOGLE_API_KEY;
+const firebaseConfig = {
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+};
+```
+
+By following these practices, you can enhance the security of your application and protect sensitive information from being exposed.
