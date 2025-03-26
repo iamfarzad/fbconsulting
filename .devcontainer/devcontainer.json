@@ -66,12 +66,12 @@
   },
   "hostRequirements": {
     "cpus": 4,
-    "memory": "8gb",
-    "storage": "32gb"
+    "memory": "3.5gb"
+    // Storage requirement removed to prevent potential issues
   },
   "runArgs": [
-    "--memory=8g",
-    "--memory-swap=10g",
+    "--memory=3.5g",
+    "--memory-swap=4g",
     "--cpus=4",
     "--security-opt=seccomp=unconfined"
   ],
