@@ -1,5 +1,14 @@
 {
     "recommendations": [
-        "github.copilot"
+        "github.copilot",
+        "openai.openai-chatgpt-adhoc",
+        "saoudrizwan.claude-dev",
+        "automatalabs.copilot-mcp",
+        "omlet.omlet-vscode-extension",
+        "fabiospampinato.vscode-open-in-github",
+        "christian-kohler.npm-intellisense",
+        "github.copilot-workspace",
+        "ms-vscode.vscode-node-azure-pack",
+        "ritwickdey.liveserver"
     ]
 }

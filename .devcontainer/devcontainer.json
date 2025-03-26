@@ -34,7 +34,8 @@
         "github.vscode-pull-request-github",
         "eamodio.gitlens",
         "github.copilot",
-        "github.copilot-chat"
+        "github.copilot-chat",
+        "Omlet.omlet-vscode-extension"
       ]
     }
   },
@@ -54,7 +55,7 @@
       "installOhMyZsh": true
     }
   },
-  "postCreateCommand": "echo 'Setting up environment...' && npm install && python3 -m pip install --upgrade pip && pip install -r requirements.txt",
+  "postCreateCommand": "echo 'Setting up environment...' && python3 -m pip install --upgrade pip && pip install -r requirements.txt && npm install || echo 'Setup completed with some warnings'",
   "postStartCommand": "git config --global core.editor 'code --wait'",
   "remoteUser": "node",
   "containerEnv": {
