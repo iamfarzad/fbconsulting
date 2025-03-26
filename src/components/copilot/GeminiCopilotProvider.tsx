@@ -10,8 +10,8 @@ import { useVoice } from '@/hooks/useVoice';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { GeminiState, GeminiAction, GeminiUserInfo, ChatStep, ProposalData } from '@/types';
 import { useCopilotReadable } from '@copilot-kit/react-core';
-import { useGeminiAudio } from '@/hooks/useGeminiAudio';
 import { toast } from '@/components/ui/toast';
+import ErrorBoundaryWrapper from '../ErrorBoundaryWrapper';
 
 interface GeminiCopilotContextType {
   isListening: boolean;
@@ -246,7 +246,9 @@ export const GeminiCopilotProvider: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <GeminiCopilotContext.Provider value={contextValue}>
-      {children}
+      <ErrorBoundaryWrapper>
+        {children}
+      </ErrorBoundaryWrapper>
     </GeminiCopilotContext.Provider>
   );
 };

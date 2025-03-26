@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -8,6 +7,7 @@ import { ChatInput } from '../ui/ai-chat/ChatInput';
 import { ChatMessageList } from '../ui/ai-chat/ChatMessageList';
 import { AIMessage } from '@/services/copilotService';
 import { UploadedFile } from '@/hooks/useFileUpload';
+import { useFullScreenChatState } from '@/hooks/chat/useFullScreenChatState';
 
 interface FullScreenChatProps {
   onMinimize: () => void;
@@ -42,7 +42,7 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
   removeFile,
   isUploading = false
 }) => {
-  const hasMessages = initialMessages.length > 0;
+  const { messages, addMessage, clearMessages } = useFullScreenChatState(initialMessages);
 
   // Prevent body scrolling when fullscreen chat is open
   useEffect(() => {
@@ -90,10 +90,10 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
             </div>
             
             <div className="flex-1 p-6 flex flex-col relative overflow-hidden">
-              {hasMessages ? (
+              {messages.length > 0 ? (
                 <div className="flex-1 mb-6 relative overflow-auto">
                   <ChatMessageList 
-                    messages={initialMessages} 
+                    messages={messages} 
                     showMessages={true} 
                     isFullScreen={true} 
                   />
@@ -118,7 +118,7 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
                   onClear={onClear}
                   isLoading={isLoading}
                   showMessages={true}
-                  hasMessages={hasMessages}
+                  hasMessages={messages.length > 0}
                   suggestedResponse={suggestedResponse}
                   placeholder={placeholderText}
                   files={files}
