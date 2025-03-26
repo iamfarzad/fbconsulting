@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { X, Maximize2, Minimize2, Trash2 } from 'lucide-react';
+import { X, Maximize2, Minimize2, Trash2, CalendarIcon, ClockIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AnimatedBars } from '@/components/ui/AnimatedBars';
 
@@ -12,6 +11,12 @@ interface ChatHeaderProps {
   isFullScreen?: boolean;
   isConnected?: boolean;
   isLoading?: boolean;
+  category?: string;
+  date?: string;
+  readTime?: string;
+  author?: string;
+  authorTitle?: string;
+  authorAvatar?: string;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -22,6 +27,12 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   isFullScreen = false,
   isConnected = true,
   isLoading = false,
+  category,
+  date,
+  readTime,
+  author,
+  authorTitle,
+  authorAvatar,
 }) => {
   const handleToggleFullScreen = () => {
     console.log('Toggle fullscreen button clicked in ChatHeader, current state:', isFullScreen);
@@ -72,6 +83,37 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           </Button>
         )}
       </div>
+
+      {category && (
+        <div className="flex items-center mb-4">
+          <span className="inline-block px-3 py-1 bg-primary text-white text-sm font-medium rounded-full mr-3">
+            {category}
+          </span>
+          <div className="flex items-center text-sm text-muted-foreground">
+            <CalendarIcon className="h-4 w-4 mr-1" /> 
+            <span>{date}</span>
+            <span className="mx-2">•</span>
+            <ClockIcon className="h-4 w-4 mr-1" /> 
+            <span>{readTime}</span>
+          </div>
+        </div>
+      )}
+
+      {author && (
+        <div className="flex items-center mb-8">
+          <div className="w-12 h-12 rounded-full overflow-hidden mr-4">
+            <img 
+              src={authorAvatar} 
+              alt={author} 
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div>
+            <div className="font-medium">{author}</div>
+            <div className="text-sm text-muted-foreground">{authorTitle}</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
