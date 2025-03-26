@@ -1,24 +1,8 @@
-
-// This file implements Google Analytics 4 tracking
-
-// Type definitions for analytics events
-export type AnalyticsEvent = {
-  action: string;
-  category?: string;
-  label?: string;
-  value?: number;
-  // Allow additional properties for GA4 flexibility
-  [key: string]: any;
-};
-
-export type PageViewParams = {
-  path: string;
-  title?: string;
-  search?: string;
-};
+import { AnalyticsEvent, PageViewParams } from '@/types/analytics';
 
 // Initialize Google Analytics
-export const initializeAnalytics = (measurementId: string): void => {
+export const initializeAnalytics = (): void => {
+  const measurementId = import.meta.env.VITE_GA_MEASUREMENT_ID;
   if (!measurementId) {
     console.warn('Google Analytics Measurement ID is not provided');
     return;
