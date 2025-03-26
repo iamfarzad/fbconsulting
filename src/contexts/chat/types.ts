@@ -1,80 +1,81 @@
+import { ReactNode } from 'react';
 
-import { AIMessage, FileAttachment } from '@/services/chat/types';
+// Message types
+export type MessageRole = 'user' | 'assistant' | 'system' | 'error' | 'function';
 
-// Define the shape of our chat state
-export interface ChatState {
-  messages: AIMessage[];
-  inputValue: string;
-  isLoading: boolean;
-  error: string | null;
-  isFullScreen: boolean;
-  showMessages: boolean;
-  suggestedResponse: string | null;
-  isInitialized: boolean;
-  // Enhanced functionality
-  activeConversationId: string | null;
-  conversationTitle: string | null;
-  voiceEnabled: boolean;
-  mediaPreviewOpen: boolean;
-  mediaItems: Array<{
-    type: string;
-    data: string;
-    mimeType?: string;
-    name?: string;
-  }>;
+export interface MessageContent {
+  text?: string;
+  image_url?: string;
 }
 
-// Define the actions we can dispatch
+export interface MessageFeedback {
+  isLiked?: boolean;
+  isDisliked?: boolean;
+  comment?: string;
+}
+
+export interface MediaItem {
+  id: string;
+  url: string;
+  type: string;
+  name: string;
+}
+
+export interface Message {
+  id: string;
+  role: MessageRole;
+  content: string | MessageContent[];
+  createdAt: Date;
+  feedback?: MessageFeedback;
+  mediaItems?: MediaItem[];
+  isLoading?: boolean;
+}
+
+// Chat state
+export interface ChatState {
+  messages: Message[];
+  inputValue: string;
+  isLoading: boolean;
+  error: Error | null;
+  isFullScreen: boolean;
+  showMessages: boolean;
+  mediaItems: MediaItem[];
+  currentPersona: string;
+  isVoiceEnabled: boolean;
+}
+
+// Chat actions
 export type ChatAction =
-  | { type: 'ADD_MESSAGE'; payload: AIMessage }
-  | { type: 'SET_MESSAGES'; payload: AIMessage[] }
-  | { type: 'CLEAR_MESSAGES' }
+  | { type: 'SET_MESSAGES'; payload: Message[] }
+  | { type: 'ADD_MESSAGE'; payload: Message }
+  | { type: 'UPDATE_MESSAGE'; payload: { id: string; updates: Partial<Message> } }
   | { type: 'SET_INPUT_VALUE'; payload: string }
   | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'TOGGLE_FULLSCREEN' }
-  | { type: 'SET_FULLSCREEN'; payload: boolean }
+  | { type: 'SET_ERROR'; payload: Error | null }
+  | { type: 'TOGGLE_FULL_SCREEN' }
   | { type: 'SET_SHOW_MESSAGES'; payload: boolean }
-  | { type: 'SET_SUGGESTED_RESPONSE'; payload: string | null }
-  | { type: 'SET_INITIALIZED'; payload: boolean }
-  | { type: 'SET_ACTIVE_CONVERSATION'; payload: string | null }
-  | { type: 'SET_CONVERSATION_TITLE'; payload: string | null }
-  | { type: 'TOGGLE_VOICE'; payload?: boolean }
-  | { type: 'TOGGLE_MEDIA_PREVIEW'; payload?: boolean }
-  | { type: 'ADD_MEDIA_ITEM'; payload: { type: string; data: string; mimeType?: string; name?: string } }
-  | { type: 'REMOVE_MEDIA_ITEM'; payload: number }
-  | { type: 'CLEAR_MEDIA_ITEMS' };
+  | { type: 'ADD_MEDIA_ITEM'; payload: MediaItem }
+  | { type: 'REMOVE_MEDIA_ITEM'; payload: string }
+  | { type: 'CLEAR_MEDIA_ITEMS' }
+  | { type: 'SET_PERSONA'; payload: string }
+  | { type: 'SET_VOICE_ENABLED'; payload: boolean }
+  | { type: 'CLEAR_CHAT' };
 
-// Export interface for ChatContext
+// Context types
 export interface ChatContextType {
   state: ChatState;
   dispatch: React.Dispatch<ChatAction>;
-  sendMessage: (content: string, files?: FileAttachment[]) => Promise<void>;
-  clearMessages: () => void;
+  sendMessage: (content: string) => Promise<void>;
+  addUserMessage: (content: string) => void;
+  clearChat: () => void;
+  setInputValue: (value: string) => void;
+  addMediaItem: (item: MediaItem) => void;
+  removeMediaItem: (id: string) => void;
   toggleFullScreen: () => void;
-  containerRef: React.RefObject<HTMLDivElement>;
-  isInitialized: boolean;
-  // Enhanced functionality
-  addMediaItem: (item: { type: string; data: string; mimeType?: string; name?: string }) => void;
-  removeMediaItem: (index: number) => void;
-  clearMediaItems: () => void;
-  toggleVoice: (enable?: boolean) => void;
+  setMessageFeedback: (messageId: string, feedback: MessageFeedback) => void;
 }
 
-// Initial state
-export const initialChatState: ChatState = {
-  messages: [],
-  inputValue: '',
-  isLoading: false,
-  error: null,
-  isFullScreen: false,
-  showMessages: true,
-  suggestedResponse: null,
-  isInitialized: false,
-  // Enhanced functionality initial values
-  activeConversationId: null,
-  conversationTitle: null,
-  voiceEnabled: false,
-  mediaPreviewOpen: false,
-  mediaItems: [],
-};
+export interface ChatProviderProps {
+  children: ReactNode;
+  initialState?: Partial<ChatState>;
+}

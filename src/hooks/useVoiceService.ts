@@ -1,180 +1,185 @@
-
 import { useState, useEffect, useCallback, useRef } from 'react';
-import VoiceServiceImpl from '@/services/voice/voiceService';
 import { 
   VoiceService, 
   VoiceServiceState, 
-  VoiceRecognitionOptions, 
-  VoiceSynthesisOptions 
-} from '@/types/voiceService';
-import { useToast } from './use-toast';
+  getVoiceService, 
+  VoiceServiceConfig 
+} from '../services/voice/voiceService';
 
-interface UseVoiceServiceOptions {
-  onTranscriptUpdate?: (transcript: string) => void;
-  onTranscriptComplete?: (finalTranscript: string) => void;
-  showToasts?: boolean;
-  recognitionOptions?: VoiceRecognitionOptions;
+export interface UseVoiceServiceProps {
+  autoInitialize?: boolean;
+  config?: VoiceServiceConfig;
 }
 
-export const useVoiceService = (options: UseVoiceServiceOptions = {}) => {
-  const {
-    onTranscriptUpdate,
-    onTranscriptComplete,
-    showToasts = true,
-    recognitionOptions
-  } = options;
+export interface UseVoiceServiceResult {
+  state: VoiceServiceState;
+  isInitialized: boolean;
+  isSupported: boolean;
+  isListening: boolean;
+  transcript: string;
+  interimTranscript: string;
+  isSpeaking: boolean;
+  isPaused: boolean;
+  error: Error | null;
+  startListening: () => Promise<void>;
+  stopListening: () => Promise<void>;
+  toggleListening: () => Promise<void>;
+  speak: (text: string) => Promise<void>;
+  stopSpeaking: () => Promise<void>;
+  pauseSpeaking: () => Promise<void>;
+  resumeSpeaking: () => Promise<void>;
+  initialize: () => Promise<void>;
+}
+
+export const useVoiceService = ({
+  autoInitialize = true,
+  config
+}: UseVoiceServiceProps = {}): UseVoiceServiceResult => {
+  // Keep a reference to the voice service
+  const serviceRef = useRef<VoiceService | null>(null);
   
+  // State to track initialization
+  const [isInitialized, setIsInitialized] = useState(false);
+  
+  // State to store the voice service state
   const [state, setState] = useState<VoiceServiceState>({
     recognition: {
+      isSupported: false,
       isListening: false,
       transcript: '',
-      isSupported: false,
+      interimTranscript: '',
       error: null,
-      isTranscribing: false
     },
-    synthesis: {
+    speech: {
+      isSupported: false,
       isSpeaking: false,
       isPaused: false,
-      isSupported: false,
-      error: null
-    }
+      error: null,
+    },
   });
-  
-  const serviceRef = useRef<VoiceService | null>(null);
-  const { toast } = useToast();
-  
-  // Initialize voice service
-  useEffect(() => {
-    const handleStateChange = (newState: VoiceServiceState) => {
-      setState(newState);
+
+  // Initialize the voice service
+  const initialize = useCallback(async () => {
+    try {
+      if (!serviceRef.current) {
+        serviceRef.current = getVoiceService(config);
+      }
       
-      // Show toast for errors if enabled
-      if (showToasts) {
-        if (newState.recognition.error && !state.recognition.error) {
-          toast({
-            title: "Voice Recognition Error",
-            description: newState.recognition.error,
-            variant: "destructive"
-          });
-        }
-        
-        if (newState.synthesis.error && !state.synthesis.error) {
-          toast({
-            title: "Voice Synthesis Error",
-            description: newState.synthesis.error,
-            variant: "destructive"
-          });
-        }
-      }
-    };
-    
-    serviceRef.current = new VoiceServiceImpl(
-      handleStateChange, 
-      onTranscriptUpdate,
-      onTranscriptComplete,
-      recognitionOptions
-    );
-    
+      await serviceRef.current.initialize();
+      setState(serviceRef.current.getState());
+      setIsInitialized(true);
+    } catch (error) {
+      console.error('Failed to initialize voice service:', error);
+    }
+  }, [config]);
+
+  // Auto-initialize if enabled
+  useEffect(() => {
+    if (autoInitialize) {
+      initialize();
+    }
+
     return () => {
+      // Clean up on unmount
       if (serviceRef.current) {
-        // Clean up any active speech
-        if (state.recognition.isListening) {
-          serviceRef.current.stopListening();
-        }
-        
-        if (state.synthesis.isSpeaking) {
-          serviceRef.current.stopSpeaking();
-        }
+        serviceRef.current.dispose();
       }
     };
-  }, []);  // Empty dependency array ensures this only runs once
-  
-  // Expose methods from the service
-  const startListening = useCallback(async () => {
-    if (serviceRef.current) {
-      try {
-        await serviceRef.current.startListening();
-        
-        if (showToasts) {
-          toast({
-            title: "Listening...",
-            description: "Speak now. Your voice will be converted to text.",
-          });
+  }, [autoInitialize, initialize]);
+
+  // Set up event listeners when the service is ready
+  useEffect(() => {
+    if (serviceRef.current && isInitialized) {
+      const handleStateChanged = (newState: VoiceServiceState) => {
+        setState(newState);
+      };
+
+      const handleError = (error: Error) => {
+        console.error('Voice service error:', error);
+        // State will be updated via stateChanged event
+      };
+
+      serviceRef.current.on('stateChanged', handleStateChanged);
+      serviceRef.current.on('error', handleError);
+
+      return () => {
+        if (serviceRef.current) {
+          serviceRef.current.off('stateChanged', handleStateChanged);
+          serviceRef.current.off('error', handleError);
         }
-      } catch (error) {
-        console.error('Failed to start listening:', error);
-      }
+      };
     }
-  }, [showToasts, toast]);
-  
-  const stopListening = useCallback(() => {
-    if (serviceRef.current) {
-      serviceRef.current.stopListening();
+  }, [isInitialized]);
+
+  // Actions
+  const startListening = useCallback(async () => {
+    if (serviceRef.current && isInitialized) {
+      await serviceRef.current.startListening();
     }
-  }, []);
-  
+  }, [isInitialized]);
+
+  const stopListening = useCallback(async () => {
+    if (serviceRef.current && isInitialized) {
+      await serviceRef.current.stopListening();
+    }
+  }, [isInitialized]);
+
   const toggleListening = useCallback(async () => {
-    if (serviceRef.current) {
+    if (serviceRef.current && isInitialized) {
       await serviceRef.current.toggleListening();
     }
-  }, []);
-  
-  const resetTranscript = useCallback(() => {
-    if (serviceRef.current) {
-      serviceRef.current.resetTranscript();
+  }, [isInitialized]);
+
+  const speak = useCallback(async (text: string) => {
+    if (serviceRef.current && isInitialized) {
+      await serviceRef.current.speak(text);
     }
-  }, []);
-  
-  const speak = useCallback(async (text: string, options?: VoiceSynthesisOptions) => {
-    if (serviceRef.current) {
-      try {
-        await serviceRef.current.speak(text, options);
-      } catch (error) {
-        console.error('Failed to speak:', error);
-      }
+  }, [isInitialized]);
+
+  const stopSpeaking = useCallback(async () => {
+    if (serviceRef.current && isInitialized) {
+      await serviceRef.current.stopSpeaking();
     }
-  }, []);
-  
-  const stopSpeaking = useCallback(() => {
-    if (serviceRef.current) {
-      serviceRef.current.stopSpeaking();
+  }, [isInitialized]);
+
+  const pauseSpeaking = useCallback(async () => {
+    if (serviceRef.current && isInitialized) {
+      await serviceRef.current.pauseSpeaking();
     }
-  }, []);
-  
-  const pauseSpeaking = useCallback(() => {
-    if (serviceRef.current) {
-      serviceRef.current.pauseSpeaking();
+  }, [isInitialized]);
+
+  const resumeSpeaking = useCallback(async () => {
+    if (serviceRef.current && isInitialized) {
+      await serviceRef.current.resumeSpeaking();
     }
-  }, []);
+  }, [isInitialized]);
+
+  // Derived state for convenience
+  const isSupported = 
+    state.recognition.isSupported || 
+    state.speech.isSupported;
   
-  const resumeSpeaking = useCallback(() => {
-    if (serviceRef.current) {
-      serviceRef.current.resumeSpeaking();
-    }
-  }, []);
-  
+  const error = 
+    state.recognition.error || 
+    state.speech.error;
+
   return {
-    // State
     state,
+    isInitialized,
+    isSupported,
     isListening: state.recognition.isListening,
     transcript: state.recognition.transcript,
-    isSpeaking: state.synthesis.isSpeaking,
-    isPaused: state.synthesis.isPaused,
-    recognitionSupported: state.recognition.isSupported,
-    synthesisSupported: state.synthesis.isSupported,
-    recognitionError: state.recognition.error,
-    synthesisError: state.synthesis.error,
-    
-    // Recognition methods
+    interimTranscript: state.recognition.interimTranscript,
+    isSpeaking: state.speech.isSpeaking,
+    isPaused: state.speech.isPaused,
+    error,
     startListening,
     stopListening,
     toggleListening,
-    resetTranscript,
-    
-    // Synthesis methods
     speak,
     stopSpeaking,
     pauseSpeaking,
-    resumeSpeaking
+    resumeSpeaking,
+    initialize,
   };
 };

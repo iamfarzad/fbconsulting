@@ -2,55 +2,79 @@
   "name": "FB Consulting Dev Environment",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
   "forwardPorts": [8080, 8000, 3000, 5173],
-  "settings": {
-    "terminal.integrated.defaultProfile.linux": "bash",
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "explicit"
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux": {
+          "zsh": { "path": "/bin/zsh" }
+        },
+        "terminal.integrated.persistentSessionReviveProcess": "never",
+        "terminal.integrated.enablePersistentSessions": false,
+        "terminal.integrated.shellIntegration.enabled": true,
+        "terminal.integrated.gpuAcceleration": "off",
+        "terminal.integrated.rendererType": "dom",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        },
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": true
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.vscode-typescript-next",
+        "streetsidesoftware.code-spell-checker",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "github.vscode-pull-request-github",
+        "eamodio.gitlens",
+        "github.copilot",
+        "github.copilot-chat"
+      ]
     }
-  },
-  "extensions": [
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
-    "bradlc.vscode-tailwindcss",
-    "ms-vscode.vscode-typescript-next",
-    "streetsidesoftware.code-spell-checker",
-    "ms-python.python",
-    "ms-python.vscode-pylance",
-    "github.vscode-pull-request-github",
-    "eamodio.gitlens",
-    "github.copilot",
-    "github.copilot-chat"
-  ],
-  "postCreateCommand": "echo 'Setting up environment...' && npm install && python3 -m pip install --upgrade pip && if [ -f requirements.txt ]; then pip install -r requirements.txt; fi",
-  "remoteUser": "node",
-  "containerEnv": {
-    "GOOGLE_API_KEY": "${localEnv:GOOGLE_API_KEY}",
-    "PYTHONUNBUFFERED": "1",
-    "NODE_OPTIONS": "--max-old-space-size=4096"
   },
   "features": {
     "ghcr.io/devcontainers/features/python:1": {
-      "version": "3.11"
+      "version": "3.9"
     },
     "ghcr.io/devcontainers/features/git:1": {
       "version": "latest"
     },
     "ghcr.io/devcontainers/features/docker-in-docker:2": {
       "version": "latest"
+    },
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true
     }
   },
-  "customizations": {
-    "vscode": {
-      "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python",
-        "python.linting.enabled": true,
-        "python.linting.pylintEnabled": true
-      }
-    }
+  "postCreateCommand": "echo 'Setting up environment...' && npm install && python3 -m pip install --upgrade pip && pip install -r requirements.txt",
+  "postStartCommand": "git config --global core.editor 'code --wait'",
+  "remoteUser": "node",
+  "containerEnv": {
+    "GOOGLE_API_KEY": "${localEnv:GOOGLE_API_KEY}",
+    "PYTHONUNBUFFERED": "1",
+    "NODE_OPTIONS": "--max-old-space-size=4096",
+    "SHELL": "/bin/zsh",
+    "TERM": "xterm-256color"
   },
-  "mounts": [
-    "source=fbconsulting_node_modules,target=${containerWorkspaceFolder}/node_modules,type=volume"
-  ]
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "8gb",
+    "storage": "32gb"
+  },
+  "runArgs": [
+    "--memory=8g",
+    "--memory-swap=10g",
+    "--cpus=4",
+    "--security-opt=seccomp=unconfined"
+  ],
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "workspaceFolder": "/workspace"
 }

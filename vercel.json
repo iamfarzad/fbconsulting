@@ -3,35 +3,35 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "devCommand": "npm run dev",
-  "installCommand": "npm install",
   "framework": "vite",
   "functions": {
-    "api/**/*": {
-      "memory": 1024,
-      "maxDuration": 10
+    "api/**/*.py": {
+      "runtime": "python3.9",
+      "memory": 1024
     }
   },
-  "headers": [
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Credentials", "value": "true" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
-        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version" }
-      ]
+      "src": "/api/gemini/audio",
+      "dest": "/api/gemini/audio.py",
+      "headers": {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Content-Type": "audio/wav"
+      }
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1.py"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ],
-  "regions": ["fra1"],
-  "public": true,
-  "environment": {
-    "VITE_GEMINI_API_KEY": "@gemini-api-key",
-    "NODE_ENV": "production"
-  },
-  "rewrites": [
-    { "source": "/api/gemini", "destination": "/api/gemini/route" },
-    { "source": "/api/gemini/stream", "destination": "/api/gemini/stream" },
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  "env": {
+    "GOOGLE_API_KEY": "@google_api_key"
+  }
 }

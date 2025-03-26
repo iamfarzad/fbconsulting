@@ -5,6 +5,7 @@ This Dev Container configuration provides a consistent development environment f
 ## What's Included
 
 ### Frontend Environment
+
 - Node.js 20
 - NPM (latest version)
 - React/TypeScript extensions
@@ -12,12 +13,14 @@ This Dev Container configuration provides a consistent development environment f
 - Audio playback and streaming support
 
 ### Backend Environment
+
 - Python 3.9 with pip
 - Google Generative AI SDK
 - FastAPI for API endpoints
 - Audio processing capabilities
 
 ### AI Features
+
 - Gemini Pro integration
 - Text-to-Speech capabilities
 - Interactive voice UI
@@ -42,6 +45,7 @@ To use this Dev Container:
 ## Audio Implementation
 
 The project implements audio capabilities through:
+
 - `/api/gemini/audio.py` - Text-to-speech API endpoint
 - `src/hooks/useGeminiAudio.ts` - Client-side audio hook
 - Audio streaming with proper browser playback
@@ -49,6 +53,7 @@ The project implements audio capabilities through:
 ## Troubleshooting
 
 If you encounter issues with Vite or other dependencies:
+
 1. Run `node scripts/fix-vite.js` to diagnose and fix common Vite issues
 2. Run `node scripts/cleanup-config.js` to fix any misplaced configuration files
 3. Check your environment variables with `node scripts/check-deployment.js`
@@ -56,12 +61,14 @@ If you encounter issues with Vite or other dependencies:
 ## Customizing
 
 You can customize this configuration by editing the following files:
+
 - `.devcontainer/devcontainer.json` - Container settings and VS Code configuration
 - `.devcontainer/Dockerfile` - Base image and environment setup
 
 ## Docker Setup in GitHub Codespaces
 
 Docker-in-Docker is already configured for GitHub Codespaces. You can verify it's working with:
+
 ```sh
 docker version
 docker run hello-world

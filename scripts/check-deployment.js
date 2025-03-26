@@ -1,25 +1,23 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 // Paths to check
 const criticalFiles = [
-  'api/gemini/audio.py',
-  'src/hooks/useGeminiAudio.ts',
-  'src/components/copilot/GeminiCopilotProvider.tsx',
-  'vercel.json'
+  "api/gemini/audio.py",
+  "src/hooks/useGeminiAudio.ts",
+  "src/components/copilot/GeminiCopilotProvider.tsx",
+  "vercel.json",
 ];
 
 // Environment variables to check
-const requiredEnvVars = [
-  'GOOGLE_API_KEY'
-];
+const requiredEnvVars = ["GOOGLE_API_KEY"];
 
-console.log('🔍 Checking deployment readiness...');
+console.log("🔍 Checking deployment readiness...");
 
 // Check for critical files
-console.log('\n📁 Checking critical files:');
+console.log("\n📁 Checking critical files:");
 const missingFiles = [];
-criticalFiles.forEach(filePath => {
+criticalFiles.forEach((filePath) => {
   const fullPath = path.join(process.cwd(), filePath);
   if (!fs.existsSync(fullPath)) {
     missingFiles.push(filePath);
@@ -30,9 +28,9 @@ criticalFiles.forEach(filePath => {
 });
 
 // Check for environment variables
-console.log('\n🔐 Checking environment variables:');
+console.log("\n🔐 Checking environment variables:");
 const missingEnvVars = [];
-requiredEnvVars.forEach(envVar => {
+requiredEnvVars.forEach((envVar) => {
   if (!process.env[envVar]) {
     missingEnvVars.push(envVar);
     console.log(`❌ Missing: ${envVar} (will be provided by Vercel secret)`);
@@ -42,43 +40,46 @@ requiredEnvVars.forEach(envVar => {
 });
 
 // Check Vercel configuration
-console.log('\n⚙️ Checking Vercel configuration:');
+console.log("\n⚙️ Checking Vercel configuration:");
 let vercelConfig;
 try {
-  vercelConfig = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'vercel.json'), 'utf8'));
-  console.log('✅ vercel.json is valid JSON');
-  
+  vercelConfig = JSON.parse(
+    fs.readFileSync(path.join(process.cwd(), "vercel.json"), "utf8")
+  );
+  console.log("✅ vercel.json is valid JSON");
+
   // Check for API routes
-  if (vercelConfig.routes && vercelConfig.routes.some(r => r.src && r.src.includes('/api/'))) {
-    console.log('✅ API routes are configured');
+  if (
+    vercelConfig.routes &&
+    vercelConfig.routes.some((r) => r.src && r.src.includes("/api/"))
+  ) {
+    console.log("✅ API routes are configured");
   } else {
-    console.log('❌ API routes not configured correctly');
+    console.log("❌ API routes not configured correctly");
   }
-  
+
   // Check for Python runtime
-  if (vercelConfig.functions && vercelConfig.functions['api/**/*.py']) {
-    console.log('✅ Python runtime is configured');
+  if (vercelConfig.functions && vercelConfig.functions["api/**/*.py"]) {
+    console.log("✅ Python runtime is configured");
   } else {
-    console.log('❌ Python runtime not configured');
+    console.log("❌ Python runtime not configured");
   }
 
   // Check for env variables
   if (vercelConfig.env && vercelConfig.env.GOOGLE_API_KEY) {
-    console.log('✅ Environment variables referenced in config');
+    console.log("✅ Environment variables referenced in config");
   } else {
-    console.log('❌ Missing environment variable references');
+    console.log("❌ Missing environment variable references");
   }
 } catch (error) {
   console.log(`❌ Error reading or parsing vercel.json: ${error.message}`);
 }
 
 // Check for misplaced configuration files
-console.log('\n🧹 Checking for misplaced configuration files:');
-const misplacedConfigFiles = [
-  'src/hooks/vercel.json'
-];
+console.log("\n🧹 Checking for misplaced configuration files:");
+const misplacedConfigFiles = ["src/hooks/vercel.json"];
 
-misplacedConfigFiles.forEach(filePath => {
+misplacedConfigFiles.forEach((filePath) => {
   const fullPath = path.join(process.cwd(), filePath);
   if (fs.existsSync(fullPath)) {
     console.log(`⚠️ Found misplaced config: ${filePath}`);
@@ -115,23 +116,25 @@ try {
 - Check browser console for any errors
 `;
 
-  fs.writeFileSync(path.join(process.cwd(), 'DEPLOYMENT.md'), deploymentReadme);
-  console.log('✅ Created DEPLOYMENT.md guide');
+  fs.writeFileSync(path.join(process.cwd(), "DEPLOYMENT.md"), deploymentReadme);
+  console.log("✅ Created DEPLOYMENT.md guide");
 } catch (error) {
   console.log(`❌ Error creating deployment guide: ${error.message}`);
 }
 
 // Summary
-console.log('\n📊 Deployment Readiness Summary:');
+console.log("\n📊 Deployment Readiness Summary:");
 if (missingFiles.length === 0 && vercelConfig) {
-  console.log('✅ Configuration looks good! Ready to deploy to Vercel.');
-  console.log('📝 See DEPLOYMENT.md for deployment instructions.');
+  console.log("✅ Configuration looks good! Ready to deploy to Vercel.");
+  console.log("📝 See DEPLOYMENT.md for deployment instructions.");
 } else {
-  console.log('❌ Some checks failed. Please address the issues before deploying:');
+  console.log(
+    "❌ Some checks failed. Please address the issues before deploying:"
+  );
   if (missingFiles.length > 0) {
     console.log(`  - Missing ${missingFiles.length} critical files`);
   }
   if (!vercelConfig) {
-    console.log('  - Invalid Vercel configuration');
+    console.log("  - Invalid Vercel configuration");
   }
 }
