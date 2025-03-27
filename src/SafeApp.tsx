@@ -5,7 +5,7 @@ import ThemeProvider from "./components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import ChatButtonWrapper from "./components/ChatButtonWrapper";
 import { LanguageProvider } from "./contexts/LanguageContext";
-import { CopilotProvider } from "@/features/gemini/config/CopilotProvider";
+import { GeminiProvider } from "@/components/copilot/providers/GeminiProvider";
 
 // Lazy load components to reduce initial load time
 const Index = lazy(() => import("./pages/Index"));
@@ -33,7 +33,7 @@ const SafeApp: React.FC = () => {
             <ErrorBoundary>
               <LanguageProvider>
                 <ErrorBoundary>
-                  <CopilotProvider>
+                  <GeminiProvider>
                     <ErrorBoundary>
                       <Suspense fallback={<LoadingFallback />}>
                         <Toaster key="toaster" />
@@ -101,7 +101,7 @@ const SafeApp: React.FC = () => {
                         </Routes>
                       </Suspense>
                     </ErrorBoundary>
-                  </CopilotProvider>
+                  </GeminiProvider>
                 </ErrorBoundary>
               </LanguageProvider>
             </ErrorBoundary>
