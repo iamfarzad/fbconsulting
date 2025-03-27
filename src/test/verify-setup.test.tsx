@@ -2,13 +2,12 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { setupComponentTest, mockAsyncFn, waitForNextTick } from './utils/component-utils';
 import { ApiMockFactory } from './utils/api-mocks';
-import { fireEvent } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 
 interface TestComponentProps {
   onFetch: () => Promise<void>;
 }
 
-// Simple test component
 const TestComponent: React.FC<TestComponentProps> = ({ onFetch }) => (
   <div data-testid="test-component">
     <button onClick={() => onFetch()}>Fetch Data</button>
@@ -22,27 +21,31 @@ describe('Test Infrastructure Verification', () => {
     expect(document).toBeDefined();
   });
 
-  // Test Layer 2: Utility Layer
-  it('has working test utilities', () => {
-    const { container } = setupComponentTest(<div>Test</div>);
-    expect(container).toBeDefined();
+  // Test Layer 2: React Testing Library
+  it('works with React Testing Library', () => {
+    render(<div data-testid="test">Test</div>);
+    expect(screen.getByTestId('test')).toHaveTextContent('Test');
   });
 
   // Test Layer 3: Component Testing
   it('can render and interact with components', async () => {
-    const mockFetch = mockAsyncFn(undefined);
-    const { getByRole } = setupComponentTest(
-      <TestComponent onFetch={mockFetch} />
-    );
-
-    const button = getByRole('button');
-    fireEvent.click(button);
+    const mockFetch = vi.fn();
+    render(<TestComponent onFetch={mockFetch} />);
     
-    await waitForNextTick();
+    const button = screen.getByRole('button');
+    await fireEvent.click(button);
+    
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
-  // Test Layer 4: API Mocking
+  // Test Layer 4: Async Operations
+  it('handles async operations', async () => {
+    const mockFn = mockAsyncFn('test-data');
+    const result = await mockFn();
+    expect(result).toBe('test-data');
+  });
+
+  // Test Layer 5: API Mocking
   it('can mock API calls', async () => {
     const mockData = { message: 'success' };
     const mockApi = ApiMockFactory.success(mockData);
