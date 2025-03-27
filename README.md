@@ -243,3 +243,21 @@ const firebaseConfig = {
 ```
 
 By following these practices, you can enhance the security of your application and protect sensitive information from being exposed.
+
+## Invalid Tree Info Error
+
+### Explanation
+The "Invalid tree info" error occurs when there is an issue with the structure or content of the tree object in a Git repository. This error typically arises when creating or updating a tree object using the Git API.
+
+### Resolution
+To resolve the "Invalid tree info" error, follow these steps:
+
+1. **Check Tree Structure**: Ensure that the tree object has a valid structure. Each entry in the tree should have the correct mode, type, and SHA-1 hash.
+
+2. **Verify Content**: Make sure that the content of the tree object is correct. Each entry should point to a valid blob or tree object.
+
+3. **Use Git API Correctly**: When using the Git API to create or update a tree, ensure that you are providing the correct parameters. Refer to the [GitHub API documentation](https://docs.github.com/rest/git/trees#create-a-tree) for detailed information on how to create a tree object.
+
+4. **Check Permissions**: Ensure that you have the necessary permissions to create or update the tree object in the repository.
+
+By following these steps, you can resolve the "Invalid tree info" error and successfully create or update tree objects in your Git repository.
