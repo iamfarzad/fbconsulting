@@ -118,3 +118,5 @@ try {
   console.log("1. npm install vite --save-dev");
   console.log("2. npx vite");
 }
+
+// Note: Use environment variables for sensitive information

@@ -4,6 +4,8 @@ from pydantic import BaseModel
 from resend import Resend
 import os
 from dotenv import load_dotenv
+from ratelimit import limits, RateLimitException
+from backoff import on_exception, expo
 
 # Load environment variables
 load_dotenv()
@@ -33,6 +35,11 @@ class GeminiState(BaseModel):
     step: str
     proposal: Optional[ProposalData]
 
+# Define rate limit: 5 requests per minute
+ONE_MINUTE = 60
+
+@on_exception(expo, RateLimitException, max_tries=3)
+@limits(calls=5, period=ONE_MINUTE)
 @router.post("/api/proposals/send")
 async def send_proposal(request: Request):
     try:
@@ -101,6 +108,8 @@ async def send_proposal(request: Request):
             "message": "Proposal sent successfully via email"
         }
 
+    except RateLimitException as e:
+        raise HTTPException(status_code=429, detail="Rate limit exceeded. Please try again later.")
     except Exception as e:
         print("Error sending proposal:", str(e))
         raise HTTPException(status_code=500, detail=str(e))

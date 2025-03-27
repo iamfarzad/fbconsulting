@@ -1,4 +1,3 @@
-
 import { AIMessage } from '../chat/messageTypes';
 import { LeadInfo } from '../lead/leadExtractor';
 
@@ -41,3 +40,5 @@ export const loadLeadInfo = (): LeadInfo => {
     return {};
   }
 };
+
+// Note: Use environment variables for sensitive information

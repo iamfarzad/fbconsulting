@@ -55,7 +55,5 @@ dirsToScan.forEach(dir => {
 });
 
 console.log('\n✅ Cleanup complete! All configuration files should now be in their correct locations.');
-```
 
-To run this cleanup script:
-node scripts/cleanup-config.js
+// Note: Use environment variables for sensitive information

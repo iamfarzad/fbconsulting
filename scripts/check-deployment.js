@@ -10,7 +10,11 @@ const criticalFiles = [
 ];
 
 // Environment variables to check
+<<<<<<< HEAD
 const requiredEnvVars = ["GOOGLE_API_KEY"];
+=======
+const requiredEnvVars = [];
+>>>>>>> origin/remove-firebase-key
 
 console.log("🔍 Checking deployment readiness...");
 
@@ -138,3 +142,5 @@ if (missingFiles.length === 0 && vercelConfig) {
     console.log("  - Invalid Vercel configuration");
   }
 }
+
+// Note: Use environment variables for sensitive information

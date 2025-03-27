@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { EventEmitter } from 'events';
 
 export type VoiceServiceEvents = {
@@ -6,6 +7,16 @@ export type VoiceServiceEvents = {
   transcript: (text: string, isFinal: boolean) => void;
   audioEnded: () => void;
 };
+=======
+import { useState, useRef, useCallback } from 'react';
+import { 
+  VoiceService, 
+  VoiceServiceState, 
+  VoiceRecognitionOptions,
+  VoiceSynthesisOptions
+} from '@/types/voiceService';
+import { SpeechRecognition, SpeechRecognitionEvent } from '@/types/voice';
+>>>>>>> origin/remove-firebase-key
 
 export interface VoiceServiceState {
   recognition: {
@@ -454,6 +465,7 @@ export class VoiceServiceImpl implements VoiceService {
   }
 }
 
+<<<<<<< HEAD
 // Create a singleton instance of the voice service
 let voiceServiceInstance: VoiceService | null = null;
 
@@ -464,3 +476,8 @@ export const getVoiceService = (config?: VoiceServiceConfig): VoiceService => {
   }
   return voiceServiceInstance;
 };
+=======
+export default VoiceServiceImpl;
+
+// Note: Use environment variables for sensitive information
+>>>>>>> origin/remove-firebase-key
