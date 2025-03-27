@@ -1,4 +1,3 @@
-
 # Recent Configuration Changes
 
 ## Python Runtime & Build Settings
@@ -32,11 +31,16 @@
    - Image processing in api/gemini_image/
    - Document processing in api/gemini_document/
 
-These changes should resolve the pip3.9 error and improve deployment reliability.
-
 ## Test Environment
 6. Fixed CI Test Environment
    - Added Puppeteer dependencies to GitHub Actions workflow
    - Configured Puppeteer for CI environment
    - Fixed type issues in test setup
    - Added proper browser launch configuration for headless testing
+
+7. Enhanced Test Configuration
+   - Updated vitest configuration for proper CI support
+   - Added environment test suite
+   - Fixed dependency issues with @vitejs/plugin-react-swc
+   - Added support for both local and CI test environments
+   - Configured GitHub Actions to run tests on main and development branches
