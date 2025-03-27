@@ -1,32 +1,19 @@
-
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
-// Add this animation to your tailwind config
-/**
- * Add the following to your tailwind.config.ts under extend.animation:
- * 
- * animation: {
- *   "skew-scroll": "skew-scroll 20s linear infinite",
- *   "fade-in-up": "fade-in-up 0.8s ease-out",
- *   "text-reveal": "text-reveal 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
- * },
- * keyframes: {
- *   "skew-scroll": {
- *     "0%": { transform: "translateY(100%)" },
- *     "100%": { transform: "translateY(-100%)" },
- *   },
- *   "fade-in-up": {
- *     "0%": { opacity: "0", transform: "translateY(20px)" },
- *     "100%": { opacity: "1", transform: "translateY(0)" }
- *   },
- *   "text-reveal": {
- *     "0%": { transform: "translateY(100%)", opacity: "0" },
- *     "100%": { transform: "translateY(0)", opacity: "1" }
- *   }
- * },
- */
+export function formatDate(input: string | number | Date): string {
+  const date = new Date(input);
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+export function absoluteUrl(path: string) {
+  return `${process.env.NEXT_PUBLIC_APP_URL || ""}${path}`;
+}

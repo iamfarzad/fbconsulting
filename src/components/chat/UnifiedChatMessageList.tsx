@@ -1,101 +1,57 @@
-
-import React, { useEffect, useRef } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Bot } from 'lucide-react';
+import React from 'react';
 import { useChat } from '@/contexts/ChatContext';
-import { ChatMessage } from './core/ChatMessage';
-import { TypingIndicator } from './core/TypingIndicator';
+import { Avatar } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
+import type { AIMessage } from '@/services/chat/types';
 
-interface UnifiedChatMessageListProps {
-  showEmptyState?: boolean;
-  emptyStateTitle?: string;
-  emptyStateDescription?: string;
-  className?: string;
-}
-
-export const UnifiedChatMessageList: React.FC<UnifiedChatMessageListProps> = ({
-  showEmptyState = true,
-  emptyStateTitle = 'How can I help you today?',
-  emptyStateDescription = 'Ask me anything about AI automation, workflow optimization, or customized solutions for your business.',
-  className
-}) => {
+export const UnifiedChatMessageList = () => {
   const { state } = useChat();
-  const { messages, isLoading, showMessages } = state;
-  
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  
-  // Scroll to bottom when new messages arrive or when loading state changes
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages, isLoading]);
-  
-  // Don't render anything if there are no messages and showMessages is false
-  if (!showMessages && messages.length === 0) {
-    return null;
+  const { messages, isLoading } = state;
+
+  if (!Array.isArray(messages)) {
+    return (
+      <div className="text-center text-red-500">
+        Invalid messages format. Please try again.
+      </div>
+    );
   }
-  
+
   return (
-    <div 
-      ref={containerRef}
-      className={cn(
-        "border border-border rounded-lg overflow-y-auto",
-        className
-      )}
-      style={{
-        minHeight: '120px',
-        maxHeight: '400px',
-        scrollBehavior: 'smooth'
-      }}
-    >
-      <AnimatePresence>
-        {messages.length === 0 && showEmptyState ? (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-center justify-center h-full text-center py-10"
+    <div className="space-y-4">
+      {messages.map((message: AIMessage, index) => {
+        const isUser = message.role === 'user';
+        const isLastMessage = index === messages.length - 1;
+        
+        return (
+          <div
+            key={message.id || `${message.role}-${index}`}
+            className={cn(
+              'flex w-full',
+              isUser ? 'justify-end' : 'justify-start'
+            )}
           >
-            <Bot size={40} className="mb-4" />
-            <h3 className="text-lg font-medium mb-2">
-              {emptyStateTitle}
-            </h3>
-            <p className="text-muted-foreground max-w-lg">
-              {emptyStateDescription}
-            </p>
-          </motion.div>
-        ) : (
-          <div className="flex flex-col space-y-4 p-4">
-            {messages.filter(msg => msg.role !== 'system').map((msg, index) => (
-              <ChatMessage 
-                key={index} 
-                message={msg} 
-                isLastMessage={index === messages.length - 1}
+            <div className={cn(
+              'flex items-start gap-2 max-w-[80%]',
+              isUser ? 'flex-row-reverse' : 'flex-row'
+            )}>
+              <Avatar
+                src={isUser ? '/placeholder.svg' : '/f_b_logo.glb'}
+                fallback={isUser ? 'U' : 'AI'}
+                className="w-8 h-8"
               />
-            ))}
-            
-            <AnimatePresence>
-              {isLoading && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <TypingIndicator />
-                </motion.div>
-              )}
-            </AnimatePresence>
-            
-            <div ref={messagesEndRef} />
+              <div className={cn(
+                'rounded-lg px-4 py-2 text-sm',
+                isUser 
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted/50',
+                isLastMessage && !isUser && isLoading && 'animate-pulse'
+              )}>
+                {message.content}
+              </div>
+            </div>
           </div>
-        )}
-      </AnimatePresence>
+        );
+      })}
     </div>
   );
-};
-
-// Helper function to conditionally join class names
-const cn = (...classes: (string | undefined)[]) => {
-  return classes.filter(Boolean).join(' ');
 };
