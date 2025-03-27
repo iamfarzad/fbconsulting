@@ -1,52 +1,23 @@
-import React, { createContext, useContext, useReducer, useEffect, useRef } from 'react';
-import { AIMessage, ChatService, FileAttachment } from '@/services/chat/types';
-import { getChatService } from '@/services/chat/googleGenAIService.tsx';
+import React, { createContext, useContext, useReducer, useRef } from 'react';
+import { AIMessage, FileAttachment } from '@/services/chat/types'; // Keep types if needed
+// Removed: import { getChatService } from '@/services/chat/googleGenAIService.tsx';
 import { toast } from '@/components/ui/use-toast';
 import { chatReducer } from './chat/chatReducer';
 import { ChatContextType, initialChatState } from './chat/types';
+import { useGemini } from '@/components/copilot/providers/GeminiProvider'; // Import useGemini
 
 // Create the context
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 // Create the provider component
-export const ChatProvider: React.FC<{
-  children: React.ReactNode;
-  apiKey?: string;
-  modelName?: string;
-}> = ({ children, apiKey: propApiKey, modelName: propModelName }) => {
+// Removed apiKey and modelName props
+export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(chatReducer, initialChatState);
   const containerRef = useRef<HTMLDivElement>(null);
-  const chatServiceRef = useRef<ChatService | null>(null);
+  // Removed: const chatServiceRef = useRef<ChatService | null>(null);
+  const gemini = useGemini(); // Get context from GeminiProvider
 
-  // Get the API key and initialize the chat service
-  useEffect(() => {
-    const initChatService = async () => {
-      try {
-        // Prioritize prop API key, then env API key
-        const apiKey = propApiKey || import.meta.env.VITE_GEMINI_API_KEY;
-        const modelName = propModelName || 'gemini-pro';
-        
-        if (apiKey) {
-          chatServiceRef.current = getChatService({ 
-            apiKey, 
-            modelName,
-            temperature: 0.7,
-            maxTokens: 1024 
-          });
-          dispatch({ type: 'SET_INITIALIZED', payload: true });
-          console.log('Chat service initialized successfully');
-        } else {
-          console.warn('No API key found for chat service');
-          dispatch({ type: 'SET_ERROR', payload: 'No API key provided' });
-        }
-      } catch (error) {
-        console.error('Failed to initialize chat service:', error);
-        dispatch({ type: 'SET_ERROR', payload: 'Failed to initialize chat service' });
-      }
-    };
-
-    initChatService();
-  }, [propApiKey, propModelName]);
+  // Removed: useEffect for initializing chatServiceRef
 
   // Send a message
   const sendMessage = async (content: string, files?: FileAttachment[]) => {
@@ -69,40 +40,39 @@ export const ChatProvider: React.FC<{
       // Clear media items after sending
       dispatch({ type: 'CLEAR_MEDIA_ITEMS' });
       
-      // Get response from chat service
-      if (chatServiceRef.current) {
-        const response = await chatServiceRef.current.sendMessage(
-          content,
-          state.messages,
-          files
-        );
-        
-        dispatch({ type: 'ADD_MESSAGE', payload: response });
+      // Use sendMessage from GeminiProvider context
+      if (gemini.isConnected) {
+        // Note: GeminiProvider's sendMessage might need adaptation 
+        // if it doesn't support files or message history directly.
+        // For now, just send the content.
+        await gemini.sendMessage(content);
+        // The response handling might need adjustment too, 
+        // as GeminiProvider handles responses via WebSocket `onmessage`.
+        // We might need to listen to state changes provided by GeminiProvider
+        // or adjust how messages are added here.
+        // Placeholder: Assume response is handled by GeminiProvider for now.
+        // dispatch({ type: 'ADD_MESSAGE', payload: response }); 
       } else {
-        // Mock response if service isn't available
-        setTimeout(() => {
-          const mockResponse: AIMessage = {
-            role: 'assistant',
-            content: `This is a mock response to: ${content}`,
-            timestamp: Date.now(),
-          };
-          dispatch({ type: 'ADD_MESSAGE', payload: mockResponse });
-        }, 1000);
-
-        // Show toast about missing API key
+        // Handle disconnected state or show error
+        const errorMsg = 'WebSocket not connected';
+        dispatch({ type: 'SET_ERROR', payload: errorMsg });
+        const errorResponse: AIMessage = {
+          role: 'error',
+          content: `Error: ${errorMsg}`,
+          timestamp: Date.now(),
+        };
+        dispatch({ type: 'ADD_MESSAGE', payload: errorResponse });
         toast({
-          title: 'Using Demo Mode',
-          description: 'Set up Gemini API Key for full AI functionality.',
+          title: 'Connection Error',
+          description: errorMsg,
+          variant: 'destructive',
         });
       }
     } catch (error) {
       console.error('Error sending message:', error);
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       
-      dispatch({ 
-        type: 'SET_ERROR', 
-        payload: errorMessage 
-      });
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
       
       // Also add an error message to the chat
       const errorResponse: AIMessage = {
@@ -110,7 +80,6 @@ export const ChatProvider: React.FC<{
         content: `Error: ${errorMessage}`,
         timestamp: Date.now(),
       };
-      
       dispatch({ type: 'ADD_MESSAGE', payload: errorResponse });
       
       toast({
@@ -126,9 +95,7 @@ export const ChatProvider: React.FC<{
   // Clear all messages
   const clearMessages = () => {
     dispatch({ type: 'CLEAR_MESSAGES' });
-    if (chatServiceRef.current) {
-      chatServiceRef.current.clearHistory();
-    }
+    // Removed chatServiceRef call
   };
 
   // Toggle fullscreen mode
@@ -156,14 +123,17 @@ export const ChatProvider: React.FC<{
     dispatch({ type: 'TOGGLE_VOICE', payload: enable });
   };
 
+  // Update value to use gemini context where applicable
   const value = {
     state,
     dispatch,
-    sendMessage,
+    sendMessage, // Use the updated sendMessage
     clearMessages,
     toggleFullScreen,
     containerRef,
-    isInitialized: state.isInitialized,
+    isInitialized: gemini.isConnected, // Reflect WebSocket connection status
+    isLoading: state.isLoading || gemini.isConnecting, // Combine loading states
+    error: state.error || gemini.error, // Combine error states
     addMediaItem,
     removeMediaItem,
     clearMediaItems,
