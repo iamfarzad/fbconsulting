@@ -9,6 +9,7 @@
 # production
 /build
 /dist
+.next/
 
 # misc
 .DS_Store
@@ -24,6 +25,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.log
 
 # editor
 .idea/
@@ -38,6 +40,7 @@ yarn-error.log*
 *.tmp
 *.temp
 .cache/
+__pycache__/
 
 # copilot temporary files
 src/components/copilot/**/*.backup
