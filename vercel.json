@@ -48,7 +48,18 @@
       ]
     }
   ],
+<<<<<<< HEAD
   "env": {
     "GOOGLE_API_KEY": "@google_api_key"
   }
+=======
+  "regions": ["fra1"],
+  "public": true,
+  "rewrites": [
+    { "source": "/api/gemini", "destination": "/api/gemini/route" },
+    { "source": "/api/gemini/stream", "destination": "/api/gemini/stream" },
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+>>>>>>> origin/consolidate-components
 }

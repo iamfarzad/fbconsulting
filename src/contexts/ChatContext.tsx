@@ -4,6 +4,7 @@ import { getChatService } from '@/services/chat/googleGenAIService.tsx';
 import { toast } from '@/components/ui/use-toast';
 import { chatReducer } from './chat/chatReducer';
 import { ChatContextType, initialChatState } from './chat/types';
+import { useGeminiWebSocket } from '@/services/gemini';
 
 // Create the context
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -17,6 +18,7 @@ export const ChatProvider: React.FC<{
   const [state, dispatch] = useReducer(chatReducer, initialChatState);
   const containerRef = useRef<HTMLDivElement>(null);
   const chatServiceRef = useRef<ChatService | null>(null);
+  const { state: wsState, connect, disconnect, sendMessage: sendWsMessage } = useGeminiWebSocket();
 
   // Get the API key and initialize the chat service
   useEffect(() => {
@@ -167,7 +169,10 @@ export const ChatProvider: React.FC<{
     addMediaItem,
     removeMediaItem,
     clearMediaItems,
-    toggleVoice
+    toggleVoice,
+    connect,
+    disconnect,
+    sendWsMessage
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

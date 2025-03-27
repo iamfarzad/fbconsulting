@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { X, Maximize2, Minimize2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
