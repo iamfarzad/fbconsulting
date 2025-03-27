@@ -1,5 +1,4 @@
 import google.generativeai as genai
-<<<<<<< HEAD
 from typing import Optional, Dict, Any, Callable, AsyncIterable
 import asyncio
 import json
@@ -37,40 +36,16 @@ class GeminiClient:
             logger.info(f"Initializing live session with voice config: {self.voice_config}")
             
             # Configure for LiveAPI session with both text and audio
-=======
-import asyncio
-import websockets
-import json
-import logging
-
-class GeminiClient:
-    def __init__(self, api_key, model_name='gemini-2.0-flash', voice_name='Charon'):
-        self.api_key = api_key
-        self.model_name = model_name
-        self.voice_name = voice_name
-        self.session = None
-        self.connected = False
-
-    async def connect(self):
-        try:
-            genai.configure(api_key=self.api_key)
-            client = genai.Client()
->>>>>>> 29d5d49c4822468a5d058b37c001746357598fd3
             config = {
                 "response_modalities": ["TEXT", "AUDIO"],
                 "speech_config": {
                     "voice_config": {
                         "prebuilt_voice_config": {
-<<<<<<< HEAD
                             "voice_name": self.voice_config["name"]
-=======
-                            "voice_name": self.voice_name
->>>>>>> 29d5d49c4822468a5d058b37c001746357598fd3
                         }
                     }
                 }
             }
-<<<<<<< HEAD
             
             # Start a new live session with gemini-2.0-flash
             self.session = self.client.connect("gemini-2.0-flash", config)
@@ -179,41 +154,3 @@ class GeminiClient:
                 logger.info("Live session closed")
             except Exception as e:
                 logger.error(f"Error closing session: {e}")
-=======
-            self.session = client.connect(self.model_name, config)
-            self.connected = True
-        except Exception as e:
-            logging.error(f"Failed to connect to Gemini Live API: {e}")
-            self.connected = False
-
-    async def send_message(self, message):
-        if not self.connected:
-            await self.connect()
-        try:
-            response = self.session.send({
-                "turns": [{
-                    "parts": [{"text": message}],
-                    "role": "user"
-                }],
-                "turn_complete": True
-            })
-            return response
-        except Exception as e:
-            logging.error(f"Failed to send message: {e}")
-            return None
-
-    async def receive_responses(self):
-        if not self.connected:
-            await self.connect()
-        try:
-            while True:
-                response = await self.session.receive()
-                yield response
-        except Exception as e:
-            logging.error(f"Failed to receive responses: {e}")
-
-    async def close(self):
-        if self.session:
-            await self.session.close()
-            self.connected = False
->>>>>>> 29d5d49c4822468a5d058b37c001746357598fd3
