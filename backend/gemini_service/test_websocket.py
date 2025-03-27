@@ -42,9 +42,8 @@ async def connect_and_test():
 
             # Send a test message
             message = {
-                "text": args.message,
-                "role": "user",
-                "enableTTS": True
+                "type": "text",
+                "content": args.message
             }
             await websocket.send(json.dumps(message))
             logger.info(f"Sent message: {args.message}")

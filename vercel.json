@@ -24,10 +24,6 @@
   ],
   "regions": ["fra1"],
   "public": true,
-  "environment": {
-    "VITE_GEMINI_API_KEY": "@gemini-api-key",
-    "NODE_ENV": "production"
-  },
   "rewrites": [
     { "source": "/api/gemini", "destination": "/api/gemini/route" },
     { "source": "/api/gemini/stream", "destination": "/api/gemini/stream" },

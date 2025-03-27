@@ -15,6 +15,10 @@ const Contact = lazy(() => import("./pages/Contact"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const TestPage = lazy(() => import("./pages/TestPage"));
+const TestMCP = lazy(() => import("./pages/TestMCP"));
+const TestGoogleAI = lazy(() => import("./pages/TestGoogleAI"));
+const TestUnifiedChat = lazy(() => import("./pages/TestUnifiedChat"));
 const ChatButton = lazy(() => import("./components/ChatButton"));
 
 // Simple loading component
