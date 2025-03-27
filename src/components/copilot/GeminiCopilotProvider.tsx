@@ -136,17 +136,18 @@ export const GeminiCopilotProvider: React.FC<{ children: React.ReactNode }> = ({
         } 
       });
 
-      // TODO: Replace with actual API call
-      const response = await new Promise<string>(resolve => 
-        setTimeout(() => resolve("This is a mock AI response. Replace with actual Gemini API call."), 1000)
-      );
+      // Actual API call
+      const response = await GeminiAdapter.generateResponse({
+        prompt: content,
+        model: 'gemini-2.0-pro'
+      });
 
       // Replace loading message with actual response
       dispatch({
         type: 'SET_MESSAGES',
         payload: state.messages.filter(m => m.id !== loadingId).concat({
           role: 'assistant',
-          content: response,
+          content: response.text,
           id: Date.now().toString()
         })
       });
