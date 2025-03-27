@@ -2,11 +2,21 @@ import '@testing-library/jest-dom';
 import './mocks/googleGenAIAdapter';
 import { vi, beforeEach } from 'vitest';
 
-// Configure Puppeteer for CI environment
+// Configure Puppeteer based on environment
+const isCI = process.env.CI === 'true';
+const isMac = process.platform === 'darwin';
+
 const puppeteerConfig = {
   launch: {
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    headless: 'new'
+    // Use different configs for CI vs local development
+    ...(isCI ? {
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: 'new'
+    } : {
+      // For local development, especially on macOS
+      executablePath: isMac ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined,
+      headless: 'new'
+    })
   }
 };
 
