@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -8,40 +7,33 @@ import { ChatInput } from '../ui/ai-chat/ChatInput';
 import { ChatMessageList } from '../ui/ai-chat/ChatMessageList';
 import { AIMessage } from '@/services/copilotService';
 import { UploadedFile } from '@/hooks/useFileUpload';
+import { useFullScreenChatState } from '@/hooks/useFullScreenChatState';
+import { chatService } from '@/services/chatService';
 
 interface FullScreenChatProps {
   onMinimize: () => void;
   initialMessages?: AIMessage[];
-  onSendMessage: (files?: { mimeType: string; data: string; name: string; type: string }[]) => void;
-  inputValue: string;
-  setInputValue: (value: string) => void;
-  isLoading: boolean;
-  suggestedResponse: string | null;
-  onClear: () => void;
   placeholderText?: string;
-  // File-related props
-  files?: UploadedFile[];
-  uploadFile?: (file: File) => Promise<void>;
-  removeFile?: (index: number) => void;
-  isUploading?: boolean;
 }
 
 const FullScreenChat: React.FC<FullScreenChatProps> = ({ 
   onMinimize,
   initialMessages = [],
-  onSendMessage,
-  inputValue,
-  setInputValue,
-  isLoading,
-  suggestedResponse,
-  onClear,
-  placeholderText = "Ask about our AI services...",
-  // File-related props with defaults
-  files = [],
-  uploadFile,
-  removeFile,
-  isUploading = false
+  placeholderText = "Ask about our AI services..."
 }) => {
+  const {
+    inputValue,
+    setInputValue,
+    isLoading,
+    suggestedResponse,
+    onClear,
+    files,
+    uploadFile,
+    removeFile,
+    isUploading,
+    onSendMessage
+  } = useFullScreenChatState(initialMessages, chatService);
+
   const hasMessages = initialMessages.length > 0;
 
   // Prevent body scrolling when fullscreen chat is open

@@ -17,6 +17,7 @@ import { useCopilotReadable } from "@copilot-kit/react-core";
 import { useGeminiAudio } from "@/hooks/useGeminiAudio";
 import { toast } from "@/components/ui/toast";
 
+<<<<<<< HEAD
 interface GeminiCopilotContextType {
   isListening: boolean;
   toggleListening: () => void;
@@ -48,15 +49,60 @@ interface GeminiCopilotContextType {
 const GeminiCopilotContext = createContext<GeminiCopilotContextType | null>(
   null
 );
+=======
+// GeminiConnectionManager.tsx
+const GeminiConnectionManagerContext = createContext(null);
 
-const initialState: GeminiState = {
+const GeminiConnectionManager = ({ children }) => {
+  const { isListening, toggleListening, transcript, error: voiceError } = useVoice();
+  const audio = useGeminiAudio({
+    onStart: () => console.log('Audio playback started'),
+    onStop: () => console.log('Audio playback stopped'),
+    onError: (error) => console.error('Audio playback error:', error),
+  });
+>>>>>>> origin/development
+
+  const contextValue = {
+    isListening,
+    toggleListening,
+    transcript,
+    voiceError,
+    isPlaying: audio.isPlaying,
+    progress: audio.progress,
+    stopAudio: audio.stopPlayback,
+    generateAndPlayAudio: audio.playText,
+  };
+
+  return (
+    <GeminiConnectionManagerContext.Provider value={contextValue}>
+      {children}
+    </GeminiConnectionManagerContext.Provider>
+  );
+};
+
+export const useGeminiConnectionManager = () => {
+  const context = useContext(GeminiConnectionManagerContext);
+  if (!context) {
+    throw new Error('useGeminiConnectionManager must be used within a GeminiConnectionManager');
+  }
+  return context;
+};
+
+// GeminiChatContext.tsx
+const GeminiChatContext = createContext(null);
+
+const initialState = {
   messages: [],
   userInfo: null,
+<<<<<<< HEAD
   step: "intro",
+=======
+  step: 'intro',
+>>>>>>> origin/development
   proposal: null,
 };
 
-function reducer(state: GeminiState, action: GeminiAction): GeminiState {
+function reducer(state, action) {
   switch (action.type) {
     case "SET_MESSAGES":
       return { ...state, messages: action.payload };
@@ -79,14 +125,17 @@ function reducer(state: GeminiState, action: GeminiAction): GeminiState {
   }
 }
 
+<<<<<<< HEAD
 export const GeminiCopilotProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+=======
+const GeminiChatProvider = ({ children }) => {
+>>>>>>> origin/development
   const [state, dispatch] = useReducer(reducer, initialState);
   const { clearStorage, hasStoredState } = useLocalStorage(state, dispatch);
   const [isInitialized, setIsInitialized] = React.useState(false);
 
-  // Wait for potential localStorage restore before rendering
   React.useEffect(() => {
     if (!isInitialized) {
       const hasState = hasStoredState();
@@ -97,6 +146,7 @@ export const GeminiCopilotProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [hasStoredState, isInitialized]);
 
+<<<<<<< HEAD
   const {
     isListening,
     toggleListening,
@@ -134,12 +184,25 @@ export const GeminiCopilotProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const setUserInfo = useCallback((info: GeminiUserInfo | null) => {
     dispatch({ type: "SET_USER_INFO", payload: info });
+=======
+  const sendMessage = useCallback((text) => {
+    dispatch({ type: 'ADD_MESSAGE', payload: { role: 'user', content: text } });
+  }, []);
+
+  const setStep = useCallback((step) => {
+    dispatch({ type: 'SET_STEP', payload: step });
+  }, []);
+
+  const setUserInfo = useCallback((info) => {
+    dispatch({ type: 'SET_USER_INFO', payload: info });
+>>>>>>> origin/development
   }, []);
 
   const clearMessages = useCallback(() => {
     dispatch({ type: "CLEAR_MESSAGES" });
   }, []);
 
+<<<<<<< HEAD
   // Hook up to the new audio system
   const generateAndPlayAudio = useCallback(
     async (text: string) => {
@@ -150,6 +213,9 @@ export const GeminiCopilotProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Create generateProposal function
   const generateProposal = useCallback(async (proposalData: ProposalData) => {
+=======
+  const generateProposal = useCallback(async (proposalData) => {
+>>>>>>> origin/development
     try {
       dispatch({ type: "SET_PROPOSAL", payload: proposalData });
       return { success: true, message: "Proposal generated successfully" };
@@ -159,13 +225,16 @@ export const GeminiCopilotProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  // Add a send proposal function with toast notification
   const sendProposal = useCallback(async () => {
     try {
+<<<<<<< HEAD
       // Implement actual sending logic here (API call, etc.)
 
       // Show success toast notification
       toast.success("Proposal sent successfully");
+=======
+      toast.success('Proposal sent successfully');
+>>>>>>> origin/development
       return { success: true };
     } catch (error) {
       console.error("Error sending proposal:", error);
@@ -174,8 +243,8 @@ export const GeminiCopilotProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, []);
 
-  // Add reset conversation functionality
   const resetConversation = useCallback(() => {
+<<<<<<< HEAD
     dispatch({ type: "RESET_STATE" });
     // Also clear any active audio
     audio.stopPlayback();
@@ -188,46 +257,52 @@ export const GeminiCopilotProvider: React.FC<{ children: React.ReactNode }> = ({
       </div>
     );
   }
+=======
+    dispatch({ type: 'RESET_STATE' });
+  }, []);
+>>>>>>> origin/development
 
   const contextValue = {
-    isListening,
-    toggleListening,
-    transcript,
-    voiceError,
     messages: state.messages,
     sendMessage,
-    isPlaying: audio.isPlaying,
-    progress: audio.progress,
-    stopAudio: audio.stopPlayback,
-    generateAndPlayAudio,
     step: state.step,
     setStep,
     userInfo: state.userInfo,
     setUserInfo,
-    isLoading: false, // TODO: Add actual loading state
-    chatError: null, // TODO: Add actual error handling
     clearMessages,
     clearStorage,
     proposal: state.proposal,
-    audio,
     resetConversation,
     generateProposal,
     sendProposal,
   };
 
   return (
-    <GeminiCopilotContext.Provider value={contextValue}>
+    <GeminiChatContext.Provider value={contextValue}>
       {children}
-    </GeminiCopilotContext.Provider>
+    </GeminiChatContext.Provider>
   );
 };
 
-export const useGeminiCopilot = () => {
-  const context = useContext(GeminiCopilotContext);
+export const useGeminiChat = () => {
+  const context = useContext(GeminiChatContext);
   if (!context) {
+<<<<<<< HEAD
     throw new Error(
       "useGeminiCopilot must be used within a GeminiCopilotProvider"
     );
+=======
+    throw new Error('useGeminiChat must be used within a GeminiChatProvider');
+>>>>>>> origin/development
   }
   return context;
 };
+
+// GeminiCopilotProvider.tsx
+export const GeminiCopilotProvider = ({ children }) => (
+  <GeminiConnectionManager>
+    <GeminiChatProvider>
+      {children}
+    </GeminiChatProvider>
+  </GeminiConnectionManager>
+);

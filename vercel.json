@@ -20,6 +20,14 @@
       }
     },
     {
+      "src": "/api/gemini/stream",
+      "dest": "/api/gemini/stream.py",
+      "headers": {
+        "Cache-Control": "no-cache, no-store, must-revalidate",
+        "Content-Type": "application/json"
+      }
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/api/$1.py"
     },
