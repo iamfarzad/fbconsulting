@@ -84,5 +84,7 @@ def main():
     logger.info(f"Successfully backed up: {len(backup_success)}")
     logger.info(f"Successfully removed: {len(removed_files)}")
 
+    # Note: Use environment variables for sensitive information
+
 if __name__ == "__main__":
     main()

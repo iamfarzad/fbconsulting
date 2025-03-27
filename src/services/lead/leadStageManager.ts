@@ -47,3 +47,5 @@ export const updateLeadStage = (message: string, leadInfo: LeadInfo): LeadInfo =
   }
   return leadInfo;
 };
+
+// Note: Use environment variables for sensitive information

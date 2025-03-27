@@ -1,7 +1,3 @@
-// If you're using Create React App
-
-// Access environment variables with correct Vite syntax
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
 
 // Make sure we're not using any fallback demo response
@@ -9,7 +5,6 @@ export const fetchGeminiResponse = async (message) => {
   try {
     console.log('Fetching from API:', `${apiBaseUrl}/api/gemini/main`);
     console.log('With message:', message);
-    console.log('Using API key:', apiKey ? 'API key exists' : 'No API key');
     
     const response = await fetch(`${apiBaseUrl}/api/gemini/main`, {
       method: 'POST',
@@ -17,8 +12,7 @@ export const fetchGeminiResponse = async (message) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ 
-        message,
-        apiKey // Pass the API key explicitly
+        message
       }),
     });
     
@@ -57,4 +51,4 @@ export const fetchGeminiResponse = async (message) => {
   }
 };
 
-// ...existing code...
+// Note: Use environment variables for sensitive information

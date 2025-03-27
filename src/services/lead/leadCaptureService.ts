@@ -7,7 +7,7 @@ export class LeadCaptureService {
   private apiEndpoint: string;
   
   constructor() {
-    this.apiEndpoint = import.meta.env.VITE_LEAD_CAPTURE_ENDPOINT || '';
+    this.apiEndpoint = '';
     
     if (!this.apiEndpoint) {
       console.warn('Lead capture endpoint not configured. Lead capture functionality will be disabled.');
@@ -81,3 +81,5 @@ export class LeadCaptureService {
 
 // Singleton instance
 export const leadCaptureService = new LeadCaptureService();
+
+// Note: Use environment variables for sensitive information

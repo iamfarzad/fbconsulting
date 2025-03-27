@@ -1,4 +1,3 @@
-
 import { useState, useRef, useCallback } from 'react';
 import { 
   VoiceService, 
@@ -320,3 +319,5 @@ class VoiceServiceImpl implements VoiceService {
 }
 
 export default VoiceServiceImpl;
+
+// Note: Use environment variables for sensitive information
