@@ -1,11 +1,14 @@
-import React, { Suspense, lazy } from "react";
+// Removed: import React, { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ThemeProvider from "./components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import ChatButtonWrapper from "./components/ChatButtonWrapper";
 import { LanguageProvider } from "./contexts/LanguageContext";
-import { GeminiProvider } from "@/components/copilot/providers/GeminiProvider";
+// Corrected import path for CopilotProvider
+import { CopilotProvider } from "@/components/copilot/providers/CopilotProvider";
+// Need lazy and Suspense for lazy loading
+import { Suspense, lazy } from "react";
 
 // Lazy load components to reduce initial load time
 const Index = lazy(() => import("./pages/Index"));
@@ -15,10 +18,11 @@ const Contact = lazy(() => import("./pages/Contact"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const TestPage = lazy(() => import("./pages/TestPage"));
-const TestMCP = lazy(() => import("./pages/TestMCP"));
-const TestGoogleAI = lazy(() => import("./pages/TestGoogleAI"));
-const TestUnifiedChat = lazy(() => import("./pages/TestUnifiedChat"));
+// Removed test page imports:
+// const TestPage = lazy(() => import("./pages/TestPage"));
+// const TestMCP = lazy(() => import("./pages/TestMCP"));
+// const TestGoogleAI = lazy(() => import("./pages/TestGoogleAI"));
+// const TestUnifiedChat = lazy(() => import("./pages/TestUnifiedChat"));
 const ChatButton = lazy(() => import("./components/ChatButton"));
 
 // Simple loading component
@@ -28,6 +32,7 @@ const LoadingFallback = () => (
   </div>
 );
 
+// Using React.FC requires React in scope, but let's see if build tool handles it
 const SafeApp: React.FC = () => {
   return (
     <ErrorBoundary>
@@ -37,7 +42,7 @@ const SafeApp: React.FC = () => {
             <ErrorBoundary>
               <LanguageProvider>
                 <ErrorBoundary>
-                  <GeminiProvider>
+                  <CopilotProvider>
                     <ErrorBoundary>
                       <Suspense fallback={<LoadingFallback />}>
                         <Toaster key="toaster" />
@@ -102,10 +107,11 @@ const SafeApp: React.FC = () => {
                               </Suspense>
                             </ErrorBoundary>
                           } />
+                          {/* Remove any <Route> elements for TestPage, TestMCP, etc. if they exist */}
                         </Routes>
                       </Suspense>
                     </ErrorBoundary>
-                  </GeminiProvider>
+                  </CopilotProvider>
                 </ErrorBoundary>
               </LanguageProvider>
             </ErrorBoundary>
