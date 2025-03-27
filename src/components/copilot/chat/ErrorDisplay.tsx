@@ -1,5 +1,5 @@
 
-import React from 'react';
+// Removed: import React from 'react';
 
 interface ErrorDisplayProps {
   error: string;
