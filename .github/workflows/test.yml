@@ -8,34 +8,60 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+
     steps:
       - uses: actions/checkout@v4
       
-      - name: Setup Node.js
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
           
-      - name: Clean install dependencies
-        run: |
-          rm -rf node_modules
-          npm cache clean --force
-          npm install
-          
-      - name: Install test dependencies
-        run: npm install -D @vitejs/plugin-react-swc@latest vitest@latest @vitest/runner@latest jsdom@latest
-          
-      - name: Install Puppeteer dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgbm-dev gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget
-          
-      - name: Type check
+      - name: Install dependencies
+        run: npm ci
+        
+      # Run lint first
+      - name: Lint
         run: npm run lint
         continue-on-error: true
           
+      # Run type checking
+      - name: Type check
+        run: npm run typecheck
+        if: success() || failure() # Run even if lint fails
+          
+      # Run tests in CI mode
       - name: Run tests
-        run: npm run test
+        run: npm run test:ci
         env:
           CI: true
           NODE_ENV: test
+          TEST_ENV: ci
+          
+      # Report test results
+      - name: Upload test results
+        if: success() || failure() # Upload even if tests fail
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: |
+            coverage/
+            test-results/
+            
+      # Add test summary
+      - name: Test Summary
+        run: |
+          echo "Test Results Summary:"
+          echo "===================="
+          echo "Environment: CI/Ubuntu-latest/Node ${{ matrix.node-version }}"
+          echo "Test command: npm run test:ci"
+          
+      # Notify on failure
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Tests failed! Check the logs for details."
