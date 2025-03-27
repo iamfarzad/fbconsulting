@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { UploadedDocument } from '@/hooks/gemini/useDocumentUpload';
 import { X, FileText, File } from 'lucide-react';
+import ErrorBoundaryWrapper from '../../ErrorBoundaryWrapper';
 
 interface DocumentPreviewProps {
   documents: UploadedDocument[];
@@ -39,41 +40,43 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
   }
 
   return (
-    <div className="p-4 space-y-2 border rounded-lg bg-background">
-      {isUploading && (
-        <div className="mb-4">
-          <Progress value={30} className="w-full" />
-          <p className="mt-2 text-sm text-muted-foreground">Uploading documents...</p>
-        </div>
-      )}
-
-      <div className="space-y-2">
-        {documents.map((doc, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between p-2 border rounded-md bg-muted/50"
-          >
-            <div className="flex items-center space-x-3">
-              <DocumentIcon mimeType={doc.mimeType} />
-              <div className="space-y-1">
-                <p className="text-sm font-medium">{doc.filename}</p>
-                <p className="text-xs text-muted-foreground">
-                  {formatFileSize(doc.size)}
-                </p>
-              </div>
-            </div>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => onRemove(index)}
-              className="ml-2"
-            >
-              <X className="w-4 h-4" />
-            </Button>
+    <ErrorBoundaryWrapper>
+      <div className="p-4 space-y-2 border rounded-lg bg-background">
+        {isUploading && (
+          <div className="mb-4">
+            <Progress value={30} className="w-full" />
+            <p className="mt-2 text-sm text-muted-foreground">Uploading documents...</p>
           </div>
-        ))}
+        )}
+
+        <div className="space-y-2">
+          {documents.map((doc, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between p-2 border rounded-md bg-muted/50"
+            >
+              <div className="flex items-center space-x-3">
+                <DocumentIcon mimeType={doc.mimeType} />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">{doc.filename}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatFileSize(doc.size)}
+                  </p>
+                </div>
+              </div>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onRemove(index)}
+                className="ml-2"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </ErrorBoundaryWrapper>
   );
 };

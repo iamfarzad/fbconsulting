@@ -1,4 +1,5 @@
 import { ChatMessage, GeminiState, GeminiAction, ChatStep, GeminiUserInfo, ProposalData } from '@/types';
+import ErrorBoundaryWrapper from '../ErrorBoundaryWrapper';
 
 export interface GeminiReducerState extends GeminiState {
   isLoading: boolean;

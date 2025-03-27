@@ -1,7 +1,7 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { Message, WebSocketMessage, MessageHandler, VoiceConfig } from '../types';
+import ErrorBoundaryWrapper from '../../ErrorBoundaryWrapper';
 
 interface GeminiContextType {
   sendMessage: (content: string) => Promise<void>;
@@ -217,8 +217,12 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({
   };
 
   return (
-    <GeminiContext.Provider value={value}>
-      {children}
-    </GeminiContext.Provider>
+    <ErrorBoundaryWrapper>
+      <GeminiContext.Provider value={value}>
+        <ErrorBoundaryWrapper>
+          {children}
+        </ErrorBoundaryWrapper>
+      </GeminiContext.Provider>
+    </ErrorBoundaryWrapper>
   );
 };

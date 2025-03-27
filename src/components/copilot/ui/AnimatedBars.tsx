@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import styles from './AnimatedBars.module.css';
+import ErrorBoundaryWrapper from '../../ErrorBoundaryWrapper';
 
 interface AnimatedBarsProps {
   isActive?: boolean;
@@ -20,28 +21,30 @@ export const AnimatedBars: React.FC<AnimatedBarsProps> = ({
     : "w-1 h-4";
 
   return (
-    <div className={cn(baseClass, className)}>
-      <div 
-        className={cn(
-          barBaseClass, 
-          barClass, 
-          isActive ? styles.bar : styles.inactive
-        )}
-      />
-      <div 
-        className={cn(
-          barBaseClass, 
-          barClass,
-          isActive ? styles.bar : styles.inactive
-        )}
-      />
-      <div 
-        className={cn(
-          barBaseClass, 
-          barClass,
-          isActive ? styles.bar : styles.inactive
-        )}
-      />
-    </div>
+    <ErrorBoundaryWrapper>
+      <div className={cn(baseClass, className)}>
+        <div 
+          className={cn(
+            barBaseClass, 
+            barClass, 
+            isActive ? styles.bar : styles.inactive
+          )}
+        />
+        <div 
+          className={cn(
+            barBaseClass, 
+            barClass,
+            isActive ? styles.bar : styles.inactive
+          )}
+        />
+        <div 
+          className={cn(
+            barBaseClass, 
+            barClass,
+            isActive ? styles.bar : styles.inactive
+          )}
+        />
+      </div>
+    </ErrorBoundaryWrapper>
   );
 };

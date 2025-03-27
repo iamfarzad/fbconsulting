@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React, {
   createContext,
   useContext,
@@ -16,6 +17,16 @@ import {
 import { useCopilotReadable } from "@copilot-kit/react-core";
 import { useGeminiAudio } from "@/hooks/useGeminiAudio";
 import { toast } from "@/components/ui/toast";
+=======
+import React, { createContext, useContext, useReducer, useCallback } from 'react';
+import { useVoice } from '@/hooks/useVoice';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { GeminiState, GeminiAction, GeminiUserInfo, ChatStep, ProposalData } from '@/types';
+import { useCopilotReadable } from '@copilot-kit/react-core';
+import { useGeminiAudio } from '@/hooks/useGeminiAudio';
+import { toast } from '@/components/ui/toast';
+import ErrorBoundaryWrapper from '../ErrorBoundaryWrapper';
+>>>>>>> origin/frontend-refactor-1
 
 <<<<<<< HEAD
 interface GeminiCopilotContextType {
@@ -74,9 +85,11 @@ const GeminiConnectionManager = ({ children }) => {
   };
 
   return (
-    <GeminiConnectionManagerContext.Provider value={contextValue}>
-      {children}
-    </GeminiConnectionManagerContext.Provider>
+    <ErrorBoundaryWrapper>
+      <GeminiConnectionManagerContext.Provider value={contextValue}>
+        {children}
+      </GeminiConnectionManagerContext.Provider>
+    </ErrorBoundaryWrapper>
   );
 };
 
@@ -147,6 +160,7 @@ const GeminiChatProvider = ({ children }) => {
   }, [hasStoredState, isInitialized]);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   const {
     isListening,
     toggleListening,
@@ -187,6 +201,55 @@ const GeminiChatProvider = ({ children }) => {
 =======
   const sendMessage = useCallback((text) => {
     dispatch({ type: 'ADD_MESSAGE', payload: { role: 'user', content: text } });
+=======
+  const sendMessage = useCallback(async (content: string) => {
+    // Add user message immediately
+    dispatch({ 
+      type: 'ADD_MESSAGE', 
+      payload: { 
+        role: 'user', 
+        content,
+        id: Date.now().toString()
+      } 
+    });
+
+    try {
+      // Show loading state
+      const loadingId = Date.now().toString();
+      dispatch({ 
+        type: 'ADD_MESSAGE', 
+        payload: { 
+          role: 'assistant', 
+          content: '...', 
+          id: loadingId 
+        } 
+      });
+
+      // TODO: Replace with actual API call
+      const response = await new Promise<string>(resolve => 
+        setTimeout(() => resolve("This is a mock AI response. Replace with actual Gemini API call."), 1000)
+      );
+
+      // Replace loading message with actual response
+      dispatch({
+        type: 'SET_MESSAGES',
+        payload: state.messages.filter(m => m.id !== loadingId).concat({
+          role: 'assistant',
+          content: response,
+          id: Date.now().toString()
+        })
+      });
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Failed to send message');
+      // Remove loading message on error
+      dispatch({
+        type: 'SET_MESSAGES',
+        payload: state.messages.filter(m => m.id !== Date.now().toString())
+      });
+    }
+>>>>>>> origin/frontend-refactor-1
   }, []);
 
   const setStep = useCallback((step) => {
@@ -277,10 +340,18 @@ const GeminiChatProvider = ({ children }) => {
     sendProposal,
   };
 
+  // Expose state to CopilotKit for assistant to access
+  useCopilotReadable({
+    userInfo: state.userInfo,
+    proposal: state.proposal
+  });
+
   return (
-    <GeminiChatContext.Provider value={contextValue}>
-      {children}
-    </GeminiChatContext.Provider>
+    <ErrorBoundaryWrapper>
+      <GeminiChatContext.Provider value={contextValue}>
+        {children}
+      </GeminiChatContext.Provider>
+    </ErrorBoundaryWrapper>
   );
 };
 
@@ -300,9 +371,13 @@ export const useGeminiChat = () => {
 
 // GeminiCopilotProvider.tsx
 export const GeminiCopilotProvider = ({ children }) => (
-  <GeminiConnectionManager>
-    <GeminiChatProvider>
-      {children}
-    </GeminiChatProvider>
-  </GeminiConnectionManager>
+  <ErrorBoundaryWrapper>
+    <GeminiConnectionManager>
+      <ErrorBoundaryWrapper>
+        <GeminiChatProvider>
+          {children}
+        </GeminiChatProvider>
+      </ErrorBoundaryWrapper>
+    </GeminiConnectionManager>
+  </ErrorBoundaryWrapper>
 );

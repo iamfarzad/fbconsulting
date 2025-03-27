@@ -3,6 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { GeminiCopilotProvider } from './GeminiCopilotProvider';
 import { useGeminiConnectionManager } from './GeminiConnectionManager';
 import { useGeminiChat } from './GeminiChatContext';
+import ErrorBoundaryWrapper from '../ErrorBoundaryWrapper';
 
 jest.mock('./GeminiConnectionManager');
 jest.mock('./GeminiChatContext');
@@ -68,5 +69,38 @@ describe('GeminiCopilotProvider', () => {
     await waitFor(() => {
       expect(useGeminiChat).toHaveBeenCalled();
     });
+  });
+
+  it('renders ErrorBoundaryWrapper around GeminiCopilotProvider', () => {
+    render(
+      <GeminiCopilotProvider>
+        <div>Test Child</div>
+      </GeminiCopilotProvider>
+    );
+
+    const errorBoundaryWrapper = screen.getByTestId('error-boundary-wrapper');
+    expect(errorBoundaryWrapper).toBeInTheDocument();
+  });
+
+  it('renders ErrorBoundaryWrapper around GeminiConnectionManager', () => {
+    render(
+      <GeminiCopilotProvider>
+        <div>Test Child</div>
+      </GeminiCopilotProvider>
+    );
+
+    const errorBoundaryWrapper = screen.getByTestId('error-boundary-wrapper');
+    expect(errorBoundaryWrapper).toBeInTheDocument();
+  });
+
+  it('renders ErrorBoundaryWrapper around GeminiChatProvider', () => {
+    render(
+      <GeminiCopilotProvider>
+        <div>Test Child</div>
+      </GeminiCopilotProvider>
+    );
+
+    const errorBoundaryWrapper = screen.getByTestId('error-boundary-wrapper');
+    expect(errorBoundaryWrapper).toBeInTheDocument();
   });
 });
