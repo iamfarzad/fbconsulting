@@ -9,9 +9,10 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "npm exec -- vite preview",
-    "test": "vitest",
+    "test": "vitest run",
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage",
+    "test:ci": "vitest run --config vitest.config.ts",
     "api": "node api/server.ts",
     "dev:all": "concurrently \"npm run dev\" \"npm run api:python\"",
     "api:python": "python api/server.py"
