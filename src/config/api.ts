@@ -5,9 +5,9 @@ const isVercel = import.meta.env.VITE_DEPLOYMENT_ENV === 'vercel';
 // API Paths
 export const API_PATHS = {
   GOOGLE_GENERATIVE_AI: 'https://generativelanguage.googleapis.com/v1beta',
-  WEBSOCKET_BASE: isProd ? (isVercel ? 'wss://fbconsulting-24cken69i-iamfarzads-projects.vercel.app/api/gemini/stream' : 'wss://fbconsulting.vercel.app/api/gemini/stream') : 'ws://localhost:8000/ws',
+  WEBSOCKET_BASE: 'wss://gemini-backend-service-74kft2d4ua-lz.a.run.app/ws', // Explicitly point to Cloud Run WSS
   GEMINI_AUDIO: '/api/gemini/audio',
-  GEMINI_STREAM: '/api/gemini/stream',
+  GEMINI_STREAM: '/api/gemini/stream', // This might be deprecated if WS is used directly
   GEMINI_MAIN: '/api/gemini/main', // Updated path to avoid conflicts
   EMAIL_SERVICE: isProd ? '/api/email' : 'http://localhost:8000/api/email',
   LEAD_CAPTURE: isProd ? '/api/lead' : 'http://localhost:8000/api/lead',
@@ -21,9 +21,8 @@ export const API_CONFIG = {
   },
   DEFAULT_WS_PING_INTERVAL: 20000, // 20 seconds
   DEFAULT_WS_PING_TIMEOUT: 10000, // 10 seconds
-  WS_BASE_URL: isProd 
-    ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`
-    : 'ws://localhost:8000',
+  // Updated to point to Cloud Run backend directly
+  WS_BASE_URL: 'wss://gemini-backend-service-74kft2d4ua-lz.a.run.app',
 };
 
 // Make sure environment variables are accessed correctly using Vite's import.meta.env
