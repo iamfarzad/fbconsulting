@@ -1,55 +1,38 @@
 import '@testing-library/jest-dom';
-import './mocks/googleGenAIAdapter';
-import { vi, beforeEach } from 'vitest';
+import { vi, afterEach } from 'vitest';
 
-// Configure Puppeteer based on environment
-const isCI = process.env.CI === 'true';
-const isMac = process.platform === 'darwin';
-
-const puppeteerConfig = {
-  launch: {
-    // Use different configs for CI vs local development
-    ...(isCI ? {
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      headless: 'new'
-    } : {
-      // For local development, especially on macOS
-      executablePath: isMac ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' : undefined,
-      headless: 'new'
-    })
+// Extend the global Window interface for our test environment
+declare global {
+  interface Window {
+    ResizeObserver: ResizeObserverConstructor;
   }
-};
-
-// Export for use in tests
-global.__PUPPETEER_CONFIG__ = puppeteerConfig;
-
-// Mock window.speechSynthesis
-const mockSpeechSynthesis = {
-  speak: vi.fn(),
-  getVoices: vi.fn().mockImplementation(() => [
-    { name: 'Charon', lang: 'en-US' },
-    { name: 'Other Voice', lang: 'en-US' }
-  ]),
-  onvoiceschanged: null as (() => void) | null
-};
-
-Object.defineProperty(window, 'speechSynthesis', {
-  value: mockSpeechSynthesis,
-  writable: true
-});
-
-// Mock IntersectionObserver
-class MockIntersectionObserver {
-  observe = vi.fn();
-  disconnect = vi.fn();
-  unobserve = vi.fn();
 }
 
-Object.defineProperty(window, 'IntersectionObserver', {
-  value: MockIntersectionObserver
-});
+interface ResizeObserverEntry {
+  target: Element;
+  contentRect: DOMRectReadOnly;
+  borderBoxSize: ReadonlyArray<ResizeObserverSize>;
+  contentBoxSize: ReadonlyArray<ResizeObserverSize>;
+}
 
-// Reset all mocks before each test
-beforeEach(() => {
+interface ResizeObserverConstructor {
+  new (callback: ResizeObserverCallback): ResizeObserver;
+  prototype: ResizeObserver;
+}
+
+type ResizeObserverCallback = (entries: ResizeObserverEntry[], observer: ResizeObserver) => void;
+
+// Mock ResizeObserver which is commonly needed
+window.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
+// Mock fetch if needed
+global.fetch = vi.fn();
+
+// Clean up after each test
+afterEach(() => {
   vi.clearAllMocks();
 });
