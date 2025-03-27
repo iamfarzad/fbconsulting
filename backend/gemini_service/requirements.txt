@@ -1,4 +1,7 @@
-# Deployment tools
+need to fix the mergeitFlask==2.3.2
+google-generativeai==0.3.1
+python-dotenv==1.0.0
+
 setuptools>=58.0.0
 wheel>=0.38.4
 pip>=21.0.0
@@ -30,3 +33,4 @@ python-json-logger>=2.0.0
 # CORS & middleware
 starlette>=0.14.2
 werkzeug==3.0.1
+

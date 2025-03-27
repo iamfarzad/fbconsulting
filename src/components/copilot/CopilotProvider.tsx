@@ -1,4 +1,6 @@
 import React, { createContext, useState, useContext, ReactNode } from 'react';
+import ErrorBoundaryWrapper from '../ErrorBoundaryWrapper';
+import { GeminiCopilotProvider } from './GeminiCopilotProvider';
 
 interface CopilotContextType {
   enabled: boolean;
@@ -34,7 +36,11 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
 
   return (
     <CopilotContext.Provider value={value}>
-      {children}
+      <ErrorBoundaryWrapper>
+        <GeminiCopilotProvider>
+          {children}
+        </GeminiCopilotProvider>
+      </ErrorBoundaryWrapper>
     </CopilotContext.Provider>
   );
 };
