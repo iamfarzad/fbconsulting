@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { Message, WebSocketMessage, MessageHandler, VoiceConfig } from '../types';
+import { API_CONFIG } from '@/config/api'; // Import API_CONFIG
 
 interface GeminiContextType {
   sendMessage: (content: string) => Promise<void>;
@@ -58,12 +59,15 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
     setIsConnecting(true);
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//${window.location.host}/api/gemini/stream`;
+    // Use WS_BASE_URL from API_CONFIG and add client ID path
+    const clientId = Math.random().toString(36).substring(7);
+    const wsUrl = `${API_CONFIG.WS_BASE_URL}/ws/${clientId}`;
+    console.log('[GeminiProvider] Connecting to WebSocket:', wsUrl); // Add logging
 
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
+      console.log('[GeminiProvider] WebSocket connected'); // Add logging
       setIsConnected(true);
       setIsConnecting(false);
       setError(null);
@@ -90,7 +94,7 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({
               variant: 'destructive',
             });
             break;
-          case 'connection':
+          case 'connection': // Assuming backend sends this on connect
             if (data.status === 'connected') {
               setIsConnected(true);
               setIsConnecting(false);
@@ -103,17 +107,20 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({
     };
 
     ws.onerror = (event) => {
+      console.error('[GeminiProvider] WebSocket error:', event); // Add logging
       setError('WebSocket error occurred');
       setIsConnected(false);
       console.error('WebSocket error:', event);
     };
 
     ws.onclose = () => {
+      console.log('[GeminiProvider] WebSocket closed'); // Add logging
       setIsConnected(false);
       setIsConnecting(false);
-      setTimeout(() => {
-        connectWebSocket(); // Attempt to reconnect
-      }, 3000);
+      // Simplified reconnect logic for now
+      // setTimeout(() => {
+      //   connectWebSocket(); // Attempt to reconnect
+      // }, 3000);
     };
 
     wsRef.current = ws;
@@ -131,18 +138,16 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({
       throw new Error('WebSocket is not connected');
     }
 
-    const message: Message = {
+    // Match the message structure expected by the backend (main.py)
+    const message = {
+      text: content,
       role: 'user',
-      content,
-      timestamp: Date.now()
+      enableTTS: true // Or get this setting dynamically
     };
 
     return new Promise<void>((resolve, reject) => {
       try {
-        wsRef.current?.send(JSON.stringify({
-          type: 'chat',
-          messages: [message]
-        }));
+        wsRef.current?.send(JSON.stringify(message));
         resolve();
       } catch (error) {
         reject(error);
