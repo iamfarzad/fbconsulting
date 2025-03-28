@@ -1,10 +1,23 @@
 
 import { useMemo } from 'react';
 
+interface PersonaData {
+  personaDefinitions?: Record<string, {
+    name: string;
+    tone: string;
+    focusAreas: string[];
+  }>;
+  currentPersona?: string;
+  userRole?: string;
+  userIndustry?: string;
+  userTechnicalLevel?: string;
+  currentPage?: string;
+}
+
 /**
- * Hook to generate the system message based on persona data
+ * Hook to generate a system message based on persona data
  */
-export function useSystemMessage(personaData?: any) {
+export function useSystemMessage(personaData: PersonaData | undefined) {
   const systemMessage = useMemo(() => {
     if (!personaData?.personaDefinitions || !personaData.currentPersona) {
       return '';
@@ -13,14 +26,13 @@ export function useSystemMessage(personaData?: any) {
     const personaDetails = personaData.personaDefinitions[personaData.currentPersona];
     if (!personaDetails) return '';
 
-    return `
-      You are Farzad AI Assistant, an AI consultant built into the landing page of F.B Consulting. 
-      Currently using the "${personaDetails.name}" persona.
+    return `You are Farzad AI Assistant, an AI consultant built into the landing page of F.B Consulting. 
+      Currently using the "${personaDetails.name}" persona. 
       
-      Tone: ${personaDetails.tone}
+      Tone: ${personaDetails.tone} 
       
-      Focus Areas:
-      ${personaDetails.focusAreas.map((area: string) => `- ${area}`).join('\n')}
+      Focus Areas: 
+      ${personaDetails.focusAreas.map(area => `- ${area}`).join('\n')} 
       
       Additional Context:
       - User Role: ${personaData.userRole || 'Unknown'}
@@ -32,5 +44,5 @@ export function useSystemMessage(personaData?: any) {
     `;
   }, [personaData]);
 
-  return { systemMessage };
+  return systemMessage;
 }

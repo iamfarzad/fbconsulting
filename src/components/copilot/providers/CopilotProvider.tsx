@@ -1,26 +1,21 @@
-import React, { useState, useEffect, useMemo, createContext, useContext } from 'react';
-import { useLocation } from 'react-router-dom';
+
+import React, { useState, createContext, useContext } from 'react';
 import { CopilotKit } from '@copilotkit/react-core';
 
 // Internal imports
 import { usePersonaManagement } from '@/mcp/hooks/usePersonaManagement';
-import { toast } from '@/components/ui/use-toast';
 import { useGeminiAPI } from '@/hooks/useGeminiAPI';
-// Corrected import for default export
 import ConnectionStatusIndicator from '@/components/ui/ConnectionStatusIndicator'; 
-import { formatErrorMessage, logDetailedError, categorizeError } from '@/utils/errorHandling';
-// Import types from their new location in features/gemini
-import type { 
-  AIMessage as Message, 
-  ChatServiceOptions as CopilotConfigType 
-} from '@/features/gemini/types';
-// Attempt to import other types - paths might need adjustment
-// import type { SpatialContext, VoiceConfig } from '@/types/copilot'; // Assuming they might be in src/types now - Commented out as source is unknown
-import type { AIMessage as ChatMessage } from '@/features/gemini/types'; // Corrected ChatMessage import
+import type { AIMessage as ChatMessage } from '@/features/gemini/types';
 
-// Placeholder types since original source is unknown
-type SpatialContext = any; 
-type VoiceConfig = any;
+// Custom hooks
+import { useSystemMessage } from '../hooks/useSystemMessage';
+import { useConnectionStatus } from '../hooks/useConnectionStatus';
+import { useVoiceSetup } from '../hooks/useVoiceSetup';
+import { useSpatialContext } from '../hooks/useSpatialContext';
+import { useCopilotConfig } from '../hooks/useCopilotConfig';
+import { useErrorHandling } from '../hooks/useErrorHandling';
+import { useChatHistory } from '../hooks/useChatHistory';
 
 // Basic Copilot Context for toggle functionality
 interface CopilotContextType {
@@ -58,161 +53,60 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
   const [enabled, setEnabled] = useState(false);
   const toggleCopilot = () => setEnabled(prev => !prev);
 
-  // Hooks for external data
-  const { personaData } = usePersonaManagement();
-  const location = useLocation();
-  const { apiKey, isLoading } = useGeminiAPI(); // Still using old hook - needs refactoring
-
-  // State hooks
-  const [voiceEnabled, setVoiceEnabled] = useState(false);
-  const [spatialContext, setSpatialContext] = useState<SpatialContext | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle');
-  const [connectionError, setConnectionError] = useState<string | null>(null);
+  // UI state
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [activeProvider, setActiveProvider] = useState<string>('gemini');
-  const [chatHistory, setChatHistory] = useState<Record<string, ChatMessage[]>>({
-    gemini: [],
-    openai: [],
-    anthropic: [],
-  });
 
+  // Hooks for external data
+  const { personaData } = usePersonaManagement();
+  const { apiKey, isLoading } = useGeminiAPI();
+
+  // Generate system message from persona data
+  const systemMessage = useSystemMessage(personaData);
+
+  // Handle connection status
+  const {
+    connectionStatus,
+    connectionError,
+    isConnected,
+    isConnecting,
+    showConnectionStatus
+  } = useConnectionStatus(enabled, apiKey, isLoading);
+
+  // Initialize voice capabilities
+  const { voiceEnabled } = useVoiceSetup(enabled);
+
+  // Track spatial context
+  const { spatialContext } = useSpatialContext(enabled);
+
+  // Build copilot configuration
+  const copilotConfig = useCopilotConfig(
+    apiKey || '',
+    systemMessage,
+    voiceEnabled,
+    spatialContext
+  );
+
+  // Setup error handling
+  useErrorHandling(connectionStatus, connectionError);
+
+  // Manage chat history
+  const { 
+    chatHistory, 
+    addMessageToHistory, 
+    clearChatHistory 
+  } = useChatHistory();
+
+  // UI handlers
   const openCopilot = () => setIsOpen(true);
   const closeCopilot = () => setIsOpen(false);
 
-  const addMessageToHistory = (provider: string, message: ChatMessage) => {
-    setChatHistory(prev => {
-      const providerHistory = Array.isArray(prev[provider]) ? [...prev[provider]] : [];
-      return {
-        ...prev,
-        [provider]: [...providerHistory, message],
-      };
-    });
-  };
-
-  const clearChatHistory = (provider: string) => {
-    setChatHistory(prev => ({
-      ...prev,
-      [provider]: [],
-    }));
-  };
-
-  // Memoized values
-  const publicApiKey = useMemo(() => {
-    return apiKey || '';
-  }, [apiKey]);
-
-  const systemMessage = useMemo(() => {
-    if (!personaData?.personaDefinitions || !personaData.currentPersona) {
-      return '';
-    }
-    const personaDetails = personaData.personaDefinitions[personaData.currentPersona];
-    if (!personaDetails) return '';
-
-    // Corrected template literal for system message
-    return `
-      You are Farzad AI Assistant, an AI consultant built into the landing page of F.B Consulting. 
-      Currently using the "${personaDetails.name}" persona.
-      
-      Tone: ${personaDetails.tone}
-      
-      Focus Areas:
-${personaDetails.focusAreas.map(area => `- ${area}`).join('\n')}
-
-      
-      Additional Context:
-      - User Role: ${personaData.userRole || 'Unknown'}
-      - User Industry: ${personaData.userIndustry || 'Unknown'}
-      - User Technical Level: ${personaData.userTechnicalLevel || 'beginner'}
-      - Current Page: ${personaData.currentPage || '/'}
-      
-      Remember to adjust your responses based on the user's technical level and industry context.
-    `;
-  }, [personaData]);
-
-  const copilotConfig = useMemo<any>( // Use any temporarily
-    () => ({
-      apiKey: publicApiKey,
-      model: 'gemini-2.0-flash-001', // This model might be invalid or unsupported
-      temperature: 0.7,
-      maxTokens: 2048,
-      initialMessages: [
-        {
-          role: 'system',
-          content: systemMessage,
-          timestamp: Date.now()
-        } as Message
-      ],
-      voice: voiceEnabled ? {
-        enabled: true,
-        voice: 'Charon', 
-        pitch: 1,
-        rate: 1
-      } : undefined,
-      spatialContext: spatialContext,
-      agentic: {
-        proactiveAssistance: true,
-        learningEnabled: true,
-        contextAwareness: true,
-        behaviorPatterns: ['page_navigation', 'content_interaction', 'form_interaction']
-      }
-    }),
-    [systemMessage, voiceEnabled, spatialContext, publicApiKey]
-  );
-
-  // Initialize and validate API key (using old hook - needs update)
-  useEffect(() => {
-    if (!enabled) return;
-    if (isLoading) {
-      setConnectionStatus('connecting');
-      return;
-    }
-    if (!apiKey) {
-      setConnectionStatus('error');
-      setConnectionError('API key not found');
-      toast({ /* ... */ });
-    } else {
-      // Old connection test logic
-      const testConnection = async () => {
-        try {
-          setConnectionStatus('connecting');
-          const response = await fetch('https://generativelanguage.googleapis.com/v1/models?key=' + apiKey);
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(`API connection failed: ${response.status} ${response.statusText}${
-              errorData.error ? ` - ${errorData.error.message || ''}` : ''
-            }`);
-          }
-          setConnectionStatus('connected');
-          setConnectionError(null);
-        } catch (error) {
-          logDetailedError(error, { /* ... */ });
-          setConnectionStatus('error');
-          const errorMessage = formatErrorMessage(error);
-          setConnectionError(errorMessage);
-          const errorCategory = categorizeError(error);
-          let toastTitle = 'API Connection Error';
-          let toastDescription = 'Failed to connect to the Gemini API.';
-          if (errorCategory === 'auth') { /* ... */ }
-          toast({ /* ... */ });
-        }
-      };
-      testConnection();
-    }
-  }, [apiKey, isLoading, enabled]);
-
-  // Voice synthesis initialization
-  useEffect(() => { /* ... */ }, [enabled]);
-
-  // Spatial context tracking
-  useEffect(() => { /* ... */ }, [location, spatialContext, enabled]);
-
-  const showConnectionStatus = connectionStatus === 'error' || connectionStatus === 'connecting';
-
+  // Provide the combined context value
   const contextValue = {
     enabled,
     toggleCopilot,
-    isConnected: connectionStatus === 'connected',
-    isConnecting: connectionStatus === 'connecting',
+    isConnected,
+    isConnecting,
     error: connectionError,
     isOpen,
     openCopilot,
@@ -224,18 +118,15 @@ ${personaDetails.focusAreas.map(area => `- ${area}`).join('\n')}
     clearChatHistory,
   };
 
-  // Other useEffects for error handling
-  useEffect(() => { /* ... */ }, [connectionStatus, connectionError]);
-  useEffect(() => { /* ... */ }, []);
-  useEffect(() => { /* ... */ }, []);
-
   return (
     <CopilotContext.Provider value={contextValue}>
       {showConnectionStatus && enabled && (
         <ConnectionStatusIndicator 
-          status={connectionStatus === 'connecting' ? 'connecting' : connectionStatus === 'connected' ? 'connected' : 'disconnected'} 
+          status={connectionStatus === 'connecting' ? 'connecting' : 
+                 connectionStatus === 'connected' ? 'connected' : 'disconnected'} 
         />
       )}
+      
       {(enabled && connectionStatus === 'connected' && apiKey) ? (
         <CopilotKit {...copilotConfig}>
           {children}
