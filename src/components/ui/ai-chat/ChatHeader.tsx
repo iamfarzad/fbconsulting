@@ -1,26 +1,13 @@
+
 import React from 'react';
 import { X, Maximize2, Minimize2, Trash2, CalendarIcon, ClockIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AnimatedBars } from '@/components/ui/AnimatedBars';
-
-interface ChatHeaderProps {
-  title: string;
-  subtitle?: string;
-  onClear?: () => void;
-  onToggleFullScreen?: () => void;
-  isFullScreen?: boolean;
-  isConnected?: boolean;
-  isLoading?: boolean;
-  category?: string;
-  date?: string;
-  readTime?: string;
-  author?: string;
-  authorTitle?: string;
-  authorAvatar?: string;
-}
+import { ConnectionStatusIndicator } from './ConnectionStatusIndicator';
+import { ChatHeaderProps } from '@/types/chat';
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
-  title,
+  title = "AI Assistant",
   subtitle,
   onClear,
   onToggleFullScreen,
@@ -35,7 +22,6 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   authorAvatar,
 }) => {
   const handleToggleFullScreen = () => {
-    console.log('Toggle fullscreen button clicked in ChatHeader, current state:', isFullScreen);
     if (onToggleFullScreen) {
       onToggleFullScreen();
     }
@@ -45,7 +31,16 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
     <div className="flex items-center justify-between p-4 border-b bg-background rounded-t-lg">
       <div className="flex items-center">
         <div>
-          <h3 className="font-medium text-lg">{title}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-medium text-lg">{title}</h3>
+            {/* Display connection status if relevant */}
+            {isConnected !== undefined && (
+              <ConnectionStatusIndicator 
+                isConnected={isConnected} 
+                isLoading={isLoading} 
+              />
+            )}
+          </div>
           <div className="flex items-center space-x-2">
             {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
             {isLoading && <AnimatedBars isActive={true} small={true} />}
@@ -117,3 +112,5 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
     </div>
   );
 };
+
+export default ChatHeader;
