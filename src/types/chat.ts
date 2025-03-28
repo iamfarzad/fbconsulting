@@ -1,33 +1,39 @@
-export interface Message {
+
+// Basic chat message types
+export interface FileAttachment {
+  mimeType: string;
+  data: string;
+  name: string;
+  type: string;
+}
+
+export interface AIMessage {
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
   timestamp: number;
+  media?: Array<{
+    type: 'image' | 'document';
+    data: string;
+    mimeType?: string;
+    name?: string;
+  }>;
 }
 
-export interface AIMessage extends Message {
-  media?: MessageMedia[];
-  isLoading?: boolean;
+export interface ChatResponse {
+  text: string;
+  suggestedResponse?: string;
+  leadInfo?: any;
+  cards?: any[];
 }
-
-export interface MessageMedia {
-  type: 'image' | 'video' | 'audio' | 'document' | 'code' | 'link';
-  url?: string;
-  content?: string;
-  metadata?: Record<string, any>;
-}
-
-export type FormType = 'email-summary' | 'newsletter-signup' | 'booking-request' | 'contact-form';
 
 export interface FormData {
-  type: FormType;
-  data?: Record<string, string>;
+  type: string;
+  fields: Record<string, string>;
 }
 
-export interface Card {
-  title: string;
-  description?: string;
-  imageUrl?: string;
-  buttonText?: string;
-  buttonUrl?: string;
-  subtitle?: string;
-}
+export type ChatService = {
+  sendMessage: (message: string, files?: FileAttachment[]) => Promise<ChatResponse>;
+  streamMessage?: (message: string, files?: FileAttachment[]) => AsyncGenerator<string, void, unknown>;
+  clearConversation: () => void;
+  getMessages: () => AIMessage[];
+};
