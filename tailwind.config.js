@@ -1,15 +1,9 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-  darkMode: ["class"],
-  content: ["./src/**/*.{ts,tsx}"],
+export default {
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+  ],
   theme: {
-    container: {
-      center: true,
-      padding: "2rem",
-      screens: {
-        "2xl": "1400px",
-      },
-    },
     extend: {
       colors: {
         border: "hsl(var(--border))",
@@ -46,25 +40,6 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))",
         },
       },
-      keyframes: {
-        'spin-around': {
-          '0%': { transform: 'rotate(0deg)' },
-          '100%': { transform: 'rotate(360deg)' }
-        },
-        'pulse-slow': {
-          '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.8' }
-        },
-        'float': {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-10px)' }
-        }
-      },
-      animation: {
-        'spin-around': 'spin-around 2s linear infinite',
-        'pulse-slow': 'pulse-slow 3s ease-in-out infinite',
-        'float': 'float 6s ease-in-out infinite'
-      }
     },
   },
   plugins: [require("tailwindcss-animate")],
