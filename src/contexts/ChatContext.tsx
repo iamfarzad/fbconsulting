@@ -1,248 +1,177 @@
 
-import React, { createContext, useContext, useReducer, useRef } from 'react';
-import { toast } from '@/components/ui/use-toast';
-import { AIMessage, MessageRole } from '@/features/gemini/types';
-import { GeminiAdapter } from '@/features/gemini/services/geminiAdapter';
+import React, { createContext, useContext, useReducer, useCallback, useRef } from 'react';
+import { AIMessage, ChatContextType } from '@/types/chat';
+import { useGemini } from '@/components/copilot/providers/GeminiProvider';
+import { useToast } from '@/hooks/use-toast';
 
-// Define the shape of our chat state
+type ChatAction = 
+  | { type: 'ADD_MESSAGE'; payload: AIMessage }
+  | { type: 'CLEAR_MESSAGES' }
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_INPUT_VALUE'; payload: string }
+  | { type: 'SET_SHOW_MESSAGES'; payload: boolean }
+  | { type: 'TOGGLE_FULLSCREEN' };
+
 interface ChatState {
   messages: AIMessage[];
   inputValue: string;
   isLoading: boolean;
-  error: string | null;
-  isFullScreen: boolean;
   showMessages: boolean;
-  suggestedResponse: string | null;
   isInitialized: boolean;
+  isFullScreen: boolean;
 }
 
-// Define the actions we can dispatch
-type ChatAction =
-  | { type: 'ADD_MESSAGE'; payload: AIMessage }
-  | { type: 'SET_MESSAGES'; payload: AIMessage[] }
-  | { type: 'CLEAR_MESSAGES' }
-  | { type: 'SET_INPUT_VALUE'; payload: string }
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'TOGGLE_FULLSCREEN' }
-  | { type: 'SET_FULLSCREEN'; payload: boolean }
-  | { type: 'SET_SHOW_MESSAGES'; payload: boolean }
-  | { type: 'SET_SUGGESTED_RESPONSE'; payload: string | null }
-  | { type: 'SET_INITIALIZED'; payload: boolean };
-
-// Initial state
-const initialChatState: ChatState = {
+const initialState: ChatState = {
   messages: [],
   inputValue: '',
   isLoading: false,
-  error: null,
-  isFullScreen: false,
-  showMessages: true,
-  suggestedResponse: null,
+  showMessages: false,
   isInitialized: false,
+  isFullScreen: false
 };
 
-// Reducer function to handle state updates
-function chatReducer(state: ChatState, action: ChatAction): ChatState {
+const chatReducer = (state: ChatState, action: ChatAction): ChatState => {
   switch (action.type) {
     case 'ADD_MESSAGE':
       return {
         ...state,
-        messages: [...state.messages, action.payload],
-      };
-    case 'SET_MESSAGES':
-      return {
-        ...state,
-        messages: action.payload,
+        messages: [...state.messages, action.payload]
       };
     case 'CLEAR_MESSAGES':
       return {
         ...state,
-        messages: [],
-      };
-    case 'SET_INPUT_VALUE':
-      return {
-        ...state,
-        inputValue: action.payload,
+        messages: []
       };
     case 'SET_LOADING':
       return {
         ...state,
-        isLoading: action.payload,
+        isLoading: action.payload
       };
-    case 'SET_ERROR':
+    case 'SET_INPUT_VALUE':
       return {
         ...state,
-        error: action.payload,
-      };
-    case 'TOGGLE_FULLSCREEN':
-      return {
-        ...state,
-        isFullScreen: !state.isFullScreen,
-      };
-    case 'SET_FULLSCREEN':
-      return {
-        ...state,
-        isFullScreen: action.payload,
+        inputValue: action.payload
       };
     case 'SET_SHOW_MESSAGES':
       return {
         ...state,
-        showMessages: action.payload,
+        showMessages: action.payload
       };
-    case 'SET_SUGGESTED_RESPONSE':
+    case 'TOGGLE_FULLSCREEN':
       return {
         ...state,
-        suggestedResponse: action.payload,
-      };
-    case 'SET_INITIALIZED':
-      return {
-        ...state,
-        isInitialized: action.payload,
+        isFullScreen: !state.isFullScreen
       };
     default:
       return state;
   }
-}
-
-// Create a type for the ChatContext
-interface ChatContextType {
-  state: ChatState;
-  dispatch: React.Dispatch<ChatAction>;
-  sendMessage: (content: string) => Promise<void>;
-  clearMessages: () => void;
-  toggleFullScreen: () => void;
-  containerRef: React.RefObject<HTMLDivElement>;
-}
-
-// Create the context
-const ChatContext = createContext<ChatContextType | undefined>(undefined);
-
-// Create the provider component
-export const ChatProvider: React.FC<{ 
-  children: React.ReactNode;
-  apiKey?: string;
-  modelName?: string;
-}> = ({ 
-  children,
-  apiKey,
-  modelName = 'gemini-1.0-pro'
-}) => {
-  const [state, dispatch] = useReducer(chatReducer, initialChatState);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Initialize with API key if provided
-  React.useEffect(() => {
-    if (apiKey) {
-      GeminiAdapter.initialize(apiKey);
-      dispatch({ type: 'SET_INITIALIZED', payload: true });
-    } else {
-      // Try to get API key from environment
-      const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
-      if (envApiKey) {
-        GeminiAdapter.initialize(envApiKey);
-        dispatch({ type: 'SET_INITIALIZED', payload: true });
-      } else {
-        console.warn("No API key provided for Gemini. Using mock responses.");
-        dispatch({ type: 'SET_INITIALIZED', payload: true });
-      }
-    }
-  }, [apiKey]);
-
-  // Clear messages function
-  const clearMessages = () => {
-    dispatch({ type: 'CLEAR_MESSAGES' });
-    dispatch({ type: 'SET_INPUT_VALUE', payload: '' });
-  };
-
-  // Toggle fullscreen function
-  const toggleFullScreen = () => {
-    dispatch({ type: 'TOGGLE_FULLSCREEN' });
-  };
-
-  // Send message function
-  const sendMessage = async (content: string) => {
-    if (!content.trim()) return;
-
-    // Set loading state
-    dispatch({ type: 'SET_LOADING', payload: true });
-
-    try {
-      // Add user message
-      const userMessage: AIMessage = {
-        role: 'user',
-        content: content.trim(),
-        timestamp: Date.now()
-      };
-      dispatch({ type: 'ADD_MESSAGE', payload: userMessage });
-      
-      // Clear input
-      dispatch({ type: 'SET_INPUT_VALUE', payload: '' });
-
-      // Generate AI response
-      const response = await GeminiAdapter.generateResponse({
-        prompt: content.trim(),
-        model: modelName
-      });
-
-      if (response.error) {
-        dispatch({ 
-          type: 'SET_ERROR', 
-          payload: response.error 
-        });
-
-        toast({
-          title: "Error",
-          description: response.error,
-          variant: "destructive",
-        });
-      }
-
-      // Add AI response
-      const aiMessage: AIMessage = {
-        role: 'assistant',
-        content: response.text,
-        timestamp: Date.now()
-      };
-      dispatch({ type: 'ADD_MESSAGE', payload: aiMessage });
-    } catch (error) {
-      console.error("Error sending message:", error);
-      dispatch({ 
-        type: 'SET_ERROR', 
-        payload: error instanceof Error ? error.message : 'Unknown error'
-      });
-
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : 'Unknown error',
-        variant: "destructive",
-      });
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
-  };
-
-  return (
-    <ChatContext.Provider
-      value={{
-        state,
-        dispatch,
-        sendMessage,
-        clearMessages,
-        toggleFullScreen,
-        containerRef
-      }}
-    >
-      {children}
-    </ChatContext.Provider>
-  );
 };
 
-// Create a hook for using the chat context
+const ChatContext = createContext<ChatContextType | null>(null);
+
 export const useChat = () => {
   const context = useContext(ChatContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useChat must be used within a ChatProvider');
   }
   return context;
+};
+
+interface ChatProviderProps {
+  children: React.ReactNode;
+  apiKey?: string;
+  modelName?: string;
+}
+
+export const ChatProvider: React.FC<ChatProviderProps> = ({ 
+  children,
+  apiKey,
+  modelName
+}) => {
+  const [state, dispatch] = useReducer(chatReducer, initialState);
+  const { sendMessage: geminiSendMessage, isConnected } = useGemini();
+  const { toast } = useToast();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Set initialized state based on Gemini connection
+  React.useEffect(() => {
+    dispatch({ 
+      type: 'SET_SHOW_MESSAGES', 
+      payload: isConnected 
+    });
+  }, [isConnected]);
+
+  const sendMessage = useCallback(async (content: string) => {
+    if (!content.trim()) return;
+    
+    // Add user message
+    dispatch({
+      type: 'ADD_MESSAGE',
+      payload: {
+        role: 'user',
+        content,
+        timestamp: Date.now()
+      }
+    });
+    
+    // Clear input value
+    dispatch({ type: 'SET_INPUT_VALUE', payload: '' });
+    
+    // Set loading state
+    dispatch({ type: 'SET_LOADING', payload: true });
+    
+    try {
+      // Send message to Gemini
+      await geminiSendMessage(content);
+      
+      // Message is received through the WebSocket connection
+      // and added to state by the onmessage handler
+    } catch (error) {
+      console.error('Error sending message:', error);
+      
+      // Add error message
+      dispatch({
+        type: 'ADD_MESSAGE',
+        payload: {
+          role: 'error',
+          content: error instanceof Error ? error.message : 'Error sending message',
+          timestamp: Date.now()
+        }
+      });
+      
+      toast({
+        title: 'Error',
+        description: 'Failed to send message. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+      
+      // Always show messages when a message is sent
+      dispatch({ type: 'SET_SHOW_MESSAGES', payload: true });
+    }
+  }, [geminiSendMessage, toast]);
+
+  const clearMessages = useCallback(() => {
+    dispatch({ type: 'CLEAR_MESSAGES' });
+  }, []);
+
+  const toggleFullScreen = useCallback(() => {
+    dispatch({ type: 'TOGGLE_FULLSCREEN' });
+  }, []);
+
+  const value = {
+    state,
+    dispatch,
+    sendMessage,
+    clearMessages,
+    toggleFullScreen,
+    containerRef
+  };
+
+  return (
+    <ChatContext.Provider value={value}>
+      {children}
+    </ChatContext.Provider>
+  );
 };
