@@ -8,8 +8,9 @@ import { ChatInputProps } from '@/types/chat';
 export const UnifiedChatInput: React.FC<ChatInputProps> = ({
   placeholder = "Type your message..."
 }) => {
-  const { state, dispatch, sendMessage } = useChat();
+  const { state, actions } = useChat();
   const { inputValue, isLoading } = state;
+  const { sendMessage, setInputValue } = actions;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea
@@ -38,7 +39,7 @@ export const UnifiedChatInput: React.FC<ChatInputProps> = ({
       <textarea
         ref={textareaRef}
         value={inputValue}
-        onChange={(e) => dispatch({ type: 'SET_INPUT_VALUE', payload: e.target.value })}
+        onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         className="flex-1 resize-none border-0 bg-transparent p-3 focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 min-h-[60px] max-h-[200px]"

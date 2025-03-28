@@ -3,7 +3,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { useChat, ChatProvider } from '@/contexts/ChatContext';
+import { ChatProvider, useChat } from '@/contexts/ChatContext';
 import { UnifiedChatMessageList } from './UnifiedChatMessageList';
 import { UnifiedChatInput } from './UnifiedChatInput';
 import { UnifiedFullScreenChatProps } from '@/types/chat';
@@ -16,8 +16,9 @@ const FullScreenChatContent: React.FC<{
   onMinimize,
   placeholderText = "Ask me anything..."
 }) => {
-  const { state, clearMessages } = useChat();
-  const { isLoading, messages, showMessages } = state;
+  const { state, actions } = useChat();
+  const { isLoading, messages } = state;
+  const { clearMessages } = actions;
   
   return (
     <motion.div
@@ -52,7 +53,6 @@ const FullScreenChatContent: React.FC<{
       <div className="flex-1 overflow-y-auto p-4">
         <UnifiedChatMessageList
           messages={messages}
-          showMessages={showMessages}
           isLoading={isLoading}
           isFullScreen={true}
         />
