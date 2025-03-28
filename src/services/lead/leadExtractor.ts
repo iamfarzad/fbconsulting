@@ -1,65 +1,80 @@
 
-// Lead information extraction utilities
+// Lead extraction service
 
+import { AIMessage, LeadStage } from '../chat/messageTypes';
+
+// Lead information interface
 export interface LeadInfo {
+  interests: string[];
+  stage: LeadStage;
   name?: string;
   email?: string;
   company?: string;
   position?: string;
-  interests: string[];
-  stage: 'initial' | 'discovery' | 'evaluation' | 'decision' | 'implementation' | 'retention';
   source?: string;
   notes?: string;
+  phone?: string; // Added to fix missing property error
 }
 
 // Extract lead information from chat messages
-export const extractLeadInfo = (messages: { role: string; content: string }[]): LeadInfo => {
-  // Very basic extraction for now
-  const interests: string[] = [];
-  
-  // Extract interests from user messages
-  for (const message of messages) {
-    if (message.role === 'user') {
-      interests.push(message.content);
-    }
-  }
-  
-  // Default lead info
-  return {
-    interests,
-    stage: 'discovery' // Default stage
+export const extractLeadInfo = (messages: AIMessage[]): LeadInfo => {
+  // Default lead info with minimal required properties
+  let leadInfo: LeadInfo = {
+    interests: [],
+    stage: 'discovery'
   };
+
+  // Skip if there are no messages
+  if (!messages || messages.length === 0) {
+    return leadInfo;
+  }
+
+  // Extract interests from user messages
+  const userMessages = messages.filter(m => m.role === 'user');
+  leadInfo.interests = userMessages.map(m => m.content);
+
+  // Use a basic approach to determine lead stage based on message count
+  if (userMessages.length >= 10) {
+    leadInfo.stage = 'decision';
+  } else if (userMessages.length >= 5) {
+    leadInfo.stage = 'evaluation';
+  } else if (userMessages.length >= 2) {
+    leadInfo.stage = 'discovery';
+  } else {
+    leadInfo.stage = 'initial';
+  }
+
+  // Look for potential contact information in the messages
+  const content = messages.map(m => m.content.toLowerCase()).join(' ');
+  
+  // Simple email detection
+  const emailMatch = content.match(/[\w._%+-]+@[\w.-]+\.[a-zA-Z]{2,}/);
+  if (emailMatch) {
+    leadInfo.email = emailMatch[0];
+  }
+
+  // Simple name detection (very basic)
+  const nameMatch = content.match(/my name is (\w+)/i);
+  if (nameMatch && nameMatch[1]) {
+    leadInfo.name = nameMatch[1];
+  }
+
+  // Simple company detection
+  const companyMatch = content.match(/work (?:for|at) ([^,.]+)/i);
+  if (companyMatch && companyMatch[1]) {
+    leadInfo.company = companyMatch[1].trim();
+  }
+
+  return leadInfo;
 };
 
-// Extract specific fields from messages
-export const extractField = (
-  messages: { role: string; content: string }[],
-  fieldNames: string[]
-): string | null => {
-  const patterns = fieldNames.map(name => new RegExp(`${name}\\s*[:=]\\s*([^,;\\n]+)`, 'i'));
-  
-  for (const message of messages) {
-    for (const pattern of patterns) {
-      const match = message.content.match(pattern);
-      if (match && match[1]) {
-        return match[1].trim();
-      }
-    }
+// Helper function to categorize lead readiness
+export const categorizeLeadReadiness = (leadInfo: LeadInfo): 'cold' | 'warm' | 'hot' => {
+  if (leadInfo.stage === 'decision' || leadInfo.stage === 'implementation') {
+    return 'hot';
+  } else if (leadInfo.stage === 'evaluation') {
+    return 'warm';
+  } else {
+    return 'cold';
   }
-  
-  return null;
-};
-
-// Determine if chat contains contact information
-export const hasContactInfo = (messages: { role: string; content: string }[]): boolean => {
-  const emailPattern = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
-  const phonePattern = /\b(?:\+?\d{1,3}[- ]?)?\(?\d{3}\)?[- ]?\d{3}[- ]?\d{4}\b/;
-  
-  for (const message of messages) {
-    if (emailPattern.test(message.content) || phonePattern.test(message.content)) {
-      return true;
-    }
-  }
-  
-  return false;
 };

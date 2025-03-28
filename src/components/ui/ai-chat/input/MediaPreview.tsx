@@ -1,7 +1,6 @@
 
 import React from 'react';
-import { X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { X, FileText, Image } from 'lucide-react';
 
 interface MediaPreviewProps {
   mediaItems: Array<{
@@ -11,48 +10,45 @@ interface MediaPreviewProps {
     mimeType?: string;
   }>;
   onRemove: (index: number) => void;
-  className?: string;
 }
 
-export const MediaPreview: React.FC<MediaPreviewProps> = ({
-  mediaItems,
-  onRemove,
-  className
-}) => {
-  if (!mediaItems || mediaItems.length === 0) return null;
+export const MediaPreview: React.FC<MediaPreviewProps> = ({ mediaItems, onRemove }) => {
+  if (mediaItems.length === 0) return null;
 
   return (
-    <div className={cn("flex flex-wrap gap-2 p-2", className)}>
+    <div className="flex flex-wrap gap-2 my-2 px-3">
       {mediaItems.map((item, index) => (
-        <div key={index} className="relative group">
+        <div 
+          key={index} 
+          className="relative bg-muted rounded-md p-2 flex items-center gap-2 border border-border"
+        >
           {item.type === 'image' ? (
-            <div className="w-16 h-16 rounded-md overflow-hidden border">
-              <img
-                src={item.data}
-                alt={item.name || 'Uploaded image'}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            <>
+              <div className="w-8 h-8 overflow-hidden rounded-sm">
+                <img 
+                  src={item.data} 
+                  alt={item.name || "Image preview"} 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <span className="text-xs max-w-36 truncate">{item.name || "Image"}</span>
+            </>
           ) : (
-            <div className="w-16 h-16 rounded-md overflow-hidden border flex items-center justify-center bg-muted">
-              <span className="text-xs text-center p-1 truncate">
-                {item.name || 'File'}
-              </span>
-            </div>
+            <>
+              <FileText className="w-5 h-5 text-muted-foreground" />
+              <span className="text-xs max-w-36 truncate">{item.name || "File"}</span>
+            </>
           )}
           
-          <button
-            type="button"
+          <button 
             onClick={() => onRemove(index)}
-            className="absolute -top-2 -right-2 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute -top-2 -right-2 bg-muted-foreground/90 hover:bg-foreground rounded-full p-0.5 text-background"
+            aria-label="Remove"
           >
-            <X className="h-3 w-3" />
-            <span className="sr-only">Remove</span>
+            <X className="w-3 h-3" />
           </button>
         </div>
       ))}
     </div>
   );
 };
-
-export default MediaPreview;

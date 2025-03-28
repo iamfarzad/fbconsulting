@@ -1,49 +1,71 @@
-import { LeadInfo } from './leadExtractor';
+import { LeadInfo, LeadStage } from "../chat/messageTypes";
 
-// Determine lead stage based on message content and current stage
-export const determineLeadStage = (message: string, currentStage?: 'discovery' | 'qualification' | 'interested' | 'ready-to-book'): 'discovery' | 'qualification' | 'interested' | 'ready-to-book' => {
-  // Start at discovery by default
-  if (!currentStage) {
+// Define progression of lead stages
+const LEAD_STAGE_PROGRESSION: LeadStage[] = [
+  'initial',
+  'discovery',
+  'evaluation',
+  'decision',
+  'implementation',
+  'retention',
+  // Alternative stages used in some components
+  'qualification',
+  'interested',
+  'ready-to-book'
+];
+
+/**
+ * Determine the lead stage based on message content and interaction history
+ */
+export const determineLeadStage = (messages: string[]): LeadStage => {
+  if (!messages || messages.length === 0) {
+    return 'initial';
+  }
+  
+  // Very simple determination based on message count
+  if (messages.length > 15) {
+    return 'decision';
+  } else if (messages.length > 10) {
+    return 'evaluation';
+  } else if (messages.length > 5) {
     return 'discovery';
-  }
-  
-  // Move to qualification when we know their interests or challenges
-  if (currentStage === 'discovery' && 
-    (message.toLowerCase().includes('interest') || 
-     message.toLowerCase().includes('challenge') ||
-     message.toLowerCase().includes('problem') ||
-     message.toLowerCase().includes('issue'))) {
+  } else if (messages.length > 3) {
     return 'qualification';
-  }
-  
-  // Move to interested when they ask about pricing or express interest
-  if (currentStage === 'qualification' && 
-    (message.toLowerCase().includes('price') || 
-     message.toLowerCase().includes('cost') || 
-     message.toLowerCase().includes('how much') ||
-     message.toLowerCase().includes('interested'))) {
+  } else if (messages.length > 1) {
     return 'interested';
   }
   
-  // Move to ready-to-book when they want to schedule something
-  if (currentStage === 'interested' && 
-    (message.toLowerCase().includes('book') || 
-     message.toLowerCase().includes('schedule') || 
-     message.toLowerCase().includes('appointment') ||
-     message.toLowerCase().includes('call') ||
-     message.toLowerCase().includes('meet'))) {
-    return 'ready-to-book';
-  }
-  
-  // Keep current stage if no transition is triggered
-  return currentStage;
+  return 'initial';
 };
 
-// Update lead stage based on message content
-export const updateLeadStage = (message: string, leadInfo: LeadInfo): LeadInfo => {
-  const newStage = determineLeadStage(message, leadInfo.stage);
-  if (newStage !== leadInfo.stage) {
-    return { ...leadInfo, stage: newStage };
+/**
+ * Update the lead stage based on new information
+ */
+export const updateLeadStage = (
+  currentInfo: LeadInfo, 
+  newStage?: LeadStage,
+  bookingRequested?: boolean
+): LeadInfo => {
+  // Create a copy of the lead info
+  const updatedInfo = { ...currentInfo };
+  
+  // If booking is requested, move to ready-to-book stage
+  if (bookingRequested) {
+    updatedInfo.stage = 'ready-to-book';
+    return updatedInfo;
   }
-  return leadInfo;
+  
+  // If a specific stage is provided, use it
+  if (newStage) {
+    updatedInfo.stage = newStage;
+    return updatedInfo;
+  }
+  
+  // Otherwise, attempt to progress to the next stage
+  const currentIndex = LEAD_STAGE_PROGRESSION.indexOf(currentInfo.stage);
+  if (currentIndex >= 0 && currentIndex < LEAD_STAGE_PROGRESSION.length - 1) {
+    updatedInfo.stage = LEAD_STAGE_PROGRESSION[currentIndex + 1];
+  }
+  
+  return updatedInfo;
 };
