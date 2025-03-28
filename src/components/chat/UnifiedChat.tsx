@@ -1,64 +1,85 @@
 
-import React from 'react';
-import { useChat } from '@/hooks/useChat';
-import { ChatContainer } from '@/components/ui/ai-chat/ChatContainer';
+import React, { useRef } from 'react';
+import { ChatProvider, useChat } from '@/contexts/ChatContext';
+import { UnifiedChatProps } from '@/types/chat';
+import { UnifiedChatMessageList } from './UnifiedChatMessageList';
+import { UnifiedChatInput } from './UnifiedChatInput';
 
-interface UnifiedChatProps {
+// Internal component that uses the context
+const UnifiedChatContent: React.FC<{
   title?: string;
   subtitle?: string;
   placeholderText?: string;
-}
-
-export const UnifiedChat: React.FC<UnifiedChatProps> = ({
+  onToggleFullScreen?: () => void;
+  className?: string;
+}> = ({
   title,
   subtitle,
-  placeholderText = "Ask me anything..."
+  placeholderText = "Ask me anything...",
+  onToggleFullScreen,
+  className = ""
 }) => {
-  const {
-    messages,
-    inputValue,
-    setInputValue,
-    isLoading,
-    showMessages,
-    suggestedResponse,
-    handleSend,
-    handleClear,
-    toggleFullScreen,
-    isFullScreen,
-    containerRef,
-    files,
-    uploadFile,
-    removeFile,
-    isUploading,
-  } = useChat();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { state } = useChat();
+  const { messages, isLoading } = state;
 
   return (
-    <div className="w-full">
+    <div className={`w-full ${className}`} ref={containerRef}>
       {title && (
-        <header className="mb-6 text-center">
-          <h2 className="text-2xl font-bold">{title}</h2>
-          {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
+        <header className="mb-4">
+          <h2 className="text-xl font-bold">{title}</h2>
+          {subtitle && <p className="text-muted-foreground text-sm">{subtitle}</p>}
         </header>
       )}
       
-      <ChatContainer
-        containerRef={containerRef}
-        messages={messages}
-        inputValue={inputValue}
-        setInputValue={setInputValue}
-        isLoading={isLoading}
-        showMessages={showMessages}
-        suggestedResponse={suggestedResponse}
-        handleSend={handleSend}
-        handleClear={handleClear}
-        toggleFullScreen={toggleFullScreen}
-        isFullScreen={isFullScreen}
-        placeholder={placeholderText}
-        files={files}
-        uploadFile={uploadFile}
-        removeFile={removeFile}
-        isUploading={isUploading}
-      />
+      <div className="bg-background border rounded-lg shadow overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-y-auto p-4 max-h-64">
+          <UnifiedChatMessageList 
+            messages={messages} 
+            isLoading={isLoading}
+          />
+        </div>
+        
+        <div className="border-t p-3">
+          <UnifiedChatInput placeholder={placeholderText} />
+        </div>
+        
+        {onToggleFullScreen && messages.length > 0 && (
+          <div className="p-2 text-center">
+            <button
+              onClick={onToggleFullScreen}
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              Expand to full screen
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
+
+// Wrapper component that provides the context
+export const UnifiedChat: React.FC<UnifiedChatProps> = ({
+  title,
+  subtitle,
+  placeholderText,
+  className,
+  apiKey,
+  modelName,
+  onToggleFullScreen
+}) => {
+  return (
+    <ChatProvider apiKey={apiKey} modelName={modelName}>
+      <UnifiedChatContent
+        title={title}
+        subtitle={subtitle}
+        placeholderText={placeholderText}
+        className={className}
+        onToggleFullScreen={onToggleFullScreen}
+      />
+    </ChatProvider>
+  );
+};
+
+export default UnifiedChat;

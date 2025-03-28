@@ -13,6 +13,8 @@ export interface ChatContextType {
     isAudioPlaying: boolean;
     audioProgress: number;
     clientId: string;
+    inputValue: string;
+    showMessages: boolean;
   };
   actions: {
     sendMessage: (content: string) => void;
@@ -20,6 +22,7 @@ export interface ChatContextType {
     connect: () => void;
     disconnect: () => void;
     stopAudio: () => void;
+    setInputValue: (value: string) => void;
   };
   error: string | null;
 }
@@ -37,8 +40,18 @@ export const useChat = () => {
 };
 
 // Chat Provider Component
-export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ChatProvider: React.FC<{ 
+  children: React.ReactNode;
+  apiKey?: string;
+  modelName?: string;
+}> = ({ 
+  children,
+  apiKey,
+  modelName
+}) => {
   const [isInitialized, setIsInitialized] = useState(false);
+  const [showMessages, setShowMessages] = useState(false);
+  const [inputValue, setInputValue] = useState('');
 
   // Use the WebSocket Chat hook
   const {
@@ -52,7 +65,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clientId,
     connect,
     disconnect,
-    sendMessage,
+    sendMessage: wssSendMessage,
     clearMessages,
     stopAudio
   } = useWebSocketChat();
@@ -64,6 +77,21 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [isConnected, isConnecting, clientId]);
 
+  // Show messages when they exist
+  useEffect(() => {
+    if (messages.length > 0 && !showMessages) {
+      setShowMessages(true);
+    }
+  }, [messages.length, showMessages]);
+
+  // Wrapper for sendMessage that also clears input
+  const sendMessage = (content: string) => {
+    if (content.trim()) {
+      wssSendMessage(content);
+      setInputValue('');
+    }
+  };
+
   // Combine state and actions into a single context value
   const contextValue: ChatContextType = {
     state: {
@@ -73,14 +101,17 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isInitialized,
       isAudioPlaying,
       audioProgress,
-      clientId
+      clientId,
+      inputValue,
+      showMessages
     },
     actions: {
       sendMessage,
       clearMessages,
       connect,
       disconnect,
-      stopAudio
+      stopAudio,
+      setInputValue
     },
     error
   };

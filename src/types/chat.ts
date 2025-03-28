@@ -1,28 +1,16 @@
 
+import { ReactNode, RefObject } from 'react';
+
 export interface AIMessage {
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
   timestamp: number;
   id?: string;
-}
-
-export type MessageRole = 'user' | 'assistant' | 'system' | 'error';
-
-export interface ChatContextType {
-  state: {
-    messages: AIMessage[];
-    inputValue: string;
-    isLoading: boolean;
-    showMessages: boolean;
-    isInitialized: boolean;
-    isFullScreen: boolean;
-  };
-  dispatch: React.Dispatch<any>;
-  sendMessage: (content: string, files?: any[]) => void;
-  clearMessages: () => void;
-  toggleFullScreen: () => void;
-  containerRef: React.RefObject<HTMLDivElement>;
-  error?: string | null;
+  mediaItems?: Array<{
+    type: string;
+    data: string;
+    mimeType?: string;
+  }>;
 }
 
 export interface ChatInputProps {
@@ -36,24 +24,14 @@ export interface ChatMessageListProps {
   isLoading?: boolean;
 }
 
-export interface ChatHeaderProps {
-  title: string;
-  subtitle?: string;
-  onClear?: () => void;
-  onToggleFullScreen?: () => void;
-  isFullScreen?: boolean;
-  isConnected?: boolean;
-  isLoading?: boolean;
-}
-
 export interface UnifiedChatProps {
+  title?: string;
+  subtitle?: string;
   placeholderText?: string;
-  onToggleFullScreen?: () => void;
   className?: string;
   apiKey?: string;
   modelName?: string;
-  title?: string;
-  subtitle?: string;
+  onToggleFullScreen?: () => void;
 }
 
 export interface UnifiedFullScreenChatProps {
@@ -63,42 +41,28 @@ export interface UnifiedFullScreenChatProps {
   modelName?: string;
 }
 
-export interface FileAttachment {
-  mimeType: string;
-  data: string;
-  name: string;
-  type: string;
-}
-
-export interface AudioMessage {
-  content: string;
-  voiceId?: string;
-  stability?: number;
-  similarity?: number;
-  speakerBoost?: boolean;
-  style?: number;
-  modelId?: string;
-}
-
-// Create a dedicated type for Voice UI
-export interface VoiceUIProps {
-  onCommand?: (command: string) => void;
-  noFloatingButton?: boolean;
-}
-
-// Unified Voice UI Props
-export interface UnifiedVoiceUIProps {
-  onCommand?: (command: string) => void;
-  noFloatingButton?: boolean;
-}
-
-// Create a dedicated type for Voice Feedback
-export interface VoiceFeedbackProps {
-  isListening: boolean;
-  transcript?: string;
+export interface ChatProviderProps {
+  children: ReactNode;
+  apiKey?: string;
+  modelName?: string;
 }
 
 export interface ConnectionStatusIndicatorProps {
-  status: 'connecting' | 'connected' | 'disconnected';
-  onRetry?: () => Promise<void>;
+  isConnected: boolean;
+  isLoading?: boolean;
+  className?: string;
+}
+
+export interface ChatHeaderProps {
+  title?: string;
+  onClose?: () => void;
+  onClear?: () => void;
+  hasMessages?: boolean;
+}
+
+export interface UnifiedVoiceUIProps {
+  onCommand?: (command: string) => void | Promise<void>;
+  noFloatingButton?: boolean;
+  onVoiceStart?: () => void;
+  onVoiceEnd?: () => void;
 }
