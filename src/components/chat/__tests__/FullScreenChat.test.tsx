@@ -2,8 +2,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import FullScreenChat from '../FullScreenChat';
+import { AIMessage } from '@/services/chat/messageTypes';
 
-const mockMessages = [
+const mockMessages: AIMessage[] = [
   {
     role: 'assistant',
     content: 'Hello, how can I help you?',

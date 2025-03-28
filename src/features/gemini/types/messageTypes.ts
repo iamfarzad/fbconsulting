@@ -2,7 +2,7 @@
 export interface MessageMedia {
   type: 'image' | 'document' | 'code' | 'link';
   url?: string;
-  data?: string;
+  data: string; // Changed from optional to required to match chat types
   caption?: string;
   mimeType?: string;
   fileName?: string;

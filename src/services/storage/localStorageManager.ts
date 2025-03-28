@@ -35,9 +35,15 @@ export const saveLeadInfo = (leadInfo: LeadInfo): void => {
 export const loadLeadInfo = (): LeadInfo => {
   try {
     const saved = localStorage.getItem('aiLeadInfo');
-    return saved ? JSON.parse(saved) : {};
+    return saved ? JSON.parse(saved) : {
+      interests: [],
+      stage: 'initial'
+    };
   } catch (error) {
     console.error('Failed to load lead information:', error);
-    return {};
+    return {
+      interests: [],
+      stage: 'initial'
+    };
   }
 };

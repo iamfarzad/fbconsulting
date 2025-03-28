@@ -9,6 +9,10 @@ export interface WebSocketClientOptions {
   reconnectAttempts?: number;
   pingInterval?: number;
   pingTimeout?: number;
+  // Added missing properties for WebSocketClient
+  debug?: boolean;
+  autoReconnect?: boolean;
+  onAudioChunk?: (info: AudioChunkInfo, data: ArrayBuffer) => void;
 }
 
 export interface WebSocketMessage {
