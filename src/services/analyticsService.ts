@@ -1,44 +1,56 @@
 
-interface AnalyticsEvent {
+// Analytics Service
+// Simple analytics tracking implementation
+
+// Define analytics event type
+export interface AnalyticsEvent {
   action: string;
-  category?: string;
+  category: string;
   label?: string;
   value?: number;
-  page?: string;
-  [key: string]: any;
+  [key: string]: any; // Allow for additional custom properties
 }
 
-// Simple analytics tracking function
-export function trackEvent(event: AnalyticsEvent): void {
-  // In a real implementation, this would send events to an analytics service
-  console.log('[Analytics]', event);
-  
-  // Send to a real analytics service in the future
+// Track a specific event
+export const trackEvent = (event: AnalyticsEvent) => {
   try {
-    // Check if window object exists (for SSR compatibility)
-    if (typeof window !== 'undefined') {
-      // If Google Analytics exists
-      if (window.gtag) {
-        window.gtag('event', event.action, {
-          event_category: event.category,
-          event_label: event.label,
-          value: event.value
-        });
-      }
-      
-      // If custom analytics object exists
-      if (window.analytics && typeof window.analytics.track === 'function') {
-        window.analytics.track(event.action, {
-          category: event.category,
-          label: event.label,
-          value: event.value,
-          page: event.page
-        });
-      }
-    }
+    console.log('[Analytics] Event tracked:', event);
+    
+    // In a real implementation, you would send this to your analytics provider
+    // Example: window.gtag('event', event.action, { ...event });
+    // or window.mixpanel.track(event.action, event);
+    
+    return true;
   } catch (error) {
-    console.error('Error tracking event:', error);
+    console.error('[Analytics] Error tracking event:', error);
+    return false;
   }
-}
+};
 
-export default { trackEvent };
+// Track page view
+export const trackPageView = (page: string, data?: Record<string, any>) => {
+  try {
+    console.log('[Analytics] Page view:', page, data);
+    
+    // In a real implementation, you would send this to your analytics provider
+    // Example: window.gtag('set', 'page_path', page);
+    // window.gtag('event', 'page_view');
+    
+    return true;
+  } catch (error) {
+    console.error('[Analytics] Error tracking page view:', error);
+    return false;
+  }
+};
+
+// Initialize analytics
+export const initAnalytics = () => {
+  console.log('[Analytics] Initialized');
+  return true;
+};
+
+export default {
+  trackEvent,
+  trackPageView,
+  initAnalytics
+};

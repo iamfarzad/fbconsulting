@@ -2,14 +2,7 @@
 import React from 'react';
 import { Bot, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-interface ChatHeaderProps {
-  title?: string;
-  subtitle?: string;
-  onClose?: () => void;
-  onClear?: () => void;
-  hasMessages?: boolean;
-}
+import { ChatHeaderProps } from '@/types/chat';
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({
   title = 'AI Assistant',

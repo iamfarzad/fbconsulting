@@ -50,3 +50,16 @@ export interface UnifiedFullScreenChatProps {
   apiKey?: string;
   modelName?: string;
 }
+
+export interface ChatHeaderProps {
+  title?: string;
+  subtitle?: string;
+  onClose?: () => void;
+  onClear?: () => void;
+  hasMessages?: boolean;
+}
+
+export interface UnifiedVoiceUIProps {
+  onCommand?: (command: string) => Promise<void> | void;
+  noFloatingButton?: boolean;
+}

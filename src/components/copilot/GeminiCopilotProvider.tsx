@@ -1,11 +1,12 @@
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { useWebSocketChat } from '@/features/gemini/hooks/useWebSocketChat';
+import { AIMessage } from '@/services/chat/messageTypes';
 
 // Define the context type
 interface GeminiCopilotContextType {
   messages: Array<{
-    role: 'user' | 'assistant' | 'system';
+    role: 'user' | 'assistant' | 'system' | 'error';
     content: string;
     timestamp?: number;
   }>;
@@ -15,6 +16,7 @@ interface GeminiCopilotContextType {
   transcript: string;
   toggleListening: () => void;
   generateAndPlayAudio: (text: string) => void;
+  clearMessages?: () => void;
 }
 
 // Create the context
@@ -78,14 +80,22 @@ export function GeminiCopilotProvider({ children }: GeminiCopilotProviderProps) 
     }
   }, [wssSendMessage, transcript]);
 
-  const value = {
-    messages,
+  // Convert AIMessage array to the format expected by the context
+  const formattedMessages = messages.map(msg => ({
+    role: msg.role,
+    content: msg.content,
+    timestamp: msg.timestamp
+  }));
+
+  const value: GeminiCopilotContextType = {
+    messages: formattedMessages,
     sendMessage,
     isLoading,
     isListening,
     transcript,
     toggleListening,
-    generateAndPlayAudio
+    generateAndPlayAudio,
+    clearMessages
   };
 
   return (

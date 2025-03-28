@@ -1,80 +1,66 @@
 
-// Lead extraction service
-
-import { AIMessage, LeadStage } from '../chat/messageTypes';
-
-// Lead information interface
+// Type definition for lead information
 export interface LeadInfo {
-  interests: string[];
-  stage: LeadStage;
+  interests?: string[];
+  stage?: 'initial' | 'discovery' | 'evaluation' | 'decision' | 'implementation' | 'retention' | 'qualification' | 'interested' | 'ready-to-book';
   name?: string;
   email?: string;
   company?: string;
-  position?: string;
-  source?: string;
-  notes?: string;
-  phone?: string; // Added to fix missing property error
 }
 
-// Extract lead information from chat messages
-export const extractLeadInfo = (messages: AIMessage[]): LeadInfo => {
-  // Default lead info with minimal required properties
-  let leadInfo: LeadInfo = {
-    interests: [],
-    stage: 'discovery'
-  };
-
-  // Skip if there are no messages
-  if (!messages || messages.length === 0) {
-    return leadInfo;
-  }
-
-  // Extract interests from user messages
-  const userMessages = messages.filter(m => m.role === 'user');
-  leadInfo.interests = userMessages.map(m => m.content);
-
-  // Use a basic approach to determine lead stage based on message count
-  if (userMessages.length >= 10) {
-    leadInfo.stage = 'decision';
-  } else if (userMessages.length >= 5) {
-    leadInfo.stage = 'evaluation';
-  } else if (userMessages.length >= 2) {
-    leadInfo.stage = 'discovery';
-  } else {
-    leadInfo.stage = 'initial';
-  }
-
-  // Look for potential contact information in the messages
-  const content = messages.map(m => m.content.toLowerCase()).join(' ');
+// Extract lead information from messages
+export const extractLeadInfo = (messages: string[]): LeadInfo => {
+  // This is a simplified mock implementation
+  // In a real app, this would do actual NLP analysis
+  const joinedMessages = messages.join(' ').toLowerCase();
   
-  // Simple email detection
-  const emailMatch = content.match(/[\w._%+-]+@[\w.-]+\.[a-zA-Z]{2,}/);
+  // Extract potential name
+  let name: string | undefined;
+  const nameMatch = joinedMessages.match(/my name is (\w+)|i am (\w+)|i'm (\w+)/i);
+  if (nameMatch) {
+    name = nameMatch[1] || nameMatch[2] || nameMatch[3];
+    name = name.charAt(0).toUpperCase() + name.slice(1); // Capitalize first letter
+  }
+  
+  // Extract potential email
+  let email: string | undefined;
+  const emailMatch = joinedMessages.match(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/);
   if (emailMatch) {
-    leadInfo.email = emailMatch[0];
+    email = emailMatch[0];
   }
-
-  // Simple name detection (very basic)
-  const nameMatch = content.match(/my name is (\w+)/i);
-  if (nameMatch && nameMatch[1]) {
-    leadInfo.name = nameMatch[1];
+  
+  // Extract company name
+  let company: string | undefined;
+  const companyMatch = joinedMessages.match(/work for (\w+)|at (\w+)|company (?:is|called) (\w+)/i);
+  if (companyMatch) {
+    company = companyMatch[1] || companyMatch[2] || companyMatch[3];
+    company = company.charAt(0).toUpperCase() + company.slice(1); // Capitalize first letter
   }
-
-  // Simple company detection
-  const companyMatch = content.match(/work (?:for|at) ([^,.]+)/i);
-  if (companyMatch && companyMatch[1]) {
-    leadInfo.company = companyMatch[1].trim();
+  
+  // Determine lead stage based on message content
+  let stage: LeadInfo['stage'] = 'initial';
+  
+  if (joinedMessages.includes('book') || 
+      joinedMessages.includes('schedule') || 
+      joinedMessages.includes('appointment')) {
+    stage = 'ready-to-book';
+  } else if (joinedMessages.includes('price') || 
+             joinedMessages.includes('cost') || 
+             joinedMessages.includes('how much')) {
+    stage = 'interested';
+  } else if (joinedMessages.includes('help') || 
+             joinedMessages.includes('problem') || 
+             messages.length > 2) {
+    stage = 'discovery';
   }
-
-  return leadInfo;
+  
+  return {
+    interests: messages,
+    stage,
+    name,
+    email,
+    company
+  };
 };
 
-// Helper function to categorize lead readiness
-export const categorizeLeadReadiness = (leadInfo: LeadInfo): 'cold' | 'warm' | 'hot' => {
-  if (leadInfo.stage === 'decision' || leadInfo.stage === 'implementation') {
-    return 'hot';
-  } else if (leadInfo.stage === 'evaluation') {
-    return 'warm';
-  } else {
-    return 'cold';
-  }
-};
+export default extractLeadInfo;
