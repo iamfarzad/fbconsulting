@@ -32,7 +32,18 @@
 /* Voice button styles */
 .voice-button {
   @apply flex items-center justify-center rounded-full transition-all duration-300;
-  @apply hover:bg-black/10 dark:hover:bg-white/10;
+  /* Direct CSS replaces the hover @apply below */
+}
+
+.voice-button:hover {
+   /* Replaces hover:bg-black/10 */
+   background-color: rgba(0, 0, 0, 0.1); 
+}
+
+/* Keep dark mode hover separate */
+.dark .voice-button:hover {
+  /* Replaces dark:hover:bg-white/10 */
+  background-color: rgba(255, 255, 255, 0.1); 
 }
 
 .voice-button.active {
