@@ -1,227 +1,169 @@
+import { useState, useRef, useCallback } from 'react';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
-
-interface UseAudioHandlerOptions {
+interface AudioHandlerOptions {
   autoPlay?: boolean;
-  onPlaybackStart?: () => void;
-  onPlaybackEnd?: () => void;
   onPlaybackError?: (error: string) => void;
 }
 
-export function useAudioHandler({
+export function useAudioHandler({ 
   autoPlay = true,
-  onPlaybackStart,
-  onPlaybackEnd,
-  onPlaybackError
-}: UseAudioHandlerOptions = {}) {
+  onPlaybackError 
+}: AudioHandlerOptions = {}) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-
-  // References for audio handling
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const audioBuffersRef = useRef<ArrayBuffer[]>([]);
-  const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
-  const isDecodingRef = useRef<boolean>(false);
-  const playbackQueueRef = useRef<AudioBuffer[]>([]);
-  const currentStartTimeRef = useRef<number>(0);
-  const playbackStartTimeRef = useRef<number>(0);
   
-  // Clear all audio data
+  const audioContext = useRef<AudioContext | null>(null);
+  const audioQueue = useRef<ArrayBuffer[]>([]);
+  const audioSourceNode = useRef<AudioBufferSourceNode | null>(null);
+  
+  // Clear all audio data and stop playback
   const clearAudio = useCallback(() => {
-    audioBuffersRef.current = [];
-    playbackQueueRef.current = [];
-    setProgress(0);
-    
-    if (audioSourceRef.current) {
-      try {
-        audioSourceRef.current.stop();
-        audioSourceRef.current.disconnect();
-        audioSourceRef.current = null;
-      } catch (error) {
-        console.error('Error stopping audio source:', error);
-      }
-    }
-    
-    setIsPlaying(false);
+    audioQueue.current = [];
+    stopAudio();
   }, []);
   
   // Stop current audio playback
   const stopAudio = useCallback(() => {
-    if (audioSourceRef.current) {
+    if (audioSourceNode.current) {
       try {
-        audioSourceRef.current.stop();
-        audioSourceRef.current.disconnect();
-        audioSourceRef.current = null;
-        setIsPlaying(false);
-        if (onPlaybackEnd) onPlaybackEnd();
+        audioSourceNode.current.stop();
+        audioSourceNode.current.disconnect();
+        audioSourceNode.current = null;
       } catch (error) {
         console.error('Error stopping audio:', error);
       }
     }
-  }, [onPlaybackEnd]);
+    setIsPlaying(false);
+    setProgress(0);
+  }, []);
   
-  // Handle incoming audio chunk
-  const handleAudioChunk = useCallback((chunk: ArrayBuffer) => {
-    if (!chunk || chunk.byteLength === 0) return;
-    
-    // Add to buffer
-    audioBuffersRef.current.push(chunk);
-    
-    // If autoplay and not already playing or decoding, start decoding and playing
-    if (autoPlay && !isPlaying && !isDecodingRef.current) {
-      processAudioChunks();
+  // Initialize AudioContext if needed
+  const getAudioContext = useCallback(() => {
+    if (!audioContext.current) {
+      try {
+        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+        audioContext.current = new AudioContext();
+      } catch (error) {
+        const errorMessage = 'Web Audio API is not supported in this browser';
+        setError(errorMessage);
+        if (onPlaybackError) onPlaybackError(errorMessage);
+        return null;
+      }
     }
-  }, [autoPlay, isPlaying]);
+    return audioContext.current;
+  }, [onPlaybackError]);
   
-  // Process audio chunks and play them
-  const processAudioChunks = useCallback(async () => {
-    if (isDecodingRef.current || audioBuffersRef.current.length === 0) return;
+  // Play the current audio queue
+  const playAudioChunks = useCallback(async () => {
+    const context = getAudioContext();
+    if (!context) return;
+    
+    if (audioQueue.current.length === 0) {
+      console.log('No audio chunks to play');
+      return;
+    }
     
     try {
-      isDecodingRef.current = true;
+      setIsPlaying(true);
       
-      // Initialize AudioContext if needed
-      if (!audioContextRef.current) {
-        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      // Stop any current playback
+      if (audioSourceNode.current) {
+        audioSourceNode.current.stop();
+        audioSourceNode.current.disconnect();
       }
       
-      // Get the chunk to process
-      const chunk = audioBuffersRef.current.shift();
-      if (!chunk) {
-        isDecodingRef.current = false;
-        return;
-      }
+      // Combine all audio chunks
+      const combinedChunks = new Uint8Array(
+        audioQueue.current.reduce((acc, chunk) => acc + chunk.byteLength, 0)
+      );
+      
+      let offset = 0;
+      audioQueue.current.forEach(chunk => {
+        combinedChunks.set(new Uint8Array(chunk), offset);
+        offset += chunk.byteLength;
+      });
       
       // Decode audio data
-      const audioBuffer = await audioContextRef.current.decodeAudioData(chunk);
-      playbackQueueRef.current.push(audioBuffer);
+      const audioBuffer = await context.decodeAudioData(combinedChunks.buffer);
       
-      // If not playing, start playback
-      if (!isPlaying) {
-        startPlayback();
-      }
+      // Create and configure source node
+      audioSourceNode.current = context.createBufferSource();
+      audioSourceNode.current.buffer = audioBuffer;
+      audioSourceNode.current.connect(context.destination);
       
-    } catch (error) {
-      console.error('Error processing audio chunk:', error);
-      setError(`Audio playback error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      if (onPlaybackError) onPlaybackError(`Error processing audio: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      isDecodingRef.current = false;
-      
-      // If more chunks are available, process them
-      if (audioBuffersRef.current.length > 0) {
-        processAudioChunks();
-      }
-    }
-  }, [isPlaying, onPlaybackError]);
-  
-  // Start audio playback
-  const startPlayback = useCallback(() => {
-    if (!audioContextRef.current || playbackQueueRef.current.length === 0) return;
-    
-    try {
-      // If already playing, do nothing
-      if (isPlaying && audioSourceRef.current) return;
-      
-      const nextBuffer = playbackQueueRef.current.shift();
-      if (!nextBuffer) return;
-      
-      // Create new source
-      const source = audioContextRef.current.createBufferSource();
-      source.buffer = nextBuffer;
-      source.connect(audioContextRef.current.destination);
-      
-      // Set up ended handler to play next buffer
-      source.onended = () => {
-        if (playbackQueueRef.current.length > 0) {
-          startPlayback();
-        } else {
-          setIsPlaying(false);
-          setProgress(100);
-          if (onPlaybackEnd) onPlaybackEnd();
+      // Set up progress tracking
+      const duration = audioBuffer.duration;
+      const updateInterval = 100; // ms
+      const progressInterval = setInterval(() => {
+        if (!context) {
+          clearInterval(progressInterval);
+          return;
         }
+        
+        const currentTime = context.currentTime;
+        const startTime = audioSourceNode.current?.startTime || 0;
+        const elapsedTime = currentTime - startTime;
+        const percent = Math.min(100, Math.floor((elapsedTime / duration) * 100));
+        
+        setProgress(percent);
+        
+        if (percent >= 100) {
+          clearInterval(progressInterval);
+          setIsPlaying(false);
+          setProgress(0);
+        }
+      }, updateInterval);
+      
+      // Handle playback completion
+      audioSourceNode.current.onended = () => {
+        clearInterval(progressInterval);
+        setIsPlaying(false);
+        setProgress(0);
+        audioSourceNode.current = null;
       };
       
       // Start playback
-      source.start();
-      audioSourceRef.current = source;
-      setIsPlaying(true);
-      setProgress(0);
+      audioSourceNode.current.start();
+      audioSourceNode.current.startTime = context.currentTime;
       
-      // Track start time for progress calculation
-      currentStartTimeRef.current = audioContextRef.current.currentTime;
-      playbackStartTimeRef.current = Date.now();
-      
-      if (onPlaybackStart) onPlaybackStart();
-      
-      // Start progress tracking
-      trackProgress(nextBuffer.duration);
+      // Clear the queue after starting playback
+      audioQueue.current = [];
       
     } catch (error) {
-      console.error('Error starting audio playback:', error);
-      setError(`Audio playback error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      if (onPlaybackError) onPlaybackError(`Error playing audio: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Audio playback error:', error);
+      setIsPlaying(false);
+      setProgress(0);
       
-      // Try the next buffer
-      if (playbackQueueRef.current.length > 0) {
-        startPlayback();
-      }
+      const errorMessage = error instanceof Error ? error.message : 'Error playing audio';
+      setError(errorMessage);
+      if (onPlaybackError) onPlaybackError(errorMessage);
     }
-  }, [isPlaying, onPlaybackStart, onPlaybackEnd, onPlaybackError]);
+  }, [getAudioContext, onPlaybackError]);
   
-  // Track playback progress
-  const trackProgress = useCallback((duration: number) => {
-    if (!isPlaying) return;
+  // Handle audio chunk from WebSocket
+  const handleAudioChunk = useCallback((chunk: ArrayBuffer) => {
+    // Add chunk to queue
+    audioQueue.current.push(chunk);
     
-    const intervalId = setInterval(() => {
-      if (!audioContextRef.current || !isPlaying) {
-        clearInterval(intervalId);
-        return;
-      }
-      
-      const elapsed = (Date.now() - playbackStartTimeRef.current) / 1000;
-      const calculatedProgress = Math.min(100, (elapsed / duration) * 100);
-      
-      setProgress(calculatedProgress);
-      
-      if (calculatedProgress >= 100) {
-        clearInterval(intervalId);
-      }
-    }, 100);
-    
-    return () => clearInterval(intervalId);
-  }, [isPlaying]);
+    // If autoPlay is enabled and not already playing, start playback
+    if (autoPlay && !isPlaying) {
+      playAudioChunks();
+    }
+  }, [autoPlay, isPlaying, playAudioChunks]);
   
-  // Handle audio metadata
-  const handleAudioMetadata = useCallback((metadata: { duration?: number; format?: string }) => {
-    // Just log for now, we may need this later
-    console.log('Received audio metadata:', metadata);
+  // Audio metadata handler (optional)
+  const handleAudioMetadata = useCallback((metadata: any) => {
+    // Handle any metadata about the audio if needed
+    console.log('Audio metadata:', metadata);
   }, []);
   
-  // Play already buffered audio chunks
-  const playAudioChunks = useCallback(() => {
-    if (audioBuffersRef.current.length > 0 && !isPlaying) {
-      processAudioChunks();
-    }
-  }, [isPlaying, processAudioChunks]);
-  
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      stopAudio();
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close();
-      }
-    };
-  }, [stopAudio]);
-  
   return {
+    handleAudioChunk,
+    handleAudioMetadata,
     isPlaying,
     progress,
     error,
-    handleAudioChunk,
-    handleAudioMetadata,
     stopAudio,
     playAudioChunks,
     clearAudio

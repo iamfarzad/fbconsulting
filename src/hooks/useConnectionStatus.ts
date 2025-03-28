@@ -1,9 +1,10 @@
+
 import { useState, useEffect } from 'react';
-import { apiConfig } from '@/config/api';
+import { API_CONFIG } from '@/config/api';
 
 export function useConnectionStatus() {
   const [isConnected, setIsConnected] = useState(false);
-  const { geminiApiKey } = apiConfig;
+  const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
   useEffect(() => {
     // If we have an API key, set connected to true
