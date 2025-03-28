@@ -15,6 +15,16 @@ export const API_CONFIG = {
     geminiStream: '/api/gemini/stream',
     audio: '/api/audio',
     healthCheck: '/api/health'
+  },
+  WEBSOCKET: {
+    DEFAULT_PATH: '/ws',
+    DEFAULT_PROTOCOL: 'gemini-protocol',
+    PING_MESSAGE: { type: 'ping' },
+    TIMEOUT: 30000 // 30 seconds
+  },
+  HEALTH_CHECK: {
+    ENDPOINT: '/health',
+    INTERVAL: 60000 // 1 minute
   }
 };
 
