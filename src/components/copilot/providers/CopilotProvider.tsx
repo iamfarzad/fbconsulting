@@ -16,6 +16,7 @@ import { useSpatialContext } from '../hooks/useSpatialContext';
 import { useCopilotConfig } from '../hooks/useCopilotConfig';
 import { useErrorHandling } from '../hooks/useErrorHandling';
 import { useChatHistory } from '../hooks/useChatHistory';
+import { useApiKeyManagement } from '../hooks/useApiKeyManagement';
 
 // Basic Copilot Context for toggle functionality
 interface CopilotContextType {
@@ -32,6 +33,7 @@ interface CopilotContextType {
   chatHistory: Record<string, ChatMessage[]>;
   addMessageToHistory: (provider: string, message: ChatMessage) => void;
   clearChatHistory: (provider: string) => void;
+  retryConnection: () => void;
 }
 
 const CopilotContext = createContext<CopilotContextType | undefined>(undefined);
@@ -46,9 +48,13 @@ export const useCopilot = () => {
 
 interface CopilotProviderProps {
   children: React.ReactNode;
+  apiKey?: string;
 }
 
-export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) => {
+export const CopilotProvider: React.FC<CopilotProviderProps> = ({ 
+  children,
+  apiKey: propApiKey 
+}) => {
   // Basic toggle state
   const [enabled, setEnabled] = useState(false);
   const toggleCopilot = () => setEnabled(prev => !prev);
@@ -59,7 +65,10 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
 
   // Hooks for external data
   const { personaData } = usePersonaManagement();
-  const { apiKey, isLoading } = useGeminiAPI();
+  const { apiKey: contextApiKey, isLoading } = useGeminiAPI();
+  
+  // API key management
+  const { apiKey } = useApiKeyManagement(propApiKey, contextApiKey);
 
   // Generate system message from persona data
   const systemMessage = useSystemMessage(personaData);
@@ -70,7 +79,8 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
     connectionError,
     isConnected,
     isConnecting,
-    showConnectionStatus
+    showConnectionStatus,
+    retry: retryConnection
   } = useConnectionStatus(enabled, apiKey, isLoading);
 
   // Initialize voice capabilities
@@ -116,6 +126,7 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
     chatHistory,
     addMessageToHistory,
     clearChatHistory,
+    retryConnection
   };
 
   return (
@@ -124,6 +135,7 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
         <ConnectionStatusIndicator 
           status={connectionStatus === 'connecting' ? 'connecting' : 
                  connectionStatus === 'connected' ? 'connected' : 'disconnected'} 
+          onRetry={retryConnection}
         />
       )}
       
