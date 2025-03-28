@@ -40,22 +40,32 @@ const ChatMessage = ({ message }: { message: AIMessage }) => {
   );
 };
 
-export const UnifiedChatMessageList: React.FC<ChatMessageListProps> = () => {
+export const UnifiedChatMessageList: React.FC<ChatMessageListProps> = ({
+  messages,
+  showMessages,
+  isFullScreen,
+  isLoading
+}) => {
   const bottomRef = useRef<HTMLDivElement>(null);
   const { state } = useChat();
-  const { messages, showMessages, isLoading } = state;
+  const chatShowMessages = state.showMessages;
+  
+  // Use props if provided, otherwise fall back to context
+  const displayShowMessages = showMessages !== undefined ? showMessages : chatShowMessages;
+  const displayMessages = messages || state.messages;
+  const displayIsLoading = isLoading !== undefined ? isLoading : state.isLoading;
   
   // Scroll to bottom when messages change
   useEffect(() => {
     if (bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, isLoading]);
+  }, [displayMessages, displayIsLoading]);
   
   // Filter out system messages for display
-  const displayMessages = messages.filter(msg => msg.role !== 'system');
+  const filteredMessages = displayMessages.filter(msg => msg.role !== 'system');
     
-  if (!showMessages || displayMessages.length === 0) {
+  if (!displayShowMessages || filteredMessages.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center p-4 text-muted-foreground">
         <Bot size={36} className="mb-2 opacity-50" />
@@ -67,14 +77,14 @@ export const UnifiedChatMessageList: React.FC<ChatMessageListProps> = () => {
   
   return (
     <div className="flex flex-col space-y-2 p-2">
-      {displayMessages.map((message, index) => (
+      {filteredMessages.map((message, index) => (
         <ChatMessage 
           key={message.id || index} 
           message={message} 
         />
       ))}
       
-      {isLoading && (
+      {displayIsLoading && (
         <div className="flex items-center space-x-2 p-3">
           <Loader2 className="h-4 w-4 animate-spin" />
           <span className="text-sm text-muted-foreground">AI is thinking...</span>
