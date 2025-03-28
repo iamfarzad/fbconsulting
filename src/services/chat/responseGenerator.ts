@@ -1,71 +1,81 @@
 
 import { LeadInfo } from '../lead/leadExtractor';
 
-// Generate a mock response based on the lead info
+// Generate a response based on lead info
 export const generateResponse = (message: string, leadInfo: LeadInfo): string => {
-  const responses = [
-    "I understand your interest in AI solutions. How can I help you further with implementing these technologies in your business?",
-    "That's a great question about automation. Many businesses are looking to streamline their workflows just like you're describing.",
-    "Based on what you've shared, I think our consulting services could be really valuable for your situation. Would you like to know more?",
-    "I'd be happy to provide more details about our AI implementation process. Is there a specific aspect you'd like to explore?",
-    "Many clients in similar situations have found success with our personalized approach. What specific challenges are you facing?"
-  ];
+  // This is a simplified mock implementation
+  // In a real application, this would be handled by an AI service
   
-  // Generate a deterministic but seemingly random index based on message
-  const messageLength = message.length;
-  const index = messageLength % responses.length;
+  const greeting = leadInfo.name ? `Hi ${leadInfo.name}! ` : "Hello! ";
   
-  return responses[index];
+  if (message.toLowerCase().includes('help') || message.toLowerCase().includes('service')) {
+    return `${greeting}I'd be happy to help with your AI consultation needs. Our services include chatbot development, process automation, and AI strategy consulting. What specifically are you interested in?`;
+  }
+  
+  if (message.toLowerCase().includes('price') || message.toLowerCase().includes('cost')) {
+    return `${greeting}Our pricing depends on the scope of your project. Basic consulting starts at $200/hour, while full implementation projects typically range from $5,000 to $50,000. Would you like to schedule a call to discuss your specific needs?`;
+  }
+  
+  if (message.toLowerCase().includes('book') || message.toLowerCase().includes('schedule')) {
+    return `${greeting}I'd be happy to schedule a consultation. Please provide your preferred date and time, and I'll check availability. Alternatively, you can use our booking calendar link.`;
+  }
+  
+  // Default response based on lead stage
+  switch (leadInfo.stage) {
+    case 'ready-to-book':
+      return `${greeting}I'm excited to move forward with our consultation. Would you prefer a video call or a phone call for our meeting?`;
+    case 'interested':
+      return `${greeting}Based on what you've shared, I think we can definitely help with your AI needs. Would you like me to explain our process in more detail, or would you prefer to schedule a consultation?`;
+    case 'discovery':
+      return `${greeting}Thanks for sharing that information. To better understand your needs, could you tell me a bit more about the specific challenges you're hoping to address with AI?`;
+    default:
+      return `${greeting}Thanks for reaching out! I'm here to help with your AI consultation needs. What specific challenges is your business facing that you'd like to address?`;
+  }
 };
 
-// Determine the persona best suited for this lead
-export const determinePersona = (leadInfo: LeadInfo): 'strategist' | 'technical' | 'consultant' | 'general' => {
-  // Simple logic to determine the most appropriate persona
-  const interestsText = leadInfo.interests.join(' ').toLowerCase();
-  
-  if (interestsText.includes('strategy') || 
-      interestsText.includes('planning') || 
-      interestsText.includes('future')) {
-    return 'strategist';
-  }
-  
-  if (interestsText.includes('code') || 
-      interestsText.includes('development') || 
-      interestsText.includes('programming') || 
-      interestsText.includes('technical')) {
-    return 'technical';
-  }
-  
-  if (interestsText.includes('advice') || 
-      interestsText.includes('guidance') || 
-      interestsText.includes('help')) {
+// Determine which persona to use based on lead info
+export const determinePersona = (leadInfo: LeadInfo, currentPage?: string): 'strategist' | 'technical' | 'consultant' => {
+  // Simple logic to determine which persona to use
+  if (currentPage === 'services' || leadInfo.stage === 'discovery') {
     return 'consultant';
   }
   
-  return 'general';
+  if (leadInfo.interests?.some(i => 
+    i.toLowerCase().includes('code') || 
+    i.toLowerCase().includes('development') || 
+    i.toLowerCase().includes('implementation')
+  )) {
+    return 'technical';
+  }
+  
+  if (leadInfo.stage === 'decision' || leadInfo.stage === 'evaluation') {
+    return 'strategist';
+  }
+  
+  return 'consultant'; // Default persona
 };
 
-// Generate a suggested response for quick replies
-export const generateSuggestedResponse = (leadInfo: LeadInfo): string => {
-  const suggestions = [
-    "Tell me more about how AI could help my specific business needs.",
-    "What's the typical timeline for implementing these solutions?",
-    "Could you share a case study of similar work you've done?",
-    "I'd like to schedule a consultation to discuss this further.",
-    "What are the costs involved for a business of my size?"
-  ];
+// Generate a suggested response based on recent conversation
+export const generateSuggestedResponse = (recentMessages: string[]): string | null => {
+  if (recentMessages.length === 0) return null;
   
-  // Use the lead stage to choose an appropriate suggestion
-  if (leadInfo.stage === 'initial' || leadInfo.stage === 'discovery') {
-    return suggestions[0];
-  }
-  if (leadInfo.stage === 'evaluation') {
-    return suggestions[2];
-  }
-  if (leadInfo.stage === 'decision') {
-    return suggestions[3];
+  const lastMessage = recentMessages[recentMessages.length - 1].toLowerCase();
+  
+  if (lastMessage.includes('help')) {
+    return 'I need help implementing AI in my business processes.';
   }
   
-  // Default suggestion
-  return suggestions[1];
+  if (lastMessage.includes('service') || lastMessage.includes('offer')) {
+    return 'Can you tell me more about your AI consultation services?';
+  }
+  
+  if (lastMessage.includes('price') || lastMessage.includes('cost')) {
+    return 'What are your rates for AI implementation projects?';
+  }
+  
+  if (lastMessage.includes('book') || lastMessage.includes('schedule')) {
+    return 'I'd like to schedule a consultation to discuss my project.';
+  }
+  
+  return null;
 };

@@ -1,89 +1,63 @@
 
-import { LeadStage } from '../chat/messageTypes';
 import { LeadInfo } from './leadExtractor';
 
-/**
- * Determines a lead stage based on message content and patterns
- * @param messages Array of message contents (strings)
- * @returns A lead stage identifier
- */
-export const determineLeadStage = (messages: string[]): LeadStage => {
-  // Join all messages for analysis
-  const allText = messages.join(' ').toLowerCase();
+// Determine lead stage based on message content
+export const determineLeadStage = (
+  messages: string[]
+): LeadInfo['stage'] => {
+  const joinedMessages = messages.join(' ').toLowerCase();
   
-  // Check for booking/consultation signals
-  if (allText.includes('schedule') || 
-      allText.includes('book a') || 
-      allText.includes('consultation') ||
-      allText.includes('appointment') ||
-      allText.includes('let\'s talk') ||
-      allText.includes('meet with you')) {
+  if (joinedMessages.includes('book') || 
+      joinedMessages.includes('schedule') || 
+      joinedMessages.includes('appointment')) {
     return 'ready-to-book';
-  }
+  } 
   
-  // Check for high interest signals
-  if (allText.includes('pricing') || 
-      allText.includes('cost') || 
-      allText.includes('how much') ||
-      allText.includes('interested in') ||
-      allText.includes('consider')) {
+  if (joinedMessages.includes('price') || 
+      joinedMessages.includes('cost') || 
+      joinedMessages.includes('how much')) {
     return 'interested';
-  }
+  } 
   
-  // Check for qualification signals
-  if (allText.includes('my company') || 
-      allText.includes('our business') || 
-      allText.includes('we need') ||
-      allText.includes('specific requirements') ||
-      allText.includes('our project')) {
-    return 'qualification';
-  }
-  
-  // Check for evaluation signals
-  if (allText.includes('compare') || 
-      allText.includes('versus') || 
-      allText.includes('vs') ||
-      allText.includes('alternatives') ||
-      allText.includes('different options')) {
-    return 'evaluation';
-  }
-  
-  // Check for discovery signals
-  if (allText.includes('how does') || 
-      allText.includes('what is') || 
-      allText.includes('tell me about') ||
-      allText.includes('explain') ||
-      allText.includes('example')) {
+  if (joinedMessages.includes('help') || 
+      joinedMessages.includes('problem') || 
+      messages.length > 2) {
     return 'discovery';
   }
   
-  // Default to initial stage
   return 'initial';
 };
 
-/**
- * Updates a lead's stage based on current information
- * @param leadInfo Current lead information
- * @returns Updated lead stage
- */
-export const updateLeadStage = (leadInfo: LeadInfo): LeadStage => {
-  // Use the interests to determine stage
-  const currentStage = leadInfo.stage as LeadStage;
-  const interests = leadInfo.interests || [];
+// Update lead stage based on new information
+export const updateLeadStage = (
+  currentStage: LeadInfo['stage'],
+  newMessages: string[]
+): LeadInfo['stage'] => {
+  const newStage = determineLeadStage(newMessages);
   
-  // If no interests, return current stage
-  if (interests.length === 0) {
-    return currentStage;
+  // Stage progression logic
+  const stageProgression: Record<string, number> = {
+    'initial': 0,
+    'discovery': 1,
+    'qualification': 2,
+    'interested': 3,
+    'evaluation': 4,
+    'decision': 5,
+    'ready-to-book': 6,
+    'implementation': 7,
+    'retention': 8
+  };
+  
+  // Only progress to later stages, never go backward
+  if (!currentStage || 
+      stageProgression[newStage] > stageProgression[currentStage]) {
+    return newStage;
   }
   
-  // Determine a new stage based on interests
-  const newStage = determineLeadStage(interests);
-  
-  // Progressive stage advancement (never go backward in the funnel)
-  const stages: LeadStage[] = ['initial', 'discovery', 'qualification', 'evaluation', 'interested', 'ready-to-book'];
-  const currentIndex = stages.indexOf(currentStage);
-  const newIndex = stages.indexOf(newStage);
-  
-  // Only advance stage, never go back
-  return newIndex > currentIndex ? newStage : currentStage;
+  return currentStage;
+};
+
+export default {
+  determineLeadStage,
+  updateLeadStage
 };
