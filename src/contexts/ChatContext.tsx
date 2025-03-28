@@ -3,7 +3,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useWebSocketChat } from '@/features/gemini/hooks/useWebSocketChat';
 import { AIMessage } from '@/features/gemini/types/messageTypes';
 
-interface ChatContextType {
+// Define the Chat Context type
+export interface ChatContextType {
   state: {
     messages: AIMessage[];
     isLoading: boolean;
@@ -11,9 +12,10 @@ interface ChatContextType {
     isInitialized: boolean;
     isAudioPlaying: boolean;
     audioProgress: number;
+    clientId: string;
   };
   actions: {
-    sendMessage: (content: string) => Promise<void>;
+    sendMessage: (content: string) => void;
     clearMessages: () => void;
     connect: () => void;
     disconnect: () => void;
@@ -23,8 +25,10 @@ interface ChatContextType {
   clientId: string;
 }
 
-const ChatContext = createContext<ChatContextType | undefined>(undefined);
+// Create the Chat Context
+const ChatContext = createContext<ChatContextType | null>(null);
 
+// Hook to use the Chat Context
 export const useChat = () => {
   const context = useContext(ChatContext);
   if (!context) {
@@ -33,9 +37,11 @@ export const useChat = () => {
   return context;
 };
 
+// Chat Provider Component
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isInitialized, setIsInitialized] = useState(false);
-  
+
+  // Use the WebSocket Chat hook
   const {
     messages,
     isLoading,
@@ -52,32 +58,37 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     stopAudio
   } = useWebSocketChat();
 
-  // Set initialized after connection attempt
+  // Set initialized after first connection attempt
   useEffect(() => {
-    if (isConnected || (!isConnecting && error)) {
+    if (isConnected || (!isConnecting && clientId)) {
       setIsInitialized(true);
     }
-  }, [isConnected, isConnecting, error]);
+  }, [isConnected, isConnecting, clientId]);
 
-  const state = {
-    messages,
-    isLoading,
-    isConnected,
-    isInitialized,
-    isAudioPlaying,
-    audioProgress
-  };
-
-  const actions = {
-    sendMessage,
-    clearMessages,
-    connect,
-    disconnect,
-    stopAudio
+  // Combine state and actions into a single context value
+  const contextValue: ChatContextType = {
+    state: {
+      messages,
+      isLoading,
+      isConnected,
+      isInitialized,
+      isAudioPlaying,
+      audioProgress,
+      clientId
+    },
+    actions: {
+      sendMessage,
+      clearMessages,
+      connect,
+      disconnect,
+      stopAudio
+    },
+    error,
+    clientId
   };
 
   return (
-    <ChatContext.Provider value={{ state, actions, error, clientId }}>
+    <ChatContext.Provider value={contextValue}>
       {children}
     </ChatContext.Provider>
   );
