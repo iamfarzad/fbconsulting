@@ -1,55 +1,39 @@
 
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useCallback, useEffect } from 'react';
 
-interface UseAutoResizeTextareaProps {
-  minHeight: number;
+interface UseAutoResizeTextareaOptions {
+  minHeight?: number;
   maxHeight?: number;
 }
 
 export function useAutoResizeTextarea({
-  minHeight,
-  maxHeight,
-}: UseAutoResizeTextareaProps) {
+  minHeight = 60,
+  maxHeight = 200
+}: UseAutoResizeTextareaOptions = {}) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const adjustHeight = useCallback(
-    (reset?: boolean) => {
-      const textarea = textareaRef.current;
-      if (!textarea) return;
-
-      if (reset) {
-        textarea.style.height = `${minHeight}px`;
-        return;
-      }
-
-      // Temporarily shrink to get the right scrollHeight
-      textarea.style.height = `${minHeight}px`;
-
-      // Calculate new height
-      const newHeight = Math.max(
-        minHeight,
-        Math.min(textarea.scrollHeight, maxHeight ?? Number.POSITIVE_INFINITY)
-      );
-
-      textarea.style.height = `${newHeight}px`;
-    },
-    [minHeight, maxHeight]
-  );
-
-  useEffect(() => {
-    // Set initial height
+  const adjustHeight = useCallback(() => {
     const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = `${minHeight}px`;
-    }
-  }, [minHeight]);
+    if (!textarea) return;
 
-  // Adjust height on window resize
+    // Reset height to allow proper calculation
+    textarea.style.height = 'auto';
+    
+    // Set new height (constrained by min/max heights)
+    const scrollHeight = textarea.scrollHeight;
+    const newHeight = Math.max(minHeight, Math.min(scrollHeight, maxHeight));
+    textarea.style.height = `${newHeight}px`;
+    
+    // If content exceeds max height, enable scrolling
+    textarea.style.overflowY = scrollHeight > maxHeight ? 'auto' : 'hidden';
+  }, [minHeight, maxHeight]);
+
+  // Initialize height on mount
   useEffect(() => {
-    const handleResize = () => adjustHeight();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    adjustHeight();
   }, [adjustHeight]);
-
+  
   return { textareaRef, adjustHeight };
 }
+
+export default useAutoResizeTextarea;

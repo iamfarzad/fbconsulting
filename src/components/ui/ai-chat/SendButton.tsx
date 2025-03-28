@@ -6,16 +6,16 @@ import { cn } from '@/lib/utils';
 interface SendButtonProps {
   hasContent: boolean;
   isLoading: boolean;
-  aiProcessing: boolean;
-  disabled: boolean;
+  aiProcessing?: boolean;
+  disabled?: boolean;
   onClick: () => void;
 }
 
 export function SendButton({
   hasContent,
   isLoading,
-  aiProcessing,
-  disabled,
+  aiProcessing = false,
+  disabled = false,
   onClick
 }: SendButtonProps) {
   const isProcessing = isLoading || aiProcessing;
@@ -49,3 +49,5 @@ export function SendButton({
     </button>
   );
 }
+
+export default SendButton;

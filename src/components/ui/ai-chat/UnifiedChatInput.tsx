@@ -1,3 +1,4 @@
+
 /**
  * UnifiedChatInput Component
  * A unified chat input component that can be used across the application
@@ -9,12 +10,12 @@ import { AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { UnifiedFullScreenChat } from '@/components/chat/UnifiedFullScreenChat';
 import { ChatContainer } from './ChatContainer';
-import { AIMessage } from '@/services/chat/types';
+import { AIMessage } from '@/services/chat/messageTypes';
 import { Mic, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useVoiceInput } from '@/hooks/useVoiceInput';
 import { useAutoResizeTextarea } from '@/hooks/useAutoResizeTextarea';
-import { FileAttachment } from '@/services/chat/types';
+import { FileAttachment } from '@/services/chat/messageTypes';
 import { ChatInputBox } from './input/ChatInputBox';
 import { MediaPreview } from './input/MediaPreview';
 import { TranscriptDisplay } from './input/TranscriptDisplay';
@@ -27,6 +28,7 @@ interface UnifiedChatInputProps {
   modelName?: string;
   onVoiceStart?: () => void;
   onVoiceEnd?: () => void;
+  className?: string;
 }
 
 export function UnifiedChatInput({
@@ -35,7 +37,8 @@ export function UnifiedChatInput({
   apiKey,
   modelName,
   onVoiceStart,
-  onVoiceEnd
+  onVoiceEnd,
+  className = ''
 }: UnifiedChatInputProps) {
   const {
     messages,
@@ -47,8 +50,8 @@ export function UnifiedChatInput({
     containerRef,
     isFullScreen,
     toggleFullScreen,
-    handleSend,
-    handleClear,
+    sendMessage,
+    clearMessages,
     setIsFullScreen,
     setShowMessages
   } = useUnifiedChat({ 
@@ -57,6 +60,12 @@ export function UnifiedChatInput({
   });
   
   const isMobile = useIsMobile();
+  const [mediaItems, setMediaItems] = useState<Array<{
+    type: string,
+    data: string,
+    name?: string,
+    mimeType?: string
+  }>>([]);
 
   useEffect(() => {
     if (autoFullScreen && messages.length > 1 && !isFullScreen) {
@@ -107,7 +116,7 @@ export function UnifiedChatInput({
     isVoiceSupported
   } = useVoiceInput(
     (value) => setInputValue(value), 
-    () => handleSend(),
+    () => handleSendMessage(),
     {
       autoStop: true,
       stopAfterSeconds: 10,
@@ -136,7 +145,7 @@ export function UnifiedChatInput({
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (inputValue.trim() && !isLoading) {
-        handleSend();
+        handleSendMessage();
       }
     }
   };
@@ -146,7 +155,7 @@ export function UnifiedChatInput({
     adjustHeight();
   };
   
-  const handleSend = () => {
+  const handleSendMessage = () => {
     if (isLoading) return;
     if (!inputValue.trim() && mediaItems.length === 0) return;
     
@@ -159,6 +168,7 @@ export function UnifiedChatInput({
     }));
     
     sendMessage(inputValue, files);
+    setMediaItems([]); // Clear media items after sending
   };
   
   const handleSuggestionClick = () => {
@@ -166,6 +176,19 @@ export function UnifiedChatInput({
       setInputValue(suggestedResponse);
       adjustHeight();
     }
+  };
+  
+  const addMediaItem = (item: {
+    type: string,
+    data: string,
+    mimeType?: string,
+    name?: string
+  }) => {
+    setMediaItems(prev => [...prev, item]);
+  };
+  
+  const removeMediaItem = (index: number) => {
+    setMediaItems(prev => prev.filter((_, i) => i !== index));
   };
   
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -218,7 +241,7 @@ export function UnifiedChatInput({
           value={inputValue}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          placeholder={isListening ? 'Listening...' : placeholder}
+          placeholder={isListening ? 'Listening...' : placeholderText}
           disabled={isLoading || isListening}
           textareaRef={textareaRef}
         />
@@ -232,7 +255,7 @@ export function UnifiedChatInput({
         <ChatInputActions
           suggestedResponse={suggestedResponse}
           onSuggestionClick={handleSuggestionClick}
-          onSend={handleSend}
+          onSend={handleSendMessage}
           hasContent={inputValue.trim().length > 0 || mediaItems.length > 0}
           isLoading={isLoading}
           isListening={isListening}

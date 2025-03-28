@@ -19,6 +19,13 @@ export interface MessageMedia {
   caption?: string;
   mimeType?: string;
   fileName?: string;
+  // Code-specific properties
+  codeContent?: string;
+  codeLanguage?: string;
+  // Link-specific properties
+  linkTitle?: string;
+  linkDescription?: string;
+  linkImage?: string;
 }
 
 export interface ChatConfig {
