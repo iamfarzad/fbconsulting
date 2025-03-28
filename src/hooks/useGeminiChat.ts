@@ -1,182 +1,145 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { WebSocketClient, generateClientId, createWebSocketUrl } from '@/utils/websocketUtils';
-import { useToast } from '@/hooks/use-toast';
-import { AIMessage, MessageRole } from '@/types/chat';
 
-interface UseGeminiChatOptions {
+import { useState, useCallback, useEffect } from 'react';
+import { AIMessage } from '@/types/chat';
+
+interface UseGeminiChatProps {
   autoConnect?: boolean;
   enableTTS?: boolean;
-  onConnected?: () => void;
-  onDisconnected?: () => void;
-  onError?: (error: string) => void;
   apiKey?: string;
   modelName?: string;
 }
 
-export function useGeminiChat(options: UseGeminiChatOptions = {}) {
-  const {
-    autoConnect = true,
-    enableTTS = true,
-    onConnected,
-    onDisconnected,
-    onError,
-    apiKey,
-    modelName
-  } = options;
-
+export function useGeminiChat({
+  autoConnect = false,
+  enableTTS = false,
+  apiKey,
+  modelName
+}: UseGeminiChatProps = {}) {
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
-  const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [clientId] = useState(generateClientId());
-  
-  const wsClientRef = useRef<WebSocketClient | null>(null);
-  const { toast } = useToast();
+  const [isConnected, setIsConnected] = useState(false);
 
-  // Initialize WebSocket connection
+  // Setup connection on mount if autoConnect is true
   useEffect(() => {
     if (autoConnect) {
       connect();
     }
-
-    return () => {
-      disconnect();
-    };
   }, [autoConnect]);
 
-  const connect = useCallback(() => {
-    if (wsClientRef.current?.isConnected()) {
-      return;
-    }
-
-    setIsConnecting(true);
-    setError(null);
-
-    const wsUrl = createWebSocketUrl(clientId);
-    const wsClient = new WebSocketClient(wsUrl, {
-      onOpen: () => {
-        setIsConnected(true);
-        setIsConnecting(false);
-        if (onConnected) onConnected();
-      },
-      onClose: () => {
-        setIsConnected(false);
-        if (onDisconnected) onDisconnected();
-      },
-      onMessage: (data) => {
-        handleWebSocketMessage(data);
-      },
-      onError: (errorMessage) => {
-        setError(errorMessage);
-        setIsConnecting(false);
-        if (onError) onError(errorMessage);
-        
-        // Only show toast for critical errors
-        if (!errorMessage.includes('WebSocket closed')) {
-          toast({
-            title: 'Connection Error',
-            description: errorMessage,
-            variant: 'destructive',
-          });
-        }
-      },
-      autoReconnect: true
-    });
-
-    wsClient.connect();
-    wsClientRef.current = wsClient;
-  }, [clientId, toast, onConnected, onDisconnected, onError]);
-
-  const disconnect = useCallback(() => {
-    if (wsClientRef.current) {
-      wsClientRef.current.disconnect();
-      wsClientRef.current = null;
-    }
-    setIsConnected(false);
-  }, []);
-
-  const handleWebSocketMessage = useCallback((data: any) => {
-    if (data.type === 'text' && data.content) {
-      addMessage('assistant', data.content);
-    } else if (data.type === 'error' && data.error) {
-      setError(data.error);
-      addMessage('error', data.error);
-    } else if (data.type === 'complete') {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const addMessage = useCallback((role: MessageRole, content: string) => {
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      {
-        role,
-        content,
-        timestamp: Date.now(),
-        id: `${role}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
+  // Connect to the Gemini service
+  const connect = useCallback(async () => {
+    try {
+      setIsConnected(false);
+      // In a real implementation, this would connect to your Gemini service
+      console.log('Connecting to Gemini with API key:', apiKey ? 'API key exists' : 'No API key');
+      
+      // Simulate connection delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setIsConnected(true);
+      setError(null);
+      
+      // Add a system message
+      if (messages.length === 0) {
+        setMessages([{
+          role: 'system',
+          content: 'Hello! I am your AI assistant. How can I help you today?',
+          timestamp: Date.now()
+        }]);
       }
-    ]);
-  }, []);
+    } catch (error) {
+      console.error('Error connecting to Gemini:', error);
+      setError('Failed to connect to Gemini service');
+      setIsConnected(false);
+    }
+  }, [apiKey, messages.length]);
 
-  const sendMessage = useCallback((content: string) => {
-    if (!content.trim()) return;
+  // Send a message to the Gemini service
+  const sendMessage = useCallback(async (content: string) => {
+    if (!content.trim() || isLoading) return;
     
-    // Check connection
-    if (!wsClientRef.current || !isConnected) {
-      connect();
-      toast({
-        title: 'Connecting...',
-        description: 'Establishing connection to AI service',
-      });
-      return;
-    }
-
-    // Add user message
-    addMessage('user', content);
-    setInputValue('');
-    setIsLoading(true);
-
-    // Send to WebSocket
-    const message = {
-      text: content,
-      role: 'user',
-      enableTTS
-    };
-
-    const success = wsClientRef.current.send(message);
-    if (!success) {
-      setError('Failed to send message');
+    try {
+      setIsLoading(true);
+      
+      // Add user message to history
+      const userMessage: AIMessage = {
+        role: 'user',
+        content: content.trim(),
+        timestamp: Date.now()
+      };
+      setMessages(prev => [...prev, userMessage]);
+      
+      // Clear input
+      setInputValue('');
+      
+      // In a real implementation, this would call your Gemini service
+      console.log('Sending message to Gemini:', content);
+      
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Generate a simple mock response
+      const response = mockGeminiResponse(content);
+      
+      // Add assistant message to history
+      const assistantMessage: AIMessage = {
+        role: 'assistant',
+        content: response,
+        timestamp: Date.now()
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('Error sending message to Gemini:', error);
+      
+      // Add error message to history
+      const errorMessage: AIMessage = {
+        role: 'error',
+        content: error instanceof Error ? error.message : 'An error occurred while processing your request',
+        timestamp: Date.now()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      setError(error instanceof Error ? error.message : 'Failed to send message');
+    } finally {
       setIsLoading(false);
-      toast({
-        title: 'Error',
-        description: 'Failed to send message. Please try again.',
-        variant: 'destructive',
-      });
     }
-  }, [connect, addMessage, isConnected, enableTTS, toast]);
+  }, [isLoading]);
 
+  // Clear all messages
   const clearMessages = useCallback(() => {
     setMessages([]);
+    setError(null);
   }, []);
 
+  // Generate a mock response for testing
+  const mockGeminiResponse = (prompt: string): string => {
+    const promptLower = prompt.toLowerCase();
+    
+    if (promptLower.includes('hello') || promptLower.includes('hi')) {
+      return "Hello! How can I help you today?";
+    }
+    
+    if (promptLower.includes('help') || promptLower.includes('?')) {
+      return "I'd be happy to help! I can answer questions about our AI services, assist with brainstorming, or provide information on how to get started with AI integration.";
+    }
+    
+    if (promptLower.includes('feature') || promptLower.includes('service')) {
+      return "Our AI services include natural language processing, image recognition, and automated workflow solutions. These features can help streamline your operations and enhance user experiences.";
+    }
+    
+    return "Thank you for your message. I'm your AI assistant here to help with information about our services. Would you like to learn more about a specific topic?";
+  };
+
   return {
-    // State
     messages,
     inputValue,
     isLoading,
     isConnected,
-    isConnecting,
     error,
-    
-    // Actions
     setInputValue,
     sendMessage,
     clearMessages,
-    connect,
-    disconnect,
+    connect
   };
 }
-
-export default useGeminiChat;

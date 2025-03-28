@@ -1,127 +1,86 @@
 
-import React, { useEffect } from 'react';
-import { Mic, MicOff, X, Volume2, VolumeOff, Loader2 } from 'lucide-react';
+import React from 'react';
+import { Mic, X, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { AnimatedBars } from '../ui/AnimatedBars';
-import { useGeminiService } from '@/hooks/gemini';
-import { Progress } from '../ui/progress';
-import { useMessage } from '@/contexts/MessageContext';
-import useGeminiAudioPlayback from '@/hooks/gemini/useGeminiAudioPlayback';
+import { cn } from '@/lib/utils';
 
 interface VoicePanelProps {
   isListening: boolean;
-  transcript: string;
+  transcript?: string;
+  aiResponse?: string;
   onClose: () => void;
   onToggleListening: () => void;
-  aiResponse?: string;
 }
 
 export const VoicePanel: React.FC<VoicePanelProps> = ({
   isListening,
   transcript,
-  onClose,
-  onToggleListening,
   aiResponse,
+  onClose,
+  onToggleListening
 }) => {
-  const { error: serviceError, isLoading, progress } = useGeminiService();
-  const { isPlaying, error: audioError, stopAudio, playAudio } = useGeminiAudioPlayback({
-    onPlaybackError: console.error
-  });
-
-  const { message, audioEnabled, setAudioEnabled } = useMessage();
-
-  useEffect(() => {
-    // Automatically play audio when message is received in context
-    if (message && audioEnabled) {
-      const messageBlob = new Blob([message], { type: 'text/plain' });
-      playAudio(messageBlob).catch(console.error);
-    }
-  }, [message, audioEnabled, playAudio]);
-
-  const handleAudioControl = () => {
-    if (isPlaying || isLoading) {
-      stopAudio();
-      setAudioEnabled(false);
-    } else if (message) {
-      setAudioEnabled(true);
-      const messageBlob = new Blob([message], { type: 'text/plain' });
-      playAudio(messageBlob).catch(console.error);
-    }
-  };
-  
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20, scale: 0.9 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: 20, scale: 0.9 }}
-      className="fixed bottom-24 right-6 p-4 bg-background border rounded-xl shadow-lg z-50 w-80"
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 50 }}
+      transition={{ duration: 0.3 }}
+      className="fixed bottom-20 right-4 md:right-6 p-4 bg-white dark:bg-slate-900 rounded-2xl shadow-xl w-80 z-50 border border-black/10 dark:border-white/10"
     >
-      <div className="flex justify-between items-center mb-3">
-        <div className="flex items-center gap-2">
-          <h3 className="text-foreground font-medium text-sm">Voice Assistant</h3>
-          {(serviceError || audioError) && <span className="text-destructive text-xs">{serviceError || audioError}</span>}
-        </div>
-        <div className="flex gap-2">
-          {message && (
-            <div className="flex items-center gap-2">
-              {isLoading && (
-                <div className="w-24">
-                  <Progress value={progress} className="h-2" />
-                </div>
-              )}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleAudioControl}
-                className="h-7 w-7 rounded-full"
-                disabled={!message}
-              >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                ) : isPlaying ? (
-                  <Volume2 className="h-4 w-4 text-primary" />
-                ) : (
-                  <VolumeOff className="h-4 w-4 text-muted-foreground" />
-                )}
-              </Button>
-            </div>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            className="h-7 w-7 rounded-full"
-          >
-            <X className="h-4 w-4 text-muted-foreground" />
-          </Button>
-        </div>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-medium text-sm">Voice Assistant</h3>
+        <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8">
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </Button>
       </div>
       
-      <div className="text-muted-foreground text-sm mb-4">
-        <p>Say commands like "show me your work" or "tell me about your services"</p>
+      <div className="bg-muted/50 rounded-lg p-3 mb-4 min-h-20 max-h-40 overflow-y-auto">
+        {transcript ? (
+          <p className="text-sm">{transcript}</p>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {isListening ? "Listening..." : "Press the mic button and speak"}
+          </p>
+        )}
       </div>
       
-      <div className="flex flex-col items-center gap-4">
-        <button 
+      {aiResponse && (
+        <div className="bg-primary/10 rounded-lg p-3 mb-4 text-sm">
+          <p>{aiResponse}</p>
+        </div>
+      )}
+      
+      <div className="flex justify-center">
+        <button
           onClick={onToggleListening}
-          className={`p-4 rounded-full ${isListening ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'} transition-colors`}
+          className={cn(
+            "rounded-full w-12 h-12 flex items-center justify-center transition-colors",
+            isListening
+              ? "bg-red-500 hover:bg-red-600 text-white"
+              : "bg-primary/90 hover:bg-primary text-white"
+          )}
         >
-          {isListening ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
+          {isListening ? (
+            <AnimatedBars isActive={true} small={true} className="h-6" />
+          ) : (
+            <Mic className="h-5 w-5" />
+          )}
+          <span className="sr-only">
+            {isListening ? "Stop listening" : "Start listening"}
+          </span>
         </button>
-        
-        {isListening && (
-          <div className="voice-waveform flex justify-center items-end h-8">
-            <AnimatedBars isActive={isListening} />
-          </div>
-        )}
-        
-        {transcript && (
-          <div className="p-3 bg-muted rounded-lg w-full">
-            <p className="text-foreground text-sm">"{transcript}"</p>
-          </div>
-        )}
       </div>
+      
+      <p className="text-xs text-center text-muted-foreground mt-3">
+        {isListening 
+          ? "Tap to stop" 
+          : "Tap and speak your command"}
+      </p>
     </motion.div>
   );
 };
+
+export default VoicePanel;

@@ -1,138 +1,190 @@
 
-import React, { useState, useCallback } from 'react';
-import { cn } from "@/lib/utils";
-import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
-import { Mic, Pause, Play, StopCircle } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
+import { AnimatedBars } from '../ui/AnimatedBars';
+import { VoiceControls } from '../ui/ai-chat/VoiceControls';
+import { VoicePanel } from './VoicePanel';
+import { DemoVoiceControls } from './DemoVoiceControls';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
-import useGeminiAudioPlayback from '@/hooks/gemini/useGeminiAudioPlayback';
+import { UnifiedVoiceUIProps } from '@/types/chat';
+import { useToast } from '@/hooks/use-toast';
+import { useLocation } from 'react-router-dom';
 
-interface UnifiedVoiceUIProps {
-  isListening: boolean;
-  toggleListening: () => void;
-  isPlaying: boolean;
-  progress: number;
-  stopAudio: () => void;
-  onVoiceInput: (text: string) => void;
-  onGenerateAudio?: (text: string) => Promise<Blob | null>;
-  className?: string;
-  disabled?: boolean;
-}
-
-export const UnifiedVoiceUI: React.FC<UnifiedVoiceUIProps> = ({
-  isListening,
-  toggleListening,
-  isPlaying,
-  progress,
-  stopAudio,
-  onVoiceInput,
-  onGenerateAudio,
-  className,
-  disabled = false
+export const UnifiedVoiceUI: React.FC<UnifiedVoiceUIProps> = ({ 
+  onCommand, 
+  noFloatingButton = false 
 }) => {
-  const {
-    transcript,
-    voiceError,
-    isVoiceSupported
-  } = useSpeechRecognition((command) => {
-    if (command.trim()) {
-      onVoiceInput(command);
-    }
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(() => {
+    return localStorage.getItem('hasInteractedWithVoice') === 'true';
   });
+  const [aiResponse, setAIResponse] = useState('');
 
-  const { 
-    playAudio,
-    error: audioError
-  } = useGeminiAudioPlayback({
-    onPlaybackComplete: () => {
-      console.log('Audio playback completed');
+  const { toast } = useToast();
+  const commandTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  
+  const handleCommand = async (command: string) => {
+    console.log('Received voice command:', command);
+    if (isProcessing) {
+      console.log('Already processing a command, ignoring');
+      return;
     }
-  });
 
-  const [pendingText, setPendingText] = useState<string>('');
+    if (!hasInteracted) {
+      localStorage.setItem('hasInteractedWithVoice', 'true');
+      setHasInteracted(true);
+    }
 
-  // Handle text-to-speech request
-  const handleTTS = async (text: string) => {
-    if (!onGenerateAudio || !text.trim()) return;
-    
+    if (commandTimeoutRef.current) {
+      clearTimeout(commandTimeoutRef.current);
+    }
+
     try {
-      setPendingText(text);
-      const audioBlob = await onGenerateAudio(text);
-      setPendingText('');
-      
-      if (audioBlob) {
-        await playAudio(audioBlob);
+      if (command.trim()) {
+        setIsProcessing(true);
+        
+        commandTimeoutRef.current = setTimeout(() => {
+          if (isProcessing) {
+            setIsProcessing(false);
+            toast({
+              title: "Processing Timed Out",
+              description: "Command took too long to process. Please try again.",
+              variant: "destructive"
+            });
+          }
+        }, 30000);
+
+        // Generate a mock response
+        setTimeout(() => {
+          setAIResponse(`I heard: "${command}"`);
+          setIsProcessing(false);
+        }, 1500);
+        
+        // Call original onCommand if provided
+        if (onCommand) {
+          await onCommand(command);
+        }
+      } else {
+        toast({
+          title: "No Speech Detected",
+          description: "Please try speaking again.",
+          variant: "default"
+        });
       }
     } catch (error) {
-      console.error('Error generating audio:', error);
-      setPendingText('');
+      console.error("Error processing voice command:", error);
+      toast({
+        title: "Command Error",
+        description: error instanceof Error ? error.message : "Failed to process voice command",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+      if (commandTimeoutRef.current) {
+        clearTimeout(commandTimeoutRef.current);
+        commandTimeoutRef.current = null;
+      }
     }
   };
 
-  const handleVoiceCommand = useCallback((command: string) => {
-    if (command.trim()) {
-      onVoiceInput(command);
+  const { isListening, transcript, toggleListening, voiceError } = useSpeechRecognition(handleCommand);
+  
+  // Show error toast if there's a voice error
+  useEffect(() => {
+    if (voiceError) {
+      console.error("Voice recognition error:", voiceError);
+      toast({
+        title: "Voice Recognition Error",
+        description: voiceError,
+        variant: "destructive"
+      });
     }
-  }, [onVoiceInput]);
-
-  if (!isVoiceSupported) return null;
-
+  }, [voiceError, toast]);
+  
+  const handleToggleListening = async () => {
+    if (isProcessing) return;
+    await toggleListening();
+    setShowTooltip(true);
+    
+    if (!hasInteracted) {
+      setIsExpanded(true);
+      setHasInteracted(true);
+      localStorage.setItem('hasInteractedWithVoice', 'true');
+    }
+    
+    const tooltipTimeout = setTimeout(() => setShowTooltip(false), 5000);
+    return () => clearTimeout(tooltipTimeout);
+  };
+  
+  // Cleanup effect for any remaining timeouts when component unmounts
+  useEffect(() => {
+    return () => {
+      if (commandTimeoutRef.current) {
+        clearTimeout(commandTimeoutRef.current);
+        commandTimeoutRef.current = null;
+      }
+    };
+  }, []);
+  
+  const toggleExpanded = () => {
+    setIsExpanded(!isExpanded);
+  };
+  
   return (
-    <div className={cn("flex items-center gap-2 relative min-h-[36px]", className)}>
-      <Button
-        variant={isListening ? "default" : "outline"}
-        size="icon"
-        onClick={toggleListening}
-        disabled={disabled}
-        className={cn(
-          "relative",
-          isListening && "bg-red-500 hover:bg-red-600"
-        )}
-      >
-        <Mic className={cn(
-          "h-4 w-4",
-          isListening && "animate-pulse"
-        )} />
-      </Button>
-
-      {isPlaying && (
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={stopAudio}
-          disabled={disabled}
-          className="relative"
-        >
-          <StopCircle className="h-4 w-4" />
-        </Button>
-      )}
-
-      {onGenerateAudio && (
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => handleTTS(transcript || pendingText || 'Hello, this is a test of the Gemini TTS system.')}
-          disabled={disabled || isPlaying || !onGenerateAudio}
-          className="relative"
-        >
-          <Play className="h-4 w-4" />
-        </Button>
-      )}
-
-      {(isListening || isPlaying) && (
-        <Progress 
-          value={isListening ? undefined : progress} 
-          className="w-[100px]"
-          aria-label="Audio progress"
-        />
+    <>
+      {!noFloatingButton && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <VoiceControls 
+            isListening={isListening}
+            toggleListening={isExpanded ? handleToggleListening : toggleExpanded}
+            disabled={isProcessing}
+            aiProcessing={isProcessing}
+          />
+        </div>
       )}
       
-      {(voiceError || audioError) && (
-        <p className="text-xs text-red-500 absolute -bottom-6 left-0">
-          {voiceError || audioError}
-        </p>
+      {noFloatingButton && (
+        <div className="flex justify-center">
+          <DemoVoiceControls 
+            isListening={isListening}
+            toggleListening={handleToggleListening}
+            disabled={isProcessing}
+            aiProcessing={isProcessing}
+          />
+        </div>
       )}
-    </div>
+      
+      <AnimatePresence>
+        {isExpanded && (
+          <VoicePanel
+            isListening={isListening}
+            transcript={transcript}
+            onClose={toggleExpanded}
+            onToggleListening={handleToggleListening}
+            aiResponse={aiResponse}
+          />
+        )}
+      </AnimatePresence>
+      
+      {showTooltip && !isExpanded && (
+        <div className="fixed bottom-20 right-6 p-3 bg-black text-white rounded-lg shadow-lg z-50 max-w-xs">
+          <p className="text-sm mb-2">Hey, I'm your voice assistant—say something to try it out!</p>
+          {isListening && (
+            <div className="voice-waveform flex justify-center items-end h-5">
+              <AnimatedBars isActive={isListening} small={true} />
+            </div>
+          )}
+        </div>
+      )}
+      
+      {transcript && isListening && !isExpanded && (
+        <div className="fixed bottom-24 right-24 p-2 bg-white/90 text-black rounded shadow-md">
+          "{transcript}"
+        </div>
+      )}
+    </>
   );
 };
 
