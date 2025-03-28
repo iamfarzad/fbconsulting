@@ -45,6 +45,11 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Define opacity values here
+        black: "hsl(var(--black))", // Assuming --black is defined in globals.css
+      },
+      opacity: {
+        '10': '0.1',
       },
       keyframes: {
         'spin-around': {
@@ -68,4 +73,4 @@ module.exports = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-}
+};
