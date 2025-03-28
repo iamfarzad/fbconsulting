@@ -1,70 +1,47 @@
 
-interface ErrorContext {
-  [key: string]: any;
-}
-
+/**
+ * Formats an error message from various error types
+ */
 export function formatErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   } else if (typeof error === 'string') {
     return error;
-  } else if (error && typeof error === 'object' && 'message' in error) {
-    return String((error as { message: unknown }).message);
+  } else if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+    return error.message;
+  } else {
+    return 'An unknown error occurred';
   }
-  return 'An unknown error occurred';
 }
 
-export function logDetailedError(error: unknown, context: ErrorContext = {}): void {
-  console.group('Detailed Error Information');
-  
-  // Log the error itself
-  console.error('Error:', error);
-  
-  // Log additional context
-  if (Object.keys(context).length > 0) {
-    console.log('Context:', context);
-  }
-  
-  // Log stack trace if available
-  if (error instanceof Error && error.stack) {
-    console.log('Stack trace:', error.stack);
-  }
-  
-  // For API errors that might have detailed response information
-  if (error && typeof error === 'object' && 'response' in error) {
-    const apiError = error as any;
-    if (apiError.response) {
-      console.log('Response status:', apiError.response.status);
-      console.log('Response data:', apiError.response.data);
-    }
-  }
-  
-  console.groupEnd();
+/**
+ * Creates a sanitized error object for API responses
+ */
+export function createErrorResponse(error: unknown): { error: string } {
+  return {
+    error: formatErrorMessage(error)
+  };
 }
 
-export function categorizeError(error: unknown): 'network' | 'auth' | 'timeout' | 'api' | 'unknown' {
-  const errorString = formatErrorMessage(error).toLowerCase();
+/**
+ * Handles common API errors and returns appropriate status codes
+ */
+export function handleApiError(error: unknown): { statusCode: number; message: string } {
+  const errorMessage = formatErrorMessage(error);
   
-  if (errorString.includes('network') || errorString.includes('offline') || 
-      errorString.includes('failed to fetch') || errorString.includes('connection')) {
-    return 'network';
+  if (errorMessage.includes('not found') || errorMessage.includes('404')) {
+    return { statusCode: 404, message: errorMessage };
+  } else if (errorMessage.includes('unauthorized') || errorMessage.includes('authentication') || errorMessage.includes('auth')) {
+    return { statusCode: 401, message: errorMessage };
+  } else if (errorMessage.includes('permission') || errorMessage.includes('forbidden')) {
+    return { statusCode: 403, message: errorMessage };
+  } else if (errorMessage.includes('validation') || errorMessage.includes('invalid')) {
+    return { statusCode: 400, message: errorMessage };
+  } else if (errorMessage.includes('timeout') || errorMessage.includes('timed out')) {
+    return { statusCode: 408, message: errorMessage };
+  } else if (errorMessage.includes('server')) {
+    return { statusCode: 500, message: errorMessage };
+  } else {
+    return { statusCode: 500, message: errorMessage };
   }
-  
-  if (errorString.includes('api key') || errorString.includes('unauthorized') || 
-      errorString.includes('auth') || errorString.includes('permission') || 
-      (error && typeof error === 'object' && 'response' in error && 
-       (error as any).response?.status === 401 || (error as any).response?.status === 403)) {
-    return 'auth';
-  }
-  
-  if (errorString.includes('timeout') || errorString.includes('timed out')) {
-    return 'timeout';
-  }
-  
-  if (errorString.includes('api') || 
-      (error && typeof error === 'object' && 'response' in error)) {
-    return 'api';
-  }
-  
-  return 'unknown';
 }

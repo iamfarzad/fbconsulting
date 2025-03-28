@@ -2,6 +2,7 @@
 import React from 'react';
 import { WebSocketChat } from '@/components/chat/WebSocketChat';
 import { ChatProvider } from '@/contexts/ChatContext';
+import { Card } from '@/components/ui/card';
 
 const Index: React.FC = () => {
   return (
@@ -18,9 +19,9 @@ const Index: React.FC = () => {
           </p>
         </div>
         
-        <div className="max-w-lg mx-auto">
+        <Card className="max-w-2xl mx-auto p-4">
           <WebSocketChat />
-        </div>
+        </Card>
         
         <div className="mt-8 text-center text-sm text-muted-foreground">
           <p>Using WebSocket API with real-time audio streaming</p>

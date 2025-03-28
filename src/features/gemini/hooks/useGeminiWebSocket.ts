@@ -61,9 +61,9 @@ export function useGeminiWebSocket({
         pingIntervalRef.current = window.setInterval(() => {
           if (wsRef.current?.readyState === WebSocket.OPEN) {
             console.log('Sending ping to keep connection alive');
-            wsRef.current.send(JSON.stringify(API_CONFIG.WEBSOCKET.PING_MESSAGE));
+            wsRef.current.send(JSON.stringify({ type: 'ping' }));
           }
-        }, API_CONFIG.WEBSOCKET.PING_INTERVAL); // Use the correct config property
+        }, API_CONFIG.WEBSOCKET.PING_INTERVAL); 
         
         if (onOpen) onOpen();
       };
@@ -71,6 +71,7 @@ export function useGeminiWebSocket({
       wsRef.current.onclose = (event) => {
         console.log(`WebSocket connection closed: ${event.code} - ${event.reason}`);
         setIsConnected(false);
+        setIsConnecting(false);
         
         // Clear ping interval
         if (pingIntervalRef.current) {
@@ -86,10 +87,7 @@ export function useGeminiWebSocket({
             setTimeout(() => connect(), API_CONFIG.WEBSOCKET.RECONNECT_INTERVAL);
           } else {
             setError(`Connection closed after ${API_CONFIG.WEBSOCKET.RECONNECT_ATTEMPTS} reconnect attempts`);
-            setIsConnecting(false);
           }
-        } else {
-          setIsConnecting(false);
         }
         
         if (onClose) onClose(event);
@@ -107,7 +105,7 @@ export function useGeminiWebSocket({
             const jsonData = JSON.parse(event.data);
             
             // Handle different message types
-            if (jsonData.type === 'text') {
+            if (jsonData.type === 'text' && jsonData.content) {
               if (onTextMessage) onTextMessage(jsonData.content);
             } else if (jsonData.type === 'complete') {
               if (onComplete) onComplete();
@@ -115,14 +113,16 @@ export function useGeminiWebSocket({
               const errorMessage = jsonData.error || 'Unknown error occurred';
               setError(errorMessage);
               if (onError) onError(errorMessage);
+            } else if (jsonData.type === 'audio_chunk_info') {
+              // This is metadata about an incoming audio chunk
+              console.log('Received audio chunk info:', jsonData.size, 'bytes');
             } else if (jsonData.type === 'pong') {
-              // Received pong response
               console.log('Received pong from server');
             }
           } catch (error) {
             console.error('Error parsing WebSocket message:', error);
           }
-        } else if (event.data instanceof Blob && onAudioChunk) {
+        } else if (event.data instanceof Blob) {
           // Handle binary data (audio chunks)
           event.data.arrayBuffer().then(buffer => {
             if (onAudioChunk) onAudioChunk(buffer);
@@ -153,7 +153,7 @@ export function useGeminiWebSocket({
   }, []);
 
   // Send a message to the server
-  const sendMessage = useCallback((text: string, enableTTS: boolean = false) => {
+  const sendMessage = useCallback((text: string, enableTTS: boolean = true) => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
       const errorMsg = 'WebSocket not connected';
       setError(errorMsg);
@@ -162,6 +162,7 @@ export function useGeminiWebSocket({
     }
     
     const message = {
+      type: 'text_message',
       text,
       enableTTS,
       role: 'user'
@@ -191,6 +192,7 @@ export function useGeminiWebSocket({
     error,
     connect,
     disconnect,
-    sendMessage
+    sendMessage,
+    clientId: clientIdRef.current
   };
 }
