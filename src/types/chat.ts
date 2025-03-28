@@ -29,8 +29,8 @@ export interface ChatInputProps {
 }
 
 export interface ChatMessageListProps {
-  messages: AIMessage[];
-  showMessages: boolean;
+  messages?: AIMessage[];
+  showMessages?: boolean;
   isFullScreen?: boolean;
   isLoading?: boolean;
 }
@@ -51,6 +51,8 @@ export interface UnifiedChatProps {
   className?: string;
   apiKey?: string;
   modelName?: string;
+  title?: string;
+  subtitle?: string;
 }
 
 export interface UnifiedFullScreenChatProps {
@@ -58,4 +60,21 @@ export interface UnifiedFullScreenChatProps {
   placeholderText?: string;
   apiKey?: string;
   modelName?: string;
+}
+
+export interface FileAttachment {
+  mimeType: string;
+  data: string;
+  name: string;
+  type: string;
+}
+
+export interface AudioMessage {
+  content: string;
+  voiceId?: string;
+  stability?: number;
+  similarity?: number;
+  speakerBoost?: boolean;
+  style?: number;
+  modelId?: string;
 }

@@ -1,8 +1,8 @@
 
 import React, { useRef, useEffect } from 'react';
 import { Bot, User, Loader2 } from 'lucide-react';
-import { AIMessage } from '@/types/chat';
-import { ChatMessageListProps } from '@/types/chat';
+import { useChat } from '@/contexts/ChatContext';
+import { AIMessage, ChatMessageListProps } from '@/types/chat';
 
 // Simple chat message component
 const ChatMessage = ({ message }: { message: AIMessage }) => {
@@ -40,12 +40,10 @@ const ChatMessage = ({ message }: { message: AIMessage }) => {
   );
 };
 
-export const UnifiedChatMessageList: React.FC<ChatMessageListProps> = ({
-  messages,
-  showMessages,
-  isLoading
-}) => {
+export const UnifiedChatMessageList: React.FC<ChatMessageListProps> = () => {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const { state } = useChat();
+  const { messages, showMessages, isLoading } = state;
   
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -71,7 +69,7 @@ export const UnifiedChatMessageList: React.FC<ChatMessageListProps> = ({
     <div className="flex flex-col space-y-2 p-2">
       {displayMessages.map((message, index) => (
         <ChatMessage 
-          key={index} 
+          key={message.id || index} 
           message={message} 
         />
       ))}

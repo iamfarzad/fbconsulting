@@ -1,6 +1,6 @@
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, Mic, MicOff } from 'lucide-react';
+import React, { useRef, useEffect } from 'react';
+import { Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChat } from '@/contexts/ChatContext';
 import { ChatInputProps } from '@/types/chat';
@@ -11,7 +11,6 @@ export const UnifiedChatInput: React.FC<ChatInputProps> = ({
   const { state, dispatch, sendMessage } = useChat();
   const { inputValue, isLoading } = state;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [rows, setRows] = useState(1);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -19,11 +18,6 @@ export const UnifiedChatInput: React.FC<ChatInputProps> = ({
       textareaRef.current.style.height = 'auto';
       const newHeight = Math.min(textareaRef.current.scrollHeight, 200);
       textareaRef.current.style.height = `${newHeight}px`;
-      
-      // Update rows based on content
-      const lineHeight = 24; // Approximate line height in pixels
-      const newRows = Math.min(Math.max(Math.ceil(newHeight / lineHeight), 1), 5);
-      setRows(newRows);
     }
   }, [inputValue]);
 
@@ -49,7 +43,7 @@ export const UnifiedChatInput: React.FC<ChatInputProps> = ({
         placeholder={placeholder}
         className="flex-1 resize-none border-0 bg-transparent p-3 focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 min-h-[60px] max-h-[200px]"
         disabled={isLoading}
-        rows={rows}
+        rows={1}
       />
       
       <Button
