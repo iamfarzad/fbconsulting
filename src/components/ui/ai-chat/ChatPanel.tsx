@@ -1,26 +1,47 @@
+
 import React from 'react';
 import { ChatMessageList } from './ChatMessageList';
 import { ChatInput } from './ChatInput';
-import { ConnectionStatus } from './ConnectionStatus';
-import { useChat } from '@/contexts/ChatContext';
-import { SectionHeading } from '@/components/ui/SectionHeading';
-import { ClearChatButton } from '@/components/ui/buttons/ClearChatButton';
-import { PopoverMenu } from '@/components/ui/PopoverMenu';
+import { useChat } from '@/hooks/useChat';
+import { Button } from '@/components/ui/button';
+import { Maximize2, Minimize2 } from 'lucide-react';
 
 export const ChatPanel: React.FC = () => {
-  const { messages, inputValue, setInputValue, isLoading, suggestedResponse, handleSend, handleClear, isFullScreen, files, uploadFile, removeFile, isUploading } = useChat();
+  const { 
+    messages, 
+    inputValue, 
+    setInputValue, 
+    isLoading, 
+    suggestedResponse, 
+    handleSend, 
+    handleClear, 
+    isFullScreen,
+    toggleFullScreen,
+    files, 
+    uploadFile, 
+    removeFile, 
+    isUploading 
+  } = useChat();
 
   return (
-    <div className="flex flex-col h-full">
-      <header className="flex items-center justify-between p-4 border-b border-gray-200">
-        <SectionHeading title="Farzad-AI" className="text-2xl font-bold" />
-        <PopoverMenu />
+    <div className="flex flex-col h-full rounded-lg border shadow-sm overflow-hidden">
+      <header className="flex items-center justify-between p-4 border-b">
+        <h2 className="text-xl font-semibold">Farzad-AI Assistant</h2>
+        <Button variant="ghost" size="sm" onClick={toggleFullScreen}>
+          {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+        </Button>
       </header>
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        <ConnectionStatus />
-        <ChatMessageList messages={messages} showMessages={true} isFullScreen={isFullScreen} isLoading={isLoading} />
+      
+      <div className="flex-1 overflow-y-auto p-4">
+        <ChatMessageList 
+          messages={messages} 
+          showMessages={true} 
+          isFullScreen={isFullScreen}
+          isLoading={isLoading}
+        />
       </div>
-      <footer className="p-4 border-t border-gray-200">
+      
+      <footer className="p-4 border-t">
         <ChatInput
           value={inputValue}
           setValue={setInputValue}
@@ -36,7 +57,6 @@ export const ChatPanel: React.FC = () => {
           onRemoveFile={removeFile}
           isUploading={isUploading}
         />
-        <ClearChatButton onClick={handleClear} />
       </footer>
     </div>
   );
