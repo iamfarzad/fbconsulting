@@ -1,5 +1,5 @@
 
-import { AIMessage } from '@/types/chat'; // Updated import
+import { AIMessage } from '@/services/chat/messageTypes'; // Updated import
 
 // Define the shape of our chat state
 export interface ChatState {
@@ -61,6 +61,19 @@ export interface ChatContextType {
   removeMediaItem: (index: number) => void;
   clearMediaItems: () => void;
   toggleVoice: (enable?: boolean) => void;
+  
+  // Additional fields for compatibility with ChatPanel
+  messages: AIMessage[];
+  inputValue: string;
+  setInputValue: (value: string) => void;
+  suggestedResponse: string | null;
+  handleSend: () => void;
+  handleClear: () => void;
+  isFullScreen: boolean;
+  files?: any[];
+  uploadFile?: (file: File) => Promise<void>;
+  removeFile?: (index: number) => void;
+  isUploading?: boolean;
 }
 
 // Initial state

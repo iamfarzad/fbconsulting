@@ -18,6 +18,7 @@ const loadTagger = async () => {
   return null;
 };
 
+// Make this a synchronous function that returns UserConfig to match the expected types
 export default defineConfig(async ({ mode }: ConfigEnv): Promise<UserConfig> => {
   const tagger = await loadTagger();
   
@@ -25,7 +26,7 @@ export default defineConfig(async ({ mode }: ConfigEnv): Promise<UserConfig> => 
     server: {
       host: "::",
       port: 8080,
-      allowedHosts: 'all', // This allows any host to connect, including lovableproject.com
+      allowedHosts: true, // Fixed: Changed from string to boolean
     },
     plugins: [
       react(),
