@@ -1,23 +1,67 @@
-import React, { createContext, useContext, useReducer, useCallback } from 'react';
+import { 
+  useGeminiMessageSubmission,
+  useGeminiInitialization,
+} from '@/features/gemini';
+import React, { createContext, useContext, useReducer, useCallback, ReactNode } from 'react';
 import { useVoice } from '@/hooks/useVoice';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { GeminiState, GeminiAction, GeminiUserInfo, ChatStep, ProposalData } from '@/types';
+import type { 
+  GeminiState,
+  GeminiAction,
+  GeminiUserInfo, 
+  ChatStep, 
+  ProposalData 
+} from '@/types';
 import { useCopilotReadable } from '@copilot-kit/react-core';
 import { useGeminiAudio } from '@/hooks/useGeminiAudio';
 import { toast } from '@/components/ui/toast';
 
-// GeminiConnectionManager.tsx
-const GeminiConnectionManagerContext = createContext(null);
+interface ConnectionContextType {
+  isListening: boolean;
+  toggleListening: () => void;
+  transcript: string | null;
+  voiceError: string | null;
+  isPlaying: boolean;
+  progress: number;
+  stopAudio: () => void;
+  generateAndPlayAudio: (text: string) => Promise<void>;
+}
 
-const GeminiConnectionManager = ({ children }) => {
+interface ChatContextType {
+  messages: Array<{
+    role: 'user' | 'assistant';
+    content: string;
+    id: string;
+  }>;
+  sendMessage: (content: string) => Promise<void>;
+  step: ChatStep;
+  setStep: (step: ChatStep) => void;
+  userInfo: GeminiUserInfo | null;
+  setUserInfo: (info: GeminiUserInfo) => void;
+  clearMessages: () => void;
+  clearStorage: () => void;
+  proposal: ProposalData | null;
+  resetConversation: () => void;
+  generateProposal: (data: ProposalData) => Promise<{ success: boolean; message: string }>;
+  sendProposal: () => Promise<{ success: boolean }>;
+}
+
+const GeminiConnectionManagerContext = createContext<ConnectionContextType | null>(null);
+const GeminiChatContext = createContext<ChatContextType | null>(null);
+
+interface ProviderProps {
+  children: ReactNode;
+}
+
+const GeminiConnectionManager: React.FC<ProviderProps> = ({ children }) => {
   const { isListening, toggleListening, transcript, error: voiceError } = useVoice();
   const audio = useGeminiAudio({
     onStart: () => console.log('Audio playback started'),
     onStop: () => console.log('Audio playback stopped'),
-    onError: (error) => console.error('Audio playback error:', error),
+    onError: (error: Error) => console.error('Audio playback error:', error),
   });
 
-  const contextValue = {
+  const contextValue: ConnectionContextType = {
     isListening,
     toggleListening,
     transcript,
@@ -35,25 +79,14 @@ const GeminiConnectionManager = ({ children }) => {
   );
 };
 
-export const useGeminiConnectionManager = () => {
-  const context = useContext(GeminiConnectionManagerContext);
-  if (!context) {
-    throw new Error('useGeminiConnectionManager must be used within a GeminiConnectionManager');
-  }
-  return context;
-};
-
-// GeminiChatContext.tsx
-const GeminiChatContext = createContext(null);
-
-const initialState = {
+const initialState: GeminiState = {
   messages: [],
   userInfo: null,
   step: 'intro',
   proposal: null,
 };
 
-function reducer(state, action) {
+function reducer(state: GeminiState, action: GeminiAction): GeminiState {
   switch (action.type) {
     case 'SET_MESSAGES':
       return { ...state, messages: action.payload };
@@ -76,7 +109,7 @@ function reducer(state, action) {
   }
 }
 
-const GeminiChatProvider = ({ children }) => {
+const GeminiChatProvider: React.FC<ProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { clearStorage, hasStoredState } = useLocalStorage(state, dispatch);
   const [isInitialized, setIsInitialized] = React.useState(false);
@@ -91,15 +124,60 @@ const GeminiChatProvider = ({ children }) => {
     }
   }, [hasStoredState, isInitialized]);
 
-  const sendMessage = useCallback((text) => {
-    dispatch({ type: 'ADD_MESSAGE', payload: { role: 'user', content: text } });
-  }, []);
+  useCopilotReadable({
+    userInfo: state.userInfo,
+    proposal: state.proposal
+  });
 
-  const setStep = useCallback((step) => {
+  const sendMessage = useCallback(async (content: string) => {
+    dispatch({ 
+      type: 'ADD_MESSAGE', 
+      payload: { 
+        role: 'user', 
+        content,
+        id: Date.now().toString()
+      } 
+    });
+
+    try {
+      const loadingId = Date.now().toString();
+      dispatch({ 
+        type: 'ADD_MESSAGE', 
+        payload: { 
+          role: 'assistant', 
+          content: '...', 
+          id: loadingId 
+        } 
+      });
+
+      const response = await new Promise<string>(resolve => 
+        setTimeout(() => resolve("This is a mock AI response. Replace with actual Gemini API call."), 1000)
+      );
+
+      dispatch({
+        type: 'SET_MESSAGES',
+        payload: state.messages.filter(m => m.id !== loadingId).concat({
+          role: 'assistant',
+          content: response,
+          id: Date.now().toString()
+        })
+      });
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error('Failed to send message');
+      dispatch({
+        type: 'SET_MESSAGES',
+        payload: state.messages.filter(m => m.id !== Date.now().toString())
+      });
+    }
+  }, [state.messages]);
+
+  const setStep = useCallback((step: ChatStep) => {
     dispatch({ type: 'SET_STEP', payload: step });
   }, []);
 
-  const setUserInfo = useCallback((info) => {
+  const setUserInfo = useCallback((info: GeminiUserInfo) => {
     dispatch({ type: 'SET_USER_INFO', payload: info });
   }, []);
 
@@ -107,7 +185,7 @@ const GeminiChatProvider = ({ children }) => {
     dispatch({ type: 'CLEAR_MESSAGES' });
   }, []);
 
-  const generateProposal = useCallback(async (proposalData) => {
+  const generateProposal = useCallback(async (proposalData: ProposalData) => {
     try {
       dispatch({ type: 'SET_PROPOSAL', payload: proposalData });
       return { success: true, message: 'Proposal generated successfully' };
@@ -132,7 +210,7 @@ const GeminiChatProvider = ({ children }) => {
     dispatch({ type: 'RESET_STATE' });
   }, []);
 
-  const contextValue = {
+  const contextValue: ChatContextType = {
     messages: state.messages,
     sendMessage,
     step: state.step,
@@ -162,8 +240,7 @@ export const useGeminiChat = () => {
   return context;
 };
 
-// GeminiCopilotProvider.tsx
-export const GeminiCopilotProvider = ({ children }) => (
+export const GeminiCopilotProvider: React.FC<ProviderProps> = ({ children }) => (
   <GeminiConnectionManager>
     <GeminiChatProvider>
       {children}

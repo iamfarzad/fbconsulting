@@ -121,3 +121,125 @@ To determine if these branches have been merged into main, you can use the follo
 - **Review Unmerged Branches**: For branches that haven’t been merged, assess their relevance. If they’re outdated or no longer needed, consider deleting them. If they contain necessary changes, plan to merge them appropriately.
 
 Regularly managing your branches ensures a streamlined and organized repository.
+
+## New API Endpoints
+
+### Text API
+- **Endpoint**: `/api/ask`
+- **Method**: `POST`
+- **Description**: Generates text response using Google's Generative AI (Gemini).
+- **Request Body**:
+  ```json
+  {
+    "prompt": "Your text prompt here",
+    "persona": "Optional persona"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "text": "Generated text response"
+  }
+  ```
+
+### Audio API
+- **Endpoint**: `/api/audio`
+- **Method**: `POST`
+- **Description**: Generates audio from text using Google's Generative AI (Gemini).
+- **Request Body**:
+  ```json
+  {
+    "text": "Your text here",
+    "voiceId": "Optional voice ID",
+    "languageCode": "Optional language code"
+  }
+  ```
+- **Response**: Audio stream
+
+### Streaming API
+- **Endpoint**: `/api/stream`
+- **Method**: `GET`
+- **Description**: Streams text responses using Server-Sent Events (SSE) or WebSockets.
+- **Response**: Streamed text responses
+
+### Document Upload API
+- **Endpoint**: `/api/upload/documents`
+- **Method**: `POST`
+- **Description**: Uploads and processes documents (PDF, DOCX, TXT) to extract text content.
+- **Request Body**: Form data with file uploads
+- **Response**:
+  ```json
+  {
+    "success": true,
+    "documents": [
+      {
+        "filename": "example.pdf",
+        "mimeType": "application/pdf",
+        "text": "Extracted text content",
+        "size": 12345
+      }
+    ]
+  }
+  ```
+
+### Image Upload API
+- **Endpoint**: `/api/upload/images`
+- **Method**: `POST`
+- **Description**: Uploads and processes images to return base64 encoded images with mime types.
+- **Request Body**: Form data with file uploads
+- **Response**:
+  ```json
+  {
+    "success": true,
+    "images": [
+      {
+        "filename": "example.jpg",
+        "mimeType": "image/jpeg",
+        "data": "base64 encoded image data",
+        "size": 12345
+      }
+    ]
+  }
+  ```
+
+### Proposals API
+- **Endpoint**: `/api/proposals/send`
+- **Method**: `POST`
+- **Description**: Sends proposals using nodemailer, Resend, or SendGrid.
+- **Request Body**:
+  ```json
+  {
+    "proposalData": "Your proposal data here"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "success": true,
+    "message": "Proposal sent successfully"
+  }
+  ```
+
+## Secure Key Management
+
+To ensure secure key management, follow these steps:
+
+1. **Environment Variables**: Store sensitive keys and credentials in environment variables. This prevents them from being hardcoded in the source code.
+2. **Secret Managers**: Use secret management tools like Google Secret Manager or Vercel Environment Variables to securely store and access keys.
+3. **Configuration**: Update your configuration files to use environment variables for sensitive information.
+
+Example of using environment variables in a configuration file:
+
+```javascript
+const apiKey = process.env.GOOGLE_API_KEY;
+const firebaseConfig = {
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+};
+```
+
+By following these practices, you can enhance the security of your application and protect sensitive information from being exposed.

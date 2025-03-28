@@ -1,12 +1,16 @@
+"use client"
+
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-interface AvatarProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+interface AvatarProps {
+  className?: string;
   src?: string | null;
   fallback?: React.ReactNode;
+  alt?: string;
 }
 
-export const Avatar = React.forwardRef<HTMLImageElement, AvatarProps>(
+export const Avatar = React.forwardRef<HTMLImageElement, AvatarProps & Omit<React.ImgHTMLAttributes<HTMLImageElement>, keyof AvatarProps>>(
   ({ className, src, fallback = "U", alt, ...props }, ref) => {
     const [error, setError] = React.useState(false);
 

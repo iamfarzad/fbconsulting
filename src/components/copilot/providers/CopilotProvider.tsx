@@ -6,14 +6,15 @@ import { CopilotKit } from '@copilotkit/react-core';
 import { usePersonaManagement } from '@/mcp/hooks/usePersonaManagement';
 import { toast } from '@/components/ui/use-toast';
 import { useGeminiAPI } from '@/hooks/useGeminiAPI';
-import { ConnectionStatusIndicator } from '../ui/ConnectionStatusIndicator';
+import { ConnectionStatusIndicator } from '@/components/ui/ConnectionStatusIndicator';
 import { formatErrorMessage, logDetailedError, categorizeError } from '@/utils/errorHandling';
 import type { 
   SpatialContext, 
   VoiceConfig, 
   Message,
   CopilotConfig as CopilotConfigType
-} from '../types';
+} from '@/components/copilot/types';
+import { ChatMessage } from '../../../types/chat';
 
 // Basic Copilot Context for toggle functionality
 interface CopilotContextType {
@@ -22,6 +23,14 @@ interface CopilotContextType {
   isConnected: boolean;
   isConnecting: boolean;
   error: string | null;
+  isOpen: boolean;
+  openCopilot: () => void;
+  closeCopilot: () => void;
+  activeProvider: string;
+  setActiveProvider: (provider: string) => void;
+  chatHistory: Record<string, ChatMessage[]>;
+  addMessageToHistory: (provider: string, message: ChatMessage) => void;
+  clearChatHistory: (provider: string) => void;
 }
 
 const CopilotContext = createContext<CopilotContextType | undefined>(undefined);
@@ -53,6 +62,35 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
   const [spatialContext, setSpatialContext] = useState<SpatialContext | null>(null);
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'connecting' | 'connected' | 'error'>('idle');
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [activeProvider, setActiveProvider] = useState<string>('gemini');
+  const [chatHistory, setChatHistory] = useState<Record<string, ChatMessage[]>>({
+    gemini: [],
+    openai: [],
+    anthropic: [],
+  });
+
+  const openCopilot = () => setIsOpen(true);
+  const closeCopilot = () => setIsOpen(false);
+
+  const addMessageToHistory = (provider: string, message: ChatMessage) => {
+    setChatHistory(prev => {
+      // Ensure we have an array for this provider
+      const providerHistory = Array.isArray(prev[provider]) ? [...prev[provider]] : [];
+      
+      return {
+        ...prev,
+        [provider]: [...providerHistory, message],
+      };
+    });
+  };
+
+  const clearChatHistory = (provider: string) => {
+    setChatHistory(prev => ({
+      ...prev,
+      [provider]: [],
+    }));
+  };
 
   // Memoized values
   const publicApiKey = useMemo(() => {
@@ -245,16 +283,55 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
     toggleCopilot,
     isConnected: connectionStatus === 'connected',
     isConnecting: connectionStatus === 'connecting',
-    error: connectionError
+    error: connectionError,
+    isOpen,
+    openCopilot,
+    closeCopilot,
+    activeProvider,
+    setActiveProvider,
+    chatHistory,
+    addMessageToHistory,
+    clearChatHistory,
   };
+
+  // Error handling for WebSocket connection failures
+  useEffect(() => {
+    if (connectionStatus === 'error' && connectionError) {
+      console.error('WebSocket connection error:', connectionError);
+    }
+  }, [connectionStatus, connectionError]);
+
+  // Error handling for resource loading failures
+  useEffect(() => {
+    const handleResourceError = (event: Event) => {
+      console.error('Resource loading error:', event);
+    };
+
+    window.addEventListener('error', handleResourceError);
+
+    return () => {
+      window.removeEventListener('error', handleResourceError);
+    };
+  }, []);
+
+  // Error handling for THREE.WebGLRenderer context lost error
+  useEffect(() => {
+    const handleContextLost = (event: Event) => {
+      console.error('THREE.WebGLRenderer context lost:', event);
+    };
+
+    window.addEventListener('webglcontextlost', handleContextLost);
+
+    return () => {
+      window.removeEventListener('webglcontextlost', handleContextLost);
+    };
+  }, []);
 
   return (
     <CopilotContext.Provider value={contextValue}>
       {showConnectionStatus && enabled && (
         <ConnectionStatusIndicator 
-          status={connectionStatus}
-          error={connectionError}
-          onRetry={() => setConnectionStatus('connecting')}
+          status={connectionStatus === 'connecting' ? 'connecting' : connectionStatus === 'connected' ? 'connected' : 'disconnected'} 
         />
       )}
       

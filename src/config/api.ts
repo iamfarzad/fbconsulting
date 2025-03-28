@@ -1,14 +1,13 @@
-
-// Environment-based configuration
 const isProd = import.meta.env.PROD;
 const isVercel = import.meta.env.VITE_DEPLOYMENT_ENV === 'vercel';
 
 // API Paths
 export const API_PATHS = {
   GOOGLE_GENERATIVE_AI: 'https://generativelanguage.googleapis.com/v1beta',
-  WEBSOCKET_BASE: isProd ? (isVercel ? '/api/gemini/stream' : '/api/gemini/stream') : 'ws://localhost:8000/ws',
+  WEBSOCKET_BASE: isProd ? (isVercel ? 'wss://fbconsulting-24cken69i-iamfarzads-projects.vercel.app/api/gemini/stream' : 'wss://fbconsulting.vercel.app/api/gemini/stream') : 'ws://localhost:8000/ws',
   GEMINI_AUDIO: '/api/gemini/audio',
   GEMINI_STREAM: '/api/gemini/stream',
+  GEMINI_MAIN: '/api/gemini/main', // Updated path to avoid conflicts
   EMAIL_SERVICE: isProd ? '/api/email' : 'http://localhost:8000/api/email',
   LEAD_CAPTURE: isProd ? '/api/lead' : 'http://localhost:8000/api/lead',
 };
@@ -25,6 +24,14 @@ export const API_CONFIG = {
     ? `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`
     : 'ws://localhost:8000',
 };
+
+// Make sure environment variables are accessed correctly using Vite's import.meta.env
+export const apiConfig = {
+  resendApiKey: import.meta.env.VITE_RESEND_API_KEY || '',
+};
+
+// Ensure we're not using demo by default
+export const useRealApi = true; // Force to true instead of checking for API keys
 
 // Gemini API configuration
 export const GEMINI_API_CONFIG = {

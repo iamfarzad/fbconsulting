@@ -1,133 +1,40 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
-interface AudioPlaybackOptions {
+interface GeminiAudioConfig {
   onStart?: () => void;
   onStop?: () => void;
   onError?: (error: Error) => void;
-  onProgress?: (progress: number) => void;
 }
 
-export interface GeminiAudioService {
-  playText: (text: string) => Promise<void>;
-  stopPlayback: () => void;
-  isPlaying: boolean;
-  progress: number;
-  error: Error | null;
-}
-
-export function useGeminiAudio(options?: AudioPlaybackOptions): GeminiAudioService {
+export const useGeminiAudio = (config: GeminiAudioConfig = {}) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [error, setError] = useState<Error | null>(null);
-  
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
 
   const stopPlayback = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
-    
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      abortControllerRef.current = null;
-    }
-    
     setIsPlaying(false);
     setProgress(0);
-    options?.onStop?.();
-  }, [options]);
-
-  useEffect(() => {
-    return () => {
-      stopPlayback();
-    };
-  }, [stopPlayback]);
+    config.onStop?.();
+  }, [config]);
 
   const playText = useCallback(async (text: string) => {
     try {
-      if (!text || text.trim() === '') {
-        throw new Error('Text is required for audio playback');
-      }
-
-      // Stop any ongoing playback
-      stopPlayback();
-      
       setIsPlaying(true);
-      setError(null);
-      setProgress(0);
-      options?.onStart?.();
+      config.onStart?.();
+
+      // TODO: Implement actual text-to-speech
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Create abort controller for fetch
-      abortControllerRef.current = new AbortController();
-      
-      // This connects to the /api/gemini/audio endpoint we saw in the codebase
-      const response = await fetch('/api/gemini/audio', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          text,
-          config: {
-            voice: 'Charon' // Default voice, could be configurable
-          }
-        }),
-        signal: abortControllerRef.current.signal
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Audio API error: ${response.status} - ${errorText}`);
-      }
-      
-      // Get audio blob from response
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      // Create and configure audio element
-      const audio = new Audio(audioUrl);
-      audioRef.current = audio;
-      
-      audio.addEventListener('timeupdate', () => {
-        const currentProgress = audio.currentTime / audio.duration;
-        setProgress(currentProgress);
-        options?.onProgress?.(currentProgress);
-      });
-      
-      audio.addEventListener('ended', () => {
-        setIsPlaying(false);
-        setProgress(1);
-        options?.onStop?.();
-        URL.revokeObjectURL(audioUrl); // Clean up
-      });
-      
-      audio.addEventListener('error', (e) => {
-        const audioError = new Error(`Audio playback error: ${e}`);
-        setError(audioError);
-        setIsPlaying(false);
-        options?.onError?.(audioError);
-        URL.revokeObjectURL(audioUrl); // Clean up
-      });
-      
-      // Start playback
-      await audio.play();
-      
-    } catch (err) {
-      const playError = err instanceof Error ? err : new Error(String(err));
-      setError(playError);
-      setIsPlaying(false);
-      options?.onError?.(playError);
-      console.error('Audio playback error:', playError);
+      stopPlayback();
+    } catch (error) {
+      config.onError?.(error instanceof Error ? error : new Error('Unknown error'));
+      stopPlayback();
     }
-  }, [options, stopPlayback]);
+  }, [config, stopPlayback]);
 
   return {
-    playText,
-    stopPlayback,
     isPlaying,
     progress,
-    error
+    stopPlayback,
+    playText
   };
-}
+};

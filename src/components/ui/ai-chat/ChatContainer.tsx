@@ -2,7 +2,7 @@ import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChatMessageList } from "./ChatMessageList";
 import { ChatInput } from "./ChatInput";
-import { AIMessage } from "@/services/chat/types";
+import { AIMessage } from "@/features/gemini/types/types";
 import { UploadedFile } from "@/hooks/useFileUpload";
 
 interface ChatContainerProps {

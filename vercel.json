@@ -3,14 +3,15 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "devCommand": "npm run dev",
+  "installCommand": "npm install",
   "framework": "vite",
   "functions": {
-    "api/**/*.py": {
-      "runtime": "@vercel/python@3.1.0",
-      "memory": 1024
+    "api/**/*": {
+      "memory": 1024,
+      "maxDuration": 10
     }
   },
-  "routes": [
+  "headers": [
     {
       "src": "/api/gemini/audio",
       "dest": "/api/gemini/audio.py",
@@ -39,8 +40,16 @@
       "dest": "/index.html"
     }
   ],
-  "env": {
-    "GOOGLE_API_KEY": "AIzaSyC77mmHQCmDsUSk86pP4IbGwtSjL-fa9qc",
-    "GEMINI_API_KEY": "AIzaSyC77mmHQCmDsUSk86pP4IbGwtSjL-fa9qc"
-  }
+  "regions": ["fra1"],
+  "public": true,
+  "environment": {
+    "VITE_GEMINI_API_KEY": "@gemini-api-key",
+    "NODE_ENV": "production"
+  },
+  "rewrites": [
+    { "source": "/api/gemini", "destination": "/api/gemini/route" },
+    { "source": "/api/gemini/stream", "destination": "/api/gemini/stream" },
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

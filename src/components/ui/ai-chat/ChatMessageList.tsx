@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot } from "lucide-react";
-import { AIMessage } from "@/services/chat/messageTypes";
+import { AIMessage } from "@/features/gemini/types/messageTypes";
 import { TypingIndicator } from "./TypingIndicator";
 
 interface ChatMessageProps {
@@ -15,7 +15,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div className={`max-w-[80%] p-3 rounded-lg ${isUser ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+      <div className={`max-w-[80%] p-3 rounded-lg ${isUser ? 'bg-gray-100' : 'bg-white border border-gray-200'}`}>
         {message.content}
       </div>
     </div>
@@ -89,7 +89,7 @@ export const ChatMessageList = ({
           >
             <Bot size={40} className="text-white/90 mb-4" />
             <h3 className="text-white/90 text-lg font-medium mb-2">
-              How can I help with your AI automation needs?
+              How can I help with your Farzad-AI automation needs?
             </h3>
             <p className="text-white/70 max-w-lg">
               Ask me anything about implementing AI in your business, from chatbots to 

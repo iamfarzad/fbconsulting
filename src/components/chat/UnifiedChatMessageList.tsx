@@ -2,7 +2,11 @@ import React from 'react';
 import { useChat } from '@/contexts/ChatContext';
 import { Avatar } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import type { AIMessage } from '@/services/chat/types';
+import type { Message } from '@/features/gemini/types';
+
+interface AIMessage extends Message {
+  id?: string;
+}
 
 export const UnifiedChatMessageList = () => {
   const { state } = useChat();
@@ -38,14 +42,19 @@ export const UnifiedChatMessageList = () => {
                 src={isUser ? '/placeholder.svg' : '/f_b_logo.glb'}
                 fallback={isUser ? 'U' : 'AI'}
                 className="w-8 h-8"
+                alt={isUser ? 'User avatar' : 'AI avatar'}
               />
-              <div className={cn(
-                'rounded-lg px-4 py-2 text-sm',
-                isUser 
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted/50',
-                isLastMessage && !isUser && isLoading && 'animate-pulse'
-              )}>
+              <div 
+                className={cn(
+                  'rounded-lg px-4 py-2 text-sm',
+                  isUser 
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted/50',
+                  isLastMessage && !isUser && isLoading && 'animate-pulse'
+                )}
+                role="article"
+                aria-label={`${isUser ? 'User' : 'AI'} message`}
+              >
                 {message.content}
               </div>
             </div>

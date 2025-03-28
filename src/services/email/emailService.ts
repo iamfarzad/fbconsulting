@@ -7,7 +7,7 @@ export class EmailService {
   private apiKey: string;
   
   constructor() {
-    this.apiKey = import.meta.env.VITE_EMAIL_SERVICE_API_KEY || '';
+    this.apiKey = ''; // Note: Use environment variables for sensitive information
     
     if (!this.apiKey) {
       console.warn('Email service API key not configured. Email functionality will be disabled.');

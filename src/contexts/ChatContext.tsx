@@ -1,7 +1,6 @@
-
 import React, { createContext, useContext, useReducer, useEffect, useRef } from 'react';
 import { AIMessage, ChatService, FileAttachment } from '@/services/chat/types';
-import { getChatService } from '@/services/chat/googleGenAIService';
+import { getChatService } from '@/services/chat/googleGenAIService.tsx';
 import { toast } from '@/components/ui/use-toast';
 import { chatReducer } from './chat/chatReducer';
 import { ChatContextType, initialChatState } from './chat/types';

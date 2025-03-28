@@ -1,58 +1,20 @@
-# Use multi-stage build for optimized image size
-FROM python:3.12-slim as builder
+# Use the official Python image from the Docker Hub
+FROM python:3.9-slim
 
-# Set working directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Python dependencies
+# Copy the requirements file into the container
 COPY requirements.txt .
+
+# Install the dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Final stage
-FROM python:3.12-slim
-
-# Set working directory
-WORKDIR /app
-
-# Install runtime dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy installed packages from builder
-COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-
-# Copy application code
+# Copy the rest of the application code into the container
 COPY . .
 
-# Create directories for logs and audio files
-RUN mkdir -p logs debug_output test_audio_output
-
-# Environment variables
-ENV HOST=0.0.0.0
-ENV PORT=8000
-ENV LOG_LEVEL=INFO
-ENV ALLOWED_ORIGINS="http://localhost:5173,http://localhost:3000"
-ENV DEFAULT_VOICE=Charon
-ENV DEFAULT_LANGUAGE=en-US
-ENV WS_PING_INTERVAL=30
-ENV WS_PING_TIMEOUT=10
-ENV PYTHONUNBUFFERED=1
-ENV GOOGLE_API_KEY=${GOOGLE_API_KEY}
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
-
-# Expose port
+# Expose the port the app runs on
 EXPOSE 8000
 
-# Run application
-CMD ["python", "start_local.py"]
+# Command to run the application
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
