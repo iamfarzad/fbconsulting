@@ -37,3 +37,6 @@ export const DEFAULT_REQUEST_OPTIONS = {
   },
   timeout: API_CONFIG.DEFAULT_TIMEOUT
 };
+
+// Re-export as apiConfig for backward compatibility
+export const apiConfig = API_CONFIG;

@@ -48,3 +48,15 @@ export interface ChatSessionState {
   isLoading: boolean;
   error: string | null;
 }
+
+// Adding lead stage type definition to fix type errors
+export type LeadStage = 
+  'initial' | 
+  'discovery' | 
+  'evaluation' | 
+  'decision' | 
+  'implementation' | 
+  'retention' |
+  'qualification' | 
+  'interested' | 
+  'ready-to-book';

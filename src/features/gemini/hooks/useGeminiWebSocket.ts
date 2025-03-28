@@ -1,224 +1,196 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useMessage } from '@/contexts/MessageContext';
 import { API_CONFIG } from '@/config/api';
+import { v4 as uuidv4 } from 'uuid';
 
-interface WebSocketMessage {
-  type: 'text' | 'error' | 'audio' | 'audio_meta' | 'complete' | 'pong';
-  content?: string;
-  error?: string;
-  size?: number;
-}
-
-export interface UseGeminiWebSocketProps {
-  onTextMessage?: (text: string) => void;
+interface WebSocketHandlers {
+  onOpen?: () => void;
+  onClose?: (event: CloseEvent) => void;
   onError?: (error: string) => void;
-  onAudioChunk?: (chunk: Blob) => void;
+  onTextMessage?: (text: string) => void;
+  onAudioChunk?: (audioChunk: ArrayBuffer) => void;
   onComplete?: () => void;
 }
 
-/**
- * Hook to manage WebSocket connections for Gemini services
- */
 export function useGeminiWebSocket({
-  onTextMessage,
+  onOpen,
+  onClose,
   onError,
+  onTextMessage,
   onAudioChunk,
   onComplete
-}: UseGeminiWebSocketProps) {
+}: WebSocketHandlers = {}) {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [progress, setProgress] = useState(0);
-  
-  const websocketRef = useRef<WebSocket | null>(null);
-  const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const pingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const reconnectAttempts = useRef(0);
-  const { setMessage } = useMessage();
-  
-  const MAX_RECONNECT_ATTEMPTS = 3;
-  const RECONNECT_DELAY = 1000;
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectAttemptsRef = useRef(0);
+  const pingIntervalRef = useRef<number | null>(null);
+  const clientIdRef = useRef(uuidv4());
 
-  const clearTimers = useCallback(() => {
-    if (pingIntervalRef.current) {
-      clearInterval(pingIntervalRef.current);
-      pingIntervalRef.current = null;
-    }
-    if (pingTimeoutRef.current) {
-      clearTimeout(pingTimeoutRef.current);
-      pingTimeoutRef.current = null;
-    }
-  }, []);
-
-  const cleanup = useCallback(() => {
-    clearTimers();
-    if (websocketRef.current) {
-      websocketRef.current.close();
-      websocketRef.current = null;
-    }
-    setIsConnected(false);
-    setProgress(0);
-  }, [clearTimers]);
-
-  const setupHeartbeat = useCallback(() => {
-    clearTimers();
-
-    // Set up ping interval
-    pingIntervalRef.current = setInterval(() => {
-      if (websocketRef.current?.readyState === WebSocket.OPEN) {
-        websocketRef.current.send(JSON.stringify({ type: 'ping' }));
-        
-        // Set up timeout for pong response
-        pingTimeoutRef.current = setTimeout(() => {
-          console.warn('WebSocket ping timeout - attempting reconnect');
-          cleanup();
-          connect();
-        }, API_CONFIG.DEFAULT_WS_PING_TIMEOUT);
-      }
-    }, API_CONFIG.DEFAULT_WS_PING_INTERVAL);
-  }, [cleanup]);
-
-  const connect = useCallback(async () => {
-    if (isConnecting || websocketRef.current) {
+  // Connect to the WebSocket server
+  const connect = useCallback(() => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      console.log('WebSocket already connected');
       return;
     }
 
-    try {
-      setIsConnecting(true);
-      setError(null);
+    setIsConnecting(true);
+    setError(null);
 
-      const clientId = Math.random().toString(36).substring(7);
-      const wsUrl = `${API_CONFIG.WS_BASE_URL}/ws/${clientId}`;
-      
-      console.log('Connecting to WebSocket:', wsUrl);
-      const ws = new WebSocket(wsUrl);
-      
-      ws.onopen = () => {
-        console.log('WebSocket connected');
+    try {
+      const wsBaseUrl = API_CONFIG.WS_BASE_URL;
+      const path = `${API_CONFIG.WEBSOCKET.DEFAULT_PATH}/${clientIdRef.current}`;
+      const wsUrl = `${wsBaseUrl}${path}`;
+      console.log(`Connecting to WebSocket at ${wsUrl}`);
+
+      wsRef.current = new WebSocket(wsUrl);
+
+      // Set up event handlers
+      wsRef.current.onopen = () => {
+        console.log('WebSocket connection established');
         setIsConnected(true);
         setIsConnecting(false);
-        reconnectAttempts.current = 0;
-        setupHeartbeat();
-      };
-      
-      ws.onclose = () => {
-        console.log('WebSocket closed');
-        clearTimers();
-        setIsConnected(false);
-        websocketRef.current = null;
+        reconnectAttemptsRef.current = 0;
         
-        // Attempt reconnection if under max attempts
-        if (reconnectAttempts.current < MAX_RECONNECT_ATTEMPTS) {
-          reconnectAttempts.current++;
-          setTimeout(() => connect(), RECONNECT_DELAY * reconnectAttempts.current);
+        // Set up ping interval
+        if (pingIntervalRef.current) {
+          window.clearInterval(pingIntervalRef.current);
         }
-      };
-      
-      ws.onerror = (event) => {
-        console.error('WebSocket error:', event);
-        setError('WebSocket connection error');
-        setIsConnecting(false);
-        if (onError) {
-          onError('WebSocket connection error');
-        }
-      };
-      
-      ws.onmessage = async (event) => {
-        if (event.data instanceof Blob) {
-          if (onAudioChunk) {
-            onAudioChunk(event.data);
+        
+        pingIntervalRef.current = window.setInterval(() => {
+          if (wsRef.current?.readyState === WebSocket.OPEN) {
+            console.log('Sending ping to keep connection alive');
+            wsRef.current.send(JSON.stringify(API_CONFIG.WEBSOCKET.PING_MESSAGE));
           }
-          setProgress(prev => Math.min(prev + 5, 95));
-        } else {
-          try {
-            const data: WebSocketMessage = JSON.parse(event.data);
-            
-            switch (data.type) {
-              case 'text':
-                if (data.content && onTextMessage) {
-                  onTextMessage(data.content);
-                  setMessage(data.content);
-                }
-                break;
-              
-              case 'error':
-                if (data.error) {
-                  setError(data.error);
-                  if (onError) onError(data.error);
-                }
-                break;
-              
-              case 'complete':
-                setProgress(100);
-                if (onComplete) onComplete();
-                break;
+        }, API_CONFIG.WEBSOCKET.PING_INTERVAL); // Use the correct config property
+        
+        if (onOpen) onOpen();
+      };
 
-              case 'pong':
-                // Clear the ping timeout since we got a response
-                if (pingTimeoutRef.current) {
-                  clearTimeout(pingTimeoutRef.current);
-                  pingTimeoutRef.current = null;
-                }
-                break;
-                
-              default:
-                console.warn('Unknown message type:', data.type);
+      wsRef.current.onclose = (event) => {
+        console.log(`WebSocket connection closed: ${event.code} - ${event.reason}`);
+        setIsConnected(false);
+        
+        // Clear ping interval
+        if (pingIntervalRef.current) {
+          window.clearInterval(pingIntervalRef.current);
+          pingIntervalRef.current = null;
+        }
+        
+        // Attempt to reconnect if not closed cleanly
+        if (event.code !== 1000 && event.code !== 1001) {
+          if (reconnectAttemptsRef.current < API_CONFIG.WEBSOCKET.RECONNECT_ATTEMPTS) {
+            console.log(`Attempting to reconnect (${reconnectAttemptsRef.current + 1}/${API_CONFIG.WEBSOCKET.RECONNECT_ATTEMPTS})`);
+            reconnectAttemptsRef.current++;
+            setTimeout(() => connect(), API_CONFIG.WEBSOCKET.RECONNECT_INTERVAL);
+          } else {
+            setError(`Connection closed after ${API_CONFIG.WEBSOCKET.RECONNECT_ATTEMPTS} reconnect attempts`);
+            setIsConnecting(false);
+          }
+        } else {
+          setIsConnecting(false);
+        }
+        
+        if (onClose) onClose(event);
+      };
+
+      wsRef.current.onerror = (event) => {
+        console.error('WebSocket error:', event);
+        setError('Error connecting to AI service');
+        if (onError) onError('WebSocket connection error');
+      };
+
+      wsRef.current.onmessage = (event) => {
+        if (typeof event.data === 'string') {
+          try {
+            const jsonData = JSON.parse(event.data);
+            
+            // Handle different message types
+            if (jsonData.type === 'text') {
+              if (onTextMessage) onTextMessage(jsonData.content);
+            } else if (jsonData.type === 'complete') {
+              if (onComplete) onComplete();
+            } else if (jsonData.type === 'error') {
+              const errorMessage = jsonData.error || 'Unknown error occurred';
+              setError(errorMessage);
+              if (onError) onError(errorMessage);
+            } else if (jsonData.type === 'pong') {
+              // Received pong response
+              console.log('Received pong from server');
             }
           } catch (error) {
             console.error('Error parsing WebSocket message:', error);
           }
+        } else if (event.data instanceof Blob && onAudioChunk) {
+          // Handle binary data (audio chunks)
+          event.data.arrayBuffer().then(buffer => {
+            if (onAudioChunk) onAudioChunk(buffer);
+          });
         }
       };
-      
-      websocketRef.current = ws;
-      
     } catch (error) {
-      console.error('Error connecting to WebSocket:', error);
-      setError(error instanceof Error ? error.message : 'Failed to connect');
+      console.error('Error setting up WebSocket:', error);
+      setError(`Failed to connect: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setIsConnecting(false);
-      if (onError) {
-        onError(error instanceof Error ? error.message : 'Failed to connect');
-      }
+      if (onError) onError(`Failed to connect: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-  }, [isConnecting, onTextMessage, onError, onAudioChunk, onComplete, setMessage, setupHeartbeat]);
+  }, [onOpen, onClose, onError, onTextMessage, onAudioChunk, onComplete]);
 
-  const sendMessage = useCallback((text: string, enableTTS: boolean = true) => {
-    if (!websocketRef.current || !isConnected) {
-      setError('WebSocket not connected');
+  // Disconnect from the WebSocket server
+  const disconnect = useCallback(() => {
+    if (wsRef.current) {
+      wsRef.current.close(1000, 'Client disconnected');
+      wsRef.current = null;
+    }
+    
+    if (pingIntervalRef.current) {
+      window.clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = null;
+    }
+    
+    setIsConnected(false);
+  }, []);
+
+  // Send a message to the server
+  const sendMessage = useCallback((text: string, enableTTS: boolean = false) => {
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
+      const errorMsg = 'WebSocket not connected';
+      setError(errorMsg);
+      if (onError) onError(errorMsg);
       return;
     }
+    
+    const message = {
+      text,
+      enableTTS,
+      role: 'user'
+    };
+    
+    wsRef.current.send(JSON.stringify(message));
+  }, [onError]);
 
-    try {
-      websocketRef.current.send(JSON.stringify({
-        text,
-        role: "user",
-        enableTTS
-      }));
-      setProgress(0);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      setError(error instanceof Error ? error.message : 'Failed to send message');
-      if (onError) {
-        onError(error instanceof Error ? error.message : 'Failed to send message');
-      }
-    }
-  }, [isConnected, onError]);
-
-  // Connect on mount, cleanup on unmount
+  // Clean up the WebSocket connection when the component unmounts
   useEffect(() => {
-    connect();
-    return cleanup;
-  }, [connect, cleanup]);
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close(1000, 'Component unmounted');
+        wsRef.current = null;
+      }
+      
+      if (pingIntervalRef.current) {
+        window.clearInterval(pingIntervalRef.current);
+        pingIntervalRef.current = null;
+      }
+    };
+  }, []);
 
   return {
     isConnected,
     isConnecting,
     error,
-    progress,
-    sendMessage,
     connect,
-    disconnect: cleanup
+    disconnect,
+    sendMessage
   };
 }
-
-export default useGeminiWebSocket;
