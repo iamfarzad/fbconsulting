@@ -3,7 +3,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useWebSocketClient } from './useWebSocketClient';
 import { useAudioHandler } from './useAudioHandler';
 import { AIMessage } from '../types/messageTypes';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 import { v4 as uuidv4 } from 'uuid';
 
 export function useWebSocketChat() {

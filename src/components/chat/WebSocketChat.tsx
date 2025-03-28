@@ -4,7 +4,6 @@ import { useChat } from '@/contexts/ChatContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TypingIndicator } from '@/components/ui/ai-chat/TypingIndicator';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Mic, Send, Trash2, Volume, VolumeX, RefreshCw } from 'lucide-react';
 import { ConnectionStatus } from '@/components/chat/core/ConnectionStatus';
@@ -39,7 +38,7 @@ export function WebSocketChat() {
     <div className="flex flex-col h-[600px]">
       <div className="border-b pb-2">
         <div className="flex justify-between items-center p-4">
-          <CardTitle className="text-xl">Chat with Gemini</CardTitle>
+          <h2 className="text-xl font-semibold">Chat with Gemini</h2>
           <div className="flex items-center space-x-2">
             <ConnectionStatus 
               isConnected={state.isConnected} 

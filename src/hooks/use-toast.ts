@@ -1,8 +1,4 @@
 
-import { toast } from '@/components/ui/use-toast';
+import { useToast as useShadcnToast } from "@/components/ui/use-toast";
 
-export const useToast = () => {
-  return { toast };
-};
-
-export default useToast;
+export const useToast = useShadcnToast;
