@@ -52,11 +52,11 @@
   }
 
   body {
-    /* @apply bg-background text-foreground antialiased base-styles; */
-    /* If you want base-styles applied, uncomment the line above AFTER fixing .base-styles */
+    /* REMOVED @apply bg-background text-foreground antialiased; */
+    /* Rely on component-level backgrounds or browser defaults */
     font-feature-settings: "rlig" 1, "calt" 1;
-    /* Applying base text color and background here is better */
-    @apply bg-background text-foreground antialiased;
+    /* Applying base text color and antialiasing is usually safe */
+    @apply text-foreground antialiased;
   }
   
   /* Standardized typography */

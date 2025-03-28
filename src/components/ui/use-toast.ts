@@ -1,9 +1,4 @@
+// Re-export the toast function from sonner
+export { toast } from 'sonner';
 
-import { toast as sonnerToast } from "sonner";
-import { useToast as useShadcnToast } from "@/components/ui/toast";
-
-// Re-export the hook
-export const useToast = useShadcnToast;
-
-// Also export the toast function for direct usage
-export const toast = sonnerToast;
+// You might want to define custom toast types or helper functions here if needed
