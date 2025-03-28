@@ -1,64 +1,62 @@
 
 import React from 'react';
-import { Maximize2, Minimize2, X, Loader2 } from 'lucide-react';
+import { Maximize2, Minimize2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-interface ChatHeaderProps {
-  title: string;
-  subtitle?: string;
-  onClear?: () => void;
-  onToggleFullScreen?: () => void;
-  isFullScreen?: boolean;
-  isConnected?: boolean;
-  isLoading?: boolean;
-}
+import { ChatHeaderProps } from '@/types/chat';
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
   title,
   subtitle,
   onClear,
   onToggleFullScreen,
-  isFullScreen = false,
-  isConnected = true,
-  isLoading = false,
+  isFullScreen,
+  isConnected,
+  isLoading
 }) => {
   return (
-    <div className="flex items-center justify-between p-3 border-b">
-      <div className="flex items-center space-x-2">
-        <div>
-          <h3 className="font-medium text-lg">{title}</h3>
-          <div className="flex items-center text-sm text-muted-foreground">
-            {isLoading && (
-              <Loader2 className="h-3 w-3 mr-2 animate-spin" />
-            )}
-            {subtitle || (isConnected ? 'Connected' : 'Offline')}
-          </div>
-        </div>
+    <div className="border-b p-3 flex justify-between items-center bg-background">
+      <div className="flex flex-col">
+        <h3 className="font-semibold text-sm flex items-center">
+          {title}
+          {isConnected && (
+            <span className="ml-2 w-2 h-2 rounded-full bg-green-500"></span>
+          )}
+          {!isConnected && !isLoading && (
+            <span className="ml-2 w-2 h-2 rounded-full bg-red-500"></span>
+          )}
+          {isLoading && (
+            <span className="ml-2 w-2 h-2 rounded-full bg-amber-500"></span>
+          )}
+        </h3>
+        {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
       </div>
       
-      <div className="flex items-center space-x-2">
+      <div className="flex space-x-1">
         {onClear && (
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onClear}
+            className="h-7 w-7"
             title="Clear chat"
           >
-            <X className="h-4 w-4" />
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
         )}
         
         {onToggleFullScreen && (
-          <Button 
-            variant="ghost" 
-            size="icon" 
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={onToggleFullScreen}
-            title={isFullScreen ? "Exit full screen" : "Full screen"}
+            className="h-7 w-7"
+            title={isFullScreen ? "Minimize" : "Maximize"}
           >
-            {isFullScreen ? 
-              <Minimize2 className="h-4 w-4" /> : 
-              <Maximize2 className="h-4 w-4" />
-            }
+            {isFullScreen ? (
+              <Minimize2 className="h-3.5 w-3.5" />
+            ) : (
+              <Maximize2 className="h-3.5 w-3.5" />
+            )}
           </Button>
         )}
       </div>
