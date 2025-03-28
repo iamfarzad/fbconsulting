@@ -1,52 +1,52 @@
+
 import React from 'react';
-
-type ConnectionStatus = 'idle' | 'connecting' | 'connected' | 'error';
-
-interface ConnectionStatusIndicatorProps {
-  status: ConnectionStatus;
-  error?: string | null;
-  onRetry?: () => void;
-}
+import { Wifi, WifiOff, Loader2, RefreshCw } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { ConnectionStatusIndicatorProps } from '@/types/chat';
 
 export const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
+  isConnected = false,
+  isLoading = false,
+  className = '',
   status,
-  error,
   onRetry
 }) => {
-  if (status === 'idle' || status === 'connected') {
-    return null;
-  }
-
+  // Determine status from props if not explicitly provided
+  const connectionStatus = status || (isConnected ? 'connected' : isLoading ? 'connecting' : 'disconnected');
+  
   return (
-    <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 z-50">
-      {status === 'connecting' ? (
-        <div className="flex items-center space-x-3">
-          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
-          <p className="text-sm text-gray-600 dark:text-gray-300">Connecting to AI service...</p>
-        </div>
-      ) : status === 'error' ? (
-        <div className="flex flex-col space-y-2">
-          <div className="flex items-center space-x-3">
-            <div className="rounded-full h-5 w-5 bg-red-500 flex items-center justify-center">
-              <span className="text-white text-xs">!</span>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-200">AI Assistant Unavailable</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {error || 'Connection error'}
-              </p>
-            </div>
-          </div>
+    <div className={cn('flex items-center gap-1', className)}>
+      {connectionStatus === 'connected' && (
+        <>
+          <Wifi className="h-3 w-3 text-green-500" />
+          <span className="text-xs text-green-500">Connected</span>
+        </>
+      )}
+      
+      {connectionStatus === 'connecting' && (
+        <>
+          <Loader2 className="h-3 w-3 text-amber-500 animate-spin" />
+          <span className="text-xs text-amber-500">Connecting...</span>
+        </>
+      )}
+      
+      {connectionStatus === 'disconnected' && (
+        <>
+          <WifiOff className="h-3 w-3 text-red-500" />
+          <span className="text-xs text-red-500">Disconnected</span>
           {onRetry && (
-            <button 
+            <button
               onClick={onRetry}
-              className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 mt-1"
+              className="ml-1 p-0.5 rounded-sm hover:bg-muted"
+              aria-label="Retry connection"
             >
-              Retry Connection
+              <RefreshCw className="h-3 w-3" />
             </button>
           )}
-        </div>
-      ) : null}
+        </>
+      )}
     </div>
   );
 };
+
+export default ConnectionStatusIndicator;

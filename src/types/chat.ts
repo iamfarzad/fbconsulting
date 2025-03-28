@@ -1,4 +1,3 @@
-
 // Basic chat types
 export interface AIMessage {
   role: 'user' | 'assistant' | 'system' | 'error';
@@ -57,6 +56,8 @@ export interface ChatHeaderProps {
   onClose?: () => void;
   onClear?: () => void;
   hasMessages?: boolean;
+  isConnected?: boolean;
+  isConnecting?: boolean;
 }
 
 export interface UnifiedVoiceUIProps {

@@ -1,22 +1,34 @@
 
 import React from 'react';
-import { Bot, X } from 'lucide-react';
+import { Bot, X, Wifi, WifiOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ChatHeaderProps } from '@/types/chat';
+import { ConnectionStatusIndicator } from '../ui/ConnectionStatusIndicator';
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({
   title = 'AI Assistant',
   subtitle,
   onClose,
   onClear,
-  hasMessages = false
+  hasMessages = false,
+  isConnected,
+  isConnecting
 }) => {
   return (
     <div className="flex items-center justify-between p-4 border-b">
       <div className="flex items-center space-x-3">
         <Bot className="h-5 w-5 text-primary" />
         <div>
-          <h3 className="font-medium">{title}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-medium">{title}</h3>
+            {/* Connection status indicator */}
+            {isConnected !== undefined && (
+              <ConnectionStatusIndicator 
+                isConnected={isConnected} 
+                isLoading={isConnecting}
+              />
+            )}
+          </div>
           {subtitle && (
             <p className="text-xs text-muted-foreground">{subtitle}</p>
           )}
