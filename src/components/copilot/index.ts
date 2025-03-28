@@ -62,3 +62,9 @@ export const initializeCopilotWithGoogleAI = (options: {
     }
   };
 };
+
+// Export components from core
+export { CopilotConfigProvider, useCopilotConfig } from './core/CopilotConfig';
+
+// Export any chat components
+export * from './chat';

@@ -1,8 +1,9 @@
 /// <reference types="vite/client" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
-import { fileURLToPath } from 'url'
-import { dirname, resolve } from 'path'
+import path from 'path'
+import { fileURLToPath, URL } from 'url'
+import { dirname } from 'path'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -11,15 +12,15 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
+      '@': path.resolve(__dirname, './src'),
     },
   },
-  // Keep essential environment variables
   envPrefix: ['VITE_', 'AZURE_', 'ELEVENLABS_', 'GOOGLE_'],
   build: {
+    outDir: 'dist',
     sourcemap: true,
     rollupOptions: {
-      external: ['google-generativeai'],
+      external: ['google-generativeai', '@chakra-ui/react'],
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom'],
@@ -36,6 +37,10 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       }
-    }
+    },
+    allowedHosts: [
+      'localhost',
+      '2f9b3b4a-cce5-4f23-8845-9ac62943cb08.lovableproject.com'
+    ]
   }
 })

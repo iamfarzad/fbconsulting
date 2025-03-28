@@ -1,26 +1,32 @@
 import React from 'react';
 
-interface CopilotConfigProps {
+export interface CopilotConfig {
   apiKey?: string;
-  modelName?: string;
+  baseUrl?: string;
+  defaultModel?: string;
   temperature?: number;
-  maxOutputTokens?: number;
+  maxTokens?: number;
 }
 
-export const CopilotConfig: React.FC<CopilotConfigProps> = (props) => {
-  // We're intentionally not destructuring props since they're used for configuration
-  // and accessed by parent components through React's component tree
-  React.useEffect(() => {
-    // Register configuration with parent provider
-    if (process.env.NODE_ENV === 'development') {
-      console.debug('CopilotConfig initialized with:', {
-        ...props,
-        apiKey: props.apiKey ? '[REDACTED]' : undefined
-      });
-    }
-  }, [props]);
-
-  return null;
+const defaultConfig: CopilotConfig = {
+  defaultModel: 'gemini-pro',
+  temperature: 0.7,
+  maxTokens: 1000,
 };
 
-export default CopilotConfig;
+export const CopilotConfigContext = React.createContext<CopilotConfig>(defaultConfig);
+
+export const CopilotConfigProvider: React.FC<{
+  children: React.ReactNode;
+  config?: Partial<CopilotConfig>;
+}> = ({ children, config = {} }) => {
+  const mergedConfig = { ...defaultConfig, ...config };
+  
+  return (
+    <CopilotConfigContext.Provider value={mergedConfig}>
+      {children}
+    </CopilotConfigContext.Provider>
+  );
+};
+
+export const useCopilotConfig = () => React.useContext(CopilotConfigContext);
