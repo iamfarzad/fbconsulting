@@ -21,6 +21,7 @@ const UnifiedChatContent: React.FC<{
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const { state } = useChat();
+  const { messages, isLoading } = state;
 
   return (
     <div className={`w-full ${className}`} ref={containerRef}>
@@ -33,14 +34,17 @@ const UnifiedChatContent: React.FC<{
       
       <div className="bg-background border rounded-lg shadow overflow-hidden flex flex-col">
         <div className="flex-1 overflow-y-auto p-4 max-h-64">
-          <UnifiedChatMessageList />
+          <UnifiedChatMessageList 
+            messages={messages} 
+            isLoading={isLoading}
+          />
         </div>
         
         <div className="border-t p-3">
           <UnifiedChatInput placeholder={placeholderText} />
         </div>
         
-        {onToggleFullScreen && state.messages.length > 0 && (
+        {onToggleFullScreen && messages.length > 0 && (
           <div className="p-2 text-center">
             <button
               onClick={onToggleFullScreen}
