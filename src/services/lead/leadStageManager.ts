@@ -1,71 +1,89 @@
-import { LeadInfo, LeadStage } from "../chat/messageTypes";
 
-// Define progression of lead stages
-const LEAD_STAGE_PROGRESSION: LeadStage[] = [
-  'initial',
-  'discovery',
-  'evaluation',
-  'decision',
-  'implementation',
-  'retention',
-  // Alternative stages used in some components
-  'qualification',
-  'interested',
-  'ready-to-book'
-];
+import { LeadStage } from '../chat/messageTypes';
+import { LeadInfo } from './leadExtractor';
 
 /**
- * Determine the lead stage based on message content and interaction history
+ * Determines a lead stage based on message content and patterns
+ * @param messages Array of message contents (strings)
+ * @returns A lead stage identifier
  */
 export const determineLeadStage = (messages: string[]): LeadStage => {
-  if (!messages || messages.length === 0) {
-    return 'initial';
+  // Join all messages for analysis
+  const allText = messages.join(' ').toLowerCase();
+  
+  // Check for booking/consultation signals
+  if (allText.includes('schedule') || 
+      allText.includes('book a') || 
+      allText.includes('consultation') ||
+      allText.includes('appointment') ||
+      allText.includes('let\'s talk') ||
+      allText.includes('meet with you')) {
+    return 'ready-to-book';
   }
   
-  // Very simple determination based on message count
-  if (messages.length > 15) {
-    return 'decision';
-  } else if (messages.length > 10) {
-    return 'evaluation';
-  } else if (messages.length > 5) {
-    return 'discovery';
-  } else if (messages.length > 3) {
-    return 'qualification';
-  } else if (messages.length > 1) {
+  // Check for high interest signals
+  if (allText.includes('pricing') || 
+      allText.includes('cost') || 
+      allText.includes('how much') ||
+      allText.includes('interested in') ||
+      allText.includes('consider')) {
     return 'interested';
   }
   
+  // Check for qualification signals
+  if (allText.includes('my company') || 
+      allText.includes('our business') || 
+      allText.includes('we need') ||
+      allText.includes('specific requirements') ||
+      allText.includes('our project')) {
+    return 'qualification';
+  }
+  
+  // Check for evaluation signals
+  if (allText.includes('compare') || 
+      allText.includes('versus') || 
+      allText.includes('vs') ||
+      allText.includes('alternatives') ||
+      allText.includes('different options')) {
+    return 'evaluation';
+  }
+  
+  // Check for discovery signals
+  if (allText.includes('how does') || 
+      allText.includes('what is') || 
+      allText.includes('tell me about') ||
+      allText.includes('explain') ||
+      allText.includes('example')) {
+    return 'discovery';
+  }
+  
+  // Default to initial stage
   return 'initial';
 };
 
 /**
- * Update the lead stage based on new information
+ * Updates a lead's stage based on current information
+ * @param leadInfo Current lead information
+ * @returns Updated lead stage
  */
-export const updateLeadStage = (
-  currentInfo: LeadInfo, 
-  newStage?: LeadStage,
-  bookingRequested?: boolean
-): LeadInfo => {
-  // Create a copy of the lead info
-  const updatedInfo = { ...currentInfo };
+export const updateLeadStage = (leadInfo: LeadInfo): LeadStage => {
+  // Use the interests to determine stage
+  const currentStage = leadInfo.stage as LeadStage;
+  const interests = leadInfo.interests || [];
   
-  // If booking is requested, move to ready-to-book stage
-  if (bookingRequested) {
-    updatedInfo.stage = 'ready-to-book';
-    return updatedInfo;
+  // If no interests, return current stage
+  if (interests.length === 0) {
+    return currentStage;
   }
   
-  // If a specific stage is provided, use it
-  if (newStage) {
-    updatedInfo.stage = newStage;
-    return updatedInfo;
-  }
+  // Determine a new stage based on interests
+  const newStage = determineLeadStage(interests);
   
-  // Otherwise, attempt to progress to the next stage
-  const currentIndex = LEAD_STAGE_PROGRESSION.indexOf(currentInfo.stage);
-  if (currentIndex >= 0 && currentIndex < LEAD_STAGE_PROGRESSION.length - 1) {
-    updatedInfo.stage = LEAD_STAGE_PROGRESSION[currentIndex + 1];
-  }
+  // Progressive stage advancement (never go backward in the funnel)
+  const stages: LeadStage[] = ['initial', 'discovery', 'qualification', 'evaluation', 'interested', 'ready-to-book'];
+  const currentIndex = stages.indexOf(currentStage);
+  const newIndex = stages.indexOf(newStage);
   
-  return updatedInfo;
+  // Only advance stage, never go back
+  return newIndex > currentIndex ? newStage : currentStage;
 };

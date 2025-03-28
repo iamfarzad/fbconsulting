@@ -1,35 +1,36 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { LeadStage } from '@/services/chat/messageTypes';
 import { LeadInfo } from '@/services/lead/leadExtractor';
 import { determineLeadStage, updateLeadStage } from '@/services/lead/leadStageManager';
-import { saveLeadInfo } from '@/services/storage/localStorageManager';
 
-export const useLeadStage = (initialLeadInfo: LeadInfo) => {
-  const [stage, setStage] = useState<LeadInfo['stage']>(initialLeadInfo.stage || 'discovery');
-  
-  // Update stage based on a new message
-  const processMessageForStage = useCallback((message: string, leadInfo: LeadInfo): LeadInfo => {
-    const updatedLeadInfo = updateLeadStage(message, leadInfo);
+export function useLeadStage(messages: string[] = []) {
+  const [stage, setStage] = useState<LeadStage>('initial');
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      // Determine the stage based on message content
+      const newStage = determineLeadStage(messages);
+      setStage(newStage);
+    }
+  }, [messages]);
+
+  const updateWithLeadInfo = (leadInfo: LeadInfo) => {
+    const interests = leadInfo.interests || [];
+    const currentStage = leadInfo.stage as LeadStage;
     
-    // Update local state if stage changed
-    if (updatedLeadInfo.stage !== stage) {
-      setStage(updatedLeadInfo.stage);
+    // Only update if we have interests
+    if (interests.length > 0) {
+      const updatedStage = determineLeadStage(interests);
+      setStage(updatedStage);
+      return updatedStage;
     }
     
-    return updatedLeadInfo;
-  }, [stage]);
-  
-  // Manually set the stage
-  const setLeadStage = useCallback((newStage: 'discovery' | 'qualification' | 'interested' | 'ready-to-book', leadInfo: LeadInfo): LeadInfo => {
-    const updatedLeadInfo = { ...leadInfo, stage: newStage };
-    setStage(newStage);
-    saveLeadInfo(updatedLeadInfo);
-    return updatedLeadInfo;
-  }, []);
-  
+    return currentStage;
+  };
+
   return {
     stage,
-    processMessageForStage,
-    setLeadStage
+    updateWithLeadInfo
   };
-};
+}

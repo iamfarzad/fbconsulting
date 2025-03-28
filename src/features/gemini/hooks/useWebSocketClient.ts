@@ -1,16 +1,17 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { WebSocketClient } from '../services/WebSocketClient';
-import { WebSocketMessage } from '../types/websocketTypes';
+import { WebSocketMessage, AudioChunkInfo } from '../types/websocketTypes';
 import { v4 as uuidv4 } from 'uuid';
 import { API_CONFIG } from '@/config/api';
 
 interface UseWebSocketClientOptions {
+  url?: string;
   onOpen?: () => void;
   onMessage?: (data: WebSocketMessage) => void;
   onError?: (error: string) => void;
   onClose?: () => void;
-  onAudioChunk?: (audioChunk: ArrayBuffer) => void;
+  onAudioChunk?: (buffer: ArrayBuffer) => void;
   autoReconnect?: boolean;
   debug?: boolean;
 }
@@ -21,6 +22,7 @@ export function useWebSocketClient(options: UseWebSocketClientOptions = {}) {
   const [error, setError] = useState<string | null>(null);
   const [clientId] = useState(() => uuidv4());
   const clientRef = useRef<WebSocketClient | null>(null);
+  const wsUrl = options.url || API_CONFIG.WS_BASE_URL + '/ws/';
 
   // Connect to the WebSocket server
   const connect = useCallback(() => {
@@ -36,6 +38,8 @@ export function useWebSocketClient(options: UseWebSocketClientOptions = {}) {
       // Create a new client if one doesn't exist
       if (!clientRef.current) {
         clientRef.current = new WebSocketClient({
+          url: wsUrl,
+          clientId,
           debug: options.debug,
           autoReconnect: options.autoReconnect,
           onOpen: () => {
@@ -57,8 +61,8 @@ export function useWebSocketClient(options: UseWebSocketClientOptions = {}) {
           onMessage: (data) => {
             if (options.onMessage) options.onMessage(data);
           },
-          onAudioChunk: (audioChunk) => {
-            if (options.onAudioChunk) options.onAudioChunk(audioChunk);
+          onAudioChunk: (info: AudioChunkInfo, buffer: ArrayBuffer) => {
+            if (options.onAudioChunk) options.onAudioChunk(buffer);
           }
         });
       }
@@ -71,7 +75,7 @@ export function useWebSocketClient(options: UseWebSocketClientOptions = {}) {
       setIsConnecting(false);
       if (options.onError) options.onError(errorMessage);
     }
-  }, [options]);
+  }, [clientId, wsUrl, options]);
 
   // Disconnect from the WebSocket server
   const disconnect = useCallback(() => {

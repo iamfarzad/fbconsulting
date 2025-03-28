@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ConnectionStatusIndicatorProps } from '@/types/chat';
 
 const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
-  isConnected = true, // Added default value to fix optional handling
+  isConnected = true,
   isLoading,
   className = '',
   status,
