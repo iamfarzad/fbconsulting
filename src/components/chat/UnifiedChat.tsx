@@ -7,7 +7,8 @@ import {
 } from '@/features/gemini';
 // Removed: import React from 'react';
 import { useChat, ChatProvider } from '@/contexts/ChatContext';
-import { ChatHeader } from './core/ChatHeader';
+// Add explicit .tsx extension
+import { ChatHeader } from './core/ChatHeader.tsx'; 
 import { UnifiedChatMessageList } from './UnifiedChatMessageList';
 import { UnifiedChatInput } from './UnifiedChatInput';
 

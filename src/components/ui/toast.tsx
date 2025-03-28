@@ -1,4 +1,4 @@
-import * as React from "react"
+import React from 'react'; // Explicitly import React
 import * as ToastPrimitives from "@radix-ui/react-toast"
 import { cva, type VariantProps } from "class-variance-authority"
 import { X } from "lucide-react"
@@ -110,7 +110,8 @@ const ToastDescription = React.forwardRef<
 ))
 ToastDescription.displayName = ToastPrimitives.Description.displayName
 
-import React from 'react';
+// Remove the duplicate React import that might have been added
+// import React from 'react'; 
 import { Toaster as SonnerToaster, toast as sonnerToast } from 'sonner';
 
 export { toast } from 'sonner';
