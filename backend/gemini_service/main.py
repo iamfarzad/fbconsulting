@@ -1,18 +1,18 @@
 # backend/gemini_service/main.py
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, WebSocketState
 from fastapi.middleware.cors import CORSMiddleware
-# Add Swagger UI imports (if needed, often automatic with FastAPI)
-# from fastapi.openapi.utils import get_openapi
-# from fastapi.responses import JSONResponse
-
-import os
-from dotenv import load_dotenv
-from gemini_client import GeminiClient
+# Pydantic for message validation
+from pydantic import BaseModel, Field, ValidationError
+from typing import List, Optional, Dict, Any, Tuple
+import base64
 import json
 import asyncio
 import logging
-from typing import Dict
+import os
+from dotenv import load_dotenv
+from gemini_client import GeminiClient
 from datetime import datetime
+from contextlib import asynccontextmanager
 
 load_dotenv()
 
@@ -22,29 +22,39 @@ PORT = int(os.getenv('PORT', 8000))
 DEFAULT_VOICE = os.getenv('DEFAULT_VOICE', 'Charon')
 DEFAULT_LANGUAGE = os.getenv('DEFAULT_LANGUAGE', 'en-US')
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
-# Added lovable.dev and potentially other required origins
-ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:3000,https://lovable.dev').split(',') 
+ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:3000,https://lovable.dev').split(',')
 WS_PING_INTERVAL = int(os.getenv('WS_PING_INTERVAL', 30))
 WS_PING_TIMEOUT = int(os.getenv('WS_PING_TIMEOUT', 10))
-API_VERSION = "0.1.0" # Define API version
+API_VERSION = "0.2.0" # Updated version for multimodal support
+
+# --- Pydantic Models for Incoming WebSocket Messages ---
+class FileData(BaseModel):
+    mime_type: str
+    data: str = Field(..., description="Base64 encoded file data") # Base64 encoded data string
+    filename: Optional[str] = None
+
+class TextMessage(BaseModel):
+    type: str = Field("text_message", Literal=True)
+    text: str
+    role: str = "user"
+    enableTTS: bool = True
+
+class MultimodalMessage(BaseModel):
+    type: str = Field("multimodal_message", Literal=True)
+    text: Optional[str] = None
+    files: List[FileData] = Field(..., min_items=1) # Must have at least one file
+    role: str = "user"
+    enableTTS: bool = True
 
 # --- FastAPI App Setup ---
-# Add title, version, description for Swagger UI
 app = FastAPI(
-    title="Gemini WebSocket Service",
+    title="Gemini Multimodal WebSocket Service",
     version=API_VERSION,
-    description="Provides a WebSocket interface to interact with Google Gemini, including streaming text and TTS audio.",
-    # Add tags metadata for better organization in Swagger UI
-    openapi_tags=[{
-        "name": "WebSocket",
-        "description": "Main WebSocket endpoint for Gemini interaction."
-    }, {
-        "name": "Meta",
-        "description": "Service metadata and health checks."
-    }]
+    description="Provides a WebSocket interface to interact with Google Gemini, supporting text, images, documents, and streaming TTS audio.",
+    openapi_tags=[{"name": "WebSocket", "description": "Main WebSocket endpoint"}, {"name": "Meta", "description": "Service metadata"}]
 )
 
-# Configure CORS - Ensure lovable.dev is included
+# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
@@ -53,279 +63,212 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configure logging
-logging.basicConfig(
-    level=getattr(logging, LOG_LEVEL.upper()),
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s' # Consistent format
-)
+# Logging Setup
+logging.basicConfig(level=getattr(logging, LOG_LEVEL.upper()), format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Log startup configuration
+# Log Startup Config
 logger.info(f"Starting Gemini WebSocket Service v{API_VERSION}")
-logger.info(f"Host: {HOST}")
-logger.info(f"Port: {PORT}")
-logger.info(f"Default Voice: {DEFAULT_VOICE}")
 logger.info(f"Allowed Origins: {ALLOWED_ORIGINS}")
-logger.info(f"WebSocket Settings: Ping Interval={WS_PING_INTERVAL}s, Timeout={WS_PING_TIMEOUT}s")
+# (Log other configs as needed)
 
-
-# --- State Management --- (Simple in-memory, consider alternatives for scaling)
-connections: Dict[str, tuple[WebSocket, GeminiClient]] = {} # Store WebSocket and Client
+# --- State Management ---
+connections: Dict[str, Tuple[WebSocket, GeminiClient]] = {}
 last_activity: Dict[str, float] = {}
 
-# --- API Endpoints ---
-
-# NEW: Version Endpoint
-@app.get("/version", tags=["Meta"])
-async def get_version():
-    """Returns the current version of the API."""
-    return {"version": API_VERSION}
-
-# Health Check Endpoint (Updated tag)
-@app.get("/health", tags=["Meta"])
-async def health_check():
-    """Checks if the service is running and the API key is configured."""
-    try:
-        api_key = os.getenv("GOOGLE_API_KEY")
-        if not api_key:
-            # Log specific error, return 503 Service Unavailable
-            logger.error("Health check failed: GOOGLE_API_KEY not configured")
-            raise HTTPException(status_code=503, detail="Service Unavailable: GOOGLE_API_KEY not configured")
-        # Optional: Add a quick check to the Gemini client/API if feasible without cost/delay
-        # Example: try client = GeminiClient(api_key) etc. but be mindful of cost/rate limits
-        return {"status": "healthy", "version": API_VERSION, "timestamp": datetime.now().isoformat()}
-    except Exception as e:
-        logger.error(f"Health check failed unexpectedly: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
-
-
-# --- WebSocket Logic --- (Tag added for Swagger)
-@app.websocket("/ws/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, client_id: str):
-    """Main WebSocket endpoint for Gemini interaction."""
-    logger.info(f"New WebSocket connection request from client {client_id}")
-    await websocket.accept()
-    logger.info(f"WebSocket connection accepted for client {client_id} from {websocket.client.host}:{websocket.client.port}")
-
-    client = None # Initialize client to None for finally block
-    try:
-        # Add connection count logging
-        logger.info(f"Active connections: {len(connections) + 1}")
-
-        # Initialize Gemini client
-        api_key = os.getenv("GOOGLE_API_KEY")
-        if not api_key:
-            error_msg = "Missing GOOGLE_API_KEY configuration"
-            logger.error(error_msg + f" for client {client_id}")
-            await websocket.close(code=1008, reason=error_msg) # Use standard code 1008 Policy Violation
-            return
-
-        try:
-            client = GeminiClient(api_key)
-            logger.info(f"GeminiClient instantiated for {client_id}")
-            await client.initialize_session(DEFAULT_VOICE, DEFAULT_LANGUAGE)
-            logger.info(f"Gemini session initialized for client {client_id}")
-        except Exception as init_error:
-            error_msg = f"Failed to initialize Gemini session: {init_error}"
-            logger.exception(f"{error_msg} for client {client_id}") # Log exception
-            await websocket.close(code=1011, reason=error_msg) # Use standard code 1011 Internal Error
-            return
-
-        connections[client_id] = (websocket, client) # Store both websocket and client
-
-        # --- Audio Callback --- 
-        async def audio_callback(audio_data: bytes):
-            try:
-                # Check if connection still exists before sending
-                if client_id not in connections:
-                    logger.warning(f"Audio callback attempted for disconnected client {client_id}")
-                    return
-                
-                ws, _ = connections[client_id]
-                if ws.client_state == WebSocketState.CONNECTED:
-                    # Send audio marker first
-                    await ws.send_json({
-                        "type": "audio_chunk_info",
-                        "size": len(audio_data),
-                        "format": "mp3" # Assuming MP3
-                    })
-                    # Send raw audio bytes
-                    await ws.send_bytes(audio_data)
-                    logger.debug(f"Sent audio chunk ({len(audio_data)} bytes) to client {client_id}")
-                else:
-                     logger.warning(f"WebSocket no longer connected for client {client_id} during audio callback.")
-            except WebSocketDisconnect:
-                 logger.warning(f"Client {client_id} disconnected during audio send.")
-            except Exception as audio_e:
-                logger.error(f"Error sending audio data to client {client_id}: {audio_e}", exc_info=True)
-
-        client.set_audio_callback(audio_callback)
-        # --- End Audio Callback --- 
-
-        # Update last activity when client connects
-        current_time = asyncio.get_event_loop().time()
-        last_activity[client_id] = current_time
-
-        # --- Main WebSocket Receive Loop --- 
-        while True:
-            try:
-                # Update last activity timestamp on receive
-                current_time = asyncio.get_event_loop().time()
-                last_activity[client_id] = current_time
-
-                # Receive message from client with timeout
-                try:
-                    # Adjusted timeout to be slightly longer than ping interval
-                    data = await asyncio.wait_for(websocket.receive_text(), timeout=WS_PING_INTERVAL * 1.5)
-                except asyncio.TimeoutError:
-                    logger.warning(f"WebSocket receive timeout for client {client_id}. Sending ping.")
-                    # Send a ping from server side to check connection
-                    try:
-                        await websocket.send_json({"type": "server_ping"})
-                        # Wait for a potential pong or next message briefly
-                        await asyncio.wait_for(websocket.receive_text(), timeout=WS_PING_TIMEOUT)
-                        logger.debug(f"Client {client_id} responded after server ping.")
-                        # If receive works, update activity and continue loop
-                        last_activity[client_id] = asyncio.get_event_loop().time()
-                        message = json.loads(data) # Process received data
-                        # (Duplicate message processing logic needed here if required after ping)
-                    except asyncio.TimeoutError:
-                        logger.warning(f"Client {client_id} did not respond after server ping. Closing connection.")
-                        break # Exit loop to close connection cleanly
-                    except Exception as ping_e:
-                         logger.error(f"Error during server ping sequence for {client_id}: {ping_e}")
-                         break # Exit loop on error during ping
-                    continue # Go to next loop iteration after successful ping sequence
-
-                message = json.loads(data)
-
-                # Handle explicit ping messages from client
-                if message.get('type') == 'ping':
-                    await websocket.send_json({"type": "pong"})
-                    logger.debug(f"Responded to client ping from {client_id}")
-                    continue
-
-                logger.info(f"Received message type '{message.get('type', 'unknown')}' from client {client_id}")
-
-                # Process text message
-                if message.get("type") == "text_message" and "text" in message:
-                    full_response_text = "" 
-                    async for response in client.send_message(
-                        message["text"],
-                        message.get("role", "user"),
-                        enable_tts=message.get("enableTTS", True)
-                    ):
-                        # Check connection state before sending each part
-                        if websocket.client_state != WebSocketState.CONNECTED:
-                             logger.warning(f"Client {client_id} disconnected during message stream. Aborting send.")
-                             break # Stop sending if client disconnected
-                        await websocket.send_json(response)
-                        if response.get("type") == "text":
-                             full_response_text = response.get("content", full_response_text)
-                    
-                    # Ensure loop didn't break due to disconnection before sending 'complete'
-                    if websocket.client_state == WebSocketState.CONNECTED:
-                        await websocket.send_json({
-                            "type": "complete",
-                            "text": full_response_text, 
-                            "role": "assistant"
-                        })
-                # Placeholder for handling settings updates
-                elif message.get("type") == "update_settings":
-                    logger.info(f"Received settings update from {client_id}: {message.get('settings')}")
-                    await websocket.send_json({"type": "settings_ack", "status": "received"})
-                else:
-                     logger.warning(f"Received unknown message type from {client_id}: {message.get('type')}")
-                     await websocket.send_json({"type": "error", "error": f"Unknown message type: {message.get('type')}"})
-
-            # --- Exception Handling for Inner Loop --- 
-            except WebSocketDisconnect:
-                logger.info(f"Client {client_id} disconnected gracefully.")
-                break
-            except json.JSONDecodeError:
-                logger.error(f"Invalid JSON received from client {client_id}: {data[:200]}...", exc_info=True) # Log part of invalid data
-                try:
-                    await websocket.send_json({"type": "error", "error": "Invalid JSON format received"})
-                except Exception:
-                    pass # Ignore if we can't send error
-            except Exception as e:
-                logger.exception(f"Error processing message from client {client_id}: {e}") 
-                try:
-                     # Avoid sending overly detailed internal errors to client
-                     await websocket.send_json({"type": "error", "error": "Internal server error during message processing"})
-                except Exception:
-                     pass # Ignore if we can't send error
-                # Consider if certain errors should terminate the connection; often yes
-                # break 
-        # --- End Main WebSocket Receive Loop --- 
-
-    # --- Exception Handling for Outer Scope (Connection Setup) --- 
-    except Exception as e:
-        logger.exception(f"Unexpected error in WebSocket handler for client {client_id}: {e}")
-    # --- Final Cleanup --- 
-    finally:
-        logger.info(f"Cleaning up connection for client {client_id}")
-        if client_id in connections:
-            ws, client_instance = connections.pop(client_id) # Remove and get client
-            logger.info(f"Closing Gemini session for client {client_id}")
-            if client_instance: # Check if client was successfully initialized
-                await client_instance.close()
-                logger.info(f"Gemini session closed for {client_id}")
-            # Ensure WebSocket is closed from server-side if not already
-            if ws.client_state != WebSocketState.DISCONNECTED:
-                 logger.warning(f"WebSocket state for {client_id} was {ws.client_state}, attempting close.")
-                 try:
-                     await ws.close(code=1000)
-                 except Exception as close_e:
-                     logger.error(f"Error during final WebSocket close for {client_id}: {close_e}")
-        if client_id in last_activity:
-            del last_activity[client_id]
-        logger.info(f"Finished cleanup for client {client_id}. Active connections: {len(connections)}")
-
-# --- Background Task (Refactor needed) ---
-# Deprecated: Use lifespan events instead. This task is also potentially inefficient.
-# @app.on_event("startup")
-# async def startup_event():
-#     logger.info("Startup event: Skipping deprecated inactive connection cleanup task setup.")
-    # ... (cleanup task code removed for brevity and because loop timeout is preferred)
-
-# --- Lifespan Event Handler (Recommended replacement for on_event) ---
-from contextlib import asynccontextmanager
-
+# --- Lifespan Event Handler ---
 @asynccontextmanager
-asyn<ctrl61>c def lifespan(app: FastAPI):
-    # Code to run on startup
+async def lifespan(app: FastAPI):
     logger.info("Lifespan startup: Initializing service...")
-    # You could start background tasks here if needed, ensuring they are properly cancelled
-    # Example: task = asyncio.create_task(my_background_task())
     yield
-    # Code to run on shutdown
     logger.info("Lifespan shutdown: Cleaning up resources...")
-    # Example: task.cancel(); await task
-    # Close any remaining client sessions gracefully
-    logger.info(f"Closing {len(connections)} remaining WebSocket connections and Gemini sessions...")
+    logger.info(f"Closing {len(connections)} remaining connections...")
     for client_id, (ws, client_instance) in list(connections.items()):
         logger.info(f"Closing connection for client {client_id} during shutdown...")
-        if client_instance:
-            await client_instance.close()
+        if client_instance: await client_instance.close()
         if ws.client_state != WebSocketState.DISCONNECTED:
-            try:
-                await ws.close(code=1001) # Going Away
+            try: await ws.close(code=1001) # Going Away
             except Exception: pass
     connections.clear()
     last_activity.clear()
     logger.info("Lifespan shutdown complete.")
 
-# Assign the lifespan context manager to the app
 app.router.lifespan_context = lifespan
+
+# --- API Endpoints ---
+@app.get("/version", tags=["Meta"])
+async def get_version():
+    return {"version": API_VERSION}
+
+@app.get("/health", tags=["Meta"])
+async def health_check():
+    if not os.getenv("GOOGLE_API_KEY"):
+        logger.error("Health check failed: GOOGLE_API_KEY not configured")
+        raise HTTPException(status_code=503, detail="Service Unavailable: GOOGLE_API_KEY not configured")
+    return {"status": "healthy", "version": API_VERSION, "timestamp": datetime.now().isoformat()}
+
+# --- WebSocket Endpoint ---
+@app.websocket("/ws/{client_id}")
+async def websocket_endpoint(websocket: WebSocket, client_id: str):
+    logger.info(f"Connection request from client {client_id} @ {websocket.client.host}:{websocket.client.port}")
+    await websocket.accept()
+    logger.info(f"Connection accepted for {client_id}")
+
+    client = None
+    try:
+        # --- Client Initialization ---
+        api_key = os.getenv("GOOGLE_API_KEY")
+        if not api_key:
+            await websocket.close(code=1008, reason="Missing GOOGLE_API_KEY configuration")
+            return
+        try:
+            client = GeminiClient(api_key)
+            await client.initialize_session(DEFAULT_VOICE, DEFAULT_LANGUAGE)
+            logger.info(f"Gemini session initialized for {client_id}")
+        except Exception as init_error:
+            logger.exception(f"Gemini initialization failed for {client_id}: {init_error}")
+            await websocket.close(code=1011, reason=f"Failed to initialize Gemini session: {init_error}")
+            return
+
+        connections[client_id] = (websocket, client)
+        logger.info(f"Client {client_id} connected. Active connections: {len(connections)}")
+
+        # --- Audio Callback Setup ---
+        async def audio_callback(audio_data: bytes):
+             # Simplified - robust error handling needed here too
+            if client_id in connections and connections[client_id][0].client_state == WebSocketState.CONNECTED:
+                try:
+                    ws, _ = connections[client_id]
+                    await ws.send_json({"type": "audio_chunk_info", "size": len(audio_data), "format": "mp3"})
+                    await ws.send_bytes(audio_data)
+                    logger.debug(f"Sent audio chunk ({len(audio_data)} bytes) to {client_id}")
+                except Exception as audio_e: logger.error(f"Audio send error for {client_id}: {audio_e}")
+            else: logger.warning(f"Audio callback for disconnected client {client_id}")
+        client.set_audio_callback(audio_callback)
+        # --- End Audio Callback ---
+
+        last_activity[client_id] = asyncio.get_event_loop().time()
+
+        # --- Main Receive Loop ---
+        while True:
+            response_stream = None # Ensure stream is reset each loop
+            try:
+                # --- Receive & Timeout Logic ---
+                try:
+                    raw_data = await asyncio.wait_for(websocket.receive_text(), timeout=WS_PING_INTERVAL * 1.5)
+                except asyncio.TimeoutError:
+                    logger.warning(f"Receive timeout for {client_id}. Sending server ping.")
+                    try:
+                        await websocket.send_json({"type": "server_ping"})
+                        await asyncio.wait_for(websocket.receive_text(), timeout=WS_PING_TIMEOUT) # Wait for any response (pong or data)
+                        last_activity[client_id] = asyncio.get_event_loop().time() # Update activity if client responded
+                        logger.debug(f"Client {client_id} responded after server ping.")
+                        # Note: If data was received here, it's currently ignored. Refactor needed if processing required.
+                        continue # Continue loop after successful ping response
+                    except asyncio.TimeoutError:
+                        logger.warning(f"{client_id} did not respond after server ping. Closing.")
+                        break # Close connection
+                    except Exception as ping_e:
+                        logger.error(f"Error during server ping for {client_id}: {ping_e}")
+                        break # Close connection
+                # --- End Receive & Timeout ---
+
+                message_data = json.loads(raw_data)
+                message_type = message_data.get("type")
+                last_activity[client_id] = asyncio.get_event_loop().time()
+
+                # --- Message Processing ---
+                if message_type == 'ping':
+                    await websocket.send_json({"type": "pong"})
+                    continue
+
+                logger.info(f"Received type '{message_type}' from {client_id}")
+
+                if message_type == "text_message":
+                    try:
+                        message = TextMessage.model_validate(message_data)
+                        response_stream = client.send_message(message.text, role=message.role, enable_tts=message.enableTTS, files_data=None)
+                    except ValidationError as e:
+                        logger.error(f"Invalid text_message from {client_id}: {e}")
+                        await websocket.send_json({"type": "error", "error": f"Invalid message format: {e}"})
+                        continue
+
+                elif message_type == "multimodal_message":
+                    try:
+                        message = MultimodalMessage.model_validate(message_data)
+                        processed_files = []
+                        for file_info in message.files:
+                            try:
+                                decoded_bytes = base64.b64decode(file_info.data)
+                                processed_files.append({"mime_type": file_info.mime_type, "data": decoded_bytes, "filename": file_info.filename})
+                            except (base64.binascii.Error, ValueError) as decode_error:
+                                logger.error(f"File decoding error for {client_id} (file: {file_info.filename}): {decode_error}")
+                                raise ValueError(f"Invalid Base64 data for file '{file_info.filename or 'unknown'}'.") # Re-raise to be caught below
+                        response_stream = client.send_message(message.text, role=message.role, enable_tts=message.enableTTS, files_data=processed_files)
+                    except (ValidationError, ValueError) as e: # Catch Pydantic and file processing errors
+                        logger.error(f"Invalid multimodal_message or file error from {client_id}: {e}")
+                        await websocket.send_json({"type": "error", "error": f"Invalid message format or file error: {e}"})
+                        continue
+
+                elif message_type == "update_settings":
+                     logger.info(f"Settings update from {client_id}: {message_data.get('settings')}")
+                     await websocket.send_json({"type": "settings_ack", "status": "received"})
+                     continue # No response stream for settings
+
+                else:
+                     logger.warning(f"Unknown message type '{message_type}' from {client_id}")
+                     await websocket.send_json({"type": "error", "error": f"Unknown message type: {message_type}"})
+                     continue # Skip unknown types
+                # --- End Message Processing ---
+
+                # --- Stream Response ---
+                if response_stream:
+                    full_response_text = ""
+                    async for response in response_stream:
+                        if websocket.client_state != WebSocketState.CONNECTED: break
+                        await websocket.send_json(response)
+                        if response.get("type") == "text": full_response_text = response.get("content", full_response_text)
+
+                    if websocket.client_state == WebSocketState.CONNECTED:
+                        await websocket.send_json({"type": "complete", "text": full_response_text, "role": "assistant"})
+                # --- End Stream Response ---
+
+            # --- Inner Loop Exception Handling ---
+            except WebSocketDisconnect:
+                logger.info(f"{client_id} disconnected gracefully.")
+                break
+            except json.JSONDecodeError:
+                logger.error(f"Invalid JSON from {client_id}: {raw_data[:200]}...", exc_info=True)
+                try: await websocket.send_json({"type": "error", "error": "Invalid JSON format received"})
+                except Exception: pass
+            except Exception as loop_e:
+                logger.exception(f"Error processing message for {client_id}: {loop_e}")
+                try: await websocket.send_json({"type": "error", "error": "Internal server error during processing"})
+                except Exception: pass
+                # Decide if loop should break on generic error, often yes
+                # break
+        # --- End Main Receive Loop ---
+
+    except Exception as handler_e:
+        logger.exception(f"Unhandled exception in WebSocket handler for {client_id}: {handler_e}")
+    finally:
+        # --- Cleanup ---
+        logger.info(f"Cleaning up connection for client {client_id}")
+        if client_id in connections:
+            ws, client_instance = connections.pop(client_id)
+            if client_instance:
+                logger.info(f"Closing Gemini session for {client_id}")
+                await client_instance.close()
+            if ws.client_state != WebSocketState.DISCONNECTED:
+                try:
+                    await ws.close(code=1000)
+                    logger.info(f"WebSocket closed for {client_id}")
+                except Exception as close_e: logger.error(f"Error closing WebSocket for {client_id}: {close_e}")
+        if client_id in last_activity: del last_activity[client_id]
+        logger.info(f"Finished cleanup for {client_id}. Active connections: {len(connections)}")
 
 # --- Run Server ---
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(
-         "main:app", 
-         host=HOST,
-         port=PORT,
-         log_level=LOG_LEVEL.lower(),
-         reload=False 
-     )
+    uvicorn.run("main:app", host=HOST, port=PORT, log_level=LOG_LEVEL.lower(), reload=False)
+
