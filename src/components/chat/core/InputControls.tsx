@@ -109,7 +109,8 @@ export const InputControls: React.FC<InputControlsProps> = ({
         onClick={onSend} 
         hasContent={hasContent} 
         isLoading={isLoading} 
-        disabled={isListening || false} 
+        disabled={isListening || false}
+        aiProcessing={aiProcessing} 
       />
     </div>
   );
