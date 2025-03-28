@@ -1,58 +1,34 @@
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React from 'react';
+import ErrorBoundary from './ErrorBoundary';
+import { AlertCircle } from 'lucide-react';
 
-interface Props {
-  children: ReactNode;
+interface ErrorBoundaryWrapperProps {
+  children: React.ReactNode;
 }
 
-interface State {
-  hasError: boolean;
-  error: Error | null;
-}
+const DefaultErrorFallback = () => (
+  <div className="flex flex-col items-center justify-center min-h-[200px] p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+    <AlertCircle className="h-10 w-10 text-destructive mb-4" />
+    <h3 className="text-lg font-semibold mb-2">Something went wrong</h3>
+    <p className="text-center text-muted-foreground">
+      We encountered an error. Please try refreshing the page.
+    </p>
+    <button
+      onClick={() => window.location.reload()}
+      className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+    >
+      Refresh
+    </button>
+  </div>
+);
 
-class ErrorBoundaryWrapper extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      hasError: false,
-      error: null
-    };
-  }
-
-  static getDerivedStateFromError(error: Error): State {
-    return {
-      hasError: true,
-      error
-    };
-  }
-
-  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    console.error('Error caught by ErrorBoundary:', error, errorInfo);
-  }
-
-  render(): ReactNode {
-    if (this.state.hasError) {
-      return (
-        <div className="p-4 bg-destructive/10 text-destructive rounded-md">
-          <h2 className="text-lg font-semibold mb-2">Something went wrong</h2>
-          <p className="mb-4">Please refresh the page and try again.</p>
-          {this.state.error && (
-            <pre className="p-2 bg-muted rounded text-sm overflow-auto">
-              {this.state.error.toString()}
-            </pre>
-          )}
-          <button
-            className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded"
-            onClick={() => this.setState({ hasError: false, error: null })}
-          >
-            Try Again
-          </button>
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
-}
+const ErrorBoundaryWrapper: React.FC<ErrorBoundaryWrapperProps> = ({ children }) => {
+  return (
+    <ErrorBoundary fallback={<DefaultErrorFallback />}>
+      {children}
+    </ErrorBoundary>
+  );
+};
 
 export default ErrorBoundaryWrapper;

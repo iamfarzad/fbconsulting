@@ -1,20 +1,23 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { textToSpeech } from '@/services/gemini/audio';
-import { DEFAULT_CONFIG } from '@/types/gemini';
 
-export function useAudioPlayback() {
+import { useState, useCallback, useRef, useEffect } from 'react';
+
+interface UseAudioPlaybackOptions {
+  onPlaybackStart?: () => void;
+  onPlaybackEnd?: () => void;
+  onPlaybackError?: (error: string) => void;
+}
+
+export function useAudioPlayback(options: UseAudioPlaybackOptions = {}) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
   // Clean up on unmount
   useEffect(() => {
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        URL.revokeObjectURL(audioRef.current.src);
-      }
+      stopAudio();
     };
   }, []);
 
@@ -22,42 +25,55 @@ export function useAudioPlayback() {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
-      URL.revokeObjectURL(audioRef.current.src);
-      audioRef.current = null;
+      if (audioRef.current.src) {
+        URL.revokeObjectURL(audioRef.current.src);
+      }
     }
     setIsPlaying(false);
     setProgress(0);
   }, []);
 
-  const generateAndPlayAudio = useCallback(async (text: string): Promise<void> => {
+  const playAudio = useCallback(async (audioBlob: Blob): Promise<void> => {
     try {
+      stopAudio();
       setError(null);
       
-      // Generate audio blob using Gemini TTS
-      const audioBlob = await textToSpeech(text, DEFAULT_CONFIG);
-      
-      // Create audio element if it doesn't exist
       if (!audioRef.current) {
         audioRef.current = new Audio();
       }
 
       // Set up audio element event handlers
-      audioRef.current.onplay = () => setIsPlaying(true);
+      audioRef.current.onplay = () => {
+        setIsPlaying(true);
+        if (options.onPlaybackStart) {
+          options.onPlaybackStart();
+        }
+      };
+      
       audioRef.current.onpause = () => setIsPlaying(false);
+      
       audioRef.current.onended = () => {
         setIsPlaying(false);
         setProgress(0);
+        if (options.onPlaybackEnd) {
+          options.onPlaybackEnd();
+        }
       };
+      
       audioRef.current.ontimeupdate = () => {
         if (audioRef.current) {
           const percentage = (audioRef.current.currentTime / audioRef.current.duration) * 100;
           setProgress(percentage);
         }
       };
-      audioRef.current.onerror = () => {
-        setError('Error playing audio');
+      
+      audioRef.current.onerror = (e) => {
+        const errorMessage = `Error playing audio: ${e}`;
+        setError(errorMessage);
         setIsPlaying(false);
-        setProgress(0);
+        if (options.onPlaybackError) {
+          options.onPlaybackError(errorMessage);
+        }
       };
 
       // Create object URL for the audio blob
@@ -73,11 +89,44 @@ export function useAudioPlayback() {
       await audioRef.current.play();
 
     } catch (error) {
-      console.error('Error generating/playing audio:', error);
-      setError(error instanceof Error ? error.message : 'Error playing audio');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error playing audio';
+      console.error('Error playing audio:', errorMessage);
+      setError(errorMessage);
       setIsPlaying(false);
-      setProgress(0);
+      if (options.onPlaybackError) {
+        options.onPlaybackError(errorMessage);
+      }
     }
+  }, [options, stopAudio]);
+
+  const addAudioChunk = useCallback((chunk: Blob) => {
+    audioChunksRef.current.push(chunk);
+  }, []);
+
+  const playAudioChunks = useCallback(async () => {
+    if (audioChunksRef.current.length === 0) {
+      const errorMessage = 'No audio chunks available to play';
+      setError(errorMessage);
+      if (options.onPlaybackError) {
+        options.onPlaybackError(errorMessage);
+      }
+      return;
+    }
+
+    try {
+      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/mpeg' });
+      await playAudio(audioBlob);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error playing audio chunks';
+      setError(errorMessage);
+      if (options.onPlaybackError) {
+        options.onPlaybackError(errorMessage);
+      }
+    }
+  }, [playAudio, options]);
+
+  const clearAudioChunks = useCallback(() => {
+    audioChunksRef.current = [];
   }, []);
 
   return {
@@ -85,6 +134,11 @@ export function useAudioPlayback() {
     progress,
     error,
     stopAudio,
-    generateAndPlayAudio,
+    playAudio,
+    addAudioChunk,
+    playAudioChunks,
+    clearAudioChunks
   };
 }
+
+export default useAudioPlayback;
