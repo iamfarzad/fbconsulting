@@ -1,7 +1,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useWebSocketClient } from './useWebSocketClient';
-import { useAudioPlayback } from './useAudioPlayback';
+import { useAudioHandler } from './useAudioHandler';
 import { AIMessage } from '../types/messageTypes';
 import { useToast } from '@/hooks/use-toast';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,13 +14,12 @@ export function useWebSocketChat() {
   // Set up audio playback
   const {
     handleAudioChunk,
-    playAudioChunks,
-    stopAudio,
-    clearAudio,
     isPlaying: isAudioPlaying,
     progress: audioProgress,
+    stopAudio,
+    clearAudio,
     error: audioError
-  } = useAudioPlayback({
+  } = useAudioHandler({
     autoPlay: true,
     onPlaybackError: (error) => {
       toast({
@@ -35,7 +34,7 @@ export function useWebSocketChat() {
   const {
     connect,
     disconnect,
-    sendTextMessage,
+    sendMessage: sendTextMessage,
     isConnected,
     isConnecting,
     error: wsError,
@@ -107,7 +106,11 @@ export function useWebSocketChat() {
       addMessage('user', content);
       
       // Send message through WebSocket
-      sendTextMessage(content, true); // true enables TTS
+      sendTextMessage({
+        type: 'text_message',
+        text: content,
+        enableTTS: true
+      });
     } catch (error) {
       console.error('Error sending message:', error);
       setIsLoading(false);
@@ -151,7 +154,6 @@ export function useWebSocketChat() {
     disconnect,
     sendMessage,
     clearMessages,
-    stopAudio,
-    playAudioChunks
+    stopAudio
   };
 }

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { WebSocketClient } from '../services/WebSocketClient';
 import { WebSocketClientOptions, WebSocketMessage } from '../types/websocketTypes';

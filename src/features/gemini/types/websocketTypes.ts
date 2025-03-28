@@ -4,10 +4,7 @@ export interface WebSocketMessage {
   content?: string;
   error?: string;
   status?: string;
-  audio_chunk_info?: {
-    size: number;
-    format: string;
-  };
+  audio_chunk_info?: AudioChunkInfo;
 }
 
 export interface AudioChunkInfo {
@@ -33,4 +30,8 @@ export interface WebSocketClientState {
   isConnecting: boolean;
   error: string | null;
   clientId: string;
+}
+
+export interface WebSocketSendOptions {
+  enableTTS?: boolean;
 }

@@ -1,26 +1,22 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
 
 export const TypingIndicator: React.FC = () => {
   return (
-    <div className="flex items-center space-x-1 p-2 rounded-lg max-w-[100px] bg-white/10">
-      {[0, 1, 2].map((dot) => (
-        <motion.div
-          key={dot}
-          className="w-2 h-2 bg-white/70 rounded-full"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.4, 1, 0.4]
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            delay: dot * 0.2,
-            ease: "easeInOut"
-          }}
-        />
-      ))}
+    <div className="flex items-center space-x-1">
+      <div className="text-sm text-muted-foreground">AI is typing</div>
+      <div className="flex space-x-1">
+        {[0, 1, 2].map((index) => (
+          <div 
+            key={index}
+            className="h-1.5 w-1.5 bg-primary rounded-full animate-bounce" 
+            style={{ 
+              animationDelay: `${index * 0.2}s`,
+              animationDuration: '1s'
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 };
