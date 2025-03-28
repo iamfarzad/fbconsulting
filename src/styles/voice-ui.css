@@ -47,13 +47,17 @@
 }
 
 .voice-button.active {
-  @apply bg-black text-white dark:bg-white dark:text-black;
+  /* Replace @apply bg-black text-white dark:bg-white dark:text-black; */
+  background-color: #000; /* Replaces bg-black */
+  @apply text-white dark:bg-white dark:text-black; /* Keep others */
   @apply animate-pulse;
 }
 
 /* Voice feedback container */
 .voice-feedback {
-  @apply rounded-lg bg-black p-4 text-white;
+  /* Replace @apply rounded-lg bg-black p-4 text-white; */
+  background-color: #000; /* Replaces bg-black */
+  @apply rounded-lg p-4 text-white; /* Keep others */
   @apply transition-all duration-500 ease-in-out;
   @apply shadow-lg border border-white/20;
 }
