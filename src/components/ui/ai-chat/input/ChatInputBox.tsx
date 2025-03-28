@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface ChatInputBoxProps {
   value: string;
@@ -18,6 +18,17 @@ export const ChatInputBox: React.FC<ChatInputBoxProps> = ({
   disabled = false,
   textareaRef
 }) => {
+  // Auto-resize textarea based on content
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    
+    // Reset height to auto to get the correct scrollHeight
+    textarea.style.height = 'auto';
+    // Set the height to scrollHeight to fit content
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [value, textareaRef]);
+
   return (
     <div className="relative">
       <textarea
