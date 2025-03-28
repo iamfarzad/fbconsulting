@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { useChat, ChatProvider } from '@/contexts/ChatContext';
-// Add explicit .tsx extension
-import { ChatHeader } from './core/ChatHeader'; 
+import { ChatHeader } from './core/ChatHeader';
 import { UnifiedChatMessageList } from './UnifiedChatMessageList';
 import { UnifiedChatInput } from './UnifiedChatInput';
 
@@ -25,22 +24,20 @@ const UnifiedChatContent: React.FC<UnifiedChatContentProps> = ({
   fullScreen = false,
   onToggleFullScreen,
   className = '',
-  apiKey,
-  modelName
 }) => {
   const { 
     state, 
     clearMessages, 
     toggleFullScreen,
     containerRef,
-    isInitialized
   } = useChat();
   
   const {
     isFullScreen: contextIsFullScreen,
     isLoading,
     messages,
-    showMessages
+    showMessages,
+    isInitialized
   } = state;
   
   // Use either prop or context value for fullScreen
@@ -48,7 +45,6 @@ const UnifiedChatContent: React.FC<UnifiedChatContentProps> = ({
   
   // Use the prop function if provided, otherwise use context function
   const handleToggleFullScreen = () => {
-    console.log('Handle toggle fullscreen called from UnifiedChat');
     if (onToggleFullScreen) {
       onToggleFullScreen();
     } else if (toggleFullScreen) {
@@ -74,15 +70,8 @@ const UnifiedChatContent: React.FC<UnifiedChatContentProps> = ({
       />
       
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* Only show messages if we have some or if showMessages is true */}
         {(showMessages || hasMessages) && (
           <UnifiedChatMessageList />
-        )}
-        {/* Fallback UI for invalid messages format */}
-        {!Array.isArray(messages) && (
-          <div className="text-center text-red-500">
-            Invalid messages format. Please try again.
-          </div>
         )}
       </div>
       
