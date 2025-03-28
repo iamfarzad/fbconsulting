@@ -1,4 +1,5 @@
-import { defineConfig } from "vite";
+
+import { defineConfig, ConfigEnv, UserConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
@@ -17,7 +18,7 @@ const loadTagger = async () => {
   return null;
 };
 
-export default defineConfig(async ({ mode }) => {
+export default defineConfig(async ({ mode }: ConfigEnv): Promise<UserConfig> => {
   const tagger = await loadTagger();
   
   return {

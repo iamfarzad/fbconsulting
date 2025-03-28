@@ -1,5 +1,5 @@
 
-import { AIMessage, FileAttachment } from '@/services/chat/types';
+import { AIMessage } from '@/types/chat'; // Updated import
 
 // Define the shape of our chat state
 export interface ChatState {
@@ -49,11 +49,13 @@ export type ChatAction =
 export interface ChatContextType {
   state: ChatState;
   dispatch: React.Dispatch<ChatAction>;
-  sendMessage: (content: string, files?: FileAttachment[]) => Promise<void>;
+  sendMessage: (content: string, files?: any[]) => Promise<void>;
   clearMessages: () => void;
   toggleFullScreen: () => void;
   containerRef: React.RefObject<HTMLDivElement>;
   isInitialized: boolean;
+  isLoading: boolean; 
+  error: string | null;
   // Enhanced functionality
   addMediaItem: (item: { type: string; data: string; mimeType?: string; name?: string }) => void;
   removeMediaItem: (index: number) => void;
