@@ -1,3 +1,4 @@
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
@@ -45,6 +46,8 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Define the Giants Orange color
+        'giants-orange': '#fe5a1d', // rgb(254,90,29)
         // Define opacity values here
         black: "hsl(var(--black))", // Assuming --black is defined in globals.css
       },

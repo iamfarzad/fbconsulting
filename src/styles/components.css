@@ -1,3 +1,4 @@
+
 /* Import specialized style files */
 @import './glassmorphism.css';
 @import './text-styles.css';
@@ -12,14 +13,20 @@
   transform: translateY(-4px);
 }
 
-/*  Removed simple button styling 
-.simple-button {
-  @apply bg-black text-white dark:bg-white dark:text-black font-medium transition-all;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+/* Add a minimal accent styling that uses Giants Orange color */
+.accent-border {
+  @apply border-giants-orange;
 }
 
-.simple-button:hover {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
+.accent-text {
+  @apply text-giants-orange;
 }
-*/
+
+.accent-bg {
+  @apply bg-giants-orange text-white;
+}
+
+/* Add glassmorphism with accent color */
+.glass-accent {
+  @apply bg-giants-orange/10 backdrop-blur-lg border border-giants-orange/20 rounded-lg;
+}
