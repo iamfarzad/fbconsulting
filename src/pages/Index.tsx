@@ -1,26 +1,28 @@
 
 import React from 'react';
-import { UnifiedChat } from '@/components/chat/UnifiedChat';
+import { WebSocketChat } from '@/components/chat/WebSocketChat';
+import { ChatProvider } from '@/contexts/ChatContext';
 
 const Index: React.FC = () => {
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-4xl font-bold mb-6 text-center">Welcome to Gemini AI Assistant</h1>
-      
-      <div className="max-w-3xl mx-auto">
-        <p className="text-lg text-center mb-8">
-          This AI-powered assistant helps with questions about our services, products, and more.
+    <ChatProvider>
+      <div className="container mx-auto py-8">
+        <h1 className="text-4xl font-bold mb-6 text-center">Gemini WebSocket Chat</h1>
+        
+        <p className="text-center mb-8">
+          This demo uses the updated WebSocket backend documented in BACKEND_UPDATE_NOTES.md
         </p>
         
-        <div className="bg-white/50 backdrop-blur-sm rounded-lg p-6 shadow-lg">
-          <UnifiedChat 
-            title="Gemini AI Assistant"
-            subtitle="Powered by Google Gemini"
-            placeholderText="Ask me anything about our services..."
-          />
+        <div className="max-w-lg mx-auto">
+          <WebSocketChat />
+        </div>
+        
+        <div className="mt-8 text-center text-sm text-muted-foreground">
+          <p>Using WebSocket API with audio support</p>
+          <p>All communications happen through a secure WebSocket connection</p>
         </div>
       </div>
-    </div>
+    </ChatProvider>
   );
 };
 
