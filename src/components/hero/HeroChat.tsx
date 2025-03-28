@@ -1,11 +1,11 @@
-import { useGeminiMessageSubmission } from '@/features/gemini';
+
 import { useState } from 'react';
+import { GeminiAdapter } from '@/features/gemini/services/geminiAdapter';
 
 export function HeroChat() {
   const [message, setMessage] = useState('');
   const [response, setResponse] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { submitMessage } = useGeminiMessageSubmission();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -13,8 +13,10 @@ export function HeroChat() {
 
     setIsLoading(true);
     try {
-      const result = await submitMessage(message);
-      setResponse(result);
+      const result = await GeminiAdapter.generateResponse({
+        prompt: message
+      });
+      setResponse(result.text);
       setMessage('');
     } catch (error) {
       console.error('Chat error:', error);

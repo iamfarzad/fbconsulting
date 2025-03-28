@@ -1,6 +1,6 @@
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import CopilotDemo from '@/pages/CopilotDemo';
 import './App.css';
 
 function App() {
@@ -17,14 +17,6 @@ function App() {
                 Home
               </Link>
             </li>
-            <li>
-              <Link 
-                to="/copilot" 
-                className="text-foreground hover:text-primary transition-colors"
-              >
-                Copilot Demo
-              </Link>
-            </li>
           </ul>
         </nav>
 
@@ -36,7 +28,6 @@ function App() {
                 <p className="mb-4">Select a demo from the navigation menu above.</p>
               </div>
             } />
-            <Route path="/copilot" element={<CopilotDemo />} />
           </Routes>
         </div>
       </div>
