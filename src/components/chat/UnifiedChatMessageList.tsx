@@ -2,7 +2,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useChat } from '@/contexts/ChatContext';
 import { Bot, Loader2 } from 'lucide-react';
-import { AIMessage } from '@/services/chat/messageTypes';
+import { AIMessage } from '@/features/gemini/types';
 
 // Simple chat message component
 const ChatMessage = ({ message, isUser }: { message: AIMessage; isUser: boolean }) => {
@@ -35,9 +35,7 @@ export const UnifiedChatMessageList: React.FC = () => {
   }, [messages, isLoading]);
   
   // Filter out system messages
-  const displayMessages = Array.isArray(messages) 
-    ? messages.filter(msg => msg.role !== 'system')
-    : [];
+  const displayMessages = messages.filter(msg => msg.role !== 'system');
     
   if (displayMessages.length === 0) {
     return (

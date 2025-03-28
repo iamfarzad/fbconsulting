@@ -1,15 +1,10 @@
-// Core exports
-export * from './services/geminiAdapter';
-export * from './services/initialize';
-export * from './services/formatters';
 
-// Config exports
-export * from './config/GeminiConfig';
+// Export GeminiAdapter from services
+export { GeminiAdapter } from './services/geminiAdapter';
+export type { GenAIRequest, GenAIResponse } from './services/geminiAdapter';
 
-// Hook exports
-export * from './hooks/useGeminiMessageSubmission';
-export * from './hooks/useGeminiInitialization';
-export * from './hooks/useGeminiAudio';
+// Export message types
+export type { AIMessage, MessageRole } from './types';
 
-// Type exports
-export * from './types';
+// Re-export hooks for ease of use
+export { useGeminiService } from '../../hooks/useGeminiService';
