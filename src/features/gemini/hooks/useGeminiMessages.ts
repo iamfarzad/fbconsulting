@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from 'react';
-import { AIMessage, isAssistantMessage, isUserMessage, isSystemMessage, isErrorMessage } from '@/services/chat/messageTypes';
+import { AIMessage } from '@/services/chat/messageTypes';
 
 /**
  * Hook to manage Gemini chat message state
@@ -37,15 +37,11 @@ export function useGeminiMessages(personaData: any) {
     const newMessage: AIMessage = {
       role,
       content,
-      timestamp: Date.now(),
-      metadata
+      timestamp: Date.now()
     };
     
-    // Validate message before adding
-    if (!isUserMessage(newMessage) && 
-        !isAssistantMessage(newMessage) && 
-        !isSystemMessage(newMessage) && 
-        !isErrorMessage(newMessage)) {
+    // Validate message role before adding
+    if (!['user', 'assistant', 'system', 'error'].includes(role)) {
       console.error('Invalid message type:', role);
       return;
     }

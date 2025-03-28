@@ -1,14 +1,8 @@
-import { 
-  GeminiAdapter,
-  GeminiConfig,
-  useGeminiMessageSubmission,
-  useGeminiInitialization,
-  useGeminiAudio,
-} from '@/features/gemini';
-// Removed: import React from 'react';
+
+import React from 'react';
 import { useChat, ChatProvider } from '@/contexts/ChatContext';
 // Add explicit .tsx extension
-import { ChatHeader } from './core/ChatHeader.tsx'; 
+import { ChatHeader } from './core/ChatHeader'; 
 import { UnifiedChatMessageList } from './UnifiedChatMessageList';
 import { UnifiedChatInput } from './UnifiedChatInput';
 
@@ -104,10 +98,12 @@ interface UnifiedChatProps extends UnifiedChatContentProps {}
 
 export const UnifiedChat: React.FC<UnifiedChatProps> = (props) => {
   const { apiKey, modelName, ...restProps } = props;
-  
+
   return (
     <ChatProvider apiKey={apiKey} modelName={modelName}>
       <UnifiedChatContent {...restProps} />
     </ChatProvider>
   );
 };
+
+export default UnifiedChat;

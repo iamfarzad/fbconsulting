@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { AIMessage } from '@/types/chat';
+import { AIMessage } from '@/services/chat/messageTypes';
 
 export interface UseFullScreenChatStateOptions {
   initialMessages?: AIMessage[];

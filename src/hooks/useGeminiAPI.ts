@@ -1,10 +1,4 @@
-import { 
-  GeminiAdapter,
-  GeminiConfig,
-  useGeminiMessageSubmission,
-  useGeminiInitialization,
-  useGeminiAudio,
-} from '@/features/gemini';
+
 import { useState } from 'react';
 
 export const useGeminiAPI = () => {
@@ -32,5 +26,6 @@ export const useGeminiAPI = () => {
 
   return { sendMessage, error };
 };
-// Already declared above with `export const useGeminiAPI = () => { ... }`
-// So nothing else is needed.
+
+// Fix imports in other files by exporting the same function as default
+export default useGeminiAPI;

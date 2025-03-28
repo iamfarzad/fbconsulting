@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { GeminiCopilotProvider } from '@/components/copilot/GeminiCopilotProvider';
-import { GeminiCopilot } from '@/components/copilot/GeminiCopilot';
+import GeminiCopilot from '@/components/copilot/GeminiCopilot';
 
 const CopilotDemo: React.FC = () => {
   return (
