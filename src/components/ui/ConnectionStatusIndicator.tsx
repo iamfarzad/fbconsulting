@@ -1,13 +1,11 @@
 
 import React from 'react';
 import { AlertCircle, Loader2, CheckCircle, RefreshCw } from 'lucide-react';
-
-export interface ConnectionStatusIndicatorProps {
-  status: 'connecting' | 'connected' | 'disconnected';
-}
+import { ConnectionStatusIndicatorProps } from '@/types/chat';
 
 const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
-  status
+  status,
+  onRetry
 }) => {
   const getStatusDisplay = () => {
     switch (status) {
@@ -45,6 +43,15 @@ const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
       <div className={`flex items-center gap-2 px-3 py-2 rounded-md text-white ${color}`}>
         {icon}
         <span className="text-sm font-medium">{text}</span>
+        {status === 'disconnected' && onRetry && (
+          <button 
+            onClick={onRetry} 
+            className="ml-2 p-1 bg-white/20 rounded-full hover:bg-white/30"
+            title="Retry connection"
+          >
+            <RefreshCw className="h-3 w-3" />
+          </button>
+        )}
       </div>
     </div>
   );

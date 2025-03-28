@@ -1,24 +1,26 @@
 
-// Connection settings for the Python backend
+// API configuration constants
+
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
-  WS_BASE_URL: import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:8000',
-  TIMEOUT: 30000,
-  HEALTH_CHECK: '/health',
-  GEMINI: {
-    CHAT: '/gemini/chat',
-    AUDIO: '/gemini/audio',
-    STREAM: '/gemini/stream',
-    VISION: '/gemini/vision'
-  },
-  WEBSOCKET: {
-    RECONNECT_ATTEMPTS: 3,
-    RECONNECT_INTERVAL: 3000,
-    PING_INTERVAL: 30000,
-    PING_TIMEOUT: 10000
-  },
-  DEFAULT_WS_PING_INTERVAL: 30000,
-  DEFAULT_WS_PING_TIMEOUT: 10000
+  BASE_URL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001',
+  WS_BASE_URL: import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:3001',
+  DEFAULT_PING_INTERVAL: 30000, // 30 seconds
+  DEFAULT_WS_PING_TIMEOUT: 10000, // 10 seconds
+  DEFAULT_TIMEOUT: 60000, // 60 seconds
+  DEFAULT_RECONNECT_ATTEMPTS: 3,
+  DEFAULT_RETRIES: 3,
+  GEMINI_API_KEY: import.meta.env.VITE_GEMINI_API_KEY,
+  DEFAULT_ENDPOINTS: {
+    gemini: '/api/gemini',
+    geminiStream: '/api/gemini/stream',
+    audio: '/api/audio',
+    healthCheck: '/api/health'
+  }
 };
 
-export default API_CONFIG;
+export const DEFAULT_REQUEST_OPTIONS = {
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  timeout: API_CONFIG.DEFAULT_TIMEOUT
+};

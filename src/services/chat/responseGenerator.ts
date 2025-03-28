@@ -1,98 +1,105 @@
 
+// Generate AI responses and suggestions
+
 import { LeadInfo } from '@/services/lead/leadExtractor';
 
-export type Persona = 'strategist' | 'technical' | 'consultant' | 'general';
-
-export function determinePersona(leadInfo: LeadInfo, currentPage?: string): Persona {
-  if (!leadInfo) return 'general';
+// Generate a response based on input and lead info
+export const generateResponse = (input: string, leadInfo: LeadInfo): string => {
+  const inputLower = input.toLowerCase();
   
-  // Combine all interests into a text corpus
-  const text = leadInfo.interests.join(' ').toLowerCase();
-  
-  // Check for technical indicators
-  if (text.includes('code') || 
-      text.includes('programming') || 
-      text.includes('development') ||
-      text.includes('api') ||
-      text.includes('technical')) {
-    return 'technical';
+  // Simple response templates based on input keywords
+  if (inputLower.includes('pricing') || inputLower.includes('cost')) {
+    return "Our pricing is customized based on your specific needs. For most clients, our AI integration services start at $5,000 for initial consultations and implementation. Would you like to discuss the details of your project to get a more accurate estimate?";
   }
   
-  // Check for strategic indicators
-  if (text.includes('strategy') || 
-      text.includes('business case') || 
-      text.includes('roi') ||
-      text.includes('return on investment') ||
-      text.includes('business value')) {
-    return 'strategist';
+  if (inputLower.includes('contact') || inputLower.includes('speak')) {
+    return "I'd be happy to connect you with a consultant. You can book a call directly through our calendar or leave your contact information, and someone will reach out within 24 hours. Would you prefer to schedule a call now?";
   }
   
-  // Check for consultant indicators
-  if (text.includes('advice') || 
-      text.includes('recommend') || 
-      text.includes('suggestion') ||
-      text.includes('should i')) {
-    return 'consultant';
+  if (inputLower.includes('service') || inputLower.includes('offer')) {
+    return "We offer a range of AI services including custom model development, integration with existing systems, workflow automation, and ongoing support. Based on your interest in " + (leadInfo.interests[0] || "AI"), + ", I'd recommend exploring our consulting services first. Would you like to learn more about that?";
   }
   
-  // Page-based defaults
-  if (currentPage) {
-    const page = currentPage.toLowerCase();
-    if (page.includes('technical') || page.includes('docs')) return 'technical';
-    if (page.includes('about') || page.includes('services')) return 'consultant';
-    if (page.includes('case') || page.includes('study')) return 'strategist';
-  }
-  
-  return 'general';
-}
-
-export function generateResponse(message: string, leadInfo: LeadInfo): string {
-  // Determine which persona to use
-  const persona = determinePersona(leadInfo);
-  
-  // Simple response generation based on persona and lead stage
-  let response = "";
-  
-  // If we have a name, use it
-  const greeting = leadInfo.name ? `Hi ${leadInfo.name}! ` : "";
-  
-  // Generate a response based on persona
-  switch (persona) {
-    case 'strategist':
-      response = `${greeting}From a strategic perspective, `;
-      break;
-    case 'technical':
-      response = `${greeting}Looking at the technical aspects, `;
-      break;
-    case 'consultant':
-      response = `${greeting}As a consultant, I'd advise that `;
-      break;
-    default:
-      response = `${greeting}`;
-  }
-  
-  // Add content based on lead stage
+  // Default response based on lead stage
   switch (leadInfo.stage) {
     case 'discovery':
-      response += "I'd like to understand more about your business needs. What specific challenges are you looking to address with AI automation?";
-      break;
-    case 'qualification':
-      response += "Based on what you've shared, our AI solutions could help optimize your workflows. Would you like to know more about our specific services?";
-      break;
-    case 'interested':
-      response += "I'm glad you're interested! Our AI automation services are tailored to your needs and typically start at $2,000 for a basic implementation. Would you like to schedule a consultation to discuss your specific requirements?";
-      break;
-    case 'ready-to-book':
-      response += "Great! Let's schedule a consultation. Would you prefer a video call or phone call? Also, what times work best for you?";
-      break;
+      return "Thank you for your interest. To better understand how we can help, could you tell me more about your specific needs or challenges you're facing with AI implementation?";
+    case 'evaluation':
+      return "Based on what you've shared, I believe our AI consulting services would be a good fit. Would you like to schedule a more detailed discussion with one of our specialists?";
+    case 'decision':
+      return "We're excited about the possibility of working with you. Would you like to review a proposal or schedule a call with our implementation team?";
     default:
-      response += "How can I help you with AI automation today?";
+      return "Thank you for your message. How else can I assist you with your AI-related questions today?";
+  }
+};
+
+// Generate a suggested response for the user
+export const generateSuggestedResponse = (leadInfo: LeadInfo): string => {
+  const mostRecentInterest = leadInfo.interests.length > 0 
+    ? leadInfo.interests[leadInfo.interests.length - 1] 
+    : null;
+  
+  if (!mostRecentInterest) {
+    return "Tell me more about your AI needs";
   }
   
-  return response;
-}
+  // Simple suggestion based on the most recent interest
+  if (mostRecentInterest.toLowerCase().includes('pricing')) {
+    return "What factors affect the pricing?";
+  }
+  
+  if (mostRecentInterest.toLowerCase().includes('integration')) {
+    return "How long does integration typically take?";
+  }
+  
+  if (mostRecentInterest.toLowerCase().includes('custom')) {
+    return "What information do you need to build a custom solution?";
+  }
+  
+  // Default suggestions based on lead stage
+  switch (leadInfo.stage) {
+    case 'discovery':
+      return "I'm interested in improving our customer service with AI";
+    case 'evaluation':
+      return "Could you provide some case studies?";
+    case 'decision':
+      return "I'd like to schedule a consultation";
+    default:
+      return "Tell me more about your services";
+  }
+};
 
-export default {
-  determinePersona,
-  generateResponse
+// Determine AI persona based on context
+export const determinePersona = (messages: { role: string; content: string }[]): string => {
+  // Count mentions of technical terms
+  let technicalTerms = 0;
+  const technicalKeywords = ['api', 'integration', 'code', 'development', 'implementation', 'technical'];
+  
+  // Count mentions of business terms
+  let businessTerms = 0;
+  const businessKeywords = ['roi', 'cost', 'revenue', 'business', 'strategy', 'market'];
+  
+  // Analyze user messages
+  const userMessages = messages.filter(m => m.role === 'user');
+  for (const message of userMessages) {
+    const content = message.content.toLowerCase();
+    
+    for (const keyword of technicalKeywords) {
+      if (content.includes(keyword)) technicalTerms++;
+    }
+    
+    for (const keyword of businessKeywords) {
+      if (content.includes(keyword)) businessTerms++;
+    }
+  }
+  
+  // Determine persona based on term counts
+  if (technicalTerms > businessTerms) {
+    return 'technical';
+  } else if (businessTerms > technicalTerms) {
+    return 'business';
+  }
+  
+  // Default persona
+  return 'balanced';
 };

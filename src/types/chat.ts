@@ -18,7 +18,7 @@ export interface ChatContextType {
     isFullScreen: boolean;
   };
   dispatch: React.Dispatch<any>;
-  sendMessage: (content: string) => void;
+  sendMessage: (content: string, files?: any[]) => void;
   clearMessages: () => void;
   toggleFullScreen: () => void;
   containerRef: React.RefObject<HTMLDivElement>;
@@ -78,4 +78,27 @@ export interface AudioMessage {
   speakerBoost?: boolean;
   style?: number;
   modelId?: string;
+}
+
+// Create a dedicated type for Voice UI
+export interface VoiceUIProps {
+  onCommand?: (command: string) => void;
+  noFloatingButton?: boolean;
+}
+
+// Unified Voice UI Props
+export interface UnifiedVoiceUIProps {
+  onCommand?: (command: string) => void;
+  noFloatingButton?: boolean;
+}
+
+// Create a dedicated type for Voice Feedback
+export interface VoiceFeedbackProps {
+  isListening: boolean;
+  transcript?: string;
+}
+
+export interface ConnectionStatusIndicatorProps {
+  status: 'connecting' | 'connected' | 'disconnected';
+  onRetry?: () => Promise<void>;
 }
