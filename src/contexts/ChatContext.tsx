@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useRef } from 'react';
+import React, { createContext, useContext, useRef, useState } from 'react';
 import { AIMessage, ChatContextType } from '@/types/chat';
 import { useGeminiChat } from '@/hooks/useGeminiChat';
 
@@ -25,6 +25,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   modelName
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   
   const {
     messages,
@@ -38,7 +39,9 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     connect
   } = useGeminiChat({
     autoConnect: true,
-    enableTTS: true
+    enableTTS: true,
+    apiKey,
+    modelName
   });
 
   // Set up the combined state object
@@ -48,17 +51,17 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     isLoading,
     showMessages: isConnected,
     isInitialized: isConnected,
-    isFullScreen: false
+    isFullScreen
   };
 
-  // Set up the dispatch function (simplified for our context)
+  // Set up the dispatch function
   const dispatch = (action: any) => {
     switch (action.type) {
       case 'SET_INPUT_VALUE':
         setInputValue(action.payload);
         break;
       case 'TOGGLE_FULLSCREEN':
-        // This will be handled separately
+        setIsFullScreen(prev => !prev);
         break;
       default:
         console.warn('Unknown action type:', action.type);
@@ -66,7 +69,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
   };
 
   const toggleFullScreen = () => {
-    // We'll handle this with a separate state later
+    setIsFullScreen(prev => !prev);
   };
 
   const value = {
@@ -75,7 +78,8 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({
     sendMessage,
     clearMessages,
     toggleFullScreen,
-    containerRef
+    containerRef,
+    error
   };
 
   return (

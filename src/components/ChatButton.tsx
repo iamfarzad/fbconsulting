@@ -48,9 +48,7 @@ const ChatButton = () => {
         {isOpen && isFullScreen && (
           <UnifiedFullScreenChat 
             onMinimize={toggleFullScreen}
-            title="AI Assistant"
-            subtitle="Ask me anything about our AI services"
-            placeholderText="Type your question here..."
+            placeholderText="Ask me anything about our AI services..."
           />
         )}
       </AnimatePresence>
