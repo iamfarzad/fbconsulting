@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { WebSocketClient, generateClientId, createWebSocketUrl } from '@/utils/websocketUtils';
 import { useToast } from '@/hooks/use-toast';
@@ -10,6 +9,8 @@ interface UseGeminiChatOptions {
   onConnected?: () => void;
   onDisconnected?: () => void;
   onError?: (error: string) => void;
+  apiKey?: string;
+  modelName?: string;
 }
 
 export function useGeminiChat(options: UseGeminiChatOptions = {}) {
@@ -18,7 +19,9 @@ export function useGeminiChat(options: UseGeminiChatOptions = {}) {
     enableTTS = true,
     onConnected,
     onDisconnected,
-    onError
+    onError,
+    apiKey,
+    modelName
   } = options;
 
   const [messages, setMessages] = useState<AIMessage[]>([]);

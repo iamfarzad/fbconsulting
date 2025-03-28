@@ -22,6 +22,7 @@ export interface ChatContextType {
   clearMessages: () => void;
   toggleFullScreen: () => void;
   containerRef: React.RefObject<HTMLDivElement>;
+  error?: string | null;
 }
 
 export interface ChatInputProps {

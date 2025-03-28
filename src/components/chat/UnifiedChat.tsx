@@ -4,24 +4,13 @@ import { useChat, ChatProvider } from '@/contexts/ChatContext';
 import { ChatHeader } from './core/ChatHeader';
 import { UnifiedChatMessageList } from './UnifiedChatMessageList';
 import { UnifiedChatInput } from './UnifiedChatInput';
-
-interface UnifiedChatContentProps {
-  title?: string;
-  subtitle?: string;
-  placeholderText?: string;
-  fullScreen?: boolean;
-  onToggleFullScreen?: () => void;
-  className?: string;
-  apiKey?: string;
-  modelName?: string;
-}
+import { UnifiedChatProps } from '@/types/chat';
 
 // Inner component that uses the ChatContext
-const UnifiedChatContent: React.FC<UnifiedChatContentProps> = ({
+const UnifiedChatContent: React.FC<UnifiedChatProps> = ({
   title = 'AI Assistant',
   subtitle,
   placeholderText = 'Ask me anything...',
-  fullScreen = false,
   onToggleFullScreen,
   className = '',
 }) => {
@@ -41,7 +30,7 @@ const UnifiedChatContent: React.FC<UnifiedChatContentProps> = ({
   } = state;
   
   // Use either prop or context value for fullScreen
-  const isFullScreenMode = fullScreen || contextIsFullScreen;
+  const isFullScreenMode = contextIsFullScreen;
   
   // Use the prop function if provided, otherwise use context function
   const handleToggleFullScreen = () => {
@@ -70,9 +59,7 @@ const UnifiedChatContent: React.FC<UnifiedChatContentProps> = ({
       />
       
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {(showMessages || hasMessages) && (
-          <UnifiedChatMessageList />
-        )}
+        <UnifiedChatMessageList />
       </div>
       
       <div className="p-4 border-t">
@@ -83,8 +70,6 @@ const UnifiedChatContent: React.FC<UnifiedChatContentProps> = ({
 };
 
 // Main component that provides the ChatContext
-interface UnifiedChatProps extends UnifiedChatContentProps {}
-
 export const UnifiedChat: React.FC<UnifiedChatProps> = (props) => {
   const { apiKey, modelName, ...restProps } = props;
 
