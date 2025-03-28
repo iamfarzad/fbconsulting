@@ -1,37 +1,25 @@
-/// <reference types="vite/client" />
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
-import path from 'path'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
+import { componentTagger } from "lovable-tagger";
 
-export default defineConfig({
-  plugins: [react()],
+export default defineConfig(({ mode }) => ({
+  server: {
+    host: "::",
+    port: 8080,
+  },
+  plugins: [
+    react(),
+    mode === 'development' && componentTagger(),
+  ].filter(Boolean),
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
   // Keep essential environment variables
   envPrefix: ['VITE_', 'AZURE_', 'ELEVENLABS_', 'GOOGLE_'],
   build: {
     sourcemap: true,
-    rollupOptions: {
-      external: ['google-generativeai'],
-      output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom'],
-          'copilot-vendor': ['@copilotkit/react-core', '@copilotkit/react-textarea']
-        }
-      }
-    }
-  },
-  server: {
-    port: 8080,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
-        secure: false,
-      }
-    }
   }
-})
+}));
