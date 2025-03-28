@@ -52,11 +52,13 @@
   }
 
   body {
-    /* REMOVED @apply bg-background text-foreground antialiased; */
-    /* Rely on component-level backgrounds or browser defaults */
+    /* REMOVED @apply text-foreground; */
     font-feature-settings: "rlig" 1, "calt" 1;
-    /* Applying base text color and antialiasing is usually safe */
-    @apply text-foreground antialiased;
+    /* Applying base antialiasing is usually safe */
+    @apply antialiased;
+    /* Background set via CSS var directly if needed, or rely on defaults/components */
+    /* background-color: hsl(var(--background)); */ 
+    /* color: hsl(var(--foreground)); */ /* Set text color directly if needed */
   }
   
   /* Standardized typography */
