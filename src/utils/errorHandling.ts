@@ -1,4 +1,6 @@
 
+import { API_CONFIG } from '@/config/api';
+
 /**
  * Format error message for display
  */
@@ -78,6 +80,17 @@ export const categorizeError = (error: unknown): 'network' | 'auth' | 'timeout' 
  */
 export const handleWebSocketError = (event: Event): string => {
   console.error('WebSocket error:', event);
+  
+  // Check if the error is related to the websocket connection
+  if (event instanceof ErrorEvent) {
+    if (event.message.includes('timeout')) {
+      return `Connection timed out. The server at ${API_CONFIG.WS_BASE_URL} did not respond in time.`;
+    }
+    
+    if (event.message.includes('refused')) {
+      return `Connection refused. The server at ${API_CONFIG.WS_BASE_URL} is not reachable.`;
+    }
+  }
   
   return 'Connection to AI service failed. The app will continue to work with limited functionality.';
 };
