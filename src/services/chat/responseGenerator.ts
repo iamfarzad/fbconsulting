@@ -62,19 +62,19 @@ export const generateSuggestedResponse = (recentMessages: string[]): string | nu
   const lastMessage = recentMessages[recentMessages.length - 1].toLowerCase();
   
   if (lastMessage.includes('help')) {
-    return 'I need help implementing AI in my business processes.';
+    return "I need help implementing AI in my business processes.";
   }
   
   if (lastMessage.includes('service') || lastMessage.includes('offer')) {
-    return 'Can you tell me more about your AI consultation services?';
+    return "Can you tell me more about your AI consultation services?";
   }
   
   if (lastMessage.includes('price') || lastMessage.includes('cost')) {
-    return 'What are your rates for AI implementation projects?';
+    return "What are your rates for AI implementation projects?";
   }
   
   if (lastMessage.includes('book') || lastMessage.includes('schedule')) {
-    return 'I'd like to schedule a consultation to discuss my project.';
+    return "I'd like to schedule a consultation to discuss my project.";
   }
   
   return null;
