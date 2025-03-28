@@ -9,7 +9,7 @@ import { Mic, Send, Trash2, Volume, VolumeX, RefreshCw } from 'lucide-react';
 import { ConnectionStatus } from '@/components/chat/core/ConnectionStatus';
 
 export function WebSocketChat() {
-  const { state, actions, error, clientId } = useChat();
+  const { state, actions, error } = useChat();
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -44,7 +44,7 @@ export function WebSocketChat() {
               isConnected={state.isConnected} 
               isLoading={!state.isInitialized} 
             />
-            <span className="text-xs text-muted-foreground">ID: {clientId.substring(0, 8)}</span>
+            <span className="text-xs text-muted-foreground">ID: {state.clientId.substring(0, 8)}</span>
           </div>
         </div>
       </div>

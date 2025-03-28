@@ -1,46 +1,33 @@
 
 import React from 'react';
-import { Wifi, WifiOff, Loader2 } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ConnectionStatusProps {
   isConnected: boolean;
-  isLoading?: boolean;
+  isLoading: boolean;
+  className?: string;
 }
 
-export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({ isConnected, isLoading = false }) => {
-  const getStatusIcon = () => {
-    if (isLoading) {
-      return <Loader2 className="h-4 w-4 animate-spin text-yellow-500" />;
-    } else if (isConnected) {
-      return <Wifi className="h-4 w-4 text-green-500" />;
-    } else {
-      return <WifiOff className="h-4 w-4 text-red-500" />;
-    }
-  };
-
-  const getStatusText = () => {
-    if (isLoading) {
-      return "Connecting...";
-    } else if (isConnected) {
-      return "Connected to AI service";
-    } else {
-      return "Disconnected from AI service";
-    }
-  };
-
+export function ConnectionStatus({ isConnected, isLoading, className }: ConnectionStatusProps) {
   return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="flex items-center gap-1">
-            {getStatusIcon()}
-          </div>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>{getStatusText()}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <div className={cn("flex items-center", className)}>
+      {isLoading ? (
+        <div className="flex items-center text-yellow-500">
+          <Loader2 className="h-4 w-4 animate-spin mr-1" />
+          <span className="text-xs">Connecting...</span>
+        </div>
+      ) : isConnected ? (
+        <div className="flex items-center text-green-500">
+          <CheckCircle className="h-4 w-4 mr-1" />
+          <span className="text-xs">Connected</span>
+        </div>
+      ) : (
+        <div className="flex items-center text-red-500">
+          <XCircle className="h-4 w-4 mr-1" />
+          <span className="text-xs">Disconnected</span>
+        </div>
+      )}
+    </div>
   );
-};
+}

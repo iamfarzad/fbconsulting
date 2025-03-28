@@ -1,171 +1,203 @@
-import { useState, useRef, useCallback } from 'react';
+
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 interface AudioHandlerOptions {
   autoPlay?: boolean;
   onPlaybackError?: (error: string) => void;
 }
 
-export function useAudioHandler({ 
-  autoPlay = true,
-  onPlaybackError 
-}: AudioHandlerOptions = {}) {
+export function useAudioHandler(options: AudioHandlerOptions = {}) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   
   const audioContext = useRef<AudioContext | null>(null);
   const audioQueue = useRef<ArrayBuffer[]>([]);
-  const audioSourceNode = useRef<AudioBufferSourceNode | null>(null);
+  const sourceNode = useRef<AudioBufferSourceNode | null>(null);
+  const isProcessing = useRef(false);
   
-  // Clear all audio data and stop playback
-  const clearAudio = useCallback(() => {
-    audioQueue.current = [];
-    stopAudio();
-  }, []);
-  
-  // Stop current audio playback
-  const stopAudio = useCallback(() => {
-    if (audioSourceNode.current) {
-      try {
-        audioSourceNode.current.stop();
-        audioSourceNode.current.disconnect();
-        audioSourceNode.current = null;
-      } catch (error) {
-        console.error('Error stopping audio:', error);
-      }
-    }
-    setIsPlaying(false);
-    setProgress(0);
-  }, []);
-  
-  // Initialize AudioContext if needed
-  const getAudioContext = useCallback(() => {
+  // Initialize audio context
+  const initAudioContext = useCallback(() => {
     if (!audioContext.current) {
       try {
-        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-        audioContext.current = new AudioContext();
+        audioContext.current = new (window.AudioContext || (window as any).webkitAudioContext)();
       } catch (error) {
-        const errorMessage = 'Web Audio API is not supported in this browser';
+        const errorMessage = `Failed to create AudioContext: ${error instanceof Error ? error.message : 'Unknown error'}`;
+        console.error(errorMessage);
         setError(errorMessage);
-        if (onPlaybackError) onPlaybackError(errorMessage);
-        return null;
+        if (options.onPlaybackError) {
+          options.onPlaybackError(errorMessage);
+        }
       }
     }
     return audioContext.current;
-  }, [onPlaybackError]);
+  }, [options]);
   
-  // Play the current audio queue
-  const playAudioChunks = useCallback(async () => {
-    const context = getAudioContext();
-    if (!context) return;
+  // Play a decoded audio buffer
+  const playAudioBuffer = useCallback((audioBuffer: AudioBuffer) => {
+    if (!audioContext.current) return;
     
-    if (audioQueue.current.length === 0) {
-      console.log('No audio chunks to play');
-      return;
+    // Stop any currently playing audio
+    if (sourceNode.current) {
+      try {
+        sourceNode.current.stop();
+      } catch (e) {
+        // Ignore errors from stopping already stopped sources
+      }
     }
     
     try {
-      setIsPlaying(true);
+      // Create new source
+      sourceNode.current = audioContext.current.createBufferSource();
+      sourceNode.current.buffer = audioBuffer;
+      sourceNode.current.connect(audioContext.current.destination);
       
-      // Stop any current playback
-      if (audioSourceNode.current) {
-        audioSourceNode.current.stop();
-        audioSourceNode.current.disconnect();
-      }
-      
-      // Combine all audio chunks
-      const combinedChunks = new Uint8Array(
-        audioQueue.current.reduce((acc, chunk) => acc + chunk.byteLength, 0)
-      );
-      
-      let offset = 0;
-      audioQueue.current.forEach(chunk => {
-        combinedChunks.set(new Uint8Array(chunk), offset);
-        offset += chunk.byteLength;
-      });
-      
-      // Decode audio data
-      const audioBuffer = await context.decodeAudioData(combinedChunks.buffer);
-      
-      // Create and configure source node
-      audioSourceNode.current = context.createBufferSource();
-      audioSourceNode.current.buffer = audioBuffer;
-      audioSourceNode.current.connect(context.destination);
-      
-      // Set up progress tracking
-      const duration = audioBuffer.duration;
-      const updateInterval = 100; // ms
-      const progressInterval = setInterval(() => {
-        if (!context) {
-          clearInterval(progressInterval);
-          return;
-        }
-        
-        const currentTime = context.currentTime;
-        const startTime = audioSourceNode.current?.startTime || 0;
-        const elapsedTime = currentTime - startTime;
-        const percent = Math.min(100, Math.floor((elapsedTime / duration) * 100));
-        
-        setProgress(percent);
-        
-        if (percent >= 100) {
-          clearInterval(progressInterval);
-          setIsPlaying(false);
-          setProgress(0);
-        }
-      }, updateInterval);
-      
-      // Handle playback completion
-      audioSourceNode.current.onended = () => {
-        clearInterval(progressInterval);
+      // Set up event handlers
+      sourceNode.current.onended = () => {
         setIsPlaying(false);
-        setProgress(0);
-        audioSourceNode.current = null;
+        setProgress(100); // Mark as complete
+        
+        // Try to play the next chunk if there is one
+        setTimeout(() => {
+          processAudioQueue();
+        }, 50);
       };
       
-      // Start playback
-      audioSourceNode.current.start();
-      audioSourceNode.current.startTime = context.currentTime;
-      
-      // Clear the queue after starting playback
-      audioQueue.current = [];
-      
-    } catch (error) {
-      console.error('Audio playback error:', error);
-      setIsPlaying(false);
+      // Play the audio
+      sourceNode.current.start(0);
+      setIsPlaying(true);
       setProgress(0);
       
-      const errorMessage = error instanceof Error ? error.message : 'Error playing audio';
+      // Update progress while playing
+      const duration = audioBuffer.duration;
+      let startTime = audioContext.current.currentTime;
+      
+      const updateProgress = () => {
+        if (!audioContext.current || !sourceNode.current) return;
+        
+        const elapsed = audioContext.current.currentTime - startTime;
+        const progressPercent = Math.min((elapsed / duration) * 100, 100);
+        
+        setProgress(progressPercent);
+        
+        if (progressPercent < 100 && isPlaying) {
+          requestAnimationFrame(updateProgress);
+        }
+      };
+      
+      requestAnimationFrame(updateProgress);
+    } catch (error) {
+      const errorMessage = `Error playing audio: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      console.error(errorMessage);
+      setIsPlaying(false);
       setError(errorMessage);
-      if (onPlaybackError) onPlaybackError(errorMessage);
+      if (options.onPlaybackError) {
+        options.onPlaybackError(errorMessage);
+      }
     }
-  }, [getAudioContext, onPlaybackError]);
+  }, [isPlaying, options]);
   
-  // Handle audio chunk from WebSocket
-  const handleAudioChunk = useCallback((chunk: ArrayBuffer) => {
-    // Add chunk to queue
-    audioQueue.current.push(chunk);
+  // Process audio chunks in the queue
+  const processAudioQueue = useCallback(async () => {
+    if (isProcessing.current || audioQueue.current.length === 0) {
+      return;
+    }
     
-    // If autoPlay is enabled and not already playing, start playback
-    if (autoPlay && !isPlaying) {
-      playAudioChunks();
+    const context = initAudioContext();
+    if (!context) return;
+    
+    isProcessing.current = true;
+    
+    try {
+      const audioData = audioQueue.current.shift();
+      if (!audioData) {
+        isProcessing.current = false;
+        return;
+      }
+      
+      // Decode the audio data
+      const audioBuffer = await context.decodeAudioData(audioData.slice(0));
+      playAudioBuffer(audioBuffer);
+    } catch (error) {
+      const errorMessage = `Error decoding audio: ${error instanceof Error ? error.message : 'Unknown error'}`;
+      console.error(errorMessage);
+      setError(errorMessage);
+      if (options.onPlaybackError) {
+        options.onPlaybackError(errorMessage);
+      }
+    } finally {
+      isProcessing.current = false;
     }
-  }, [autoPlay, isPlaying, playAudioChunks]);
+  }, [initAudioContext, playAudioBuffer, options]);
   
-  // Audio metadata handler (optional)
-  const handleAudioMetadata = useCallback((metadata: any) => {
-    // Handle any metadata about the audio if needed
-    console.log('Audio metadata:', metadata);
+  // Handle new audio chunks
+  const handleAudioChunk = useCallback((audioChunk: ArrayBuffer) => {
+    if (!audioChunk || audioChunk.byteLength === 0) {
+      console.warn('Received empty audio chunk');
+      return;
+    }
+    
+    audioQueue.current.push(audioChunk);
+    
+    // If not currently processing the queue, start
+    if (!isProcessing.current && options.autoPlay !== false) {
+      processAudioQueue();
+    }
+  }, [processAudioQueue, options.autoPlay]);
+  
+  // Stop audio playback
+  const stopAudio = useCallback(() => {
+    if (sourceNode.current) {
+      try {
+        sourceNode.current.stop();
+        sourceNode.current = null;
+      } catch (e) {
+        // Ignore errors from stopping already stopped sources
+      }
+    }
+    setIsPlaying(false);
+  }, []);
+  
+  // Clear all audio
+  const clearAudio = useCallback(() => {
+    stopAudio();
+    audioQueue.current = [];
+    setProgress(0);
+  }, [stopAudio]);
+  
+  // Resume audio context if needed (for autoplay policy)
+  const resumeAudioContextIfNeeded = useCallback(() => {
+    if (audioContext.current?.state === 'suspended') {
+      audioContext.current.resume();
+    }
+  }, []);
+  
+  // Clean up resources when component unmounts
+  useEffect(() => {
+    return () => {
+      if (sourceNode.current) {
+        try {
+          sourceNode.current.stop();
+          sourceNode.current.disconnect();
+        } catch (e) {
+          // Ignore errors during cleanup
+        }
+      }
+      
+      if (audioContext.current) {
+        audioContext.current.close();
+        audioContext.current = null;
+      }
+    };
   }, []);
   
   return {
     handleAudioChunk,
-    handleAudioMetadata,
     isPlaying,
     progress,
     error,
     stopAudio,
-    playAudioChunks,
-    clearAudio
+    clearAudio,
+    resumeAudioContext: resumeAudioContextIfNeeded
   };
 }

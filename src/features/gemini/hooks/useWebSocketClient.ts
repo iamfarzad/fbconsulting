@@ -1,99 +1,108 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { WebSocketClient } from '../services/WebSocketClient';
-import { WebSocketClientOptions, WebSocketMessage } from '../types/websocketTypes';
-import { useToast } from '@/hooks/use-toast';
 
-export function useWebSocketClient(options?: WebSocketClientOptions) {
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { WebSocketClient } from '../services/WebSocketClient';
+import { WebSocketMessage } from '../types/websocketTypes';
+import { v4 as uuidv4 } from 'uuid';
+import { API_CONFIG } from '@/config/api';
+
+interface UseWebSocketClientOptions {
+  onOpen?: () => void;
+  onMessage?: (data: WebSocketMessage) => void;
+  onError?: (error: string) => void;
+  onClose?: () => void;
+  onAudioChunk?: (audioChunk: ArrayBuffer) => void;
+  autoReconnect?: boolean;
+  debug?: boolean;
+}
+
+export function useWebSocketClient(options: UseWebSocketClientOptions = {}) {
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [clientId, setClientId] = useState<string>('');
-  const wsClientRef = useRef<WebSocketClient | null>(null);
-  const { toast } = useToast();
+  const [clientId] = useState(() => uuidv4());
+  const clientRef = useRef<WebSocketClient | null>(null);
 
-  const initClient = useCallback(() => {
-    const clientOptions: WebSocketClientOptions = {
-      ...options,
-      onOpen: () => {
-        setIsConnected(true);
-        setIsConnecting(false);
-        setError(null);
-        if (options?.onOpen) options.onOpen();
-      },
-      onClose: () => {
-        setIsConnected(false);
-        if (options?.onClose) options.onClose();
-      },
-      onError: (errorMsg) => {
-        setError(errorMsg);
-        setIsConnected(false);
-        setIsConnecting(false);
-        if (options?.onError) options.onError(errorMsg);
-      },
-      onMessage: (message: WebSocketMessage) => {
-        // Handle standard messages
-        if (message.type === 'error' && message.error) {
-          setError(message.error);
-          toast({
-            title: "Connection Error",
-            description: message.error,
-            variant: "destructive",
-          });
-        }
-        
-        // Pass to the original handler if provided
-        if (options?.onMessage) options.onMessage(message);
-      }
-    };
-    
-    wsClientRef.current = new WebSocketClient(clientOptions);
-    setClientId(wsClientRef.current.getClientId());
-    return wsClientRef.current;
-  }, [options, toast]);
-
-  // Connect function
+  // Connect to the WebSocket server
   const connect = useCallback(() => {
-    setIsConnecting(true);
-    if (!wsClientRef.current) {
-      initClient();
+    if (clientRef.current?.isConnected()) {
+      console.log('WebSocket already connected');
+      return;
     }
-    wsClientRef.current?.connect();
-  }, [initClient]);
+    
+    setIsConnecting(true);
+    setError(null);
+    
+    try {
+      // Create a new client if one doesn't exist
+      if (!clientRef.current) {
+        clientRef.current = new WebSocketClient({
+          debug: options.debug,
+          autoReconnect: options.autoReconnect,
+          onOpen: () => {
+            setIsConnected(true);
+            setIsConnecting(false);
+            setError(null);
+            if (options.onOpen) options.onOpen();
+          },
+          onClose: () => {
+            setIsConnected(false);
+            setIsConnecting(false);
+            if (options.onClose) options.onClose();
+          },
+          onError: (err) => {
+            setError(err);
+            setIsConnecting(false);
+            if (options.onError) options.onError(err);
+          },
+          onMessage: (data) => {
+            if (options.onMessage) options.onMessage(data);
+          },
+          onAudioChunk: (audioChunk) => {
+            if (options.onAudioChunk) options.onAudioChunk(audioChunk);
+          }
+        });
+      }
+      
+      clientRef.current.connect();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to connect to WebSocket';
+      console.error('WebSocket connection error:', errorMessage);
+      setError(errorMessage);
+      setIsConnecting(false);
+      if (options.onError) options.onError(errorMessage);
+    }
+  }, [options]);
 
-  // Disconnect function
+  // Disconnect from the WebSocket server
   const disconnect = useCallback(() => {
-    wsClientRef.current?.disconnect();
-    setIsConnected(false);
-    setIsConnecting(false);
+    if (clientRef.current) {
+      clientRef.current.disconnect();
+      setIsConnected(false);
+    }
   }, []);
 
-  // Send message function
-  const sendMessage = useCallback((message: any): boolean => {
-    if (!wsClientRef.current || !isConnected) {
-      toast({
-        title: "Not Connected",
-        description: "Cannot send message, WebSocket is not connected",
-        variant: "destructive",
-      });
+  // Send a message through the WebSocket
+  const sendMessage = useCallback((data: any) => {
+    if (!clientRef.current) {
+      console.error('WebSocket client not initialized');
       return false;
     }
     
-    return wsClientRef.current.send(message);
-  }, [isConnected, toast]);
-
-  // Send text message helper
-  const sendTextMessage = useCallback((text: string, enableTTS: boolean = true) => {
-    return sendMessage({
-      type: 'text_message',
-      text,
-      enableTTS
-    });
-  }, [sendMessage]);
+    if (!clientRef.current.isConnected()) {
+      console.error('WebSocket not connected');
+      return false;
+    }
+    
+    return clientRef.current.send(data);
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      wsClientRef.current?.disconnect();
+      if (clientRef.current) {
+        clientRef.current.disconnect();
+        clientRef.current = null;
+      }
     };
   }, []);
 
@@ -101,10 +110,9 @@ export function useWebSocketClient(options?: WebSocketClientOptions) {
     connect,
     disconnect,
     sendMessage,
-    sendTextMessage,
     isConnected,
     isConnecting,
     error,
-    clientId
+    clientId: clientRef.current?.getClientId() || clientId
   };
 }
