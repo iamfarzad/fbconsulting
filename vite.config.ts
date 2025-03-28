@@ -1,4 +1,3 @@
-
 import { defineConfig, ConfigEnv, UserConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
@@ -18,7 +17,7 @@ const loadTagger = async () => {
   return null;
 };
 
-// Make this a synchronous function that returns UserConfig
+// Define a synchronous config function
 export default defineConfig(async ({ mode }: ConfigEnv): Promise<UserConfig> => {
   const tagger = await loadTagger();
   

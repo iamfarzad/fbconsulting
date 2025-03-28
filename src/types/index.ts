@@ -17,6 +17,17 @@ export interface ProposalData {
   timeframe?: string;
 }
 
+export interface LeadInfo {
+  name?: string;
+  email?: string;
+  company?: string;
+  position?: string;
+  interests?: string[];
+  source?: string;
+  stage?: string;
+  notes?: string;
+}
+
 // Gemini State Types
 export interface GeminiState {
   messages: {
