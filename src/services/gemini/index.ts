@@ -5,7 +5,7 @@ export { useGeminiWebSocket } from '@/features/gemini/hooks/useGeminiWebSocket';
 export { useGeminiService } from '@/features/gemini/hooks/useGeminiService';
 export { useGeminiAudioPlayback } from '@/features/gemini/hooks/useGeminiAudioPlayback';
 
-interface GeminiConfig {
+export interface GeminiConfig {
   apiKey: string;
   model?: string;
   maxTokens?: number;
@@ -21,7 +21,7 @@ export async function sendGeminiChatRequest(
   config: GeminiConfig
 ): Promise<string> {
   try {
-    const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.DEFAULT_ENDPOINTS.gemini}`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.DEFAULT_ENDPOINTS.GEMINI}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ export async function sendMultimodalRequest(
   config: GeminiConfig
 ): Promise<string> {
   try {
-    const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.DEFAULT_ENDPOINTS.gemini}`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.DEFAULT_ENDPOINTS.GEMINI}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -89,11 +89,24 @@ export async function sendMultimodalRequest(
 /**
  * Convert chat messages to Gemini format
  */
-export function convertToGeminiMessages(messages: Array<{ role: string; content: string }>): Array<{ role: string; content: string }> {
-  return messages.map(msg => ({
+export function convertToGeminiMessages(
+  messages: Array<{ role: string; content: string }>, 
+  systemPrompt?: string
+): Array<{ role: string; content: string }> {
+  const result = messages.map(msg => ({
     role: msg.role === 'user' ? 'user' : msg.role === 'assistant' ? 'model' : 'system',
     content: msg.content
   }));
+  
+  // Add system prompt if provided
+  if (systemPrompt) {
+    result.unshift({
+      role: 'system',
+      content: systemPrompt
+    });
+  }
+  
+  return result;
 }
 
 // Default configuration

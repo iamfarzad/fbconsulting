@@ -1,7 +1,15 @@
 
 import { useState } from 'react';
-import { sendGeminiChatRequest, convertToGeminiMessages, GeminiConfig } from '@/services/gemini';
+import { sendGeminiChatRequest, convertToGeminiMessages } from '@/services/gemini';
 import { AIMessage } from '@/services/chat/messageTypes';
+
+interface GeminiConfig {
+  apiKey: string;
+  model?: string;
+  maxTokens?: number;
+  temperature?: number;
+  safetySettings?: any[];
+}
 
 interface UseMessageHandlerProps {
   messages: AIMessage[];

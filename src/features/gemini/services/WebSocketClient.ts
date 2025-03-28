@@ -2,7 +2,7 @@
 import { API_CONFIG } from '@/config/api';
 import { formatErrorMessage } from '@/utils/errorHandling';
 import { v4 as uuidv4 } from 'uuid';
-import { WebSocketClientOptions, WebSocketMessage } from '../types/websocketTypes';
+import { WebSocketClientOptions, WebSocketMessage, AudioChunkInfo } from '../types/websocketTypes';
 
 export class WebSocketClient {
   private ws: WebSocket | null = null;
@@ -13,18 +13,19 @@ export class WebSocketClient {
   private connectionTimeout: number | null = null;
   private clientId: string;
 
-  constructor(options: WebSocketClientOptions = {}) {
+  constructor(options: WebSocketClientOptions) {
     this.options = {
+      url: API_CONFIG.WS_BASE_URL + '/ws/',
       autoReconnect: true,
       debug: false,
       ...options
     };
     
-    // Generate a unique client ID for this connection
-    this.clientId = uuidv4();
+    // Generate a unique client ID for this connection if not provided
+    this.clientId = this.options.clientId || uuidv4();
     
     // Construct the full WebSocket URL with client ID
-    this.url = `${API_CONFIG.WS_BASE_URL}/ws/${this.clientId}`;
+    this.url = `${this.options.url}${this.clientId}`;
     
     if (this.options.debug) {
       console.log(`WebSocketClient created with client ID: ${this.clientId}`);
@@ -97,8 +98,13 @@ export class WebSocketClient {
             if (this.options.onAudioChunk) {
               // Convert Blob to ArrayBuffer and pass to handler
               event.data.arrayBuffer().then(buffer => {
+                const audioInfo: AudioChunkInfo = {
+                  size: buffer.byteLength,
+                  format: 'mp3' // Default format
+                };
+                
                 if (this.options.onAudioChunk) {
-                  this.options.onAudioChunk(buffer);
+                  this.options.onAudioChunk(audioInfo, buffer);
                 }
               });
             }
@@ -136,12 +142,12 @@ export class WebSocketClient {
           this.options.onClose();
         }
         
-        if (this.options.autoReconnect && this.reconnectAttempts < API_CONFIG.WEBSOCKET.RECONNECT_ATTEMPTS) {
+        if (this.options.autoReconnect && this.reconnectAttempts < (this.options.reconnectAttempts || API_CONFIG.WEBSOCKET.RECONNECT_ATTEMPTS)) {
           this.reconnectAttempts++;
           const delay = API_CONFIG.WEBSOCKET.RECONNECT_INTERVAL * Math.pow(2, this.reconnectAttempts - 1);
           
           if (this.options.debug) {
-            console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${API_CONFIG.WEBSOCKET.RECONNECT_ATTEMPTS})`);
+            console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.options.reconnectAttempts || API_CONFIG.WEBSOCKET.RECONNECT_ATTEMPTS})`);
           }
           
           setTimeout(() => this.connect(), delay);
@@ -195,11 +201,13 @@ export class WebSocketClient {
       clearInterval(this.pingInterval);
     }
     
+    const pingIntervalMs = this.options.pingInterval || API_CONFIG.WEBSOCKET.PING_INTERVAL;
+    
     this.pingInterval = window.setInterval(() => {
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
         this.send({ type: 'ping' });
       }
-    }, API_CONFIG.WEBSOCKET.PING_INTERVAL);
+    }, pingIntervalMs);
   }
 
   isConnected(): boolean {
