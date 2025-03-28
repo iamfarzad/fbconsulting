@@ -1,16 +1,20 @@
 
-// Removed: import React from 'react';
+import React from 'react';
+import { AlertCircle } from 'lucide-react';
 
 interface ErrorDisplayProps {
   error: string;
 }
 
-export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error }) => {
+const ErrorDisplay: React.FC<ErrorDisplayProps> = ({ error }) => {
   return (
-    <div className="p-4 bg-destructive/10 rounded-lg text-destructive text-sm">
-      <p className="font-medium">Error initializing AI Assistant</p>
-      <p className="mt-1">{error}</p>
-      <p className="mt-2 text-xs">Please check your API key configuration.</p>
+    <div className="p-4 bg-destructive/10 border-t border-destructive">
+      <div className="flex items-start space-x-2">
+        <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
+        <p className="text-sm text-destructive">{error}</p>
+      </div>
     </div>
   );
 };
+
+export default ErrorDisplay;

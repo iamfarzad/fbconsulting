@@ -1,82 +1,95 @@
-import React, { useEffect, useRef } from 'react';
-import { Box, Text, Avatar, Flex } from '@chakra-ui/react';
-import ReactMarkdown from 'react-markdown';
-import { ChatMessage } from '../../../types/chat';
-import { formatDistanceToNow } from 'date-fns';
+
+import React from 'react';
+import { AIMessage } from '@/services/chat/messageTypes';
+import { Loader2 } from 'lucide-react';
 
 interface ChatMessagesProps {
-  messages: ChatMessage[];
+  messages: AIMessage[];
+  isLoading?: boolean;
+  isProviderLoading?: boolean;
+  isListening?: boolean;
+  transcript?: string;
+  error?: string | null;
+  messagesEndRef?: React.RefObject<HTMLDivElement>;
+  isInitialized?: boolean;
 }
 
-const ChatMessages: React.FC<ChatMessagesProps> = ({ messages }) => {
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+const ChatMessages: React.FC<ChatMessagesProps> = ({
+  messages,
+  isLoading = false,
+  isProviderLoading = false,
+  isListening = false,
+  transcript = '',
+  error = null,
+  messagesEndRef,
+  isInitialized = true
+}) => {
+  // If there are no messages and the provider is still loading, show a loading state
+  if (messages.length === 0 && isProviderLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-4">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mb-4" />
+        <p className="text-sm text-muted-foreground">Initializing AI assistant...</p>
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    // Auto-scroll to the bottom when messages change
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  // Ensure messages is always treated as an array
-  const safeMessages = Array.isArray(messages) ? messages : [];
+  // If there are no messages and there's no error, show a welcome message
+  if (messages.length === 0 && !error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full p-4 text-center">
+        <h3 className="text-lg font-medium mb-2">Welcome to the AI Assistant</h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          How can I help you today?
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <Box>
-      {safeMessages.map((message, index) => {
-        const isUser = message.role === 'user';
-        const timestamp = message.timestamp 
-          ? formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })
-          : '';
-        
-        return (
-          <Box 
-            key={index}
-            mb={4}
-            ml={isUser ? 'auto' : 0}
-            mr={!isUser ? 'auto' : 0}
-            maxW="80%"
+    <div className="space-y-4 p-4">
+      {/* Display all messages */}
+      {messages.map((message, index) => (
+        <div
+          key={index}
+          className={`flex ${
+            message.role === 'user' ? 'justify-end' : 'justify-start'
+          }`}
+        >
+          <div
+            className={`px-4 py-2 rounded-lg max-w-[80%] ${
+              message.role === 'user'
+                ? 'bg-primary text-primary-foreground'
+                : message.role === 'system'
+                ? 'bg-muted text-muted-foreground'
+                : 'bg-secondary text-secondary-foreground'
+            }`}
           >
-            <Flex 
-              direction={isUser ? 'row-reverse' : 'row'}
-              alignItems="flex-start"
-            >
-              <Avatar 
-                size="sm" 
-                name={isUser ? 'User' : 'AI'} 
-                bg={isUser ? 'blue.500' : 'green.500'} 
-                color="white"
-                mr={isUser ? 0 : 2}
-                ml={isUser ? 2 : 0}
-              />
-              <Box>
-                <Box
-                  bg={isUser ? 'blue.50' : 'gray.50'}
-                  p={3}
-                  borderRadius="lg"
-                  boxShadow="sm"
-                >
-                  {isUser ? (
-                    <Text>{message.content}</Text>
-                  ) : (
-                    <Box className="markdown-content">
-                      <ReactMarkdown>{message.content}</ReactMarkdown>
-                    </Box>
-                  )}
-                </Box>
-                <Text 
-                  fontSize="xs" 
-                  color="gray.500" 
-                  textAlign={isUser ? 'right' : 'left'}
-                  mt={1}
-                >
-                  {timestamp}
-                </Text>
-              </Box>
-            </Flex>
-          </Box>
-        );
-      })}
+            {message.content}
+          </div>
+        </div>
+      ))}
+
+      {/* Show loading indicator */}
+      {isLoading && (
+        <div className="flex justify-center py-2">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        </div>
+      )}
+
+      {/* Show listening indicator */}
+      {isListening && (
+        <div className="flex justify-center py-2">
+          <div className="bg-secondary p-3 rounded-lg max-w-[80%]">
+            <p className="text-sm font-medium mb-1">Listening...</p>
+            {transcript && <p className="text-sm italic">{transcript}</p>}
+          </div>
+        </div>
+      )}
+
+      {/* Messages end reference for scrolling */}
       <div ref={messagesEndRef} />
-    </Box>
+    </div>
   );
 };
 

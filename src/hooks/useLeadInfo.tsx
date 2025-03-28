@@ -41,7 +41,7 @@ export function useLeadInfo(messages: AIMessage[] = []) {
       
       // Only update state if something changed
       if (
-        updatedInfo.interests.length !== leadInfo.interests.length ||
+        updatedInfo.interests?.length !== leadInfo.interests?.length ||
         updatedInfo.stage !== leadInfo.stage
       ) {
         setLeadInfo(updatedInfo);
