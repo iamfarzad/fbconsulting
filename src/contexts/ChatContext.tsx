@@ -1,63 +1,29 @@
 
-import React, { createContext, useContext, useRef, useState, useReducer } from 'react';
-import { AIMessage } from '@/services/chat/messageTypes';
-import { useGeminiChat } from '@/hooks/useGeminiChat';
-import { useToast } from '@/hooks/use-toast';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useWebSocketChat } from '@/features/gemini/hooks/useWebSocketChat';
+import { AIMessage } from '@/features/gemini/types/messageTypes';
 
-export interface ChatState {
-  messages: AIMessage[];
-  inputValue: string;
-  isLoading: boolean;
-  showMessages: boolean;
-  isInitialized: boolean;
-  isFullScreen: boolean;
-}
-
-export interface ChatContextType {
-  state: ChatState;
-  dispatch: React.Dispatch<any>;
-  sendMessage: (text: string, files?: any[]) => void;
-  clearMessages: () => void;
-  toggleFullScreen: () => void;
-  containerRef: React.RefObject<HTMLDivElement>;
+interface ChatContextType {
+  state: {
+    messages: AIMessage[];
+    isLoading: boolean;
+    isConnected: boolean;
+    isInitialized: boolean;
+    isAudioPlaying: boolean;
+    audioProgress: number;
+  };
+  actions: {
+    sendMessage: (content: string) => Promise<void>;
+    clearMessages: () => void;
+    connect: () => void;
+    disconnect: () => void;
+    stopAudio: () => void;
+  };
   error: string | null;
+  clientId: string;
 }
 
-interface ChatProviderProps {
-  children: React.ReactNode;
-  apiKey?: string;
-  modelName?: string;
-}
-
-const initialState: ChatState = {
-  messages: [],
-  inputValue: '',
-  isLoading: false,
-  showMessages: false,
-  isInitialized: false,
-  isFullScreen: false
-};
-
-function chatReducer(state: ChatState, action: any) {
-  switch (action.type) {
-    case 'SET_INPUT_VALUE':
-      return { ...state, inputValue: action.payload };
-    case 'TOGGLE_FULLSCREEN':
-      return { ...state, isFullScreen: !state.isFullScreen };
-    case 'SET_MESSAGES':
-      return { ...state, messages: action.payload };
-    case 'SET_LOADING':
-      return { ...state, isLoading: action.payload };
-    case 'SET_SHOW_MESSAGES':
-      return { ...state, showMessages: action.payload };
-    case 'SET_INITIALIZED':
-      return { ...state, isInitialized: action.payload };
-    default:
-      return state;
-  }
-}
-
-const ChatContext = createContext<ChatContextType | null>(null);
+const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export const useChat = () => {
   const context = useContext(ChatContext);
@@ -67,90 +33,51 @@ export const useChat = () => {
   return context;
 };
 
-export const ChatProvider: React.FC<ChatProviderProps> = ({ 
-  children,
-  apiKey,
-  modelName
-}) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [state, dispatch] = useReducer(chatReducer, initialState);
-  const { toast } = useToast();
+export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [isInitialized, setIsInitialized] = useState(false);
   
   const {
     messages,
-    inputValue,
     isLoading,
     isConnected,
+    isConnecting,
+    isAudioPlaying,
+    audioProgress,
     error,
-    setInputValue,
-    sendMessage: geminiSendMessage,
-    clearMessages: geminiClearMessages,
-    connect
-  } = useGeminiChat({
-    autoConnect: true,
-    enableTTS: true,
-    apiKey,
-    modelName
-  });
-
-  // Update state when messages change
-  React.useEffect(() => {
-    dispatch({ type: 'SET_MESSAGES', payload: messages });
-  }, [messages]);
-
-  // Update state when loading changes
-  React.useEffect(() => {
-    dispatch({ type: 'SET_LOADING', payload: isLoading });
-  }, [isLoading]);
-
-  // Update state when connection status changes
-  React.useEffect(() => {
-    dispatch({ type: 'SET_INITIALIZED', payload: isConnected });
-    dispatch({ type: 'SET_SHOW_MESSAGES', payload: isConnected });
-  }, [isConnected]);
-
-  // Send a message
-  const sendMessage = (text: string, files: any[] = []) => {
-    if (!text.trim() && (!files || files.length === 0)) {
-      toast({
-        title: "Message is empty",
-        description: "Please enter a message before sending.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    geminiSendMessage(text);
-    dispatch({ type: 'SET_INPUT_VALUE', payload: '' });
-    dispatch({ type: 'SET_SHOW_MESSAGES', payload: true });
-  };
-
-  // Clear messages
-  const clearMessages = () => {
-    geminiClearMessages();
-    toast({
-      title: "Chat cleared",
-      description: "All messages have been removed.",
-    });
-  };
-
-  // Toggle fullscreen mode
-  const toggleFullScreen = () => {
-    dispatch({ type: 'TOGGLE_FULLSCREEN' });
-  };
-
-  const value = {
-    state,
-    dispatch,
+    clientId,
+    connect,
+    disconnect,
     sendMessage,
     clearMessages,
-    toggleFullScreen,
-    containerRef,
-    error
+    stopAudio
+  } = useWebSocketChat();
+
+  // Set initialized after connection attempt
+  useEffect(() => {
+    if (isConnected || (!isConnecting && error)) {
+      setIsInitialized(true);
+    }
+  }, [isConnected, isConnecting, error]);
+
+  const state = {
+    messages,
+    isLoading,
+    isConnected,
+    isInitialized,
+    isAudioPlaying,
+    audioProgress
+  };
+
+  const actions = {
+    sendMessage,
+    clearMessages,
+    connect,
+    disconnect,
+    stopAudio
   };
 
   return (
-    <ChatContext.Provider value={value}>
+    <ChatContext.Provider value={{ state, actions, error, clientId }}>
       {children}
     </ChatContext.Provider>
   );
