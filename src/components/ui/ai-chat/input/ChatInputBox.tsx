@@ -1,9 +1,13 @@
 
-import React from 'react';
-import { cn } from '@/lib/utils';
+import React, { useEffect } from 'react';
 
-interface ChatInputBoxProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  textareaRef?: React.RefObject<HTMLTextAreaElement>;
+interface ChatInputBoxProps {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  placeholder: string;
+  disabled?: boolean;
+  textareaRef: React.RefObject<HTMLTextAreaElement>;
 }
 
 export const ChatInputBox: React.FC<ChatInputBoxProps> = ({
@@ -11,27 +15,35 @@ export const ChatInputBox: React.FC<ChatInputBoxProps> = ({
   onChange,
   onKeyDown,
   placeholder,
-  disabled,
-  className,
-  textareaRef,
-  ...props
+  disabled = false,
+  textareaRef
 }) => {
+  // Auto-resize textarea based on content
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    
+    // Reset height to auto to get the correct scrollHeight
+    textarea.style.height = 'auto';
+    // Set the height to scrollHeight to fit content
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [value, textareaRef]);
+
   return (
-    <textarea
-      ref={textareaRef}
-      value={value}
-      onChange={onChange}
-      onKeyDown={onKeyDown}
-      placeholder={placeholder}
-      disabled={disabled}
-      className={cn(
-        "flex-1 resize-none border-0 bg-transparent p-3 focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 min-h-[60px] max-h-[200px]",
-        className
-      )}
-      rows={1}
-      {...props}
-    />
+    <div className="relative">
+      <textarea
+        ref={textareaRef}
+        value={value}
+        onChange={onChange}
+        onKeyDown={onKeyDown}
+        placeholder={placeholder}
+        disabled={disabled}
+        rows={1}
+        className="w-full py-3 px-4 resize-none max-h-60 bg-transparent border-0 focus:ring-0 focus:outline-none text-foreground placeholder:text-muted-foreground/70 disabled:opacity-50"
+        style={{ 
+          overflowY: 'auto'
+        }}
+      />
+    </div>
   );
 };
-
-export default ChatInputBox;

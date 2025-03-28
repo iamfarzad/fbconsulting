@@ -1,7 +1,8 @@
+
 import React, { useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot } from "lucide-react";
-import { AIMessage } from "@/features/gemini/types/messageTypes";
+import { AIMessage } from "@/services/chat/messageTypes";
 import { TypingIndicator } from "./TypingIndicator";
 
 interface ChatMessageProps {
