@@ -1,8 +1,9 @@
 
-import React, { useRef } from 'react';
-import { Send, Mic, Image, X, MessageSquare, File } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React from 'react';
+import { Mic, Image, Paperclip, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { SendButton } from '../SendButton';
+import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ChatInputActionsProps {
@@ -12,6 +13,7 @@ interface ChatInputActionsProps {
   hasContent: boolean;
   isLoading: boolean;
   isListening: boolean;
+  aiProcessing?: boolean;
   toggleListening: () => void;
   isVoiceSupported: boolean;
   onClearChat: () => void;
@@ -20,7 +22,7 @@ interface ChatInputActionsProps {
   onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   hasMessages: boolean;
-  aiProcessing?: boolean;
+  className?: string;
 }
 
 export const ChatInputActions: React.FC<ChatInputActionsProps> = ({
@@ -30,6 +32,7 @@ export const ChatInputActions: React.FC<ChatInputActionsProps> = ({
   hasContent,
   isLoading,
   isListening,
+  aiProcessing = false,
   toggleListening,
   isVoiceSupported,
   onClearChat,
@@ -38,172 +41,159 @@ export const ChatInputActions: React.FC<ChatInputActionsProps> = ({
   onImageUpload,
   onFileUpload,
   hasMessages,
-  aiProcessing = false
+  className
 }) => {
-  const imageInputRef = useRef<HTMLInputElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  const handleImageClick = () => {
-    if (imageInputRef.current) {
-      imageInputRef.current.click();
-    }
-  };
-  
-  const handleFileClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-  
   return (
-    <div className="flex items-center gap-1 p-2">
-      {/* Suggested Response */}
-      {suggestedResponse && (
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          onClick={onSuggestionClick}
-          className="mr-auto text-xs flex items-center gap-1 bg-muted/50"
-        >
-          <MessageSquare className="h-3 w-3" />
-          <span className="truncate max-w-[120px]">{suggestedResponse}</span>
-        </Button>
-      )}
-      
-      <div className="ml-auto flex items-center gap-1">
-        {/* Media Upload */}
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                onClick={() => setShowMediaUpload(!showMediaUpload)}
-                className="h-8 w-8"
-                disabled={isLoading || isListening}
-              >
-                {showMediaUpload ? (
-                  <X className="h-4 w-4" />
-                ) : (
-                  <Image className="h-4 w-4" />
-                )}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              {showMediaUpload ? 'Cancel' : 'Add media'}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-        
-        {showMediaUpload && (
-          <>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    onClick={handleImageClick}
-                    className="h-8 w-8"
-                    disabled={isLoading || isListening}
-                  >
-                    <Image className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  Upload image
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    onClick={handleFileClick}
-                    className="h-8 w-8"
-                    disabled={isLoading || isListening}
-                  >
-                    <File className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="top">
-                  Upload document
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            
-            <input
-              ref={imageInputRef}
-              type="file"
-              accept="image/*"
-              onChange={onImageUpload}
-              className="hidden"
-            />
-            
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,.doc,.docx,.txt"
-              onChange={onFileUpload}
-              className="hidden"
-            />
-          </>
+    <div className={cn("flex items-center justify-between p-2", className)}>
+      {/* Left side actions */}
+      <div className="flex items-center gap-1">
+        {suggestedResponse && (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={onSuggestionClick}
+            className="text-xs py-1 h-7 mr-1"
+          >
+            {suggestedResponse.length > 30
+              ? `${suggestedResponse.substring(0, 30)}...`
+              : suggestedResponse}
+          </Button>
         )}
         
-        {/* Voice Button */}
+        {/* Voice button */}
         {isVoiceSupported && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  type="button"
                   size="icon"
                   variant="ghost"
-                  onClick={toggleListening}
-                  disabled={isLoading || aiProcessing}
                   className={cn(
                     "h-8 w-8",
-                    isListening && "text-red-500"
+                    isListening && "text-destructive"
                   )}
+                  onClick={toggleListening}
+                  disabled={isLoading || aiProcessing}
                 >
-                  <Mic className={cn("h-4 w-4", isListening && "animate-pulse")} />
+                  <Mic className="h-4 w-4" />
+                  <span className="sr-only">
+                    {isListening ? "Stop recording" : "Start recording"}
+                  </span>
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="top">
-                {isListening ? 'Stop listening' : 'Voice input'}
+                {isListening ? "Stop recording" : "Voice input"}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         )}
-        
-        {/* Send Button */}
+
+        {/* Media upload toggle */}
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                type="button"
                 size="icon"
                 variant="ghost"
-                onClick={onSend}
-                disabled={isLoading || !hasContent}
-                className="h-8 w-8 text-primary"
+                className="h-8 w-8"
+                onClick={() => setShowMediaUpload(!showMediaUpload)}
+                disabled={isLoading || isListening}
               >
-                <Send className="h-4 w-4" />
+                <Paperclip className="h-4 w-4" />
+                <span className="sr-only">Attach files</span>
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="top">
-              Send message
-            </TooltipContent>
+            <TooltipContent side="top">Attach files</TooltipContent>
           </Tooltip>
         </TooltipProvider>
+
+        {/* Image upload input */}
+        {showMediaUpload && (
+          <>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <label
+                    htmlFor="image-upload"
+                    className={cn(
+                      "flex h-8 w-8 items-center justify-center rounded-md text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
+                      isLoading && "cursor-not-allowed opacity-50"
+                    )}
+                  >
+                    <Image className="h-4 w-4" />
+                    <span className="sr-only">Upload image</span>
+                    <input
+                      id="image-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={onImageUpload}
+                      disabled={isLoading || isListening}
+                    />
+                  </label>
+                </TooltipTrigger>
+                <TooltipContent side="top">Upload image</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            {/* Document upload input */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <label
+                    htmlFor="file-upload"
+                    className={cn(
+                      "flex h-8 w-8 items-center justify-center rounded-md text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
+                      isLoading && "cursor-not-allowed opacity-50"
+                    )}
+                  >
+                    <Paperclip className="h-4 w-4" />
+                    <span className="sr-only">Upload file</span>
+                    <input
+                      id="file-upload"
+                      type="file"
+                      className="hidden"
+                      onChange={onFileUpload}
+                      disabled={isLoading || isListening}
+                    />
+                  </label>
+                </TooltipTrigger>
+                <TooltipContent side="top">Upload file</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </>
+        )}
+
+        {/* Clear chat */}
+        {hasMessages && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8"
+                  onClick={onClearChat}
+                  disabled={isLoading || isListening}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span className="sr-only">Clear chat</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="top">Clear chat</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
       </div>
+
+      {/* Send button */}
+      <SendButton
+        hasContent={hasContent}
+        isLoading={isLoading}
+        aiProcessing={aiProcessing}
+        disabled={isListening}
+        onClick={onSend}
+      />
     </div>
   );
 };

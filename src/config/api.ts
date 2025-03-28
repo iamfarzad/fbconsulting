@@ -20,7 +20,10 @@ export const API_CONFIG = {
     DEFAULT_PATH: '/ws',
     DEFAULT_PROTOCOL: 'gemini-protocol',
     PING_MESSAGE: { type: 'ping' },
-    TIMEOUT: 30000 // 30 seconds
+    TIMEOUT: 30000, // 30 seconds
+    RECONNECT_ATTEMPTS: 5, // Max reconnection attempts
+    RECONNECT_INTERVAL: 5000, // 5 seconds between reconnection attempts
+    PING_INTERVAL: 30000 // 30 seconds ping interval
   },
   HEALTH_CHECK: {
     ENDPOINT: '/health',
