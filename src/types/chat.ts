@@ -1,20 +1,25 @@
 
-import { ReactNode, RefObject } from 'react';
-
+// Basic chat types
 export interface AIMessage {
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
   timestamp: number;
   id?: string;
-  mediaItems?: Array<{
-    type: string;
-    data: string;
-    mimeType?: string;
-  }>;
 }
 
-export interface ChatInputProps {
-  placeholder?: string;
+export interface ChatMessage {
+  id: string;
+  content: string;
+  sender: 'user' | 'ai';
+  timestamp?: number;
+}
+
+export interface ConnectionStatusIndicatorProps {
+  isConnected?: boolean;
+  isLoading?: boolean;
+  className?: string;
+  status?: 'connected' | 'connecting' | 'disconnected';
+  onRetry?: () => void;
 }
 
 export interface ChatMessageListProps {
@@ -22,6 +27,11 @@ export interface ChatMessageListProps {
   showMessages?: boolean;
   isFullScreen?: boolean;
   isLoading?: boolean;
+}
+
+export interface ChatInputProps {
+  placeholder?: string;
+  disabled?: boolean;
 }
 
 export interface UnifiedChatProps {
@@ -40,54 +50,3 @@ export interface UnifiedFullScreenChatProps {
   apiKey?: string;
   modelName?: string;
 }
-
-export interface ChatProviderProps {
-  children: ReactNode;
-  apiKey?: string;
-  modelName?: string;
-}
-
-export interface ConnectionStatusIndicatorProps {
-  isConnected: boolean;
-  isLoading?: boolean;
-  className?: string;
-  status?: 'connected' | 'connecting' | 'disconnected';
-  onRetry?: () => void;
-}
-
-export interface ChatHeaderProps {
-  title?: string;
-  subtitle?: string;
-  onClose?: () => void;
-  onClear?: () => void;
-  hasMessages?: boolean;
-  onToggleFullScreen?: () => void;
-  isFullScreen?: boolean;
-  isConnected?: boolean;
-  isLoading?: boolean;
-}
-
-export interface UnifiedVoiceUIProps {
-  onCommand?: (command: string) => void | Promise<void>;
-  noFloatingButton?: boolean;
-  onVoiceStart?: () => void;
-  onVoiceEnd?: () => void;
-}
-
-// Voice related types
-export interface VoiceUIProps {
-  onCommand?: (command: string) => void | Promise<void>;
-  noFloatingButton?: boolean;
-}
-
-// Lead stage type definition
-export type LeadStage = 
-  'initial' | 
-  'discovery' | 
-  'evaluation' | 
-  'decision' | 
-  'implementation' | 
-  'retention' |
-  'qualification' | 
-  'interested' | 
-  'ready-to-book';

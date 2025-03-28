@@ -1,12 +1,13 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { ChatHeader } from './chat/ChatHeader';
-import { ChatMessages } from './chat/ChatMessages';
-import { ChatInputArea } from './chat/ChatInputArea';
-import { ErrorDisplay } from './chat/ErrorDisplay';
+import ChatHeader from './chat/ChatHeader';
+import ChatMessages from './chat/ChatMessages';
+import ChatInputArea from './chat/ChatInputArea';
+import ErrorDisplay from './chat/ErrorDisplay';
 import { AIMessage } from '@/services/chat/messageTypes';
 import { useGeminiAPI } from '@/hooks/useGeminiAPI';
 import { useMessageHandler } from '@/hooks/chat/useMessageHandler';
