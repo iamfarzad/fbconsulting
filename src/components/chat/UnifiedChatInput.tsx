@@ -1,167 +1,101 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { cn } from '@/lib/utils';
 import { useChat } from '@/contexts/ChatContext';
-import { useVoiceInput } from '@/hooks/useVoiceInput';
-import { useAutoResizeTextarea } from '@/hooks/useAutoResizeTextarea';
-import { FileAttachment } from '@/services/chat/types';
-
-// Import our new components
-import { ChatInputBox } from './input/ChatInputBox';
-import { MediaPreview } from './input/MediaPreview';
-import { TranscriptDisplay } from './input/TranscriptDisplay';
-import { ChatInputActions } from './input/ChatInputActions';
+import { cn } from '@/lib/utils';
+import { TranscriptDisplay } from './TranscriptDisplay';
+import { ChatInputBox } from './ChatInputBox';
+import { MediaPreview } from './MediaPreview';
+import { ChatInputActions } from './ChatInputActions';
 
 interface UnifiedChatInputProps {
   placeholder?: string;
   className?: string;
-  onVoiceStart?: () => void;
-  onVoiceEnd?: () => void;
 }
 
 export const UnifiedChatInput: React.FC<UnifiedChatInputProps> = ({
-  placeholder = 'Ask me anything...',
-  className = '',
-  onVoiceStart,
-  onVoiceEnd
+  placeholder = 'Type your message...',
+  className
 }) => {
-  const { 
-    state, 
-    dispatch, 
-    sendMessage,
-    clearMessages,
-    addMediaItem,
-    removeMediaItem
-  } = useChat();
+  const { state, dispatch, sendMessage } = useChat();
+  const { inputValue, isLoading, messages } = state;
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   
-  const { 
-    inputValue, 
-    isLoading, 
-    suggestedResponse,
-    showMessages,
-    messages,
-    mediaItems
-  } = state;
-  
-  // Textarea auto-resize
-  const {
-    textareaRef,
-    adjustHeight
-  } = useAutoResizeTextarea({
-    minHeight: 60,
-    maxHeight: 200
-  });
-  
-  // Voice input
-  const {
-    isListening,
-    transcript,
-    toggleListening,
-    voiceError,
-    aiProcessing,
-    isVoiceSupported
-  } = useVoiceInput(
-    (value) => dispatch({ type: 'SET_INPUT_VALUE', payload: value }), 
-    () => handleSend(),
-    {
-      autoStop: true,
-      stopAfterSeconds: 10,
-      continuousListening: false
-    }
-  );
-  
-  // Call onVoiceStart/onVoiceEnd callbacks when listening state changes
-  useEffect(() => {
-    if (isListening && onVoiceStart) {
-      onVoiceStart();
-    } else if (!isListening && onVoiceEnd) {
-      onVoiceEnd();
-    }
-  }, [isListening, onVoiceStart, onVoiceEnd]);
-  
-  // Update textarea height when input value changes
-  useEffect(() => {
-    adjustHeight();
-  }, [inputValue, adjustHeight]);
-  
-  // Media upload toggle
+  // State for enhanced features
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState('');
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const [mediaItems, setMediaItems] = useState<any[]>([]);
   const [showMediaUpload, setShowMediaUpload] = useState(false);
-  
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const [suggestedResponse, setSuggestedResponse] = useState<string | null>(null);
+  const [isVoiceSupported] = useState(() => 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
+  const [aiProcessing, setAiProcessing] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputValue.trim() && mediaItems.length === 0 || isLoading) return;
+
+    try {
+      setAiProcessing(true);
+      await sendMessage(inputValue, mediaItems);
+      dispatch({ type: 'SET_INPUT_VALUE', payload: '' });
+      setMediaItems([]);
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to send message' });
+    } finally {
+      setAiProcessing(false);
+    }
+  };
+
+  const handleChange = (value: string) => {
+    dispatch({ type: 'SET_INPUT_VALUE', payload: value });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if (inputValue.trim() && !isLoading) {
-        handleSend();
-      }
+      handleSubmit(e);
     }
   };
-  
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    dispatch({ type: 'SET_INPUT_VALUE', payload: e.target.value });
-    adjustHeight();
+
+  const toggleListening = () => {
+    setIsListening(prev => !prev);
   };
-  
+
+  const handleSuggestionClick = (suggestion: string) => {
+    dispatch({ type: 'SET_INPUT_VALUE', payload: suggestion });
+  };
+
   const handleSend = () => {
-    if (isLoading) return;
-    if (!inputValue.trim() && mediaItems.length === 0) return;
-    
-    // Convert mediaItems to FileAttachment format
-    const files: FileAttachment[] = mediaItems.map(item => ({
-      mimeType: item.mimeType || '',
-      data: item.data,
-      name: item.name || 'file',
-      type: item.type
+    const event = { preventDefault: () => {} } as React.FormEvent;
+    handleSubmit(event);
+  };
+
+  const clearMessages = () => {
+    dispatch({ type: 'CLEAR_MESSAGES' });
+  };
+
+  const handleImageUpload = (files: File[]) => {
+    const newMediaItems = files.map(file => ({
+      type: 'image',
+      file,
+      preview: URL.createObjectURL(file)
     }));
-    
-    sendMessage(inputValue, files);
+    setMediaItems(prev => [...prev, ...newMediaItems]);
   };
-  
-  const handleSuggestionClick = () => {
-    if (suggestedResponse) {
-      dispatch({ type: 'SET_INPUT_VALUE', payload: suggestedResponse });
-      adjustHeight();
-    }
+
+  const handleFileUpload = (files: File[]) => {
+    const newMediaItems = files.map(file => ({
+      type: 'file',
+      file,
+      name: file.name
+    }));
+    setMediaItems(prev => [...prev, ...newMediaItems]);
   };
-  
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = () => {
-      const data = reader.result as string;
-      addMediaItem({
-        type: 'image',
-        data,
-        mimeType: file.type,
-        name: file.name
-      });
-    };
-    reader.readAsDataURL(file);
-    
-    // Reset the input
-    e.target.value = '';
+
+  const removeMediaItem = (index: number) => {
+    setMediaItems(prev => prev.filter((_, i) => i !== index));
   };
-  
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    const reader = new FileReader();
-    reader.onload = () => {
-      const data = reader.result as string;
-      addMediaItem({
-        type: 'file',
-        data,
-        mimeType: file.type,
-        name: file.name
-      });
-    };
-    reader.readAsDataURL(file);
-    
-    // Reset the input
-    e.target.value = '';
-  };
-  
+
   return (
     <div className={cn('w-full', className)}>
       {/* Voice transcription display */}

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React from "react";
 
 interface ConnectionStatusIndicatorProps {
@@ -34,6 +35,19 @@ const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({ s
   return (
     <div className={`text-sm font-medium ${getColor(status)}`}>
       {getLabel(status)}
+=======
+import React, { useContext } from 'react';
+import { useGeminiConnectionManager } from '@/components/copilot/GeminiCopilotProvider';
+
+const ConnectionStatusIndicator: React.FC = () => {
+  const { isListening, voiceError, isPlaying, progress } = useGeminiConnectionManager();
+
+  return (
+    <div className="fixed bottom-4 right-4 p-2 bg-white shadow-lg rounded-lg">
+      <p>Status: {isListening ? 'Listening' : 'Idle'}</p>
+      {voiceError && <p className="text-red-500">Error: {voiceError}</p>}
+      {isPlaying && <p>Playing audio... {progress}%</p>}
+>>>>>>> 26c4008dd833320798c0e713e430a18c4e2be7ae
     </div>
   );
 };

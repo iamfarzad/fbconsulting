@@ -27,7 +27,7 @@
     "sourceMap": true,
     "outDir": "./dist",
     "removeComments": false,
-    "importsNotUsedAsValues": "error",
+    "verbatimModuleSyntax": true,
 
     /* Interop Constraints */
     "isolatedModules": true,

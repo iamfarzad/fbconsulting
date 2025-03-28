@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react-swc';
 import tsconfigPaths from 'vite-tsconfig-paths';
@@ -34,9 +35,24 @@ export default defineConfig({
       statements: 80,
     },
   },
+=======
+/// <reference types="vitest" />
+import { defineConfig } from 'vitest/config';
+import path from 'path';
+import react from '@vitejs/plugin-react-swc';
+
+export default defineConfig({
+  plugins: [react()],
+>>>>>>> 26c4008dd833320798c0e713e430a18c4e2be7ae
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
     },
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    include: ['src/**/*.{test,spec}.{js,ts,jsx,tsx}'],
   },
 });

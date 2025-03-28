@@ -1,51 +1,66 @@
-import { useGeminiMessageSubmission, useGeminiInitialization } from '@/features/gemini';
-import { useState, useEffect } from 'react';
-import { Message } from '@/features/gemini/types';
+import React from 'react';
+import { useChat } from '@/contexts/ChatContext';
+import { Avatar } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
+import type { Message } from '@/features/gemini/types';
 
-export function UnifiedChatMessageList() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const { submitMessage } = useGeminiMessageSubmission();
-  const { isReady } = useGeminiInitialization();
+interface AIMessage extends Message {
+  id?: string;
+}
 
-  useEffect(() => {
-    if (!isReady) return;
-    
-    // Initial setup if needed
-    console.log('Gemini chat initialized');
-  }, [isReady]);
+export const UnifiedChatMessageList = () => {
+  const { state } = useChat();
+  const { messages, isLoading } = state;
 
-  const handleNewMessage = async (content: string) => {
-    const newMessage: Message = {
-      role: 'user',
-      content,
-      timestamp: new Date().toISOString()
-    };
-    
-    setMessages(prev => [...prev, newMessage]);
-    
-    const response = await submitMessage(content);
-    
-    const assistantMessage: Message = {
-      role: 'assistant',
-      content: response,
-      timestamp: new Date().toISOString()
-    };
-    
-    setMessages(prev => [...prev, assistantMessage]);
-  };
+  if (!Array.isArray(messages)) {
+    return (
+      <div className="text-center text-red-500">
+        Invalid messages format. Please try again.
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col gap-4">
-      {messages.map((message, index) => (
-        <div
-          key={index}
-          className={`p-4 rounded-lg ${
-            message.role === 'user' ? 'bg-blue-100 ml-auto' : 'bg-gray-100'
-          }`}
-        >
-          {message.content}
-        </div>
-      ))}
+    <div className="space-y-4">
+      {messages.map((message: AIMessage, index) => {
+        const isUser = message.role === 'user';
+        const isLastMessage = index === messages.length - 1;
+        
+        return (
+          <div
+            key={message.id || `${message.role}-${index}`}
+            className={cn(
+              'flex w-full',
+              isUser ? 'justify-end' : 'justify-start'
+            )}
+          >
+            <div className={cn(
+              'flex items-start gap-2 max-w-[80%]',
+              isUser ? 'flex-row-reverse' : 'flex-row'
+            )}>
+              <Avatar
+                src={isUser ? '/placeholder.svg' : '/f_b_logo.glb'}
+                fallback={isUser ? 'U' : 'AI'}
+                className="w-8 h-8"
+                alt={isUser ? 'User avatar' : 'AI avatar'}
+              />
+              <div 
+                className={cn(
+                  'rounded-lg px-4 py-2 text-sm',
+                  isUser 
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted/50',
+                  isLastMessage && !isUser && isLoading && 'animate-pulse'
+                )}
+                role="article"
+                aria-label={`${isUser ? 'User' : 'AI'} message`}
+              >
+                {message.content}
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
-}
+};
