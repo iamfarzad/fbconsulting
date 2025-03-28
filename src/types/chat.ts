@@ -1,13 +1,24 @@
 
-import { AIMessage } from '@/features/gemini/types/messageTypes';
 import { ReactNode, RefObject } from 'react';
+
+export interface AIMessage {
+  role: 'user' | 'assistant' | 'system' | 'error';
+  content: string;
+  timestamp: number;
+  id?: string;
+  mediaItems?: Array<{
+    type: string;
+    data: string;
+    mimeType?: string;
+  }>;
+}
 
 export interface ChatInputProps {
   placeholder?: string;
 }
 
 export interface ChatMessageListProps {
-  messages: AIMessage[];
+  messages?: AIMessage[];
   showMessages?: boolean;
   isFullScreen?: boolean;
   isLoading?: boolean;
@@ -20,6 +31,7 @@ export interface UnifiedChatProps {
   className?: string;
   apiKey?: string;
   modelName?: string;
+  onToggleFullScreen?: () => void;
 }
 
 export interface UnifiedFullScreenChatProps {
@@ -33,4 +45,24 @@ export interface ChatProviderProps {
   children: ReactNode;
   apiKey?: string;
   modelName?: string;
+}
+
+export interface ConnectionStatusIndicatorProps {
+  isConnected: boolean;
+  isLoading?: boolean;
+  className?: string;
+}
+
+export interface ChatHeaderProps {
+  title?: string;
+  onClose?: () => void;
+  onClear?: () => void;
+  hasMessages?: boolean;
+}
+
+export interface UnifiedVoiceUIProps {
+  onCommand?: (command: string) => void | Promise<void>;
+  noFloatingButton?: boolean;
+  onVoiceStart?: () => void;
+  onVoiceEnd?: () => void;
 }
