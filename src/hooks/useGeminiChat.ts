@@ -1,136 +1,135 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import { AIMessage } from '@/types/chat';
+import { useToast } from '@/hooks/use-toast';
+import { AIMessage } from '@/services/chat/messageTypes';
+import { API_CONFIG } from '@/config/api';
 
 interface UseGeminiChatProps {
-  autoConnect?: boolean;
-  enableTTS?: boolean;
   apiKey?: string;
   modelName?: string;
+  autoConnect?: boolean;
+  enableTTS?: boolean;
 }
 
 export function useGeminiChat({
-  autoConnect = false,
-  enableTTS = false,
   apiKey,
-  modelName
+  modelName,
+  autoConnect = true,
+  enableTTS = true
 }: UseGeminiChatProps = {}) {
+  // State
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-
-  // Setup connection on mount if autoConnect is true
+  const [error, setError] = useState<string | null>(null);
+  
+  const { toast } = useToast();
+  
+  // Connect to the API service
+  const connect = useCallback(async () => {
+    try {
+      // Check if API key is available
+      const effectiveApiKey = apiKey || API_CONFIG.GEMINI_API_KEY;
+      
+      if (!effectiveApiKey) {
+        setError('No API key provided');
+        return false;
+      }
+      
+      // Simulate API connection - in a real app this would check the API
+      setIsConnected(true);
+      setError(null);
+      return true;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to connect to API';
+      setError(errorMessage);
+      setIsConnected(false);
+      
+      toast({
+        title: 'Connection Error',
+        description: errorMessage,
+        variant: 'destructive'
+      });
+      
+      return false;
+    }
+  }, [apiKey, toast]);
+  
+  // Disconnect from the API service
+  const disconnect = useCallback(() => {
+    setIsConnected(false);
+  }, []);
+  
+  // Add a message to the chat
+  const addMessage = useCallback((role: 'user' | 'assistant' | 'system' | 'error', content: string) => {
+    const newMessage: AIMessage = {
+      role,
+      content,
+      timestamp: Date.now()
+    };
+    setMessages(prev => [...prev, newMessage]);
+  }, []);
+  
+  // Send a message
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim()) return;
+    
+    // Add user message to chat
+    addMessage('user', text);
+    
+    // Clear input
+    setInputValue('');
+    
+    // Set loading state
+    setIsLoading(true);
+    
+    try {
+      // In a real app, this would call the API
+      setTimeout(() => {
+        // Simulate a response
+        addMessage('assistant', `You said: "${text}". This is a placeholder response since we're not connected to the real API.`);
+        
+        // Set loading state
+        setIsLoading(false);
+      }, 1000);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send message';
+      
+      // Add error message
+      addMessage('error', errorMessage);
+      
+      // Set error state
+      setError(errorMessage);
+      
+      // Show toast
+      toast({
+        title: 'Message Error',
+        description: errorMessage,
+        variant: 'destructive'
+      });
+      
+      // Set loading state
+      setIsLoading(false);
+    }
+  }, [addMessage, toast]);
+  
+  // Clear messages
+  const clearMessages = useCallback(() => {
+    setMessages([]);
+  }, []);
+  
+  // Connect on mount if autoConnect is true
   useEffect(() => {
     if (autoConnect) {
       connect();
     }
-  }, [autoConnect]);
-
-  // Connect to the Gemini service
-  const connect = useCallback(async () => {
-    try {
-      setIsConnected(false);
-      // In a real implementation, this would connect to your Gemini service
-      console.log('Connecting to Gemini with API key:', apiKey ? 'API key exists' : 'No API key');
-      
-      // Simulate connection delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setIsConnected(true);
-      setError(null);
-      
-      // Add a system message
-      if (messages.length === 0) {
-        setMessages([{
-          role: 'system',
-          content: 'Hello! I am your AI assistant. How can I help you today?',
-          timestamp: Date.now()
-        }]);
-      }
-    } catch (error) {
-      console.error('Error connecting to Gemini:', error);
-      setError('Failed to connect to Gemini service');
-      setIsConnected(false);
-    }
-  }, [apiKey, messages.length]);
-
-  // Send a message to the Gemini service
-  const sendMessage = useCallback(async (content: string) => {
-    if (!content.trim() || isLoading) return;
     
-    try {
-      setIsLoading(true);
-      
-      // Add user message to history
-      const userMessage: AIMessage = {
-        role: 'user',
-        content: content.trim(),
-        timestamp: Date.now()
-      };
-      setMessages(prev => [...prev, userMessage]);
-      
-      // Clear input
-      setInputValue('');
-      
-      // In a real implementation, this would call your Gemini service
-      console.log('Sending message to Gemini:', content);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Generate a simple mock response
-      const response = mockGeminiResponse(content);
-      
-      // Add assistant message to history
-      const assistantMessage: AIMessage = {
-        role: 'assistant',
-        content: response,
-        timestamp: Date.now()
-      };
-      setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error('Error sending message to Gemini:', error);
-      
-      // Add error message to history
-      const errorMessage: AIMessage = {
-        role: 'error',
-        content: error instanceof Error ? error.message : 'An error occurred while processing your request',
-        timestamp: Date.now()
-      };
-      setMessages(prev => [...prev, errorMessage]);
-      setError(error instanceof Error ? error.message : 'Failed to send message');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isLoading]);
-
-  // Clear all messages
-  const clearMessages = useCallback(() => {
-    setMessages([]);
-    setError(null);
-  }, []);
-
-  // Generate a mock response for testing
-  const mockGeminiResponse = (prompt: string): string => {
-    const promptLower = prompt.toLowerCase();
-    
-    if (promptLower.includes('hello') || promptLower.includes('hi')) {
-      return "Hello! How can I help you today?";
-    }
-    
-    if (promptLower.includes('help') || promptLower.includes('?')) {
-      return "I'd be happy to help! I can answer questions about our AI services, assist with brainstorming, or provide information on how to get started with AI integration.";
-    }
-    
-    if (promptLower.includes('feature') || promptLower.includes('service')) {
-      return "Our AI services include natural language processing, image recognition, and automated workflow solutions. These features can help streamline your operations and enhance user experiences.";
-    }
-    
-    return "Thank you for your message. I'm your AI assistant here to help with information about our services. Would you like to learn more about a specific topic?";
-  };
-
+    return () => {
+      disconnect();
+    };
+  }, [autoConnect, connect, disconnect]);
+  
   return {
     messages,
     inputValue,
@@ -140,6 +139,7 @@ export function useGeminiChat({
     setInputValue,
     sendMessage,
     clearMessages,
-    connect
+    connect,
+    disconnect
   };
 }

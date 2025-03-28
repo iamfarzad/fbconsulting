@@ -1,39 +1,35 @@
 
 import React from 'react';
-import { Loader2, Wifi, WifiOff } from 'lucide-react';
-import API_CONFIG from '@/config/api';
+import { Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { API_CONFIG } from '@/config/api';
+import { useChat } from '@/contexts/ChatContext';
 
-interface ConnectionStatusProps {
-  status?: 'connected' | 'connecting' | 'disconnected';
-  apiUrl?: string;
-}
-
-export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
-  status = 'connected',
-  apiUrl = API_CONFIG.BASE_URL
-}) => {
-  if (status === 'connected') {
+export const ConnectionStatus: React.FC = () => {
+  const { state, error } = useChat();
+  const { isInitialized } = state;
+  
+  if (error) {
     return (
-      <div className="flex items-center justify-center text-xs text-muted-foreground mb-4">
-        <Wifi className="h-3 w-3 mr-1 text-green-500" />
-        <span>Connected to AI service</span>
+      <div className="flex items-center gap-2 text-sm text-red-500 mb-4 p-2 bg-red-50 rounded-md">
+        <AlertCircle className="h-4 w-4" />
+        <span>Error: {error}</span>
       </div>
     );
   }
-
-  if (status === 'connecting') {
+  
+  if (!isInitialized) {
     return (
-      <div className="flex items-center justify-center text-xs text-muted-foreground mb-4">
-        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+        <Loader2 className="h-4 w-4 animate-spin" />
         <span>Connecting to AI service...</span>
       </div>
     );
   }
-
+  
   return (
-    <div className="flex items-center justify-center text-xs text-muted-foreground mb-4">
-      <WifiOff className="h-3 w-3 mr-1 text-red-500" />
-      <span>Disconnected from AI service</span>
+    <div className="flex items-center gap-2 text-sm text-green-600 mb-4">
+      <CheckCircle className="h-4 w-4" />
+      <span>Connected to Gemini AI</span>
     </div>
   );
 };

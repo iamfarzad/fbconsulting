@@ -1,49 +1,62 @@
 
 import React from 'react';
+import { ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export interface LinkPreviewMediaProps {
-  title: string;
-  description?: string | null;
-  thumbnailUrl?: string | null;
-  linkUrl: string;
+interface LinkPreviewMediaProps {
+  url: string;
+  title?: string;
+  description?: string;
+  thumbnail?: string;
   className?: string;
 }
 
 export const LinkPreviewMedia: React.FC<LinkPreviewMediaProps> = ({
+  url,
   title,
   description,
-  thumbnailUrl,
-  linkUrl,
-  className,
+  thumbnail,
+  className
 }) => {
+  const displayUrl = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  
   return (
-    <a
-      href={linkUrl}
-      target="_blank"
+    <a 
+      href={url} 
+      target="_blank" 
       rel="noopener noreferrer"
       className={cn(
-        "flex flex-col sm:flex-row items-start border rounded-md overflow-hidden hover:bg-muted/20 transition-colors", 
+        "block border rounded-md overflow-hidden hover:shadow-md transition-shadow bg-white dark:bg-gray-800",
         className
       )}
     >
-      {thumbnailUrl && (
-        <div className="sm:w-1/3 max-w-[200px]">
-          <img 
-            src={thumbnailUrl} 
-            alt={title} 
-            className="w-full h-auto max-h-[150px] object-cover"
-          />
-        </div>
-      )}
-      
-      <div className={cn("p-3", thumbnailUrl ? "sm:w-2/3" : "w-full")}>
-        <h3 className="font-medium text-sm mb-1 line-clamp-2">{title}</h3>
-        {description && (
-          <p className="text-xs text-muted-foreground line-clamp-3">{description}</p>
+      <div className="flex">
+        {thumbnail && (
+          <div className="w-24 h-24 flex-shrink-0">
+            <img 
+              src={thumbnail} 
+              alt={title || displayUrl} 
+              className="w-full h-full object-cover"
+            />
+          </div>
         )}
-        <p className="text-xs text-blue-500 mt-1 truncate">{linkUrl}</p>
+        <div className="p-3 flex-1">
+          <div className="flex items-center text-xs text-muted-foreground mb-1">
+            <span className="truncate mr-1">{displayUrl}</span>
+            <ExternalLink size={12} />
+          </div>
+          <h3 className="font-medium line-clamp-2 text-sm">
+            {title || url}
+          </h3>
+          {description && (
+            <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+              {description}
+            </p>
+          )}
+        </div>
       </div>
     </a>
   );
 };
+
+export default LinkPreviewMedia;
