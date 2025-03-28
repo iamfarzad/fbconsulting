@@ -1,18 +1,16 @@
 
-import React from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
-import AppRoutes from './routes/AppRoutes';
-import './App.css';
+import React, { Suspense } from 'react';
+import SafeApp from './SafeApp';
+import LoadingFallback from './components/LoadingFallback';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   return (
-    <Router>
-      <div className="app">
-        <div className="min-h-screen bg-background text-foreground">
-          <AppRoutes />
-        </div>
-      </div>
-    </Router>
+    <ErrorBoundary fallback={<div>Something went wrong. Please refresh the page.</div>}>
+      <Suspense fallback={<LoadingFallback />}>
+        <SafeApp />
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 

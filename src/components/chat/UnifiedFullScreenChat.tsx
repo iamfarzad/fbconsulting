@@ -1,86 +1,70 @@
-import React, { useEffect } from 'react';
+
+import React from 'react';
 import { motion } from 'framer-motion';
-import { X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { AnimatedBars } from '@/components/ui/AnimatedBars';
-import { UnifiedChat } from './UnifiedChat';
-import { ChatProvider } from '@/contexts/ChatContext';
+import { useChat, ChatProvider } from '@/contexts/ChatContext';
+import { ChatHeader } from './core/ChatHeader';
+import { UnifiedChatMessageList } from './UnifiedChatMessageList';
+import { UnifiedChatInput } from './UnifiedChatInput';
+
+interface UnifiedFullScreenChatContentProps {
+  onMinimize?: () => void;
+  placeholderText?: string;
+}
+
+const UnifiedFullScreenChatContent: React.FC<UnifiedFullScreenChatContentProps> = ({
+  onMinimize,
+  placeholderText = 'Ask me anything...',
+}) => {
+  const { state, clearMessages, containerRef } = useChat();
+  
+  const { isLoading, messages, isInitialized } = state;
+  
+  const hasMessages = messages.filter(m => m.role !== 'system').length > 0;
+  
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex flex-col bg-background"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      ref={containerRef}
+    >
+      <ChatHeader 
+        title="Gemini AI Assistant"
+        subtitle={isInitialized ? 'Connected' : 'Initializing...'}
+        onClear={hasMessages ? clearMessages : undefined}
+        onToggleFullScreen={onMinimize}
+        isFullScreen={true}
+        isConnected={isInitialized}
+        isLoading={isLoading}
+      />
+      
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <UnifiedChatMessageList />
+      </div>
+      
+      <div className="p-4 border-t">
+        <UnifiedChatInput placeholder={placeholderText} />
+      </div>
+    </motion.div>
+  );
+};
 
 interface UnifiedFullScreenChatProps {
-  onMinimize: () => void;
-  title?: string;
-  subtitle?: string;
+  onMinimize?: () => void;
   placeholderText?: string;
   apiKey?: string;
   modelName?: string;
 }
 
-export const UnifiedFullScreenChat: React.FC<UnifiedFullScreenChatProps> = ({
-  onMinimize,
-  title = 'AI Assistant',
-  subtitle,
-  placeholderText = "Ask me anything...",
-  apiKey,
-  modelName
-}) => {
-  // Prevent body scrolling when fullscreen chat is open
-  useEffect(() => {
-    const originalStyle = window.getComputedStyle(document.body).overflow;
-    document.body.style.overflow = 'hidden';
-    
-    return () => {
-      document.body.style.overflow = originalStyle;
-    };
-  }, []);
+export const UnifiedFullScreenChat: React.FC<UnifiedFullScreenChatProps> = (props) => {
+  const { apiKey, modelName, ...restProps } = props;
 
   return (
-    <motion.div
-      className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      <motion.div
-        className="fixed inset-4 bg-background border rounded-lg shadow-lg overflow-hidden flex flex-col"
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-      >
-        <div className="absolute top-4 right-4 z-10">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onMinimize}
-            className="h-8 w-8"
-          >
-            <X size={18} />
-          </Button>
-        </div>
-        
-        <div className="p-6 text-center mb-4">
-          <h2 className="text-2xl font-semibold mb-2">{title}</h2>
-          <div className="flex justify-center">
-            <AnimatedBars isActive={true} />
-          </div>
-          {subtitle && (
-            <p className="text-muted-foreground mt-4">{subtitle}</p>
-          )}
-        </div>
-        
-        <div className="flex-1 p-6 flex flex-col relative overflow-hidden">
-          <ChatProvider apiKey={apiKey} modelName={modelName}>
-            <UnifiedChat 
-              fullScreen={true} 
-              placeholderText={placeholderText}
-              title={title}
-              subtitle={subtitle}
-              className="h-full border-0 rounded-none shadow-none"
-            />
-          </ChatProvider>
-        </div>
-      </motion.div>
-    </motion.div>
+    <ChatProvider apiKey={apiKey} modelName={modelName}>
+      <UnifiedFullScreenChatContent {...restProps} />
+    </ChatProvider>
   );
 };
 

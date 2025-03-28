@@ -1,35 +1,41 @@
+
 import React from 'react';
-import { useConnectionStatus } from '@/hooks/useConnectionStatus';
-import { apiConfig } from '@/config/api';
+import { Loader2, Wifi, WifiOff } from 'lucide-react';
+import API_CONFIG from '@/config/api';
 
 interface ConnectionStatusProps {
-    className?: string;
+  status?: 'connected' | 'connecting' | 'disconnected';
+  apiUrl?: string;
 }
 
-export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({ className }) => {
-    const { isConnected } = useConnectionStatus();
-    const { geminiApiKey } = apiConfig;
-    
-    // Add some debug logging
-    console.log("API Config key exists:", !!geminiApiKey);
-    console.log("Connection status:", isConnected);
-    
-    const isUsingRealApi = Boolean(geminiApiKey);
-    
+export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
+  status = 'connected',
+  apiUrl = API_CONFIG.BASE_URL
+}) => {
+  if (status === 'connected') {
     return (
-        <div className={`connection-status ${className || ''}`}>
-            <div className="flex items-center">
-                <div className={`w-3 h-3 rounded-full mr-2 ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                {isConnected ? (
-                    isUsingRealApi ? (
-                        <p>Connected to Farzad-AI</p>
-                    ) : (
-                        <p>Using production API</p>
-                    )
-                ) : (
-                    <p>Disconnected from API</p>
-                )}
-            </div>
-        </div>
+      <div className="flex items-center justify-center text-xs text-muted-foreground mb-4">
+        <Wifi className="h-3 w-3 mr-1 text-green-500" />
+        <span>Connected to AI service</span>
+      </div>
     );
-}
+  }
+
+  if (status === 'connecting') {
+    return (
+      <div className="flex items-center justify-center text-xs text-muted-foreground mb-4">
+        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+        <span>Connecting to AI service...</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-center text-xs text-muted-foreground mb-4">
+      <WifiOff className="h-3 w-3 mr-1 text-red-500" />
+      <span>Disconnected from AI service</span>
+    </div>
+  );
+};
+
+export default ConnectionStatus;

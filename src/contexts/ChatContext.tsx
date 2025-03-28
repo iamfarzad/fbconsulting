@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useReducer, useRef } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { AIMessage, MessageRole } from '@/features/gemini/types';
+import { GeminiAdapter } from '@/features/gemini/services/geminiAdapter';
 
 // Define the shape of our chat state
 interface ChatState {
@@ -11,6 +12,7 @@ interface ChatState {
   error: string | null;
   isFullScreen: boolean;
   showMessages: boolean;
+  suggestedResponse: string | null;
   isInitialized: boolean;
 }
 
@@ -25,6 +27,7 @@ type ChatAction =
   | { type: 'TOGGLE_FULLSCREEN' }
   | { type: 'SET_FULLSCREEN'; payload: boolean }
   | { type: 'SET_SHOW_MESSAGES'; payload: boolean }
+  | { type: 'SET_SUGGESTED_RESPONSE'; payload: string | null }
   | { type: 'SET_INITIALIZED'; payload: boolean };
 
 // Initial state
@@ -35,6 +38,7 @@ const initialChatState: ChatState = {
   error: null,
   isFullScreen: false,
   showMessages: true,
+  suggestedResponse: null,
   isInitialized: false,
 };
 
@@ -86,6 +90,11 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
         ...state,
         showMessages: action.payload,
       };
+    case 'SET_SUGGESTED_RESPONSE':
+      return {
+        ...state,
+        suggestedResponse: action.payload,
+      };
     case 'SET_INITIALIZED':
       return {
         ...state,
@@ -117,7 +126,7 @@ export const ChatProvider: React.FC<{
 }> = ({ 
   children,
   apiKey,
-  modelName = 'gemini-2.0-flash'
+  modelName = 'gemini-1.0-pro'
 }) => {
   const [state, dispatch] = useReducer(chatReducer, initialChatState);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -125,107 +134,111 @@ export const ChatProvider: React.FC<{
   // Initialize with API key if provided
   React.useEffect(() => {
     if (apiKey) {
+      GeminiAdapter.initialize(apiKey);
       dispatch({ type: 'SET_INITIALIZED', payload: true });
     } else {
       // Try to get API key from environment
       const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
       if (envApiKey) {
+        GeminiAdapter.initialize(envApiKey);
+        dispatch({ type: 'SET_INITIALIZED', payload: true });
+      } else {
+        console.warn("No API key provided for Gemini. Using mock responses.");
         dispatch({ type: 'SET_INITIALIZED', payload: true });
       }
     }
   }, [apiKey]);
 
-  // Send a message
+  // Clear messages function
+  const clearMessages = () => {
+    dispatch({ type: 'CLEAR_MESSAGES' });
+    dispatch({ type: 'SET_INPUT_VALUE', payload: '' });
+  };
+
+  // Toggle fullscreen function
+  const toggleFullScreen = () => {
+    dispatch({ type: 'TOGGLE_FULLSCREEN' });
+  };
+
+  // Send message function
   const sendMessage = async (content: string) => {
     if (!content.trim()) return;
 
-    try {
-      dispatch({ type: 'SET_LOADING', payload: true });
-      dispatch({ type: 'SET_ERROR', payload: null });
+    // Set loading state
+    dispatch({ type: 'SET_LOADING', payload: true });
 
-      // Add user message to state
+    try {
+      // Add user message
       const userMessage: AIMessage = {
         role: 'user',
-        content,
-        timestamp: Date.now(),
+        content: content.trim(),
+        timestamp: Date.now()
       };
-
       dispatch({ type: 'ADD_MESSAGE', payload: userMessage });
+      
+      // Clear input
       dispatch({ type: 'SET_INPUT_VALUE', payload: '' });
-      
-      // Call Gemini API to get a response
-      const response = await fetch('/api/gemini/ask', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          prompt: content,
-          apiKey: apiKey || import.meta.env.VITE_GEMINI_API_KEY || '',
-          model: modelName
-        }),
+
+      // Generate AI response
+      const response = await GeminiAdapter.generateResponse({
+        prompt: content.trim(),
+        model: modelName
       });
-      
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+
+      if (response.error) {
+        dispatch({ 
+          type: 'SET_ERROR', 
+          payload: response.error 
+        });
+
+        toast({
+          title: "Error",
+          description: response.error,
+          variant: "destructive",
+        });
       }
-      
-      const data = await response.json();
-      
-      // Add AI response to state
+
+      // Add AI response
       const aiMessage: AIMessage = {
         role: 'assistant',
-        content: data.text || 'Sorry, I could not generate a response.',
-        timestamp: Date.now(),
+        content: response.text,
+        timestamp: Date.now()
       };
-      
       dispatch({ type: 'ADD_MESSAGE', payload: aiMessage });
     } catch (error) {
-      console.error('Error sending message:', error);
-      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-      
-      dispatch({ type: 'SET_ERROR', payload: errorMessage });
-      
-      // Also add an error message to the chat
-      const errorResponse: AIMessage = {
-        role: 'error',
-        content: `Error: ${errorMessage}`,
-        timestamp: Date.now(),
-      };
-      dispatch({ type: 'ADD_MESSAGE', payload: errorResponse });
-      
+      console.error("Error sending message:", error);
+      dispatch({ 
+        type: 'SET_ERROR', 
+        payload: error instanceof Error ? error.message : 'Unknown error'
+      });
+
       toast({
-        title: 'Error sending message',
-        description: errorMessage,
-        variant: 'destructive',
+        title: "Error",
+        description: error instanceof Error ? error.message : 'Unknown error',
+        variant: "destructive",
       });
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
 
-  // Clear all messages
-  const clearMessages = () => {
-    dispatch({ type: 'CLEAR_MESSAGES' });
-  };
-
-  // Toggle fullscreen mode
-  const toggleFullScreen = () => {
-    dispatch({ type: 'TOGGLE_FULLSCREEN' });
-  };
-
-  // Provide the context value
-  const value = {
-    state,
-    dispatch,
-    sendMessage,
-    clearMessages,
-    toggleFullScreen,
-    containerRef,
-  };
-
-  return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
+  return (
+    <ChatContext.Provider
+      value={{
+        state,
+        dispatch,
+        sendMessage,
+        clearMessages,
+        toggleFullScreen,
+        containerRef
+      }}
+    >
+      {children}
+    </ChatContext.Provider>
+  );
 };
 
-// Custom hook for consuming the chat context
+// Create a hook for using the chat context
 export const useChat = () => {
   const context = useContext(ChatContext);
   if (context === undefined) {
