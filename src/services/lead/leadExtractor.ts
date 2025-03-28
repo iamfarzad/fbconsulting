@@ -1,147 +1,91 @@
 
-import { trackEvent } from '../analyticsService';
-
-// Types for lead information extracted from conversations
 export interface LeadInfo {
   name?: string;
   email?: string;
   company?: string;
-  role?: string;
-  interests?: string[];
-  challenges?: string[];
-  budget?: string;
-  timeframe?: string;
-  stage?: 'discovery' | 'qualification' | 'interested' | 'ready-to-book';
-  notes?: string;
+  interests: string[];
+  stage: 'discovery' | 'qualification' | 'interested' | 'ready-to-book';
 }
 
-// Helper function to extract potential lead information from message content
-export const extractLeadInfo = (message: string, currentInfo: LeadInfo = {}): LeadInfo => {
-  const newInfo: LeadInfo = { ...currentInfo };
-  
-  // Basic email extraction
-  const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
-  const emailMatch = message.match(emailRegex);
-  if (emailMatch && !newInfo.email) {
-    newInfo.email = emailMatch[0].toLowerCase();
-  }
-  
-  // Name extraction (look for common patterns like "I'm [Name]" or "my name is [Name]")
-  const namePatterns = [
-    /(?:I am|I'm|my name is|this is|call me) ([A-Z][a-z]+(?: [A-Z][a-z]+)?)/i,
-    /([A-Z][a-z]+(?: [A-Z][a-z]+)?) here/i
-  ];
-  
-  for (const pattern of namePatterns) {
-    const nameMatch = message.match(pattern);
-    if (nameMatch && nameMatch[1] && !newInfo.name) {
-      newInfo.name = nameMatch[1].trim();
-      break;
-    }
-  }
-  
-  // Company extraction
-  const companyPatterns = [
-    /(?:I work for|I work at|employed by|my company is|with) ([A-Za-z0-9][\w\s&.,-]+)/i,
-    /([A-Za-z0-9][\w\s&.,-]+) (?:company|business|firm|agency|corporation)/i
-  ];
-  
-  for (const pattern of companyPatterns) {
-    const companyMatch = message.match(pattern);
-    if (companyMatch && companyMatch[1] && !newInfo.company) {
-      newInfo.company = companyMatch[1].trim();
-      break;
-    }
-  }
-  
-  // Role/position extraction
-  const rolePatterns = [
-    /(?:I am|I'm|as) (?:an|a|the) ([A-Za-z][\w\s-]+) (?:at|for|of)/i,
-    /(?:my role is|my position is|I work as) (?:an|a|the) ([A-Za-z][\w\s-]+)/i
-  ];
-  
-  for (const pattern of rolePatterns) {
-    const roleMatch = message.match(pattern);
-    if (roleMatch && roleMatch[1] && !newInfo.role) {
-      newInfo.role = roleMatch[1].trim();
-      break;
-    }
-  }
-  
-  // Interest detection
-  const interestKeywords = {
-    'chatbot': 'AI Chatbots',
-    'chat': 'AI Chatbots',
-    'automate': 'Workflow Automation',
-    'automation': 'Workflow Automation',
-    'workflow': 'Workflow Automation',
-    'strategy': 'AI Strategy',
-    'planning': 'AI Strategy',
-    'roadmap': 'AI Strategy',
-    'content': 'Content Generation',
-    'generate': 'Content Generation',
-    'writing': 'Content Generation',
-    'data': 'Data Analysis',
-    'analytics': 'Data Analysis',
-    'analysis': 'Data Analysis'
+export function extractLeadInfo(messages: any[]): LeadInfo {
+  // Default lead info
+  const leadInfo: LeadInfo = {
+    interests: [],
+    stage: 'discovery'
   };
-  
-  const interests = new Set(newInfo.interests || []);
-  
-  Object.entries(interestKeywords).forEach(([keyword, service]) => {
-    if (message.toLowerCase().includes(keyword.toLowerCase())) {
-      interests.add(service);
-    }
-  });
-  
-  if (interests.size > 0) {
-    newInfo.interests = Array.from(interests);
+
+  // If no messages, return default
+  if (!messages || messages.length === 0) {
+    return leadInfo;
   }
-  
-  // Challenge detection
-  const challengeKeywords = {
-    'slow': 'Process Efficiency',
-    'inefficient': 'Process Efficiency',
-    'manual': 'Manual Processes',
-    'time consuming': 'Time Management',
-    'expensive': 'Cost Reduction',
-    'cost': 'Cost Reduction',
-    'error': 'Error Reduction',
-    'mistake': 'Error Reduction',
-    'customer service': 'Customer Experience',
-    'customer experience': 'Customer Experience',
-    'scale': 'Scaling Operations',
-    'growing': 'Scaling Operations',
-    'expansion': 'Scaling Operations'
+
+  // Combine all message content into a text corpus
+  const text = messages
+    .map(m => m.content || '')
+    .join(' ');
+
+  // Extract name (basic pattern matching)
+  const nameMatch = text.match(/my name is ([A-Za-z\s]+)/i);
+  if (nameMatch && nameMatch[1]) {
+    leadInfo.name = nameMatch[1].trim();
+  }
+
+  // Extract email (basic pattern matching)
+  const emailMatch = text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/i);
+  if (emailMatch && emailMatch[1]) {
+    leadInfo.email = emailMatch[1];
+  }
+
+  // Extract company (basic pattern matching)
+  const companyMatch = text.match(/(?:at|from|with) ([A-Za-z0-9\s&]+)(?:company|corporation|inc|llc)?/i);
+  if (companyMatch && companyMatch[1]) {
+    leadInfo.company = companyMatch[1].trim();
+  }
+
+  // Extract interests and determine stage
+  const keywords = {
+    discovery: ['what', 'how', 'tell me', 'explain', 'service', 'offer'],
+    qualification: ['cost', 'price', 'budget', 'timeline', 'when', 'process'],
+    interested: ['interested', 'want to', 'looking for', 'need', 'help'],
+    readyToBook: ['book', 'schedule', 'appointment', 'meeting', 'call', 'consult']
   };
-  
-  const challenges = new Set(newInfo.challenges || []);
-  
-  Object.entries(challengeKeywords).forEach(([keyword, challenge]) => {
-    if (message.toLowerCase().includes(keyword.toLowerCase())) {
-      challenges.add(challenge);
+
+  // Count keyword occurrences to determine stage
+  const stageCounts = {
+    discovery: 0,
+    qualification: 0,
+    interested: 0,
+    readyToBook: 0
+  };
+
+  for (const stage in keywords) {
+    if (Object.prototype.hasOwnProperty.call(keywords, stage)) {
+      const stageKeywords = keywords[stage as keyof typeof keywords];
+      for (const keyword of stageKeywords) {
+        const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+        const matches = text.match(regex);
+        if (matches) {
+          stageCounts[stage as keyof typeof stageCounts] += matches.length;
+        }
+      }
     }
-  });
-  
-  if (challenges.size > 0) {
-    newInfo.challenges = Array.from(challenges);
   }
-  
-  // Track if we gathered new lead information
-  const hadChanges = JSON.stringify(currentInfo) !== JSON.stringify(newInfo);
-  if (hadChanges) {
-    trackEvent({
-      action: 'lead_information_updated',
-      category: 'chatbot',
-      label: 'lead_data',
-      lead_stage: newInfo.stage,
-      has_name: !!newInfo.name,
-      has_email: !!newInfo.email,
-      has_company: !!newInfo.company,
-      interest_count: newInfo.interests?.length || 0,
-      challenge_count: newInfo.challenges?.length || 0
-    });
+
+  // Determine stage based on keyword count
+  if (stageCounts.readyToBook > 0) {
+    leadInfo.stage = 'ready-to-book';
+  } else if (stageCounts.interested > stageCounts.qualification) {
+    leadInfo.stage = 'interested';
+  } else if (stageCounts.qualification > stageCounts.discovery) {
+    leadInfo.stage = 'qualification';
+  } else {
+    leadInfo.stage = 'discovery';
   }
-  
-  return newInfo;
-};
+
+  // Extract interests
+  leadInfo.interests = messages.map(m => m.content || '');
+
+  return leadInfo;
+}
+
+export default extractLeadInfo;
