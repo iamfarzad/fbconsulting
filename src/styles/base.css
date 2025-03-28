@@ -45,12 +45,18 @@
   }
 
   .base-styles {
-    @apply border-border;
+    /* Apply the CSS variable directly instead of using @apply */
+    border-color: hsl(var(--border)); 
+    /* Add default width if needed, as @apply border-border would include border-width: 1px */
+    border-width: 1px; 
   }
 
   body {
     /* @apply bg-background text-foreground antialiased base-styles; */
+    /* If you want base-styles applied, uncomment the line above AFTER fixing .base-styles */
     font-feature-settings: "rlig" 1, "calt" 1;
+    /* Applying base text color and background here is better */
+    @apply bg-background text-foreground antialiased;
   }
   
   /* Standardized typography */
