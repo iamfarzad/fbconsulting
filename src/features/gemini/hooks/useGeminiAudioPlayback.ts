@@ -1,151 +1,165 @@
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
-export interface UseGeminiAudioPlaybackOptions {
-  onPlaybackComplete?: () => void;
+interface UseGeminiAudioPlaybackProps {
   onPlaybackError?: (error: string) => void;
+  onPlaybackStart?: () => void;
+  onPlaybackEnd?: () => void;
 }
 
-export function useGeminiAudioPlayback(options: UseGeminiAudioPlaybackOptions = {}) {
+/**
+ * Hook to manage audio playback for Gemini TTS responses
+ */
+export function useGeminiAudioPlayback({
+  onPlaybackError,
+  onPlaybackStart,
+  onPlaybackEnd
+}: UseGeminiAudioPlaybackProps = {}) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [duration, setDuration] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
+  const audioQueue = useRef<Blob[]>([]);
+  const audioContext = useRef<AudioContext | null>(null);
+  const currentAudio = useRef<HTMLAudioElement | null>(null);
   
-  const audioChunksRef = useRef<Blob[]>([]);
-  const audioElementRef = useRef<HTMLAudioElement | null>(null);
-  
-  // Initialize audio element
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      audioElementRef.current = new Audio();
-      
-      const audioElement = audioElementRef.current;
-      
-      // Set up event listeners
-      audioElement.addEventListener('play', () => setIsPlaying(true));
-      audioElement.addEventListener('pause', () => setIsPlaying(false));
-      audioElement.addEventListener('ended', () => {
-        setIsPlaying(false);
-        setProgress(100);
-        if (options.onPlaybackComplete) {
-          options.onPlaybackComplete();
-        }
-      });
-      audioElement.addEventListener('timeupdate', () => {
-        if (audioElement.duration) {
-          setCurrentTime(audioElement.currentTime);
-          setProgress((audioElement.currentTime / audioElement.duration) * 100);
-        }
-      });
-      audioElement.addEventListener('durationchange', () => {
-        setDuration(audioElement.duration);
-      });
-      audioElement.addEventListener('error', (e) => {
-        const errorMessage = 'Audio playback error';
-        setError(errorMessage);
-        if (options.onPlaybackError) {
-          options.onPlaybackError(errorMessage);
-        }
-      });
-      
-      // Clean up event listeners on unmount
-      return () => {
-        audioElement.pause();
-        audioElement.src = '';
-        audioElement.removeEventListener('play', () => setIsPlaying(true));
-        audioElement.removeEventListener('pause', () => setIsPlaying(false));
-        audioElement.removeEventListener('ended', () => {
-          setIsPlaying(false);
-          if (options.onPlaybackComplete) {
-            options.onPlaybackComplete();
-          }
-        });
-        audioElement.removeEventListener('timeupdate', () => {});
-        audioElement.removeEventListener('durationchange', () => {});
-        audioElement.removeEventListener('error', () => {});
-      };
-    }
-  }, [options]);
-  
-  // Handle audio chunks
-  const handleAudioChunk = useCallback((chunk: Blob) => {
-    audioChunksRef.current.push(chunk);
-  }, []);
-  
-  // Handle audio metadata
-  const handleAudioMetadata = useCallback((metadata: {size: number}) => {
-    // Handle metadata if needed
-  }, []);
-  
-  // Play audio from accumulated chunks
-  const playAudioChunks = useCallback(() => {
-    if (audioChunksRef.current.length === 0) {
-      if (options.onPlaybackError) {
-        options.onPlaybackError('No audio data available');
-      }
-      return;
+  // Clear the audio queue and stop playback
+  const clearAudio = useCallback(() => {
+    if (currentAudio.current) {
+      currentAudio.current.pause();
+      currentAudio.current = null;
     }
     
-    try {
-      // Create a combined audio blob
-      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/mpeg' });
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      if (audioElementRef.current) {
-        audioElementRef.current.src = audioUrl;
-        audioElementRef.current.play().catch(err => {
-          console.error('Error playing audio:', err);
-          if (options.onPlaybackError) {
-            options.onPlaybackError('Failed to play audio');
-          }
-        });
-      }
-    } catch (error) {
-      console.error('Error playing audio chunks:', error);
-      setError('Failed to play audio');
-      if (options.onPlaybackError) {
-        options.onPlaybackError('Failed to play audio');
-      }
-    }
-  }, [options]);
+    audioQueue.current = [];
+    setIsPlaying(false);
+    setProgress(0);
+  }, []);
   
   // Stop audio playback
   const stopAudio = useCallback(() => {
-    if (audioElementRef.current) {
-      audioElementRef.current.pause();
+    if (currentAudio.current) {
+      currentAudio.current.pause();
+      currentAudio.current = null;
       setIsPlaying(false);
     }
   }, []);
   
-  // Clear audio data
-  const clearAudio = useCallback(() => {
-    audioChunksRef.current = [];
-    if (audioElementRef.current) {
-      audioElementRef.current.pause();
-      audioElementRef.current.src = '';
+  // Handle a new audio chunk received from WebSocket
+  const handleAudioChunk = useCallback((chunk: ArrayBuffer) => {
+    try {
+      // Convert ArrayBuffer to Blob
+      const blob = new Blob([chunk], { type: 'audio/mp3' });
+      
+      // Add to queue
+      audioQueue.current.push(blob);
+      
+      // If not currently playing, start playback
+      if (!isPlaying) {
+        playAudioChunks();
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error processing audio';
+      setError(errorMessage);
+      if (onPlaybackError) onPlaybackError(errorMessage);
     }
-    setIsPlaying(false);
-    setProgress(0);
-    setCurrentTime(0);
-    setDuration(0);
-    setError(null);
+  }, [isPlaying, onPlaybackError]);
+  
+  // Handle audio metadata information
+  const handleAudioMetadata = useCallback((_metadata: any) => {
+    // Currently not used, but could handle sample rate, etc
+  }, []);
+  
+  // Play audio chunks from the queue
+  const playAudioChunks = useCallback(() => {
+    if (audioQueue.current.length === 0) {
+      setIsPlaying(false);
+      if (onPlaybackEnd) onPlaybackEnd();
+      return;
+    }
+    
+    try {
+      // Create audio element if needed
+      if (!currentAudio.current) {
+        currentAudio.current = new Audio();
+        
+        // Setup event listeners
+        currentAudio.current.onended = () => {
+          // Play next chunk when current one ends
+          currentAudio.current = null;
+          playAudioChunks();
+        };
+        
+        currentAudio.current.ontimeupdate = () => {
+          if (currentAudio.current) {
+            const progress = (currentAudio.current.currentTime / currentAudio.current.duration) * 100;
+            setProgress(progress);
+          }
+        };
+        
+        currentAudio.current.onerror = (e) => {
+          const errorMessage = `Audio playback error: ${e}`;
+          setError(errorMessage);
+          if (onPlaybackError) onPlaybackError(errorMessage);
+          currentAudio.current = null;
+          setIsPlaying(false);
+        };
+      }
+      
+      // Get the next chunk from the queue
+      const nextChunk = audioQueue.current.shift();
+      if (!nextChunk) return;
+      
+      // Create object URL and play
+      const audioUrl = URL.createObjectURL(nextChunk);
+      currentAudio.current.src = audioUrl;
+      
+      const playPromise = currentAudio.current.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsPlaying(true);
+            if (onPlaybackStart) onPlaybackStart();
+          })
+          .catch(err => {
+            const errorMessage = `Failed to play audio: ${err.message}`;
+            setError(errorMessage);
+            if (onPlaybackError) onPlaybackError(errorMessage);
+            currentAudio.current = null;
+            setIsPlaying(false);
+          });
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error playing audio';
+      setError(errorMessage);
+      if (onPlaybackError) onPlaybackError(errorMessage);
+      setIsPlaying(false);
+    }
+  }, [onPlaybackStart, onPlaybackEnd, onPlaybackError]);
+  
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      if (currentAudio.current) {
+        currentAudio.current.pause();
+        currentAudio.current = null;
+      }
+      
+      if (audioContext.current) {
+        audioContext.current.close();
+      }
+    };
   }, []);
   
   return {
-    handleAudioChunk,
-    handleAudioMetadata,
     isPlaying,
     progress,
     error,
-    duration,
-    currentTime,
-    playAudioChunks,
+    handleAudioChunk,
+    handleAudioMetadata,
     stopAudio,
+    playAudioChunks,
     clearAudio
   };
 }
 
-// Make sure to export the main hook
 export default useGeminiAudioPlayback;

@@ -1,32 +1,38 @@
 
-import { AIMessage, MessageMedia } from './messageTypes';
+// Re-export message types
+export type { AIMessage, MessageMedia, ChatConfig } from './messageTypes';
 
-export { AIMessage, MessageMedia };
+// Websocket types
+export type { WebSocketClientOptions, WebSocketMessage, AudioChunkInfo } from './websocketTypes';
 
-export interface UploadedFile {
-  name: string;
-  data: string;
-  mimeType: string;
-  type: string;
-  size?: number;
-  preview?: string;
+// Gemini specific types
+
+export interface GeminiContextType {
+  isInitialized?: boolean;
+  isLoading?: boolean;
+  error?: string | null;
+  personaData?: any;
+  sendMessage?: (text: string) => Promise<any>;
+  generateAudio?: (text: string) => Promise<any>;
 }
 
-export interface ChatState {
-  messages: AIMessage[];
-  isLoading: boolean;
-  error: string | null;
+export interface GeminiConfig {
+  apiKey: string;
+  model?: string;
+  temperature?: number;
+  maxTokens?: number;
+  systemPrompt?: string;
+  voice?: {
+    name: string;
+    languageCode: string;
+    pitch?: number;
+    speakingRate?: number;
+  };
 }
 
-export interface VoiceState {
-  isListening: boolean;
-  transcript: string;
-  error: string | null;
-  isSupported: boolean;
-}
-
-export interface GeminiConnectionState {
-  isConnected: boolean;
-  isConnecting: boolean;
-  error: string | null;
+export interface GeminiAdapter {
+  sendMessage: (message: string) => Promise<any>;
+  generateAudio?: (text: string) => Promise<any>;
+  initialize: () => Promise<boolean>;
+  isInitialized: boolean;
 }

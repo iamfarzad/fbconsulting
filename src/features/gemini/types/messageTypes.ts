@@ -1,26 +1,33 @@
 
+export interface MessageMedia {
+  type: 'image' | 'document' | 'code' | 'link';
+  url?: string;
+  data?: string;
+  caption?: string;
+  mimeType?: string;
+  fileName?: string;
+  // Code-specific properties
+  codeContent?: string;
+  codeLanguage?: string;
+  // Link-specific properties
+  linkTitle?: string;
+  linkDescription?: string;
+  linkImage?: string;
+}
+
 export interface AIMessage {
-  id: string;
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
   timestamp: number;
+  id?: string;
+  mediaItems?: MessageMedia[];
+  feedback?: 'positive' | 'negative' | null;
 }
 
-export interface ChatHistory {
-  messages: AIMessage[];
-  id: string;
-  title?: string;
-  createdAt: number;
-  updatedAt: number;
-}
-
-export interface MessageActions {
-  sendMessage: (text: string) => void;
-  clearMessages: () => void;
-}
-
-export interface MessageState {
-  messages: AIMessage[];
-  isLoading: boolean;
-  error: string | null;
+export interface ChatConfig {
+  apiKey?: string;
+  modelName?: string;
+  systemPrompt?: string;
+  maxTokens?: number;
+  temperature?: number;
 }

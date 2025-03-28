@@ -51,13 +51,20 @@ export interface ConnectionStatusIndicatorProps {
   isConnected: boolean;
   isLoading?: boolean;
   className?: string;
+  status?: 'connected' | 'connecting' | 'disconnected';
+  onRetry?: () => void;
 }
 
 export interface ChatHeaderProps {
   title?: string;
+  subtitle?: string;
   onClose?: () => void;
   onClear?: () => void;
   hasMessages?: boolean;
+  onToggleFullScreen?: () => void;
+  isFullScreen?: boolean;
+  isConnected?: boolean;
+  isLoading?: boolean;
 }
 
 export interface UnifiedVoiceUIProps {
@@ -66,3 +73,21 @@ export interface UnifiedVoiceUIProps {
   onVoiceStart?: () => void;
   onVoiceEnd?: () => void;
 }
+
+// Voice related types
+export interface VoiceUIProps {
+  onCommand?: (command: string) => void | Promise<void>;
+  noFloatingButton?: boolean;
+}
+
+// Lead stage type definition
+export type LeadStage = 
+  'initial' | 
+  'discovery' | 
+  'evaluation' | 
+  'decision' | 
+  'implementation' | 
+  'retention' |
+  'qualification' | 
+  'interested' | 
+  'ready-to-book';
