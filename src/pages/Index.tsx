@@ -7,19 +7,24 @@ const Index: React.FC = () => {
   return (
     <ChatProvider>
       <div className="container mx-auto py-8">
-        <h1 className="text-4xl font-bold mb-6 text-center">Gemini WebSocket Chat</h1>
-        
-        <p className="text-center mb-8">
-          This demo uses the updated WebSocket backend documented in BACKEND_UPDATE_NOTES.md
-        </p>
+        <div className="flex flex-col items-center justify-center mb-8">
+          <h1 className="text-4xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-gray-700 to-black dark:from-gray-200 dark:to-white">
+            Gemini WebSocket Chat
+          </h1>
+          
+          <p className="text-center mt-3 text-muted-foreground max-w-lg">
+            This demo uses a WebSocket connection to stream responses from Gemini AI 
+            with both text and audio support.
+          </p>
+        </div>
         
         <div className="max-w-lg mx-auto">
           <WebSocketChat />
         </div>
         
         <div className="mt-8 text-center text-sm text-muted-foreground">
-          <p>Using WebSocket API with audio support</p>
-          <p>All communications happen through a secure WebSocket connection</p>
+          <p>Using WebSocket API with real-time audio streaming</p>
+          <p className="text-xs mt-1 opacity-70">Communications happen through a secure WebSocket connection</p>
         </div>
       </div>
     </ChatProvider>
