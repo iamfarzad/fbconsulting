@@ -1,3 +1,13 @@
+import rateLimit from 'express-rate-limit';
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests, please try again later.',
+});
+
 export default function handler(req, res) {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 }
+
+export default limiter(handler);

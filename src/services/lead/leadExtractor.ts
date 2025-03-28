@@ -1,4 +1,3 @@
-
 import { trackEvent } from '../analyticsService';
 
 // Types for lead information extracted from conversations
@@ -145,3 +144,5 @@ export const extractLeadInfo = (message: string, currentInfo: LeadInfo = {}): Le
   
   return newInfo;
 };
+
+// Note: Use environment variables for sensitive information

@@ -40,3 +40,5 @@ export async function sendProposal(state: GeminiState): Promise<SendProposalResp
     };
   }
 }
+
+// Note: Use environment variables for sensitive information

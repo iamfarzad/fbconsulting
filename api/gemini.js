@@ -1,5 +1,11 @@
-// Adjust the import paths to match your project structure
 import { getGeminiApiKey } from '../src/utils/apiHelpers';
+import rateLimit from 'express-rate-limit';
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests, please try again later.',
+});
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -70,3 +76,5 @@ export default async function handler(req, res) {
     });
   }
 }
+
+export default limiter(handler);

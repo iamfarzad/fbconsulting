@@ -1,4 +1,3 @@
-// Environment-based configuration
 const isProd = import.meta.env.PROD;
 const isVercel = import.meta.env.VITE_DEPLOYMENT_ENV === 'vercel';
 
@@ -28,8 +27,6 @@ export const API_CONFIG = {
 
 // Make sure environment variables are accessed correctly using Vite's import.meta.env
 export const apiConfig = {
-  geminiApiKey: import.meta.env.VITE_GEMINI_API_KEY || '',
-  googleApiKey: import.meta.env.VITE_Google_API_KEY || '',
   resendApiKey: import.meta.env.VITE_RESEND_API_KEY || '',
 };
 

@@ -1,5 +1,12 @@
 import { GeminiAdapter } from '@/features/gemini';
 import { NextRequest } from 'next/server';
+import rateLimit from 'express-rate-limit';
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests, please try again later.',
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,3 +35,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export default limiter(POST);

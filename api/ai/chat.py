@@ -6,7 +6,14 @@ from typing import Dict, List, Any, Optional
 from google.ai.generativelanguage import Candidate, Content, Part, Tool, GenerativeModel
 from google.generativeai import configure, GenerativeModel
 from google.auth.exceptions import DefaultCredentialsError
+from ratelimit import limits, RateLimitException
+from backoff import on_exception, expo
 
+# Define rate limit: 5 requests per minute
+ONE_MINUTE = 60
+
+@on_exception(expo, RateLimitException, max_tries=3)
+@limits(calls=5, period=ONE_MINUTE)
 def generate_response(
     model_name: str,
     messages: List[Dict[str, Any]],
@@ -57,6 +64,8 @@ def generate_response(
         
     except DefaultCredentialsError as e:
         return {"error": f"Authentication error: {str(e)}", "status": HTTPStatus.UNAUTHORIZED}
+    except RateLimitException as e:
+        return {"error": "Rate limit exceeded. Please try again later.", "status": HTTPStatus.TOO_MANY_REQUESTS}
     except Exception as e:
         return {"error": f"Error generating response: {str(e)}", "status": HTTPStatus.INTERNAL_SERVER_ERROR}
 

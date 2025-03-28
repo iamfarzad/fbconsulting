@@ -1,4 +1,3 @@
-
 import { SearchResultItem } from '@/components/ui/search/SearchResults';
 
 // Mock data for demonstration purposes
@@ -85,3 +84,5 @@ export const trackSearch = (query: string, resultsCount: number) => {
   // This would integrate with your analytics service
   console.log('Search tracked:', { query, resultsCount });
 };
+
+// Note: Use environment variables for sensitive information

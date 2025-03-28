@@ -1,37 +1,40 @@
-import { Content } from '@google/generative-ai';
-
-export interface GeminiRequest {
-  prompt: string;
-  model?: string;
-  temperature?: number;
+// Core Types
+export interface Message {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+  timestamp: number;
 }
 
-export interface GeminiConfig {
+export interface VoiceConfig {
+  enabled: boolean;
+  voice: string;
+  pitch: number;
+  rate: number;
+}
+
+export interface SpatialContext {
+  pageSection: string;
+  elementType: string;
+  interactionType: string;
+  userBehavior: string;
+  timestamp: number;
+}
+
+// Copilot Types
+export interface CopilotConfig {
   apiKey: string;
-  temperature?: number;
-  topK?: number;
-  topP?: number;
-  maxOutputTokens?: number;
-}
-
-export interface SpeechConfig {
-  language: string;
-  name: string;
-  ssmlGender: 'MALE' | 'FEMALE' | 'NEUTRAL';
-}
-
-export const DEFAULT_SPEECH_CONFIG: SpeechConfig = {
-  language: 'en-US',
-  name: 'en-US-Standard-A',
-  ssmlGender: 'NEUTRAL'
-};
-
-export interface GeminiResponse {
-  text: string;
-  error?: string;
-}
-
-export interface GeminiMessage {
-  role: 'user' | 'model';
-  content: Content[];
+  options: {
+    model: string;
+    temperature: number;
+    maxTokens: number;
+    initialMessages: Message[];
+    voice?: VoiceConfig;
+    spatialContext?: SpatialContext;
+    agentic?: {
+      proactiveAssistance: boolean;
+      learningEnabled: boolean;
+      contextAwareness: boolean;
+      behaviorPatterns: string[];
+    };
+  };
 }

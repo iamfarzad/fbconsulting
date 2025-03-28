@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, createContext, useContext } from "react";
 
 // Create a Context for Gemini API
@@ -23,27 +22,9 @@ export const GeminiAPIProvider: React.FC<GeminiAPIProviderProps> = ({ children }
 
   useEffect(() => {
     try {
-      // Get API key from environment
-      const rawApiKey = import.meta.env.VITE_GEMINI_API_KEY;
-      console.log('Environment variables loaded:', {
-        hasApiKey: !!rawApiKey,
-        mode: import.meta.env.MODE,
-        isDev: import.meta.env.DEV
-      });
+      // Note: Use environment variables for sensitive information
+      throw new Error('VITE_GEMINI_API_KEY is not set in environment');
 
-      if (!rawApiKey) {
-        throw new Error('VITE_GEMINI_API_KEY is not set in environment');
-      }
-
-      // Trim and validate API key
-      const trimmedKey = rawApiKey.trim();
-      if (!trimmedKey) {
-        throw new Error('VITE_GEMINI_API_KEY is empty after trimming');
-      }
-
-      // Set the API key
-      setApiKeyValue(trimmedKey);
-      console.log('✅ Gemini API Key loaded successfully');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error loading API key';
       console.error('⚠️ API Key Error:', errorMessage);
