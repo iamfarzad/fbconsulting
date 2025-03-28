@@ -130,7 +130,7 @@ const Brain3D: React.FC<Brain3DProps> = ({
           polar={[-Math.PI / 4, Math.PI / 4]}
           azimuth={[-Math.PI / 4, Math.PI / 4]}
           config={{ mass: 2, tension: 400 }}
-          snap={{ mass: 2, tension: 400 }}
+          snap
         >
           <BrainModel onNodeClick={onNodeClick} />
         </PresentationControls>

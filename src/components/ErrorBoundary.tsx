@@ -1,5 +1,6 @@
+
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { categorizeError, logDetailedError } from '@/utils/errorHandling';
+import { formatErrorMessage, logDetailedError } from '@/utils/errorHandling';
 
 interface Props {
   children: ReactNode;
@@ -24,11 +25,17 @@ class ErrorBoundary extends Component<Props, State> {
   };
 
   public static getDerivedStateFromError(error: Error): Partial<State> {
+    // Map network/auth/timeout errors to api errors for our UI
+    const errorCategory = formatErrorMessage(error).toLowerCase().includes('network') ||
+                        formatErrorMessage(error).toLowerCase().includes('auth') ||
+                        formatErrorMessage(error).toLowerCase().includes('timeout')
+                        ? 'api' : 'unknown';
+    
     // Update state so the next render will show the fallback UI.
     return { 
       hasError: true, 
       error,
-      errorType: categorizeError(error)
+      errorType: errorCategory
     };
   }
 
@@ -37,7 +44,7 @@ class ErrorBoundary extends Component<Props, State> {
     logDetailedError(error, {
       component: 'ErrorBoundary',
       errorInfo,
-      errorType: categorizeError(error)
+      errorType: this.state.errorType
     });
     
     this.setState({ errorInfo });
