@@ -16,11 +16,11 @@ export const API_CONFIG = {
   
   WEBSOCKET: {
     DEFAULT_PATH: '/ws',
-    PING_INTERVAL: 30000,
-    PING_TIMEOUT: 10000,
-    RECONNECT_INTERVAL: 3000,
-    RECONNECT_ATTEMPTS: 3,
-    TIMEOUT: 30000,
+    PING_INTERVAL: 30000, // 30 seconds (backend uses this)
+    PING_TIMEOUT: 10000, // 10 seconds (backend waits this long for pong)
+    RECONNECT_INTERVAL: 3000, // 3 seconds between reconnect attempts
+    RECONNECT_ATTEMPTS: 3, // Max number of reconnection attempts
+    TIMEOUT: 30000, // 30 seconds connection timeout
     PING_MESSAGE: { type: 'ping' }
   },
   

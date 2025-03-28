@@ -22,7 +22,6 @@ export interface ChatContextType {
     stopAudio: () => void;
   };
   error: string | null;
-  clientId: string;
 }
 
 // Create the Chat Context
@@ -83,8 +82,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       disconnect,
       stopAudio
     },
-    error,
-    clientId
+    error
   };
 
   return (
