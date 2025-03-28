@@ -1,32 +1,53 @@
-export interface GoogleGenAIConfig {
-  apiKey: string;
-  modelName?: string;
+
+// Simple adapter for Gemini API calls
+
+export interface GenAIRequest {
+  prompt: string;
+  model?: string;
   temperature?: number;
-  maxOutputTokens?: number;
+  maxTokens?: number;
 }
 
-// Export the test connection function
-export const testGoogleGenAIConnection = async (apiKey: string): Promise<boolean> => {
-  try {
-    const response = await fetch('/api/gemini/test', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apiKey })
-    });
-    return response.ok;
-  } catch (error) {
-    console.error('Connection test failed:', error);
-    return false;
-  }
-};
+export interface GenAIResponse {
+  text: string;
+  error?: string;
+}
 
-export class GoogleGenAIAdapter {
-  async testConnection(apiKey: string): Promise<boolean> {
+export class GeminiAdapter {
+  static async generateResponse(request: GenAIRequest): Promise<GenAIResponse> {
+    try {
+      const { prompt, model = 'gemini-2.0-pro' } = request;
+      
+      const response = await fetch('/api/gemini/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, model }),
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API error:', errorText);
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return { text: data.text };
+      
+    } catch (error) {
+      console.error('Error in GeminiAdapter:', error);
+      return { 
+        text: 'Sorry, I encountered an error processing your request.',
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      };
+    }
+  }
+
+  // Test connection to the API
+  static async testConnection(): Promise<boolean> {
     try {
       const response = await fetch('/api/gemini/test', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKey })
+        headers: { 'Content-Type': 'application/json' }
       });
       return response.ok;
     } catch (error) {
@@ -34,24 +55,7 @@ export class GoogleGenAIAdapter {
       return false;
     }
   }
-
-  async generateResponse(prompt: string) {
-    try {
-      const response = await fetch('/api/gemini/ask', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to generate response');
-      }
-
-      const data = await response.json();
-      return data.text;
-    } catch (error) {
-      console.error('Adapter error:', error);
-      throw error;
-    }
-  }
 }
+
+// Re-export as default for compatibility
+export default GeminiAdapter;

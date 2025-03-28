@@ -1,118 +1,83 @@
-import { 
-  GeminiAdapter,
-  GeminiConfig,
-  useGeminiMessageSubmission,
-  useGeminiInitialization,
-  useGeminiAudio,
-} from '@/features/gemini';
-import React, { useState, useEffect } from 'react';
-import { Box, Flex, Heading, Spinner, useToast } from '@chakra-ui/react';
-import ChatInput from './chat/ChatInput';
-import ChatMessages from './chat/ChatMessages';
-import { ChatMessage } from '../../types/chat';
-import axios from 'axios';
-import ConnectionStatusIndicator from '../common/ConnectionStatusIndicator';
 
-const GeminiCopilot: React.FC = () => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [connected, setConnected] = useState<boolean>(true);
-  const toast = useToast();
+import React, { useState } from 'react';
+import { useGeminiCopilot } from './GeminiCopilotProvider';
 
-  // Check API connection on component mount
-  useEffect(() => {
-    const checkConnection = async () => {
-      try {
-        await axios.get('/api/health');
-        setConnected(true);
-      } catch (error) {
-        setConnected(false);
-        toast({
-          title: 'Connection Error',
-          description: 'Unable to connect to AI service',
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-        });
-      }
-    };
-    
-    checkConnection();
-    // Set up periodic connection checks
-    const intervalId = setInterval(checkConnection, 30000);
-    
-    return () => clearInterval(intervalId);
-  }, [toast]);
+interface GeminiCopilotProps {
+  className?: string;
+}
 
-  const handleSendMessage = async (content: string) => {
-    if (!content.trim()) return;
-    
-    const userMessage: ChatMessage = {
-      role: 'user',
-      content,
-      timestamp: new Date().toISOString(),
-    };
-    
-    // Update messages with user input
-    const updatedMessages = [...messages, userMessage];
-    setMessages(updatedMessages);
-    setIsLoading(true);
-    
-    try {
-      const response = await axios.post('/api/gemini', {
-        messages: updatedMessages,
-      });
-      
-      if (response.data && response.data.response) {
-        const aiMessage: ChatMessage = {
-          role: 'assistant',
-          content: response.data.response,
-          timestamp: new Date().toISOString(),
-        };
-        setMessages([...updatedMessages, aiMessage]);
-      } else {
-        throw new Error('Invalid response format');
-      }
-    } catch (error) {
-      console.error('Error generating response:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to get AI response. Please try again.',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      });
-    } finally {
-      setIsLoading(false);
+const GeminiCopilot: React.FC<GeminiCopilotProps> = ({ className = '' }) => {
+  const { 
+    messages, 
+    sendMessage, 
+    isLoading 
+  } = useGeminiCopilot();
+  const [inputValue, setInputValue] = useState('');
+
+  const handleSendMessage = async () => {
+    if (!inputValue.trim() || isLoading) return;
+    await sendMessage(inputValue);
+    setInputValue('');
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
     }
   };
 
   return (
-    <Box height="100%" display="flex" flexDirection="column">
-      <Flex justifyContent="space-between" alignItems="center" mb={4}>
-        <Heading size="md">Gemini Copilot</Heading>
-        <ConnectionStatusIndicator isConnected={connected} />
-      </Flex>
-      
-      <Box flex="1" overflowY="auto" mb={4}>
+    <div className={`flex flex-col h-full ${className}`}>
+      <div className="flex-1 overflow-y-auto p-4 mb-4 border rounded-md bg-background/5">
         {messages.length === 0 ? (
-          <Flex 
-            direction="column" 
-            align="center" 
-            justify="center" 
-            height="100%"
-            color="gray.500"
-          >
-            <Box mb={4}>Start a conversation with Gemini</Box>
-          </Flex>
+          <div className="flex items-center justify-center h-full text-muted-foreground">
+            <p>Start a conversation with the AI assistant</p>
+          </div>
         ) : (
-          <ChatMessages messages={messages} />
+          <div className="space-y-4">
+            {messages.map((message, index) => (
+              <div 
+                key={message.id || index} 
+                className={`p-3 rounded-lg ${
+                  message.role === 'user' 
+                    ? 'bg-primary text-primary-foreground ml-12' 
+                    : 'bg-muted mr-12'
+                }`}
+              >
+                {message.content}
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
+                <span>AI is thinking...</span>
+              </div>
+            )}
+          </div>
         )}
-        {isLoading && <Spinner size="sm" ml={2} />}
-      </Box>
-      
-      <ChatInput onSendMessage={handleSendMessage} disabled={isLoading || !connected} />
-    </Box>
+      </div>
+
+      <div className="p-4 border rounded-md bg-background">
+        <div className="flex gap-2">
+          <textarea
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="flex-1 min-h-[80px] p-3 bg-background border rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+            placeholder="Type your message here..."
+            disabled={isLoading}
+          />
+          <button
+            onClick={handleSendMessage}
+            disabled={!inputValue.trim() || isLoading}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50 self-end"
+          >
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
