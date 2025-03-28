@@ -1,23 +1,27 @@
+
 import React, { createContext, useContext, useReducer, useRef } from 'react';
-import { AIMessage, FileAttachment } from '@/services/chat/types'; // Keep types if needed
-// Removed: import { getChatService } from '@/services/chat/googleGenAIService.tsx';
+import { AIMessage, FileAttachment } from '@/types/chat'; // Import from types/chat
 import { toast } from '@/components/ui/use-toast';
 import { chatReducer } from './chat/chatReducer';
 import { ChatContextType, initialChatState } from './chat/types';
-import { useGemini } from '@/components/copilot/providers/GeminiProvider'; // Import useGemini
+import { useGemini } from '@/hooks/gemini';
 
 // Create the context
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
-// Create the provider component
-// Removed apiKey and modelName props
-export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+// Create the provider component with apiKey and modelName props
+export const ChatProvider: React.FC<{ 
+  children: React.ReactNode;
+  apiKey?: string;
+  modelName?: string;
+}> = ({ 
+  children,
+  apiKey,
+  modelName
+}) => {
   const [state, dispatch] = useReducer(chatReducer, initialChatState);
   const containerRef = useRef<HTMLDivElement>(null);
-  // Removed: const chatServiceRef = useRef<ChatService | null>(null);
   const gemini = useGemini(); // Get context from GeminiProvider
-
-  // Removed: useEffect for initializing chatServiceRef
 
   // Send a message
   const sendMessage = async (content: string, files?: FileAttachment[]) => {
@@ -42,16 +46,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Use sendMessage from GeminiProvider context
       if (gemini.isConnected) {
-        // Note: GeminiProvider's sendMessage might need adaptation 
-        // if it doesn't support files or message history directly.
-        // For now, just send the content.
         await gemini.sendMessage(content);
-        // The response handling might need adjustment too, 
-        // as GeminiProvider handles responses via WebSocket `onmessage`.
-        // We might need to listen to state changes provided by GeminiProvider
-        // or adjust how messages are added here.
-        // Placeholder: Assume response is handled by GeminiProvider for now.
-        // dispatch({ type: 'ADD_MESSAGE', payload: response }); 
       } else {
         // Handle disconnected state or show error
         const errorMsg = 'WebSocket not connected';
@@ -95,7 +90,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Clear all messages
   const clearMessages = () => {
     dispatch({ type: 'CLEAR_MESSAGES' });
-    // Removed chatServiceRef call
   };
 
   // Toggle fullscreen mode
@@ -123,17 +117,17 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     dispatch({ type: 'TOGGLE_VOICE', payload: enable });
   };
 
-  // Update value to use gemini context where applicable
+  // Value object with all context properties
   const value = {
     state,
     dispatch,
-    sendMessage, // Use the updated sendMessage
+    sendMessage,
     clearMessages,
     toggleFullScreen,
     containerRef,
-    isInitialized: gemini.isConnected, // Reflect WebSocket connection status
-    isLoading: state.isLoading || gemini.isConnecting, // Combine loading states
-    error: state.error || gemini.error, // Combine error states
+    isInitialized: gemini.isConnected,
+    isLoading: state.isLoading || gemini.isConnecting,
+    error: state.error || gemini.error,
     addMediaItem,
     removeMediaItem,
     clearMediaItems,
