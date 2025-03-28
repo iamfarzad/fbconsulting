@@ -15,7 +15,7 @@ const NotFound = lazy(() => import("@/pages/NotFound"));
 
 const AppRoutes: React.FC = () => {
   return (
-    <Routes key="routes">
+    <Routes>
       <Route path="/" element={
         <ErrorBoundary>
           <Suspense fallback={<LoadingFallback />}>
