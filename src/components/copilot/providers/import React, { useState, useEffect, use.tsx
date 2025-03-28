@@ -15,12 +15,8 @@ import type {
   ChatServiceOptions as CopilotConfigType 
 } from '@/features/gemini/types';
 // Attempt to import other types - paths might need adjustment
-// import type { SpatialContext, VoiceConfig } from '@/types/copilot'; // Assuming they might be in src/types now - Commented out as source is unknown
+import type { SpatialContext, VoiceConfig } from '@/types/copilot'; // Assuming they might be in src/types now
 import type { AIMessage as ChatMessage } from '@/features/gemini/types'; // Corrected ChatMessage import
-
-// Placeholder types since original source is unknown
-type SpatialContext = any; 
-type VoiceConfig = any;
 
 // Basic Copilot Context for toggle functionality
 interface CopilotContextType {
@@ -61,7 +57,7 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
   // Hooks for external data
   const { personaData } = usePersonaManagement();
   const location = useLocation();
-  const { apiKey, isLoading } = useGeminiAPI(); // Still using old hook - needs refactoring
+  const { apiKey, isLoading } = useGeminiAPI();
 
   // State hooks
   const [voiceEnabled, setVoiceEnabled] = useState(false);
@@ -81,7 +77,9 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
 
   const addMessageToHistory = (provider: string, message: ChatMessage) => {
     setChatHistory(prev => {
+      // Ensure we have an array for this provider
       const providerHistory = Array.isArray(prev[provider]) ? [...prev[provider]] : [];
+      
       return {
         ...prev,
         [provider]: [...providerHistory, message],
@@ -105,19 +103,18 @@ export const CopilotProvider: React.FC<CopilotProviderProps> = ({ children }) =>
     if (!personaData?.personaDefinitions || !personaData.currentPersona) {
       return '';
     }
+
     const personaDetails = personaData.personaDefinitions[personaData.currentPersona];
     if (!personaDetails) return '';
 
-    // Corrected template literal for system message
-    return `
-      You are Farzad AI Assistant, an AI consultant built into the landing page of F.B Consulting. 
-      Currently using the "${personaDetails.name}" persona.
+    // **** Applying the definitive fix here ****
+    return `You are Farzad AI Assistant, an AI consultant built into the landing page of F.B Consulting. 
+      Currently using the "${personaDetails.name}" persona. 
       
-      Tone: ${personaDetails.tone}
+      Tone: ${personaDetails.tone} 
       
-      Focus Areas:
-${personaDetails.focusAreas.map(area => `- ${area}`).join('\n')}
-
+      Focus Areas: 
+      ${personaDetails.focusAreas.map(area => `- ${area}`).join('\n')} 
       
       Additional Context:
       - User Role: ${personaData.userRole || 'Unknown'}
@@ -129,10 +126,13 @@ ${personaDetails.focusAreas.map(area => `- ${area}`).join('\n')}
     `;
   }, [personaData]);
 
+  // This config type might need adjustment based on actual CopilotKit needs
   const copilotConfig = useMemo<any>( // Use any temporarily
     () => ({
       apiKey: publicApiKey,
-      model: 'gemini-2.0-flash-001', // This model might be invalid or unsupported
+      // CopilotKit specific options might differ from ChatServiceOptions
+      // Update these based on CopilotKit documentation / requirements
+      model: 'gemini-2.0-flash-001', 
       temperature: 0.7,
       maxTokens: 2048,
       initialMessages: [
@@ -159,55 +159,128 @@ ${personaDetails.focusAreas.map(area => `- ${area}`).join('\n')}
     [systemMessage, voiceEnabled, spatialContext, publicApiKey]
   );
 
-  // Initialize and validate API key (using old hook - needs update)
+  // Initialize and validate API key
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) return; // Don't connect if copilot is disabled
+
     if (isLoading) {
       setConnectionStatus('connecting');
       return;
     }
+    
     if (!apiKey) {
       setConnectionStatus('error');
       setConnectionError('API key not found');
-      toast({ /* ... */ });
+      toast({
+        title: 'AI Configuration Error',
+        description: 'API key not found. Please check your configuration.',
+        variant: 'destructive'
+      });
     } else {
-      // Old connection test logic
       const testConnection = async () => {
         try {
           setConnectionStatus('connecting');
+          
           const response = await fetch('https://generativelanguage.googleapis.com/v1/models?key=' + apiKey);
+          
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             throw new Error(`API connection failed: ${response.status} ${response.statusText}${
               errorData.error ? ` - ${errorData.error.message || ''}` : ''
             }`);
           }
+          
           setConnectionStatus('connected');
           setConnectionError(null);
         } catch (error) {
-          logDetailedError(error, { /* ... */ });
+          logDetailedError(error, {
+            component: 'CopilotProvider',
+            apiKeyLength: apiKey?.length,
+            apiKeyPresent: !!apiKey
+          });
+          
           setConnectionStatus('error');
           const errorMessage = formatErrorMessage(error);
           setConnectionError(errorMessage);
+          
           const errorCategory = categorizeError(error);
           let toastTitle = 'API Connection Error';
-          let toastDescription = 'Failed to connect to the Gemini API.';
-          if (errorCategory === 'auth') { /* ... */ }
-          toast({ /* ... */ });
+          let toastDescription = 'Failed to connect to the Gemini API. Please check your network connection.';
+          
+          if (errorCategory === 'auth') {
+            toastTitle = 'API Key Error';
+            toastDescription = 'Invalid or expired API key. Please check your API key configuration.';
+          }
+          
+          toast({
+            title: toastTitle,
+            description: toastDescription,
+            variant: 'destructive'
+          });
         }
       };
+      
       testConnection();
     }
   }, [apiKey, isLoading, enabled]);
 
   // Voice synthesis initialization
-  useEffect(() => { /* ... */ }, [enabled]);
+  useEffect(() => {
+    if (!enabled) return; // Don't initialize voice if copilot is disabled
+
+    const initVoice = async () => {
+      if ('speechSynthesis' in window) {
+        try {
+          let voices = window.speechSynthesis.getVoices();
+          
+          if (voices.length === 0) {
+            await new Promise<void>(resolve => {
+              const voicesChangedHandler = () => {
+                voices = window.speechSynthesis.getVoices();
+                window.speechSynthesis.removeEventListener('voiceschanged', voicesChangedHandler);
+                resolve();
+              };
+              window.speechSynthesis.addEventListener('voiceschanged', voicesChangedHandler);
+              setTimeout(resolve, 1000);
+            });
+          }
+          
+          const charonVoice = voices.find(voice => voice.name.includes('Charon'));
+          setVoiceEnabled(voices.length > 0);
+        } catch (error) {
+          console.error('Error initializing voice synthesis:', error);
+          setVoiceEnabled(false);
+        }
+      } else {
+        console.warn('Speech synthesis not supported in this browser');
+        setVoiceEnabled(false);
+      }
+    };
+
+    initVoice();
+  }, [enabled]);
 
   // Spatial context tracking
-  useEffect(() => { /* ... */ }, [location, spatialContext, enabled]);
+  useEffect(() => {
+    if (!enabled) return; // Don't track context if copilot is disabled
+
+    if (!spatialContext) {
+      const currentPath = location.pathname;
+      const pageName = currentPath === '/' ? 'home' : currentPath.substring(1);
+      
+      setSpatialContext({
+        pageSection: pageName,
+        elementType: 'page',
+        interactionType: 'navigation',
+        userBehavior: 'active',
+        timestamp: Date.now()
+      });
+    }
+  }, [location, spatialContext, enabled]);
 
   const showConnectionStatus = connectionStatus === 'error' || connectionStatus === 'connecting';
 
+  // Provide the combined context value
   const contextValue = {
     enabled,
     toggleCopilot,
@@ -224,10 +297,38 @@ ${personaDetails.focusAreas.map(area => `- ${area}`).join('\n')}
     clearChatHistory,
   };
 
-  // Other useEffects for error handling
-  useEffect(() => { /* ... */ }, [connectionStatus, connectionError]);
-  useEffect(() => { /* ... */ }, []);
-  useEffect(() => { /* ... */ }, []);
+  // Error handling for WebSocket connection failures
+  useEffect(() => {
+    if (connectionStatus === 'error' && connectionError) {
+      console.error('WebSocket connection error:', connectionError);
+    }
+  }, [connectionStatus, connectionError]);
+
+  // Error handling for resource loading failures
+  useEffect(() => {
+    const handleResourceError = (event: Event) => {
+      console.error('Resource loading error:', event);
+    };
+
+    window.addEventListener('error', handleResourceError);
+
+    return () => {
+      window.removeEventListener('error', handleResourceError);
+    };
+  }, []);
+
+  // Error handling for THREE.WebGLRenderer context lost error
+  useEffect(() => {
+    const handleContextLost = (event: Event) => {
+      console.error('THREE.WebGLRenderer context lost:', event);
+    };
+
+    window.addEventListener('webglcontextlost', handleContextLost);
+
+    return () => {
+      window.removeEventListener('webglcontextlost', handleContextLost);
+    };
+  }, []);
 
   return (
     <CopilotContext.Provider value={contextValue}>
@@ -236,8 +337,9 @@ ${personaDetails.focusAreas.map(area => `- ${area}`).join('\n')}
           status={connectionStatus === 'connecting' ? 'connecting' : connectionStatus === 'connected' ? 'connected' : 'disconnected'} 
         />
       )}
+      
       {(enabled && connectionStatus === 'connected' && apiKey) ? (
-        <CopilotKit {...copilotConfig}>
+        <CopilotKit {...copilotConfig}> {/* Pass potentially updated config */}
           {children}
         </CopilotKit>
       ) : (
