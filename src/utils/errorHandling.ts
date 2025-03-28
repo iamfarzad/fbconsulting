@@ -1,86 +1,83 @@
 
 /**
- * Error handling utilities for consistent error management
+ * Format error message for display
  */
-
-// Define error categories for better organization
-export type ErrorCategory = 'api' | 'auth' | 'validation' | 'unknown' | 'ui';
-
-/**
- * Formats error messages to be user-friendly
- */
-export function formatErrorMessage(error: unknown): string {
+export const formatErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
     return error.message;
-  } else if (typeof error === 'string') {
-    return error;
-  } else if (error && typeof error === 'object' && 'message' in error) {
-    return String((error as any).message);
-  } else {
-    return 'An unknown error occurred';
   }
-}
-
-/**
- * Categorizes errors to handle them appropriately
- */
-export function categorizeError(error: unknown): ErrorCategory {
-  if (error instanceof Error) {
-    const message = error.message.toLowerCase();
+  
+  if (typeof error === 'string') {
+    return error;
+  }
+  
+  if (typeof error === 'object' && error !== null) {
+    const errorObj = error as Record<string, unknown>;
     
-    if (message.includes('api') || message.includes('network') || message.includes('fetch') || message.includes('request')) {
-      return 'api';
-    } else if (message.includes('auth') || message.includes('unauthorized') || message.includes('forbidden') || message.includes('permission') || message.includes('key')) {
-      return 'auth';
-    } else if (message.includes('validation') || message.includes('invalid') || message.includes('required')) {
-      return 'validation';
-    } else if (message.includes('ui') || message.includes('render') || message.includes('component')) {
-      return 'ui';
+    if ('message' in errorObj && typeof errorObj.message === 'string') {
+      return errorObj.message;
+    }
+    
+    try {
+      return JSON.stringify(errorObj);
+    } catch (e) {
+      return 'Unknown error object';
     }
   }
   
-  return 'unknown';
-}
+  return 'An unknown error occurred';
+};
 
 /**
- * Logs detailed error information for debugging
+ * Log detailed error information for debugging
  */
-export function logDetailedError(error: unknown, context: Record<string, any> = {}): void {
-  console.error('Error details:', {
-    error: error instanceof Error ? {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-    } : error,
-    category: categorizeError(error),
-    context,
-    timestamp: new Date().toISOString(),
-  });
-}
-
-/**
- * Creates a user-friendly error message based on the error category
- */
-export function getUserFriendlyErrorMessage(error: unknown): string {
-  const category = categorizeError(error);
+export const logDetailedError = (error: unknown, context: Record<string, unknown> = {}): void => {
+  const errorType = error instanceof Error ? error.constructor.name : typeof error;
+  const errorDetails = {
+    type: errorType,
+    message: formatErrorMessage(error),
+    stack: error instanceof Error ? error.stack : undefined,
+    context
+  };
   
-  switch (category) {
-    case 'api':
-      return 'There was a problem connecting to the server. Please check your internet connection and try again.';
-    case 'auth':
-      return 'Authentication failed. Please check your credentials or API key and try again.';
-    case 'validation':
-      return 'There was an issue with the data provided. Please check your inputs and try again.';
-    case 'ui':
-      return 'There was a problem with the user interface. Please refresh the page and try again.';
-    default:
-      return 'An unexpected error occurred. Please try again later.';
-  }
-}
+  console.error('Detailed error:', errorDetails);
+};
 
-export default {
-  formatErrorMessage,
-  categorizeError,
-  logDetailedError,
-  getUserFriendlyErrorMessage
+/**
+ * Categorize errors for better handling
+ */
+export const categorizeError = (error: unknown): 'network' | 'auth' | 'timeout' | 'unknown' => {
+  const errorStr = formatErrorMessage(error).toLowerCase();
+  
+  if (errorStr.includes('network') || 
+      errorStr.includes('fetch') || 
+      errorStr.includes('connection') ||
+      errorStr.includes('websocket')) {
+    return 'network';
+  }
+  
+  if (errorStr.includes('key') || 
+      errorStr.includes('auth') || 
+      errorStr.includes('unauthorized') ||
+      errorStr.includes('permission') ||
+      errorStr.includes('403') ||
+      errorStr.includes('401')) {
+    return 'auth';
+  }
+  
+  if (errorStr.includes('timeout') || 
+      errorStr.includes('timed out')) {
+    return 'timeout';
+  }
+  
+  return 'unknown';
+};
+
+/**
+ * Gracefully handle WebSocket errors
+ */
+export const handleWebSocketError = (event: Event): string => {
+  console.error('WebSocket error:', event);
+  
+  return 'Connection to AI service failed. The app will continue to work with limited functionality.';
 };

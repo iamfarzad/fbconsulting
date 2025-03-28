@@ -1,8 +1,11 @@
-
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { Message, WebSocketMessage, MessageHandler, VoiceConfig } from '../types';
-import { API_CONFIG } from '@/config/api'; // Import API_CONFIG
+import { API_CONFIG } from '@/config/api';
+import { handleWebSocketError } from '@/utils/errorHandling';
+
+const MAX_RECONNECT_ATTEMPTS = 3;
+const RECONNECT_DELAY = 2000;
 
 interface GeminiContextType {
   sendMessage: (content: string) => Promise<void>;
@@ -11,6 +14,7 @@ interface GeminiContextType {
   isConnecting: boolean;
   error: string | null;
   resetError: () => void;
+  reconnect: () => void;
   // Add needed properties for test files
   personaData?: any;
   model?: any;
@@ -54,95 +58,160 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({
   const [error, setError] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const messageHandlersRef = useRef<Map<string, MessageHandler>>(new Map());
+  const reconnectAttemptsRef = useRef(0);
+  const reconnectTimeoutRef = useRef<number | null>(null);
+  const manualReconnectRef = useRef(false);
 
   const connectWebSocket = useCallback(() => {
+    if (isConnecting) return;
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
+    if (reconnectTimeoutRef.current) {
+      window.clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+
     setIsConnecting(true);
-    // Use WS_BASE_URL from API_CONFIG and add client ID path
     const clientId = Math.random().toString(36).substring(7);
     const wsUrl = `${API_CONFIG.WS_BASE_URL}/ws/${clientId}`;
-    console.log('[GeminiProvider] Connecting to WebSocket:', wsUrl); // Add logging
+    console.log('[GeminiProvider] Connecting to WebSocket:', wsUrl);
 
-    const ws = new WebSocket(wsUrl);
+    try {
+      const ws = new WebSocket(wsUrl);
 
-    ws.onopen = () => {
-      console.log('[GeminiProvider] WebSocket connected'); // Add logging
-      setIsConnected(true);
-      setIsConnecting(false);
-      setError(null);
-    };
+      ws.onopen = () => {
+        console.log('[GeminiProvider] WebSocket connected');
+        setIsConnected(true);
+        setIsConnecting(false);
+        setError(null);
+        reconnectAttemptsRef.current = 0;
+        manualReconnectRef.current = false;
+      };
 
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data) as WebSocketMessage;
-        let errorMessage: string;
-        
-        // Handle different message types
-        switch (data.type) {
-          case 'text':
-            if (data.content) {
-              messageHandlersRef.current.get('text')?.(data.content);
-            }
-            break;
-          case 'error':
-            errorMessage = data.error || data.content || 'Unknown error';
-            setError(errorMessage);
-            toast({
-              title: 'Error',
-              description: errorMessage,
-              variant: 'destructive',
-            });
-            break;
-          case 'connection': // Assuming backend sends this on connect
-            if (data.status === 'connected') {
-              setIsConnected(true);
-              setIsConnecting(false);
-            }
-            break;
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data) as WebSocketMessage;
+          
+          switch (data.type) {
+            case 'text':
+              if (data.content) {
+                messageHandlersRef.current.get('text')?.(data.content);
+              }
+              break;
+            case 'error':
+              const errorMessage = data.error || data.content || 'Unknown error';
+              setError(errorMessage);
+              console.error('[GeminiProvider] WebSocket error message:', errorMessage);
+              
+              if (errorMessage.includes('API key') || errorMessage.includes('Authentication')) {
+                toast({
+                  title: 'Error',
+                  description: errorMessage,
+                  variant: 'destructive',
+                });
+              }
+              break;
+            case 'connection':
+              if (data.status === 'connected') {
+                setIsConnected(true);
+                setIsConnecting(false);
+              }
+              break;
+            case 'audio':
+              break;
+          }
+        } catch (e) {
+          console.error('[GeminiProvider] Failed to parse WebSocket message:', e);
         }
-      } catch (e) {
-        console.error('Failed to parse WebSocket message:', e);
-      }
-    };
+      };
 
-    ws.onerror = (event) => {
-      console.error('[GeminiProvider] WebSocket error:', event); // Add logging
-      setError('WebSocket error occurred');
-      setIsConnected(false);
-      console.error('WebSocket error:', event);
-    };
+      ws.onerror = (event) => {
+        const errorMsg = handleWebSocketError(event);
+        console.error('[GeminiProvider] WebSocket error:', errorMsg);
+        setError(errorMsg);
+        setIsConnected(false);
+        
+        if (reconnectAttemptsRef.current === 0 || manualReconnectRef.current) {
+          toast({
+            title: 'Connection Error',
+            description: 'Failed to connect to AI service. Some features may be limited.',
+            variant: 'destructive',
+          });
+        }
+      };
 
-    ws.onclose = () => {
-      console.log('[GeminiProvider] WebSocket closed'); // Add logging
-      setIsConnected(false);
+      ws.onclose = () => {
+        console.log('[GeminiProvider] WebSocket closed');
+        setIsConnected(false);
+        setIsConnecting(false);
+        
+        if (reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
+          reconnectAttemptsRef.current++;
+          console.log(`[GeminiProvider] Attempting reconnect ${reconnectAttemptsRef.current}/${MAX_RECONNECT_ATTEMPTS}`);
+          
+          const delay = RECONNECT_DELAY * Math.pow(2, reconnectAttemptsRef.current - 1);
+          reconnectTimeoutRef.current = window.setTimeout(() => {
+            reconnectTimeoutRef.current = null;
+            connectWebSocket();
+          }, delay);
+        } else if (!error) {
+          setError('Failed to connect after multiple attempts. Try again later.');
+        }
+      };
+
+      wsRef.current = ws;
+    } catch (err) {
+      console.error('[GeminiProvider] Error creating WebSocket:', err);
       setIsConnecting(false);
-      // Simplified reconnect logic for now
-      // setTimeout(() => {
-      //   connectWebSocket(); // Attempt to reconnect
-      // }, 3000);
-    };
+      setError('Failed to create WebSocket connection');
+    }
+  }, [isConnecting, error]);
 
-    wsRef.current = ws;
-  }, []);
+  const reconnect = useCallback(() => {
+    if (wsRef.current) {
+      wsRef.current.close();
+    }
+    reconnectAttemptsRef.current = 0;
+    manualReconnectRef.current = true;
+    connectWebSocket();
+  }, [connectWebSocket]);
 
   useEffect(() => {
     connectWebSocket();
+    
+    const pingInterval = setInterval(() => {
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        try {
+          wsRef.current.send(JSON.stringify({ type: 'ping' }));
+        } catch (e) {
+          console.error('[GeminiProvider] Error sending ping:', e);
+        }
+      }
+    }, API_CONFIG.WEBSOCKET.PING_INTERVAL);
+    
     return () => {
+      clearInterval(pingInterval);
+      if (reconnectTimeoutRef.current) {
+        window.clearTimeout(reconnectTimeoutRef.current);
+      }
       wsRef.current?.close();
     };
   }, [connectWebSocket]);
 
   const sendMessage = useCallback(async (content: string) => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-      throw new Error('WebSocket is not connected');
+      if (!isConnecting && reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
+        reconnect();
+        throw new Error('WebSocket reconnecting, please try again in a moment');
+      } else {
+        throw new Error('WebSocket is not connected');
+      }
     }
 
-    // Match the message structure expected by the backend (main.py)
     const message = {
       text: content,
       role: 'user',
-      enableTTS: true // Or get this setting dynamically
+      enableTTS: true
     };
 
     return new Promise<void>((resolve, reject) => {
@@ -150,10 +219,11 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({
         wsRef.current?.send(JSON.stringify(message));
         resolve();
       } catch (error) {
+        console.error('[GeminiProvider] Error sending message:', error);
         reject(error);
       }
     });
-  }, []);
+  }, [isConnecting, reconnect]);
 
   const sendAudioRequest = useCallback(async (text: string): Promise<Blob | null> => {
     try {
@@ -180,7 +250,7 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({
 
       return await response.blob();
     } catch (error) {
-      console.error('Failed to generate audio:', error);
+      console.error('[GeminiProvider] Failed to generate audio:', error);
       return null;
     }
   }, []);
@@ -189,7 +259,6 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({
     setError(null);
   }, []);
 
-  // Mock data for tests
   const personaData = {
     personaDefinitions: {
       default: {
@@ -217,6 +286,7 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({
     isConnecting,
     error,
     resetError,
+    reconnect,
     personaData,
     model,
   };
