@@ -92,10 +92,16 @@ export const ChatProvider: React.FC<{
     }
   };
 
+  // Ensure all messages have the required timestamp property
+  const messagesWithTimestamps: AIMessage[] = messages.map(msg => ({
+    ...msg,
+    timestamp: msg.timestamp || Date.now(),
+  }));
+
   // Combine state and actions into a single context value
   const contextValue: ChatContextType = {
     state: {
-      messages,
+      messages: messagesWithTimestamps,
       isLoading,
       isConnected,
       isInitialized,
