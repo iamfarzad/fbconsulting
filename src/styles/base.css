@@ -44,38 +44,31 @@
     --ring: 240 4.9% 83.9%;
   }
 
-  /* Removed .base-styles class as it caused issues */
-
   body {
     font-feature-settings: "rlig" 1, "calt" 1;
-    /* Applying base antialiasing is usually safe */
     @apply antialiased;
-    /* Rely on component defaults for background/text color */
   }
   
-  /* 
-   Removed heading (h1-h4) and paragraph (p, .body, .body-sm) 
-   styles using @apply within @layer base. 
-   These should be styled using utility classes directly in components 
-   or rely on Tailwind's default base styles.
-  */
+  /* Removed problematic @apply rules for base typography */
 }
 
 /* Simplified glass styling - Use direct CSS */
 .glass {
-  background-color: rgba(255, 255, 255, 0.1); 
-  /* Replace @apply backdrop-blur-md */
+  background-color: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(8px);
-  /* Keep border styles applied via @apply for now */
-  @apply border border-white/20;
+  /* Replace @apply border border-white/20 */
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .frosted-glass {
   background-color: rgba(255, 255, 255, 0.05);
-   /* Replace @apply backdrop-blur-md */
   backdrop-filter: blur(8px);
-  /* Keep border styles applied via @apply for now */
-  @apply border border-white/10;
+  /* Replace @apply border border-white/10 */
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Simplified animation - Keep these */

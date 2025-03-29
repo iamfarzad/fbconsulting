@@ -29,99 +29,71 @@
   animation-delay: 0.6s;
 }
 
-/* Voice button styles */
+/* Voice button styles - Using direct CSS */
 .voice-button {
-  @apply flex items-center justify-center rounded-full transition-all duration-300;
+  /* @apply flex items-center justify-center rounded-full transition-all duration-300; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px; /* rounded-full */
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
 }
 
 .voice-button:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+   background-color: rgba(0, 0, 0, 0.1); 
 }
 
-/* Keep dark mode hover separate */
 .dark .voice-button:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.1); 
 }
 
 .voice-button.active {
+  /* @apply bg-black text-white dark:bg-white dark:text-black; */
   background-color: #000;
-  color: white;
+  color: #fff;
+  /* @apply animate-pulse; */
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; 
 }
-
 .dark .voice-button.active {
-  background-color: white;
-  color: black;
+  background-color: #fff;
+  color: #000;
 }
 
-.voice-button.active {
-  @apply animate-pulse;
-}
-
-/* Voice feedback container */
+/* Voice feedback container - Using direct CSS */
 .voice-feedback {
+  /* @apply rounded-lg bg-black p-4 text-white; */
   background-color: #000;
-  @apply rounded-lg p-4 text-white;
-  @apply transition-all duration-500 ease-in-out;
-  @apply shadow-lg border border-white/20;
+  color: #fff;
+  border-radius: 0.5rem; /* rounded-lg */
+  padding: 1rem; /* p-4 */
+  /* @apply transition-all duration-500 ease-in-out; */
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 500ms;
+  /* @apply shadow-lg border border-white/20; */
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); /* shadow-lg */
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Transcription text animation */
+/* Transcription text animation - Using direct CSS */
 .transcription-text {
-  @apply transition-all duration-300;
+  /* @apply transition-all duration-300; */
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
 }
 
 .transcription-text.active {
-  @apply text-white font-medium;
+  /* @apply text-white font-medium; */
+  color: #fff;
+  font-weight: 500;
 }
 
 .transcription-text.inactive {
-  @apply text-white/70;
-}
-
-/* Added styles for voice UI in the home page */
-.voice-container {
-  @apply rounded-full shadow-md;
-  transition: all 0.3s ease;
-}
-
-.voice-container:hover {
-  @apply shadow-lg transform scale-105;
-}
-
-.voice-indicator {
-  @apply absolute -top-1 -right-1 w-3 h-3 rounded-full;
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0% { 
-    transform: scale(0.95); 
-    box-shadow: 0 0 0 0 rgba(254, 90, 29, 0.7);
-  }
-  70% { 
-    transform: scale(1);
-    box-shadow: 0 0 0 6px rgba(254, 90, 29, 0);
-  }
-  100% { 
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(254, 90, 29, 0);
-  }
-}
-
-/* Voice recognition status indicator */
-.voice-status {
-  @apply flex items-center justify-center text-xs;
-  @apply transition-all duration-300;
-}
-
-.voice-status.listening {
-  @apply text-green-500;
-}
-
-.voice-status.error {
-  @apply text-red-500;
-}
-
-.voice-status.idle {
-  @apply text-gray-400;
+  /* @apply text-white/70; */
+  color: rgba(255, 255, 255, 0.7);
 }
