@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useGemini } from '@/components/copilot/providers/GeminiProvider'; // Use the central context
-// Correct the import name using an alias
 import { ChatInputBox as ChatInput } from '@/components/ui/ai-chat/input/ChatInputBox'; 
-import { ChatMessages } from '@/components/ui/ai-chat/ChatMessageList';
+// Correct import name for ChatMessageList
+import { ChatMessageList } from '@/components/ui/ai-chat/ChatMessageList';
 import { FilePreview } from '@/components/ui/ai-chat/input/MediaPreview';
 import { ConnectionStatusIndicator } from '@/components/ui/ai-chat/ConnectionStatusIndicator'; 
 import { TypingIndicator } from '@/components/ui/ai-chat/TypingIndicator';
@@ -135,7 +135,12 @@ export function WebSocketChat() {
 
       {/* Message List Area */}
       <div className="flex-grow overflow-y-auto p-4 space-y-4">
-        <ChatMessages messages={contextMessages.map(msg => ({...msg, isUser: msg.role === 'user'}))} /> 
+        {/* Use the imported ChatMessageList component */}
+        <ChatMessageList 
+           messages={contextMessages.map(msg => ({...msg, isUser: msg.role === 'user'}))} 
+           // Pass other necessary props if ChatMessageList requires them
+           showMessages={true} // Assume we always show messages in this component
+        /> 
         {contextIsProcessing && <TypingIndicator />} 
         <div ref={localMessageEndRef} />
       </div>
@@ -156,11 +161,7 @@ export function WebSocketChat() {
           onKeyDown={handleKeyDown} // Use Enter key handler
           placeholder="Ask anything or drop a file..."
           disabled={!isConnected || contextIsProcessing}
-          // Need to add props for file input button and send button interaction
-          // onSend={handleSendMessage} - This might be triggered by button in actual ChatInput component
-          // onFileChange={handleFileUpload} - This might be triggered by button
         />
-        {/* Need to add the action buttons (send, file upload) here or as part of ChatInput */}
       </div>
     </div>
   );
