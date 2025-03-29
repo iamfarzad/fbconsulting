@@ -4,7 +4,7 @@ import { toast } from '@/components/ui/use-toast';
 import API_CONFIG from '@/config/apiConfig'; 
 import { v4 as uuidv4 } from 'uuid'; 
 
-// Define Message structure (can be moved to types later)
+// --- Types --- (Consider moving to a shared types file)
 interface ProviderMessage {
   id: string;
   role: 'user' | 'assistant' | 'system' | 'error';
@@ -13,7 +13,6 @@ interface ProviderMessage {
   // Add other relevant fields like files for display?
 }
 
-// Define WebSocket message format for outgoing messages
 interface OutgoingWebSocketMessage {
   type: 'text_message' | 'multimodal_message';
   text?: string | null;
@@ -22,17 +21,14 @@ interface OutgoingWebSocketMessage {
   enableTTS?: boolean;
 }
 
-// Define structure for incoming messages (simplified)
 interface IncomingWebSocketMessage {
   type: string;
   content?: string;
   error?: string;
   status?: string;
-  // Add fields for audio info if needed
   size?: number;
   format?: string;
 }
-
 
 interface GeminiContextType {
   sendMessage: (message: OutgoingWebSocketMessage) => Promise<void>; // Accept full message object
@@ -46,6 +42,7 @@ interface GeminiContextType {
   clearMessages: () => void; // Add clear messages function
   // TODO: Add audio state/controls if needed
 }
+// ---
 
 const GeminiContext = createContext<GeminiContextType | null>(null);
 
@@ -73,21 +70,15 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
   const clientIdRef = useRef<string>(uuidv4()); // Generate client ID once
 
   const connectWebSocket = useCallback(() => {
-    // Prevent multiple connection attempts
     if (isConnecting || wsRef.current?.readyState === WebSocket.OPEN) return;
-
     if (reconnectTimeoutRef.current) window.clearTimeout(reconnectTimeoutRef.current);
     reconnectTimeoutRef.current = null;
-
     setIsConnecting(true);
-    setError(null); // Clear previous errors on new attempt
-    
+    setError(null);
     const wsUrl = `${API_CONFIG.WS_BASE_URL}${API_CONFIG.WEBSOCKET.PATH}${clientIdRef.current}`;
     console.log('[GeminiProvider] Connecting to:', wsUrl);
-
     try {
       const ws = new WebSocket(wsUrl);
-
       ws.onopen = () => {
         console.log('[GeminiProvider] WebSocket connected');
         setIsConnected(true);
@@ -100,42 +91,45 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
         try {
           if (event.data instanceof Blob) {
              console.log("[GeminiProvider] Received audio blob - handling needed.");
-             // TODO: Implement audio handling logic (e.g., emitting an event, updating context state)
+             // TODO: Implement audio handling
              return;
           }
-
           const data = JSON.parse(event.data) as IncomingWebSocketMessage;
           console.log("[GeminiProvider] Received message:", data);
 
-          // Append/Update messages based on type
-          if (data.type === 'text' && data.content) {
-             setMessages(prev => {
-               const lastMsg = prev[prev.length - 1];
-               if (lastMsg?.role === 'assistant') {
-                 // Append to last assistant message
-                 const updated = [...prev];
-                 updated[prev.length-1] = { ...lastMsg, content: data.content }; // Update content
-                 return updated;
-               } else {
-                 // Add new assistant message
-                 return [...prev, { id: uuidv4(), role: 'assistant', content: data.content, timestamp: Date.now() }];
-               }
-             });
-          } else if (data.type === 'complete') {
+          // --- Message Handling Logic --- 
+          setMessages(prev => {
+            const lastMsg = prev[prev.length - 1];
+            if (data.type === 'text' && data.content) {
+              if (lastMsg?.role === 'assistant' && !contextIsProcessing /* Avoid appending to old message if new one started */) {
+                // Append to last assistant message content if still processing same response
+                // Best practice: Backend should send message IDs to reliably update.
+                // Simple approach for now: Update the last assistant message.
+                const updated = [...prev];
+                updated[prev.length-1] = { ...lastMsg, content: data.content }; 
+                return updated;
+              } else {
+                // Add new assistant message
+                return [...prev, { id: uuidv4(), role: 'assistant', content: data.content, timestamp: Date.now() }];
+              }
+            } else if (data.type === 'error' && data.error) {
+               return [...prev, { id: uuidv4(), role: 'error', content: data.error, timestamp: Date.now() }];
+            }
+            // Return previous state if message type isn't handled for display
+            return prev; 
+          });
+          // --- End Message Handling --- 
+
+          // --- State Update Logic --- 
+          if (data.type === 'complete') {
              setIsProcessing(false);
           } else if (data.type === 'error' && data.error) {
              setError(data.error);
-             setMessages(prev => [...prev, { id: uuidv4(), role: 'error', content: data.error!, timestamp: Date.now() }]);
              setIsProcessing(false);
              toast({ title: 'Server Error', description: data.error, variant: 'destructive' });
-          } else if (data.type === 'audio_chunk_info'){
-             // console.debug("Received audio info", data);
           } else if (data.type === 'pong') {
-             // console.debug("Received pong from server");
-          } else if (data.type !== 'server_ping') { // Ignore server pings in message logic
-             console.warn("[GeminiProvider] Unhandled message type:", data.type);
+            // console.debug("Received pong from server");
           }
-
         } catch (e) {
           console.error('[GeminiProvider] Failed to parse message:', e, event.data);
         }
@@ -143,7 +137,7 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
 
       ws.onerror = (event) => {
         console.error('[GeminiProvider] WebSocket error:', event);
-        setError('Connection error occurred.'); // Keep error concise for UI
+        setError('Connection error occurred.');
         setIsConnected(false);
         setIsConnecting(false);
       };
@@ -153,21 +147,16 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
         setIsConnected(false);
         setIsConnecting(false);
         wsRef.current = null;
-        
-        if (event.code !== 1000 && reconnectAttemptsRef.current < API_CONFIG.DEFAULT_RECONNECT_ATTEMPTS) { // Don't auto-reconnect on normal close (1000)
+        if (event.code !== 1000 && reconnectAttemptsRef.current < API_CONFIG.DEFAULT_RECONNECT_ATTEMPTS) {
           reconnectAttemptsRef.current++;
           const delay = API_CONFIG.WEBSOCKET.RECONNECT_DELAY * Math.pow(2, reconnectAttemptsRef.current - 1);
           console.log(`[GeminiProvider] Reconnecting attempt ${reconnectAttemptsRef.current} in ${delay}ms...`);
-          reconnectTimeoutRef.current = window.setTimeout(() => {
-            reconnectTimeoutRef.current = null;
-            connectWebSocket();
-          }, delay);
+          reconnectTimeoutRef.current = window.setTimeout(() => { reconnectTimeoutRef.current = null; connectWebSocket(); }, delay);
         } else if (event.code !== 1000) {
           setError('Failed to reconnect after multiple attempts.');
           toast({ title: "Connection Lost", description: "Could not reconnect.", variant: "destructive" });
         }
       };
-
       wsRef.current = ws;
     } catch (err) {
       console.error('[GeminiProvider] Error creating WebSocket:', err);
@@ -175,91 +164,70 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
       setError('Failed to create WebSocket connection');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isConnecting]); // Only re-run if not already connecting
+  }, [isConnecting]); 
 
   const reconnect = useCallback(() => {
     console.log("[GeminiProvider] Manual reconnect triggered.");
-    if (wsRef.current) {
-      wsRef.current.close(1000, "Manual Reconnect"); // Close existing first
-      wsRef.current = null;
-    }
-    reconnectAttemptsRef.current = 0; // Reset attempts for manual reconnect
+    if (wsRef.current) wsRef.current.close(1000, "Manual Reconnect");
+    reconnectAttemptsRef.current = 0;
     setError(null);
+    setIsProcessing(false); // Reset processing on reconnect
     connectWebSocket();
   }, [connectWebSocket]);
 
   // Initial connection and ping setup
   useEffect(() => {
-    connectWebSocket(); // Attempt initial connection
-    
+    connectWebSocket();
     const pingInterval = setInterval(() => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
-        try {
-          // console.debug("[GeminiProvider] Sending ping");
-          wsRef.current.send(JSON.stringify({ type: 'ping' }));
-        } catch (e) {
-          console.error('[GeminiProvider] Error sending ping:', e);
-        }
+        try { wsRef.current.send(JSON.stringify({ type: 'ping' })); }
+        catch (e) { console.error('[GeminiProvider] Error sending ping:', e); }
       }
     }, API_CONFIG.DEFAULT_PING_INTERVAL);
-    
-    // Cleanup on unmount
     return () => {
-      console.log("[GeminiProvider] Unmounting - cleaning up.");
+      console.log("[GeminiProvider] Unmounting.");
       clearInterval(pingInterval);
       if (reconnectTimeoutRef.current) window.clearTimeout(reconnectTimeoutRef.current);
       wsRef.current?.close(1000, "Component Unmounted");
-      wsRef.current = null;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only once on mount
+  }, []); 
 
   // sendMessage now accepts the structured message
   const sendMessage = useCallback(async (message: OutgoingWebSocketMessage) => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-       setError('Cannot send message: WebSocket not connected.');
-       console.error('Cannot send message: WebSocket not connected.');
-       // Optionally try reconnecting before throwing error
-       // reconnect(); 
+       setError('Cannot send: WebSocket not connected.');
+       console.error('Cannot send: WebSocket not connected.');
+       reconnect(); // Attempt reconnect
        throw new Error('WebSocket is not connected');
     }
-
-    // Add user message optimistically to local state (if applicable)
-    // This depends on whether the calling component manages its own display messages
-    // Maybe GeminiProvider shouldn't manage the UI message list directly?
-    // For now, let's assume the caller adds the user message.
-    
-    // We *do* set the processing state here
     setIsProcessing(true); 
-    setError(null); // Clear previous errors
-
+    setError(null); 
     return new Promise<void>((resolve, reject) => {
       try {
         console.log("[GeminiProvider] Sending message:", message);
         wsRef.current?.send(JSON.stringify(message));
-        resolve(); // Resolve promise once message is sent
+        resolve(); 
       } catch (error) {
         console.error('[GeminiProvider] Error sending message:', error);
         setError('Failed to send message');
-        setIsProcessing(false); // Reset processing on send error
+        setIsProcessing(false); 
         reject(error);
       }
     });
-  }, [/* Add dependencies like isConnected? Maybe not needed due to initial check */]);
+  // Add dependencies that affect sending logic
+  }, [reconnect]); 
 
   const resetError = useCallback(() => { setError(null); }, []);
-  const clearMessages = useCallback(() => { 
-    setMessages([]); 
-    // TODO: Send reset signal to backend if necessary? 
-  }, []);
+  const clearMessages = useCallback(() => { setMessages([]); }, []);
 
   // Context value
-  const value = {
+  const value: GeminiContextType = {
     sendMessage,
-    messages, // Provide the managed messages
+    messages, 
     isConnected,
     isConnecting,
-    isProcessing, // Provide processing state
+    isProcessing, 
     error,
     resetError,
     reconnect,
