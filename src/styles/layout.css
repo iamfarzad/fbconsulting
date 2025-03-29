@@ -1,24 +1,97 @@
 
-/* Bento grid styles - simplified */
+/* Bento grid styles - simplified using direct CSS and media queries */
 .bento-grid {
-  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+  /* @apply grid grid-cols-1 gap-6; */
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.5rem; /* gap-6 */
+}
+
+@media (min-width: 768px) { /* md breakpoint */
+  .bento-grid {
+    /* @apply md:grid-cols-2; */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) { /* lg breakpoint */
+  .bento-grid {
+    /* @apply lg:grid-cols-3; */
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .bento-card {
-  @apply relative overflow-hidden rounded-md border border-border bg-white dark:bg-black transition-all duration-300;
+  /* @apply relative overflow-hidden rounded-md border border-border bg-white dark:bg-black transition-all duration-300; */
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.375rem; /* rounded-md */
+  border-width: 1px;
+  border-style: solid;
+  border-color: hsl(var(--border)); /* border-border */
+  background-color: hsl(var(--background)); /* bg-white replacement using theme */
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+.dark .bento-card {
+  /* @apply dark:bg-black; - Already handled by bg-background in dark mode? Let's be explicit */
+  background-color: hsl(var(--background)); 
 }
 
 .bento-card:hover {
-  @apply -translate-y-1;
+  /* @apply -translate-y-1; */
+  transform: translateY(-0.25rem);
 }
 
-/* Container and spacing */
+/* Container and spacing - Replace potentially problematic applies */
 .section-container {
-  @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8;
+  /* @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8; */
+  max-width: 72rem; /* max-w-6xl */
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem; /* px-4 */
+  padding-right: 1rem; /* px-4 */
 }
+
+@media (min-width: 640px) { /* sm breakpoint */
+  .section-container {
+    /* @apply sm:px-6; */
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) { /* lg breakpoint */
+  .section-container {
+    /* @apply lg:px-8; */
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
 
 .section-spacing {
-  @apply py-12 md:py-16 lg:py-20;
+  /* @apply py-12 md:py-16 lg:py-20; */
+  padding-top: 3rem; /* py-12 */
+  padding-bottom: 3rem; /* py-12 */
+}
+
+@media (min-width: 768px) { /* md breakpoint */
+  .section-spacing {
+    /* @apply md:py-16; */
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}
+
+@media (min-width: 1024px) { /* lg breakpoint */
+  .section-spacing {
+    /* @apply lg:py-20; */
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
 }
 
 /* Simple background patterns */
