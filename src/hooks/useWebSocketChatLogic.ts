@@ -41,6 +41,31 @@ export function useWebSocketChatLogic() {
   // MOVE Files state declaration BEFORE handleSendMessage
   const [files, setFiles] = useState<FileState[]>([]);
 
+  // --- Audio Handling (Define BEFORE handleIncomingMessage) ---
+  const handleAudioChunk = useCallback((audioBlob: Blob) => {
+    try {
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audio.play().catch(error => {
+        console.error('Error playing audio:', error);
+        // Optionally show a toast to the user
+        // toast({ title: "Audio Playback Error", description: "Could not play audio response.", variant: "destructive" });
+      });
+      
+      // Clean up the audio URL when done
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+      };
+      audio.onerror = (e) => {
+        console.error('Audio element error:', e);
+        URL.revokeObjectURL(audioUrl); // Clean up even on error
+      };
+    } catch (error) {
+      console.error('Error processing audio Blob:', error);
+    }
+  }, []); // Empty dependency array assuming no external dependencies needed
+
+
   // --- WebSocket Connection Logic ---
   const connectWebSocket = useCallback(() => {
       if (socketRef.current || status === 'connecting') {
@@ -53,7 +78,9 @@ export function useWebSocketChatLogic() {
       
       // Construct URL correctly using WS_BASE_URL and WEBSOCKET.PATH
       const wsUrl = `${API_CONFIG.WS_BASE_URL}${API_CONFIG.WEBSOCKET.PATH}${clientIdRef.current}`;
-      console.log(`Connecting to: ${wsUrl}`);
+      
+      // **** ADD EXPLICIT LOG HERE ****
+      console.log(`>>> Trying to connect WebSocket to: ${wsUrl}`); 
       
       let socket: WebSocket;
       try {
@@ -132,9 +159,8 @@ export function useWebSocketChatLogic() {
   const handleIncomingMessage = useCallback((event: MessageEvent) => {
       try {
           if (event.data instanceof Blob) {
-              // We expect backend to send raw audio bytes, wrap in Blob if necessary
-              // Or handle ArrayBuffer directly if backend sends that
-              handleAudioChunk(new Blob([event.data], { type: 'audio/mp3' })); // Assuming mp3 for now
+              // Use the handleAudioChunk defined above
+              handleAudioChunk(new Blob([event.data], { type: 'audio/mp3' })); // Assuming mp3
               return;
           }
 
@@ -183,8 +209,8 @@ export function useWebSocketChatLogic() {
       } catch (err) {
           console.error('Error handling incoming message:', err, event.data);
       }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [handleAudioChunk, toast]); // handleAudioChunk is stable
+  // Pass handleAudioChunk in dependency array
+  }, [handleAudioChunk, toast]); 
 
   // --- Effect to Initiate Connection --- 
   useEffect(() => {
