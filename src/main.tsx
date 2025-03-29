@@ -7,7 +7,7 @@ import './index.css'
 import './styles/voice-ui.css'
 // Import HelmetProvider for SEO
 import { HelmetProvider } from 'react-helmet-async'
-import { GeminiProvider } from '@/components/copilot/providers/GeminiProvider'
+// import { GeminiProvider } from '@/components/copilot/providers/GeminiProvider' // Temporarily commented out
 
 // Add error boundary for development debugging
 if (import.meta.env.DEV) {
@@ -26,9 +26,9 @@ if (import.meta.env.DEV) {
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <HelmetProvider>
-      <GeminiProvider>
+      {/* <GeminiProvider> */}
         <App />
-      </GeminiProvider>
+      {/* </GeminiProvider> */}
     </HelmetProvider>
   </React.StrictMode>,
 )
