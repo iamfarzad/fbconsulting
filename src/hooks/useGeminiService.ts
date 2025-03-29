@@ -6,7 +6,7 @@ export const useGeminiService = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [response, setResponse] = useState(null);
-  const [messages, setMessages] = useState([]); // Ensure this is initialized as an array
+  const [messages, setMessages] = useState([]);
   
   const sendMessage = useCallback(async (message) => {
     setLoading(true);
@@ -65,13 +65,22 @@ export const useGeminiService = () => {
     setError(null);
   }, []);
   
+  // Generate and play audio (mock implementation for interface compatibility)
+  const generateAndPlayAudio = useCallback((text) => {
+    console.log("Would play audio for:", text);
+    // This is a placeholder implementation
+    return Promise.resolve();
+  }, []);
+  
   return {
     loading,
     error,
     response,
-    messages, // Make sure we expose the messages array
+    messages,
     sendMessage,
-    resetMessages
+    resetMessages,
+    isLoading: loading, // Alias for compatibility
+    generateAndPlayAudio // Added for GeminiCopilotProvider
   };
 };
 
