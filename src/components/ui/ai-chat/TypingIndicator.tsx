@@ -6,21 +6,14 @@ interface TypingIndicatorProps {
   className?: string;
 }
 
-export function TypingIndicator({ className }: TypingIndicatorProps) {
+export const TypingIndicator: React.FC<TypingIndicatorProps> = ({ className }) => {
   return (
-    <div className={cn("flex space-x-1 items-center", className)}>
-      <div className="text-sm text-muted-foreground mr-2">AI is typing</div>
-      <div className="w-1 h-1 bg-primary/50 rounded-full animate-pulse"></div>
-      <div className="w-1 h-1 bg-primary/50 rounded-full animate-pulse delay-75"></div>
-      <div className="w-1 h-1 bg-primary/50 rounded-full animate-pulse delay-150"></div>
-      <style jsx>{`
-        .delay-75 {
-          animation-delay: 0.2s;
-        }
-        .delay-150 {
-          animation-delay: 0.4s;
-        }
-      `}</style>
+    <div className={cn("flex items-center space-x-1.5", className)}>
+      <div className="w-2 h-2 rounded-full bg-primary/70 animate-pulse" style={{ animationDelay: "0ms" }} />
+      <div className="w-2 h-2 rounded-full bg-primary/70 animate-pulse" style={{ animationDelay: "200ms" }} />
+      <div className="w-2 h-2 rounded-full bg-primary/70 animate-pulse" style={{ animationDelay: "400ms" }} />
     </div>
   );
-}
+};
+
+export default TypingIndicator;
