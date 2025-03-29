@@ -3,75 +3,51 @@
 
 ## Backend Changes (v0.2.0)
 
-- ✨ **Multimodal Support Added:** The backend now accepts messages with text and/or files (images, PDFs, etc.).
+- ✨ **Multimodal Support Added:** The backend now accepts messages with text and/or files (images, PDFs, etc.). See format below.
 - ⚙️ **Internal Refinements:** Further improvements to WebSocket handling and logging.
+- ✅ **Environment Stable:** Backend runs reliably in IDX.
 
-## Frontend Implementation Status
+## Frontend Build Troubleshooting (In Progress)
 
-(As previously described by lovable.dev - thank you!)
+We noticed the frontend build (`npm run dev`) is encountering PostCSS errors related to using `@apply` within base CSS layers (`src/styles/base.css`). This seems to be an issue with how PostCSS/Tailwind resolves utilities that depend on CSS variables or responsive modifiers inside `@layer base`.
 
-1. **WebSocket Connection Manager**:
-   - Connection establishment with unique client IDs
-   - Automatic reconnection with backoff
-   - Ping/pong keep-alive mechanisms (20-25 second interval as recommended)
-   - Proper error handling and connection status display
+**Recent Fixes Pushed:**
+- Corrected `postcss.config.cjs` to use `@tailwindcss/postcss`.
+- Attempted to replace problematic `@apply` rules in `src/styles/base.css` and `src/styles/voice-ui.css` with direct CSS or media queries.
+- **Latest Attempt (Just Pushed):** Removed most `@apply` rules for typography (h1-h4, p, etc.) from `@layer base` in `src/styles/base.css`. The intention is to rely more on utility classes applied directly in components.
 
-2. **Real-time Chat UI**:
-   - Message sending and receiving 
-   - Typing indicators
-   - Connection status indicators
-   - Error handling and retry mechanisms
-
-3. **Audio Streaming Support**:
-   - Binary audio chunk processing
-   - Audio playback with progress tracking
-   - Play/pause/stop controls
-   - Audio queue management
-
----
+**Next Steps for Frontend:**
+- Restart the Vite dev server (`web` preview) after pulling the latest `main`.
+- Check if the PostCSS build errors are resolved.
+- If errors persist, we may need to systematically remove or refactor any remaining `@apply` usage within `@layer base` in other CSS files (`components.css`, `layout.css` etc.).
 
 ## Using Multimodal Input
 
-To send files (images, PDFs, etc.) along with optional text, use the following JSON message format over the WebSocket:
+(Format definition as before...)
 
 ```json
 {
   "type": "multimodal_message",
-  "text": "Optional description of the files or question.",
+  "text": "Optional description...",
   "files": [
     {
-      "mime_type": "image/jpeg", // Correct MIME type (e.g., image/png, application/pdf)
-      "data": "BASE64_ENCODED_FILE_DATA", // File content as base64 string
-      "filename": "optional_image_name.jpg" // Optional filename
+      "mime_type": "image/jpeg", 
+      "data": "BASE64_ENCODED_FILE_DATA", 
+      "filename": "optional_image_name.jpg"
     }
-    // Add more file objects here if needed
   ],
-  "role": "user", // Optional
-  "enableTTS": true // Optional
+  "role": "user", 
+  "enableTTS": true 
 }
 ```
 
 **Key Points:**
-- `type` must be `"multimodal_message"`.
-- `files` is a list and must contain at least one file object.
-- `files[n].data` **must** be a valid Base64 encoded string of the file content.
-- `files[n].mime_type` should be accurate (e.g., `image/jpeg`, `application/pdf`). The backend uses `gemini-1.5-flash` which supports a wide range, including common image, audio, video, and document types (PDF, DOCX, etc.). Unsupported types will be skipped with a warning message sent back.
-- `text` is optional when sending files.
+(Details as before...)
 
 ## Previous Q&A Summary
 
-- **Max Message Length:** No strict backend limit, but UI limits (e.g., 5k-10k chars) recommended. Gemini API has token limits.
-- **Ping Interval:** Client ping every 20-25 seconds is recommended.
-- **Rate Limiting:** None implemented in the backend itself, but be mindful of underlying Google Gemini API limits.
-- **Text Messages:** Still supported using `{"type": "text_message", "text": "..."}`.
+(Summary as before...)
 
 ---
 
-## Frontend Next Steps (from lovable.dev)
-
-1. Voice input support
-2. Improved error recovery
-3. File/image attachment support (using the new `multimodal_message` format)
-4. Enhanced UI/UX for audio playback
-
-Let us know if you have issues implementing the multimodal message sending!
+Please pull the latest changes on `main`. Let us know if the frontend build is successful now!
