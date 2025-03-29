@@ -1,23 +1,20 @@
 
-/* Glassmorphism */
-.glassmorphism {
+/* Base Glassmorphism Style */
+.glassmorphism-base { 
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
-.dark .glassmorphism {
+.dark .glassmorphism-base {
   background: rgba(17, 25, 40, 0.75);
   border: 1px solid rgba(255, 255, 255, 0.125);
 }
 
-/* Frosted glass */
-.frosted-glass {
-  @apply glassmorphism rounded-xl border border-white/10;
-}
-
-/* Glass card */
-.glass-card {
-  @apply glassmorphism rounded-xl p-6 transition-all duration-300;
-}
+/* 
+  Removed .frosted-glass and .glass-card rules.
+  These should be implemented by applying utility classes directly 
+  in components, potentially including .glassmorphism-base if needed.
+  e.g., className="glassmorphism-base rounded-xl border border-white/10 ..."
+*/
