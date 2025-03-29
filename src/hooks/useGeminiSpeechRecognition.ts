@@ -55,10 +55,10 @@ export const useGeminiSpeechRecognition = (
       // Show toast notification that we're listening
       toast({
         title: "Listening...",
-        description: "Speak now. Your voice will be converted to text using Gemini.",
+        description: "Speak now. Your voice will be converted to text.",
       });
       
-      // Record audio
+      // Record audio using our utility function
       const audioBlob = await recordAudio(10000); // 10 seconds max
       
       if (!audioBlob) {
@@ -71,14 +71,14 @@ export const useGeminiSpeechRecognition = (
       
       console.log('Processing audio with Gemini API, key:', apiKey ? 'Available' : 'Not available');
       
-      // Process audio with Gemini
+      // Process audio with Gemini using our updated service
       if (!apiKey) {
         throw new Error('Gemini API key is not available');
       }
       
       const transcription = await processAudioInput(audioBlob, {
         apiKey,
-        model: 'gemini-2.0-pro', // Updated to correct model name
+        model: 'gemini-pro', // Updated model name
         speechConfig: {
           voice_name: 'Charon'
         }

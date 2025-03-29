@@ -368,6 +368,10 @@ export function useWebSocketChatLogic() {
     setFiles(prev => prev.filter((_, i) => i !== index)); 
   }, []);
   
+  const clearFiles = useCallback(() => {
+    setFiles([]);
+  }, []);
+  
   const clearMessages = useCallback(() => { 
     setMessages([]); 
   }, []);
@@ -384,7 +388,8 @@ export function useWebSocketChatLogic() {
     setFiles, 
     handleSendMessage, 
     handleFileUpload, 
-    removeFile, 
+    removeFile,
+    clearFiles, 
     clearMessages 
   };
 }
