@@ -46,7 +46,7 @@
 
   body {
     font-feature-settings: "rlig" 1, "calt" 1;
-    @apply antialiased;
+    /* Removed @apply antialiased; - Rely on browser defaults or apply in component if needed */
   }
   
   /* Removed problematic @apply rules for base typography */
