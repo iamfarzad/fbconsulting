@@ -1,7 +1,7 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useWebSocketChat } from '@/features/gemini/hooks/useWebSocketChat';
-import { AIMessage } from '@/features/gemini/types/messageTypes';
+import { AIMessage } from '@/services/chat/messageTypes';
 
 // Define the Chat Context type
 export interface ChatContextType {
@@ -23,6 +23,7 @@ export interface ChatContextType {
     disconnect: () => void;
     stopAudio: () => void;
     setInputValue: (value: string) => void;
+    setShowMessages: (show: boolean) => void;
   };
   error: string | null;
 }
@@ -52,6 +53,7 @@ export const ChatProvider: React.FC<{
   const [isInitialized, setIsInitialized] = useState(false);
   const [showMessages, setShowMessages] = useState(false);
   const [inputValue, setInputValue] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Use the WebSocket Chat hook
   const {
@@ -117,7 +119,8 @@ export const ChatProvider: React.FC<{
       connect,
       disconnect,
       stopAudio,
-      setInputValue
+      setInputValue,
+      setShowMessages
     },
     error
   };

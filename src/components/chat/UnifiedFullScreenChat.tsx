@@ -3,16 +3,13 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ChatProvider, useChat } from '@/contexts/ChatContext';
+import { useChat } from '@/contexts/ChatContext';
 import { UnifiedChatMessageList } from './UnifiedChatMessageList';
 import { UnifiedChatInput } from './UnifiedChatInput';
 import { UnifiedFullScreenChatProps } from '@/types/chat';
 
-// Inner component that uses the ChatContext
-const FullScreenChatContent: React.FC<{ 
-  onMinimize: () => void, 
-  placeholderText?: string
-}> = ({
+// Full screen chat component that uses the ChatContext
+const UnifiedFullScreenChat: React.FC<UnifiedFullScreenChatProps> = ({
   onMinimize,
   placeholderText = "Ask me anything..."
 }) => {
@@ -62,23 +59,6 @@ const FullScreenChatContent: React.FC<{
         <UnifiedChatInput placeholder={placeholderText} />
       </div>
     </motion.div>
-  );
-};
-
-// Main component that provides the ChatContext
-export const UnifiedFullScreenChat: React.FC<UnifiedFullScreenChatProps> = ({
-  onMinimize,
-  placeholderText,
-  apiKey,
-  modelName
-}) => {
-  return (
-    <ChatProvider apiKey={apiKey} modelName={modelName}>
-      <FullScreenChatContent 
-        onMinimize={onMinimize} 
-        placeholderText={placeholderText} 
-      />
-    </ChatProvider>
   );
 };
 
