@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import API_CONFIG from '@/config/apiConfig'; // Use the updated config
+import { v4 as uuidv4 } from 'uuid'; // Import uuid at the top
 
 interface WebSocketMessage {
   type: string;
@@ -55,9 +56,9 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
 
     setIsConnecting(true);
     
-    // Use v4 UUID for client ID
-    const { v4: uuidv4 } = require('uuid');
-    const clientId = uuidv4();
+    // Use v4 UUID for client ID (using import)
+    // const { v4: uuidv4 } = require('uuid'); // REMOVED require()
+    const clientId = uuidv4(); // Use imported function
     
     // Properly construct the WebSocket URL using API_CONFIG
     const wsBaseUrl = API_CONFIG.WS_BASE_URL;
@@ -142,7 +143,7 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
       setIsConnecting(false);
       setError('Failed to create WebSocket connection');
     }
-  }, [isConnecting, error]);
+  }, [isConnecting, error]); // Removed connectWebSocket from deps to break potential cycle
 
   const reconnect = useCallback(() => {
     if (wsRef.current) {
@@ -185,6 +186,7 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
     }
 
     const message = {
+      type: 'text_message', // Explicitly set type for text message
       text: content,
       role: 'user',
       enableTTS: true
