@@ -9,7 +9,7 @@ import { UnifiedChatInput } from './UnifiedChatInput';
 import { UnifiedFullScreenChatProps } from '@/types/chat';
 
 // Full screen chat component that uses the ChatContext
-const UnifiedFullScreenChat: React.FC<UnifiedFullScreenChatProps> = ({
+export const UnifiedFullScreenChat: React.FC<UnifiedFullScreenChatProps> = ({
   onMinimize,
   placeholderText = "Ask me anything..."
 }) => {
