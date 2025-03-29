@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import API_CONFIG from '@/config/apiConfig';
 
 // WebSocket connection states
 type ConnectionState = 'disconnected' | 'connecting' | 'connected';
@@ -40,19 +41,24 @@ export function useGeminiWebSocket(
   // WebSocket instance reference
   const ws = useRef<WebSocket | null>(null);
   const reconnectAttempt = useRef<number>(0);
-  const maxReconnectAttempts = options.reconnectAttempts || 5;
-  const pingInterval = options.pingInterval || 20000; // 20 seconds
-  const pingTimeout = options.pingTimeout || 5000; // 5 seconds
+  const maxReconnectAttempts = options.reconnectAttempts || API_CONFIG.DEFAULT_RECONNECT_ATTEMPTS;
+  const pingInterval = options.pingInterval || API_CONFIG.DEFAULT_PING_INTERVAL;
+  const pingTimeout = options.pingTimeout || API_CONFIG.WEBSOCKET.CONNECT_TIMEOUT;
   
   // Timers
   const pingIntervalId = useRef<number | null>(null);
   const pingTimeoutId = useRef<number | null>(null);
   
-  // Default WebSocket URL
-  const wsUrl = options.url || 
-    (typeof window !== 'undefined' && window.location.protocol === 'https:' 
-      ? 'wss://api.yourdomain.com/ws/'  // Replace with your actual WebSocket endpoint
-      : 'ws://localhost:8000/ws/');
+  // Get WebSocket URL from config
+  const getWebSocketUrl = useCallback(() => {
+    // If a custom URL was provided in options, use that
+    if (options.url) return options.url;
+    
+    // Otherwise construct URL from API_CONFIG
+    const wsBaseUrl = API_CONFIG.WS_BASE_URL;
+    const wsPath = API_CONFIG.WEBSOCKET.PATH;
+    return `${wsBaseUrl}${wsPath}${clientId}`;
+  }, [clientId, options.url]);
     
   // Clean up timers
   const clearTimers = useCallback(() => {
@@ -98,9 +104,11 @@ export function useGeminiWebSocket(
       setConnectionState('connecting');
       setError(null);
       
-      // Create WebSocket connection with client ID
-      const fullUrl = `${wsUrl}${clientId}`;
-      ws.current = new WebSocket(fullUrl);
+      // Get WebSocket URL
+      const wsUrl = getWebSocketUrl();
+      console.log(`useGeminiWebSocket: Connecting to ${wsUrl}`);
+      
+      ws.current = new WebSocket(wsUrl);
       
       // Handle WebSocket events
       ws.current.onopen = () => {
@@ -129,7 +137,7 @@ export function useGeminiWebSocket(
           reconnectAttempt.current++;
           
           // Exponential backoff
-          const delay = Math.min(1000 * Math.pow(2, reconnectAttempt.current), 30000);
+          const delay = Math.min(API_CONFIG.WEBSOCKET.RECONNECT_DELAY * Math.pow(2, reconnectAttempt.current), 30000);
           setTimeout(() => connect(), delay);
           
           setError(`Connection closed. Reconnecting (${reconnectAttempt.current}/${maxReconnectAttempts})...`);
@@ -241,7 +249,7 @@ export function useGeminiWebSocket(
       
       if (handlers.onError) handlers.onError(errorMessage);
     }
-  }, [clientId, wsUrl, handlers, maxReconnectAttempts, clearTimers]);
+  }, [clientId, getWebSocketUrl, handlers, maxReconnectAttempts, clearTimers, setupPingPong]);
   
   // Setup ping/pong for keepalive
   const setupPingPong = useCallback(() => {
@@ -256,7 +264,7 @@ export function useGeminiWebSocket(
         
         // Set timeout for pong response
         pingTimeoutId.current = window.setTimeout(() => {
-          console.warn('WebSocket ping timeout - no pong received');
+          console.warn('useGeminiWebSocket: WebSocket ping timeout - no pong received');
           closeConnection();
           
           // Attempt to reconnect

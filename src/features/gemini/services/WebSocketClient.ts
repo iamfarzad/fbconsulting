@@ -9,14 +9,14 @@ export class WebSocketClient {
   private url: string; 
   private options: WebSocketClientOptions;
   private reconnectAttempts = 0;
-  private pingIntervalId: NodeJS.Timeout | null = null; // Use NodeJS.Timeout for clarity
-  private connectionTimeoutId: NodeJS.Timeout | null = null; // Use NodeJS.Timeout
+  private pingIntervalId: NodeJS.Timeout | null = null;
+  private connectionTimeoutId: NodeJS.Timeout | null = null;
   private clientId: string;
   private suppressErrors: boolean;
   private connectionState: 'disconnected' | 'connecting' | 'connected' = 'disconnected';
   private hasReportedInitialError = false;
 
-  constructor(passedOptions?: Partial<WebSocketClientOptions>) { // Make options optional
+  constructor(passedOptions?: Partial<WebSocketClientOptions>) {
     // Merge default options with passed options
     this.options = {
       autoReconnect: true,
@@ -29,14 +29,18 @@ export class WebSocketClient {
     
     this.clientId = this.options.clientId || uuidv4();
     
-    // **** Log config being used ****
-    console.log(`[WebSocketClient Constructor ${this.clientId}] Using base config:`, { 
-      wsBaseUrl: API_CONFIG.WS_BASE_URL, 
-      wsPath: API_CONFIG.WEBSOCKET.PATH 
+    // Get base URL and path from API_CONFIG
+    const wsBaseUrl = API_CONFIG.WS_BASE_URL;
+    const wsPath = API_CONFIG.WEBSOCKET.PATH;
+    
+    // Log config being used
+    console.log(`[WebSocketClient Constructor ${this.clientId}] Using config:`, { 
+      wsBaseUrl, 
+      wsPath 
     });
 
-    // Construct the full WebSocket URL using API_CONFIG correctly
-    this.url = `${API_CONFIG.WS_BASE_URL}${API_CONFIG.WEBSOCKET.PATH}${this.clientId}`;
+    // Construct the full WebSocket URL using API_CONFIG
+    this.url = `${wsBaseUrl}${wsPath}${this.clientId}`;
     this.suppressErrors = this.options.suppressErrors;
     
     if (this.options.debug) {
@@ -52,7 +56,7 @@ export class WebSocketClient {
 
     try {
       this.connectionState = 'connecting';
-      // **** Log URL right before creating WebSocket ****
+      // Log URL right before creating WebSocket
       console.log(`[WebSocketClient ${this.clientId}] >>> Attempting connect to: ${this.url}`); 
 
       if (typeof WebSocket === 'undefined') throw new Error('WebSocket not supported');
