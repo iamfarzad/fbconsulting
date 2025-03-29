@@ -44,64 +44,24 @@
     --ring: 240 4.9% 83.9%;
   }
 
-  .base-styles {
-    /* Apply the CSS variable directly instead of using @apply */
-    border-color: hsl(var(--border)); 
-    /* Add default width if needed, as @apply border-border would include border-width: 1px */
-    border-width: 1px; 
-  }
+  /* Removed .base-styles class as it caused issues */
 
   body {
-    /* REMOVED @apply text-foreground; */
     font-feature-settings: "rlig" 1, "calt" 1;
     /* Applying base antialiasing is usually safe */
     @apply antialiased;
-    /* Background set via CSS var directly if needed, or rely on defaults/components */
-    /* background-color: hsl(var(--background)); */ 
-    /* color: hsl(var(--foreground)); */ /* Set text color directly if needed */
+    /* Rely on component defaults for background/text color */
   }
   
-  /* Standardized typography - using media queries instead of responsive @apply */
-  h1, .h1 {
-    @apply text-3xl font-semibold leading-tight tracking-tight text-foreground dark:text-white;
-  }
-  @media (min-width: 768px) { /* Tailwind's 'md' breakpoint */
-    h1, .h1 { @apply text-4xl; }
-  }
-
-  h2, .h2 {
-    @apply text-2xl font-semibold leading-tight tracking-tight text-foreground dark:text-white;
-  }
-  @media (min-width: 768px) {
-    h2, .h2 { @apply text-3xl; }
-  }
-
-  h3, .h3 {
-    @apply text-xl font-medium leading-snug text-foreground dark:text-white;
-  }
-  @media (min-width: 768px) {
-     h3, .h3 { @apply text-2xl; }
-  }
-
-  h4, .h4 {
-    /* This one didn't use responsive utilities, should be fine */
-    @apply text-lg font-medium leading-snug text-foreground dark:text-white;
-  }
-  
-  p, .body {
-    /* Replaced @apply text-foreground */
-     color: hsl(var(--foreground)); /* Direct CSS */
-     @apply text-base leading-relaxed dark:text-gray-200; /* Keep others */
-  }
-  
-  .body-sm {
-    /* Replaced @apply text-foreground */
-    color: hsl(var(--foreground)); /* Direct CSS */
-    @apply text-sm leading-relaxed dark:text-gray-200; /* Keep others */
-  }
+  /* 
+   Removed heading (h1-h4) and paragraph (p, .body, .body-sm) 
+   styles using @apply within @layer base. 
+   These should be styled using utility classes directly in components 
+   or rely on Tailwind's default base styles.
+  */
 }
 
-/* Simplified glass styling */
+/* Simplified glass styling - Keep these as they use @apply in the global scope, not @layer base */
 .glass {
   @apply bg-white/10 backdrop-blur-md border border-white/20;
 }
@@ -110,7 +70,7 @@
   @apply bg-white/5 backdrop-blur-md border border-white/10;
 }
 
-/* Simplified animation */
+/* Simplified animation - Keep these */
 .animate-subtle-bounce {
   animation: subtle-bounce 2s ease-in-out infinite;
 }
