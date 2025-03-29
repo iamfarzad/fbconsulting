@@ -1,5 +1,14 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { useWebSocketMessageHandlers } from './useWebSocketMessageHandlers';
+import { useWebSocketPingPong } from './useWebSocketPingPong';
+import { 
+  constructWebSocketUrl, 
+  calculateReconnectDelay,
+  createTextMessage,
+  createMultimodalMessage
+} from '../utils/webSocketUtils';
 import API_CONFIG from '@/config/apiConfig';
 
 // WebSocket connection states
@@ -42,36 +51,28 @@ export function useGeminiWebSocket(
   const ws = useRef<WebSocket | null>(null);
   const reconnectAttempt = useRef<number>(0);
   const maxReconnectAttempts = options.reconnectAttempts || API_CONFIG.DEFAULT_RECONNECT_ATTEMPTS;
+  
+  // Configure ping/pong
   const pingInterval = options.pingInterval || API_CONFIG.DEFAULT_PING_INTERVAL;
   const pingTimeout = options.pingTimeout || API_CONFIG.WEBSOCKET.CONNECT_TIMEOUT;
   
-  // Timers
-  const pingIntervalId = useRef<number | null>(null);
-  const pingTimeoutId = useRef<number | null>(null);
-  
-  // Get WebSocket URL from config
-  const getWebSocketUrl = useCallback(() => {
-    // If a custom URL was provided in options, use that
-    if (options.url) return options.url;
+  // Handler to call when ping times out
+  const handlePingTimeout = useCallback(() => {
+    console.warn('WebSocket ping timeout - closing connection');
     
-    // Otherwise construct URL from API_CONFIG
-    const wsBaseUrl = API_CONFIG.WS_BASE_URL;
-    const wsPath = API_CONFIG.WEBSOCKET.PATH;
-    return `${wsBaseUrl}${wsPath}${clientId}`;
-  }, [clientId, options.url]);
-    
-  // Clean up timers
-  const clearTimers = useCallback(() => {
-    if (pingIntervalId.current) {
-      clearInterval(pingIntervalId.current);
-      pingIntervalId.current = null;
+    if (ws.current) {
+      ws.current.close();
     }
     
-    if (pingTimeoutId.current) {
-      clearTimeout(pingTimeoutId.current);
-      pingTimeoutId.current = null;
-    }
+    // Attempt to reconnect (handled by onclose event)
   }, []);
+  
+  // Use the ping/pong hook
+  const { startPingPong, clearPingTimeout, clearTimers } = useWebSocketPingPong({
+    pingInterval,
+    pingTimeout,
+    onPingTimeout: handlePingTimeout
+  });
   
   // Close existing connection
   const closeConnection = useCallback(() => {
@@ -94,33 +95,14 @@ export function useGeminiWebSocket(
     setConnectionState('disconnected');
   }, [clearTimers]);
   
-  // Setup ping/pong for keepalive
-  const setupPingPong = useCallback(() => {
-    // Clear existing timers
-    clearTimers();
-    
-    // Setup ping interval
-    pingIntervalId.current = window.setInterval(() => {
-      if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-        // Send ping
-        ws.current.send(JSON.stringify({ type: 'ping' }));
-        
-        // Set timeout for pong response
-        pingTimeoutId.current = window.setTimeout(() => {
-          console.warn('useGeminiWebSocket: WebSocket ping timeout - no pong received');
-          closeConnection();
-          
-          // Attempt to reconnect
-          if (reconnectAttempt.current < maxReconnectAttempts) {
-            reconnectAttempt.current++;
-            connect();
-          } else {
-            setError('Connection lost. Maximum reconnection attempts reached.');
-          }
-        }, pingTimeout);
-      }
-    }, pingInterval);
-  }, [clearTimers, closeConnection, maxReconnectAttempts, pingInterval, pingTimeout]);
+  // Use the message handlers hook
+  const { handleMessage } = useWebSocketMessageHandlers({
+    ...handlers,
+    onError: (errorMsg) => {
+      setError(errorMsg);
+      if (handlers.onError) handlers.onError(errorMsg);
+    }
+  });
   
   // Connect to WebSocket server
   const connect = useCallback(() => {
@@ -133,7 +115,7 @@ export function useGeminiWebSocket(
       setError(null);
       
       // Get WebSocket URL
-      const wsUrl = getWebSocketUrl();
+      const wsUrl = constructWebSocketUrl(clientId, options.url);
       console.log(`useGeminiWebSocket: Connecting to ${wsUrl}`);
       
       ws.current = new WebSocket(wsUrl);
@@ -144,7 +126,7 @@ export function useGeminiWebSocket(
         reconnectAttempt.current = 0;
         
         // Setup ping/pong
-        setupPingPong();
+        startPingPong(ws.current!);
         
         // Call onConnect handler
         if (handlers.onConnect) handlers.onConnect();
@@ -165,7 +147,7 @@ export function useGeminiWebSocket(
           reconnectAttempt.current++;
           
           // Exponential backoff
-          const delay = Math.min(API_CONFIG.WEBSOCKET.RECONNECT_DELAY * Math.pow(2, reconnectAttempt.current), 30000);
+          const delay = calculateReconnectDelay(reconnectAttempt.current);
           setTimeout(() => connect(), delay);
           
           setError(`Connection closed. Reconnecting (${reconnectAttempt.current}/${maxReconnectAttempts})...`);
@@ -186,85 +168,7 @@ export function useGeminiWebSocket(
       };
       
       ws.current.onmessage = (event) => {
-        try {
-          // Handle binary messages (audio data)
-          if (event.data instanceof Blob || event.data instanceof ArrayBuffer) {
-            if (handlers.onAudioChunk) {
-              // Convert Blob to ArrayBuffer if needed
-              if (event.data instanceof Blob) {
-                const reader = new FileReader();
-                reader.onload = () => {
-                  if (reader.result instanceof ArrayBuffer && handlers.onAudioChunk) {
-                    handlers.onAudioChunk(reader.result);
-                  }
-                };
-                reader.readAsArrayBuffer(event.data);
-              } else {
-                handlers.onAudioChunk(event.data);
-              }
-            }
-            return;
-          }
-          
-          // Handle JSON messages
-          const data = JSON.parse(event.data);
-          
-          // Handle pong message
-          if (data.type === 'pong') {
-            if (pingTimeoutId.current) {
-              clearTimeout(pingTimeoutId.current);
-              pingTimeoutId.current = null;
-            }
-            return;
-          }
-          
-          // Handle server ping
-          if (data.type === 'server_ping') {
-            ws.current?.send(JSON.stringify({ type: 'server_pong' }));
-            if (handlers.onServerPing) handlers.onServerPing();
-            return;
-          }
-          
-          // Handle audio chunk info
-          if (data.type === 'audio_chunk_info') {
-            if (handlers.onAudioChunkInfo) {
-              handlers.onAudioChunkInfo({
-                size: data.size,
-                format: data.format
-              });
-            }
-            return;
-          }
-          
-          // Handle complete message
-          if (data.type === 'complete') {
-            if (handlers.onComplete) handlers.onComplete();
-            return;
-          }
-          
-          // Handle errors
-          if (data.type === 'error') {
-            const errorMessage = data.error || 'Unknown error from server';
-            setError(errorMessage);
-            
-            if (handlers.onError) handlers.onError(errorMessage);
-            return;
-          }
-          
-          // Handle text messages
-          if (data.type === 'text' && data.content && handlers.onTextMessage) {
-            handlers.onTextMessage(data.content);
-            return;
-          }
-          
-        } catch (err) {
-          const errorMessage = err instanceof Error 
-            ? `Error processing message: ${err.message}` 
-            : 'Error processing message';
-          
-          setError(errorMessage);
-          if (handlers.onError) handlers.onError(errorMessage);
-        }
+        handleMessage(event, ws.current, clearPingTimeout);
       };
       
     } catch (error) {
@@ -277,7 +181,16 @@ export function useGeminiWebSocket(
       
       if (handlers.onError) handlers.onError(errorMessage);
     }
-  }, [clientId, getWebSocketUrl, handlers, maxReconnectAttempts, clearTimers, setupPingPong]);
+  }, [
+    clientId, 
+    options.url, 
+    handlers, 
+    maxReconnectAttempts, 
+    clearTimers, 
+    startPingPong, 
+    handleMessage,
+    clearPingTimeout
+  ]);
   
   // Send a text message
   const sendMessage = useCallback((text: string, enableTTS: boolean = true) => {
@@ -287,13 +200,7 @@ export function useGeminiWebSocket(
     }
     
     try {
-      const message = {
-        type: 'text_message',
-        text,
-        enableTTS,
-        role: 'user'
-      };
-      
+      const message = createTextMessage(text, enableTTS);
       ws.current.send(JSON.stringify(message));
     } catch (error) {
       const errorMessage = error instanceof Error 
@@ -317,14 +224,7 @@ export function useGeminiWebSocket(
     }
     
     try {
-      const message = {
-        type: 'multimodal_message',
-        text,
-        files,
-        enableTTS,
-        role: 'user'
-      };
-      
+      const message = createMultimodalMessage(text, files, enableTTS);
       ws.current.send(JSON.stringify(message));
     } catch (error) {
       const errorMessage = error instanceof Error 
