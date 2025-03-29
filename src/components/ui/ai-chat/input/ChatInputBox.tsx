@@ -1,5 +1,6 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
+import { cn } from '@/lib/utils';
 
 interface ChatInputBoxProps {
   value: string;
@@ -8,6 +9,7 @@ interface ChatInputBoxProps {
   placeholder: string;
   disabled?: boolean;
   textareaRef: React.RefObject<HTMLTextAreaElement>;
+  className?: string;
 }
 
 export const ChatInputBox: React.FC<ChatInputBoxProps> = ({
@@ -16,21 +18,11 @@ export const ChatInputBox: React.FC<ChatInputBoxProps> = ({
   onKeyDown,
   placeholder,
   disabled = false,
-  textareaRef
+  textareaRef,
+  className
 }) => {
-  // Auto-resize textarea based on content
-  useEffect(() => {
-    const textarea = textareaRef.current;
-    if (!textarea) return;
-    
-    // Reset height to auto to get the correct scrollHeight
-    textarea.style.height = 'auto';
-    // Set the height to scrollHeight to fit content
-    textarea.style.height = `${textarea.scrollHeight}px`;
-  }, [value, textareaRef]);
-
   return (
-    <div className="relative">
+    <div className={cn("relative", className)}>
       <textarea
         ref={textareaRef}
         value={value}
@@ -38,12 +30,19 @@ export const ChatInputBox: React.FC<ChatInputBoxProps> = ({
         onKeyDown={onKeyDown}
         placeholder={placeholder}
         disabled={disabled}
+        className={cn(
+          "w-full resize-none appearance-none overflow-hidden",
+          "bg-transparent border-0 p-3",
+          "placeholder:text-muted-foreground",
+          "focus:outline-none focus:ring-0",
+          "disabled:cursor-not-allowed disabled:opacity-50",
+          "min-h-[60px] max-h-[200px]",
+          "text-base"
+        )}
         rows={1}
-        className="w-full py-3 px-4 resize-none max-h-60 bg-transparent border-0 focus:ring-0 focus:outline-none text-foreground placeholder:text-muted-foreground/70 disabled:opacity-50"
-        style={{ 
-          overflowY: 'auto'
-        }}
       />
     </div>
   );
 };
+
+export default ChatInputBox;

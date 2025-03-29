@@ -45,8 +45,8 @@ export const UnifiedChatMessageList: React.FC<ChatMessageListProps> = ({
   
   // Use props if provided, otherwise use context
   const messages = propMessages || state.messages;
-  const showMessages = propShowMessages !== undefined ? propShowMessages : state.showMessages;
   const isLoading = propIsLoading !== undefined ? propIsLoading : state.isLoading;
+  const showMessages = propShowMessages !== undefined ? propShowMessages : state.messages.length > 0;
   
   // Scroll to bottom when messages change
   useEffect(() => {

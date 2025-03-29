@@ -1,35 +1,41 @@
 
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 import { Mic } from 'lucide-react';
 
 interface TranscriptDisplayProps {
   isListening: boolean;
   transcript: string;
+  className?: string;
 }
 
-export const TranscriptDisplay: React.FC<TranscriptDisplayProps> = ({ 
-  isListening, 
-  transcript 
+export const TranscriptDisplay: React.FC<TranscriptDisplayProps> = ({
+  isListening,
+  transcript,
+  className
 }) => {
-  if (!isListening || !transcript) return null;
+  if (!isListening && !transcript) return null;
   
   return (
-    <AnimatePresence>
-      {isListening && transcript && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          className="py-2 px-4 mb-2 bg-primary/10 rounded-lg flex items-start gap-2"
-        >
-          <Mic className="w-4 h-4 text-primary mt-1 flex-shrink-0" />
-          <div className="text-sm text-foreground">
-            <p className="font-medium mb-0.5">Listening...</p>
-            <p className="text-muted-foreground">{transcript}</p>
-          </div>
-        </motion.div>
+    <div className={cn(
+      "relative mb-2 p-3 border rounded-md bg-muted/50",
+      "flex items-center gap-2",
+      className
+    )}>
+      {isListening && (
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Mic className="h-4 w-4 animate-pulse text-primary" />
+          <span>Listening...</span>
+        </div>
       )}
-    </AnimatePresence>
+      
+      {!isListening && transcript && (
+        <div className="text-foreground">
+          <p className="text-sm italic">{transcript}</p>
+        </div>
+      )}
+    </div>
   );
 };
+
+export default TranscriptDisplay;
