@@ -14,6 +14,7 @@ interface UseWebSocketClientOptions {
   onAudioChunk?: (buffer: ArrayBuffer) => void;
   autoReconnect?: boolean;
   debug?: boolean;
+  suppressErrors?: boolean;
 }
 
 export function useWebSocketClient(options: UseWebSocketClientOptions = {}) {
@@ -23,6 +24,7 @@ export function useWebSocketClient(options: UseWebSocketClientOptions = {}) {
   const [clientId] = useState(() => uuidv4());
   const clientRef = useRef<WebSocketClient | null>(null);
   const wsUrl = options.url || API_CONFIG.WS_BASE_URL + '/ws/';
+  const [hasShownError, setHasShownError] = useState(false);
 
   // Connect to the WebSocket server
   const connect = useCallback(() => {
@@ -32,7 +34,6 @@ export function useWebSocketClient(options: UseWebSocketClientOptions = {}) {
     }
     
     setIsConnecting(true);
-    setError(null);
     
     try {
       // Create a new client if one doesn't exist
@@ -42,10 +43,12 @@ export function useWebSocketClient(options: UseWebSocketClientOptions = {}) {
           clientId,
           debug: options.debug,
           autoReconnect: options.autoReconnect,
+          suppressErrors: options.suppressErrors,
           onOpen: () => {
             setIsConnected(true);
             setIsConnecting(false);
             setError(null);
+            setHasShownError(false);
             if (options.onOpen) options.onOpen();
           },
           onClose: () => {
@@ -54,9 +57,12 @@ export function useWebSocketClient(options: UseWebSocketClientOptions = {}) {
             if (options.onClose) options.onClose();
           },
           onError: (err) => {
-            setError(err);
+            if (!hasShownError) {
+              setError(err);
+              setHasShownError(true);
+              if (options.onError) options.onError(err);
+            }
             setIsConnecting(false);
-            if (options.onError) options.onError(err);
           },
           onMessage: (data) => {
             if (options.onMessage) options.onMessage(data);
@@ -65,6 +71,9 @@ export function useWebSocketClient(options: UseWebSocketClientOptions = {}) {
             if (options.onAudioChunk) options.onAudioChunk(buffer);
           }
         });
+      } else {
+        // Enable/disable error suppression based on options
+        clientRef.current.enableErrorSuppression(options.suppressErrors || false);
       }
       
       clientRef.current.connect();
@@ -73,9 +82,12 @@ export function useWebSocketClient(options: UseWebSocketClientOptions = {}) {
       console.error('WebSocket connection error:', errorMessage);
       setError(errorMessage);
       setIsConnecting(false);
-      if (options.onError) options.onError(errorMessage);
+      if (options.onError && !hasShownError) {
+        options.onError(errorMessage);
+        setHasShownError(true);
+      }
     }
-  }, [clientId, wsUrl, options]);
+  }, [clientId, wsUrl, options, hasShownError]);
 
   // Disconnect from the WebSocket server
   const disconnect = useCallback(() => {
