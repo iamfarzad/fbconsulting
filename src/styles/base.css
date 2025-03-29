@@ -61,13 +61,17 @@
   */
 }
 
-/* Simplified glass styling - Keep these as they use @apply in the global scope, not @layer base */
+/* Simplified glass styling - Use direct CSS for background opacity */
 .glass {
-  @apply bg-white/10 backdrop-blur-md border border-white/20;
+  /* Replace @apply bg-white/10 */
+  background-color: rgba(255, 255, 255, 0.1);
+  @apply backdrop-blur-md border border-white/20; /* Keep others */
 }
 
 .frosted-glass {
-  @apply bg-white/5 backdrop-blur-md border border-white/10;
+   /* Replace @apply bg-white/5 */
+  background-color: rgba(255, 255, 255, 0.05);
+  @apply backdrop-blur-md border border-white/10; /* Keep others */
 }
 
 /* Simplified animation - Keep these */
