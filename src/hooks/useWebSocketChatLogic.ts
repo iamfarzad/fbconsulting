@@ -1,11 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { useGemini } from '@/components/copilot/providers/GeminiProvider'; // Import the context hook
-// import API_CONFIG from '@/config/apiConfig'; // No longer needed for direct connection
+import { useGemini } from '@/components/copilot/providers/GeminiProvider'; 
 
-type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
-
-// Define file state interface (as before)
+// Define file state interface
 interface FileState {
   data: string; 
   mimeType: string;
@@ -14,133 +11,87 @@ interface FileState {
   preview?: string;
 }
 
-// Define chat message interface (as before)
+// Note: The ChatMessage type might ideally come from a shared types definition
 interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
+  role: 'user' | 'assistant' | 'system' | 'error'; // Match ProviderMessage roles
   content: string;
   timestamp: number;
   id: string;
   files?: Pick<FileState, 'name' | 'type'>[]; 
 }
 
-// This hook now focuses on managing UI state and interacting with the GeminiProvider context
+// Hook focuses ONLY on UI state for chat input/display, using GeminiProvider for connection/messages
 export function useWebSocketChatLogic() {
-  // --- Local UI State --- 
-  const [messages, setMessages] = useState<ChatMessage[]>([]); // Manages the visual message list
+  // --- Local UI State (Input & Files) --- 
   const [input, setInput] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false); // Tracks if waiting for response
-  const [files, setFiles] = useState<FileState[]>([]); // Manages attached files for input
+  const [files, setFiles] = useState<FileState[]>([]); 
   const messageEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  
-  // --- Get Connection State & Methods from Context --- 
+
+  // --- Get State & Methods from Central Gemini Context --- 
   const {
-    sendMessage: contextSendMessage, // Renamed for clarity
+    sendMessage: contextSendMessage,
+    messages: contextMessages, // Get messages from the provider
     isConnected,
     isConnecting,
+    isProcessing: contextIsProcessing, // Use processing state from provider
     error: connectionError,
-    resetError: resetConnectionError,
     reconnect,
-    // Need message receiving mechanism from provider!
-    // TODO: Modify GeminiProvider to allow subscribing to messages
-    // For now, this hook cannot receive messages directly from the WebSocket via context.
+    clearMessages: contextClearMessages, // Use clear function from provider
   } = useGemini();
 
   // Map context status for UI
-  const status: ConnectionStatus = isConnecting ? 'connecting' : 
-                                   isConnected ? 'connected' : 
-                                   connectionError ? 'error' : 'disconnected';
-
-  // TODO: Implement logic to receive messages from GeminiProvider
-  // This likely involves GeminiProvider exposing messages via context value
-  // or allowing registration of a message handler callback.
-  useEffect(() => {
-    // Placeholder: This effect should ideally react to new messages from the context
-    // and update the local `messages` state.
-    // Example (conceptual - requires GeminiProvider changes):
-    // const unsubscribe = GeminiProvider.subscribeToMessages((newMessage) => {
-    //   if (newMessage.type === 'text') { ... handle text ... }
-    //   if (newMessage.type === 'complete') { setIsProcessing(false); }
-    //   if (newMessage.type === 'error') { setIsProcessing(false); }
-    // });
-    // return () => unsubscribe(); 
-
-    // Temporary workaround: Log status changes
-    console.log(`[useWebSocketChatLogic] Context status: ${status}, Error: ${connectionError}`);
-    if (status === 'connected') {
-        setIsProcessing(false); // Assume connection means not processing initially
-    }
-    if (connectionError) {
-        toast({ title: "Connection Error", description: connectionError, variant: "destructive" });
-    }
-
-  }, [status, connectionError, toast]);
-
+  const status = isConnecting ? 'connecting' : 
+                 isConnected ? 'connected' : 
+                 connectionError ? 'error' : 'disconnected';
 
   // --- Auto-scroll Effect --- 
   useEffect(() => {
-      messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [contextMessages]); // Scroll when messages from context change
 
   // --- Send Message Logic (Uses contextSendMessage) ---
-  const handleSendMessage = useCallback(async () => { // Make async to await context send
-    if ((!input.trim() && files.length === 0) || isProcessing) return;
+  const handleSendMessage = useCallback(async () => {
+    if ((!input.trim() && files.length === 0) || contextIsProcessing) return;
     
     if (!isConnected) {
-      console.error('[useWebSocketChatLogic] Cannot send: Not connected.');
-      toast({ title: "Connection Error", description: "Not connected.", variant: "destructive" });
-      reconnect(); // Attempt reconnect via context
+      toast({ title: "Not Connected", variant: "destructive" });
+      reconnect(); 
       return;
     }
     
     const userMessageContent = input;
     const userFiles = [...files];
     
-    const userDisplayMessage: ChatMessage = {
-      role: 'user',
-      content: userMessageContent,
-      files: userFiles.map(f => ({ name: f.name, type: f.type })), 
-      timestamp: Date.now(),
-      id: `user-${Date.now()}`,
-    };
-    setMessages(prev => [...prev, userDisplayMessage]);
-    setInput(''); setFiles([]); setIsProcessing(true);
+    // Clear local input state immediately
+    setInput(''); 
+    setFiles([]); 
+    
+    // Let the context handle optimistic updates if desired, or adjust here
+    // For now, this hook doesn't manage the message list directly
 
     try {
-      let messageToSend: any;
-      let messageContentForContext: string; // What GeminiProvider.sendMessage expects
-
+      let messageToSend: any; // Use the OutgoingWebSocketMessage type ideally
       if (userFiles.length > 0) {
         const fileDataToSend = userFiles.map(file => {
           const base64Data = file.data.split(',')[1]; 
           if (!base64Data) throw new Error(`Invalid data URL for file ${file.name}`);
           return { mime_type: file.mimeType, data: base64Data, filename: file.name };
         });
-        // TODO: GeminiProvider needs enhancement for multimodal
-        // Sending only text for now, log warning
-        console.warn("[useWebSocketChatLogic] Multimodal message prepared, but GeminiProvider currently only sends text. Sending only text content.");
-        messageToSend = { type: 'multimodal_message', text: userMessageContent || null, files: fileDataToSend, role: 'user', enableTTS: true };
-        messageContentForContext = userMessageContent || ""; // Send empty string if no text
-
+        messageToSend = { type: 'multimodal_message', text: userMessageContent || null, files: fileDataToSend };
       } else {
-        messageToSend = { type: 'text_message', text: userMessageContent, role: 'user', enableTTS: true };
-        messageContentForContext = userMessageContent;
+        messageToSend = { type: 'text_message', text: userMessageContent };
       }
       
-      console.log('[useWebSocketChatLogic] Sending message via context:', messageToSend);
-      // Use the sendMessage function from GeminiContext, passing only the text content for now
-      await contextSendMessage(messageContentForContext); 
-
-      // PROBLEM: Need a way to know when response is complete to set isProcessing false.
+      console.log('[useWebSocketChatLogic] Sending via context:', messageToSend);
+      await contextSendMessage(messageToSend); // Send the structured message
 
     } catch (error: any) {
       console.error('[useWebSocketChatLogic] Send Error:', error);
       toast({ title: "Send Error", description: error?.message || "Failed to send.", variant: "destructive" });
-      setIsProcessing(false); 
-      setMessages(prev => prev.filter(msg => msg.id !== userDisplayMessage.id)); // Revert optimistic UI
+      // UI already cleared, context provider should handle error message display?
     }
-  // Dependencies include context methods/state
-  }, [input, files, isProcessing, isConnected, toast, contextSendMessage, reconnect]);
+  }, [input, files, contextIsProcessing, isConnected, toast, contextSendMessage, reconnect]);
 
   // --- File Handling Callbacks (Remain the same) ---
   const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,24 +109,22 @@ export function useWebSocketChatLogic() {
   }, [toast]);
 
   const removeFile = useCallback((index: number) => { setFiles(prev => prev.filter((_, i) => i !== index)); }, []);
-  const clearMessages = useCallback(() => { setMessages([]); }, []);
-
+  
   // --- Return Hook Values ---
   return {
-    messages,       // Local messages (needs update from context)
-    setMessages,    // Allow parent to push updates
+    messages: contextMessages, // Pass messages from context
     input,
     setInput,
-    status,         // Derived from context
-    connectionError, // From context
-    isProcessing,   // Local processing state (needs improvement)
+    status,         
+    connectionError, 
+    isProcessing: contextIsProcessing, // Pass processing state from context
     messageEndRef,
-    files,
+    files,         // Local file state for input
     setFiles, 
-    handleSendMessage, // Now uses context
+    handleSendMessage, 
     handleFileUpload,
     removeFile,
-    clearMessages,
-    reconnect       // From context
+    clearMessages: contextClearMessages, // Use context clear function
+    reconnect       
   };
 }
