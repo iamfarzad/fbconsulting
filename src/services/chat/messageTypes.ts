@@ -1,3 +1,4 @@
+
 export type MediaType = 'image' | 'code' | 'link-preview' | 'poll' | 'audio' | 'video';
 
 export interface MediaContent {
@@ -21,7 +22,7 @@ export interface ChatMessageMedia {
 export interface MessageMedia {
   type: 'image' | 'code' | 'link' | 'document';
   url?: string;
-  data?: string;
+  data: string; // Changed from optional to required to match the type in chat.ts
   caption?: string;
   fileName?: string;
   mimeType?: string;
@@ -29,13 +30,14 @@ export interface MessageMedia {
 
 // Update AIMessage to support media attachments
 export interface AIMessage {
-  id: string;
+  id: string; // Made required to match the type in chat.ts
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
   timestamp: number;
   media?: MessageMedia[];
   isLoading?: boolean;
   error?: string;
+  feedback?: 'positive' | 'negative' | null; // Added to fix ChatMessage errors
 }
 
 // Multimodal Message format for WebSocket communication
@@ -58,3 +60,23 @@ export interface TextMessage {
   role: 'user' | 'assistant' | 'system';
   enableTTS: boolean;
 }
+
+// Adding FileAttachment type
+export interface FileAttachment {
+  mimeType: string;
+  data: string;
+  name: string;
+  type: string;
+}
+
+// Adding LeadStage type
+export type LeadStage = 
+  'initial' | 
+  'discovery' | 
+  'evaluation' | 
+  'decision' | 
+  'implementation' | 
+  'retention' |
+  'qualification' | 
+  'interested' | 
+  'ready-to-book';

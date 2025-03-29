@@ -16,6 +16,7 @@ interface Message {
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: number;
+  id: string; // Added to match AIMessage requirements
 }
 
 interface CopilotChatProps {
@@ -72,7 +73,8 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
     const newMessage: Message = {
       role: role === 'error' ? 'system' : role,
       content,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      id: `message-${Date.now()}-${Math.random().toString(36).substring(2, 9)}` // Generate unique ID
     };
     setMessages(prev => [...prev, newMessage]);
   };
@@ -97,9 +99,9 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
   
   // Use message handler from hooks
   const { sendMessage } = useMessageHandler({
-    messages: messages,
+    messages: messages as AIMessage[], // Type cast as AIMessage[]
     apiKey: effectiveApiKey || null,
-    addMessage: addMessageAdapter, // Use the adapter function here
+    addMessage: addMessageAdapter, 
     setLoadingState: setIsLoading,
     handleError,
     getSystemPrompt,
@@ -146,6 +148,7 @@ export const CopilotChat: React.FC<CopilotChatProps> = ({
   
   // Convert messages to AIMessage format for ChatMessages component
   const aiMessages: AIMessage[] = messages.map(msg => ({
+    id: msg.id,
     role: msg.role,
     content: msg.content,
     timestamp: msg.timestamp

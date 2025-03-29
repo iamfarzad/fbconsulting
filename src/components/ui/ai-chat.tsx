@@ -5,7 +5,7 @@ import React, { useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { UnifiedChat } from "../chat/UnifiedChat";
-import { UnifiedFullScreenChat } from "../chat/UnifiedFullScreenChat";
+import UnifiedFullScreenChat from "../chat/UnifiedFullScreenChat";
 
 interface AIChatInputProps {
   placeholderText?: string;
@@ -50,7 +50,7 @@ export function AIChatInput({
         />
       ) : (
         <UnifiedChat
-          placeholderText={placeholderText}
+          placeholder={placeholderText}
           onToggleFullScreen={toggleFullScreen}
           apiKey={apiKey}
           modelName={modelName}
