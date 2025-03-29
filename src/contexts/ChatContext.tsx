@@ -1,37 +1,27 @@
 
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { useWebSocketChat } from '@/features/gemini/hooks/useWebSocketChat';
-import { AIMessage } from '@/services/chat/messageTypes';
+import React, { createContext, useContext, ReactNode } from 'react';
+import { useGemini } from '@/components/copilot/providers/GeminiProvider'; // Import the main context hook
 
-// Define the Chat Context type
-export interface ChatContextType {
-  state: {
-    messages: AIMessage[];
-    isLoading: boolean;
-    isConnected: boolean;
-    isInitialized: boolean;
-    isAudioPlaying: boolean;
-    audioProgress: number;
-    clientId: string;
-    inputValue: string;
-    showMessages: boolean;
-  };
-  actions: {
-    sendMessage: (content: string) => void;
-    clearMessages: () => void;
-    connect: () => void;
-    disconnect: () => void;
-    stopAudio: () => void;
-    setInputValue: (value: string) => void;
-    setShowMessages: (show: boolean) => void;
-  };
-  error: string | null;
+// Define the shape of the context data (subset of GeminiContext)
+interface ChatContextType {
+  messages: Array<{
+    id: string;
+    role: 'user' | 'assistant' | 'system' | 'error';
+    content: string;
+    timestamp: number;
+    files?: any[]; // Simplified file info if needed
+  }>;
+  sendMessage: (message: { type: string; text?: string | null; files?: any[] }) => void;
+  isConnected: boolean;
+  isProcessing: boolean;
+  connectionError: string | null;
+  clearMessages: () => void;
 }
 
-// Create the Chat Context
+// Create the context with a default value (or null)
 const ChatContext = createContext<ChatContextType | null>(null);
 
-// Hook to use the Chat Context
+// Custom hook to use the ChatContext
 export const useChat = () => {
   const context = useContext(ChatContext);
   if (!context) {
@@ -40,93 +30,41 @@ export const useChat = () => {
   return context;
 };
 
-// Chat Provider Component
-export const ChatProvider: React.FC<{ 
-  children: React.ReactNode;
-  apiKey?: string;
-  modelName?: string;
-}> = ({ 
-  children,
-  apiKey,
-  modelName
-}) => {
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [showMessages, setShowMessages] = useState(false);
-  const [inputValue, setInputValue] = useState('');
-  const containerRef = useRef<HTMLDivElement>(null);
+// Define the props for the provider component
+interface ChatProviderProps {
+  children: ReactNode;
+}
 
-  // Use the WebSocket Chat hook
+// ChatProvider now acts as a wrapper around useGemini,
+// potentially adapting the context value if needed, or just passing it through.
+// For simplicity, we'll pass through the relevant parts of useGemini.
+export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
+  // Get state and methods from the central GeminiProvider context
   const {
-    messages,
-    isLoading,
-    isConnected,
-    isConnecting,
-    isAudioPlaying,
-    audioProgress,
-    error,
-    clientId,
-    connect,
-    disconnect,
-    sendMessage: wssSendMessage,
+    messages, 
+    sendMessage, // Use the context's sendMessage directly
+    isConnected, 
+    isProcessing, 
+    error: connectionError, 
     clearMessages,
-    stopAudio
-  } = useWebSocketChat();
+    // Add other needed values from useGemini if required
+  } = useGemini();
 
-  // Set initialized after first connection attempt
-  useEffect(() => {
-    if (isConnected || (!isConnecting && clientId)) {
-      setIsInitialized(true);
-    }
-  }, [isConnected, isConnecting, clientId]);
-
-  // Show messages when they exist
-  useEffect(() => {
-    if (messages.length > 0 && !showMessages) {
-      setShowMessages(true);
-    }
-  }, [messages.length, showMessages]);
-
-  // Wrapper for sendMessage that also clears input
-  const sendMessage = (content: string) => {
-    if (content.trim()) {
-      wssSendMessage(content);
-      setInputValue('');
-    }
-  };
-
-  // Ensure all messages have the required timestamp property
-  const messagesWithTimestamps: AIMessage[] = messages.map(msg => ({
-    ...msg,
-    timestamp: msg.timestamp || Date.now(),
-  }));
-
-  // Combine state and actions into a single context value
-  const contextValue: ChatContextType = {
-    state: {
-      messages: messagesWithTimestamps,
-      isLoading,
-      isConnected,
-      isInitialized,
-      isAudioPlaying,
-      audioProgress,
-      clientId,
-      inputValue,
-      showMessages
-    },
-    actions: {
-      sendMessage,
-      clearMessages,
-      connect,
-      disconnect,
-      stopAudio,
-      setInputValue,
-      setShowMessages
-    },
-    error
+  // Prepare the value for this specific ChatContext
+  // Adapt the data structure if ChatContext requires a different shape than GeminiContext
+  const chatContextValue: ChatContextType = {
+    messages, // Pass messages directly
+    // Adapt sendMessage if needed, otherwise pass directly
+    // For now, assume the signature matches or components will adapt
+    sendMessage: (msg) => sendMessage(msg), 
+    isConnected,
+    isProcessing,
+    connectionError,
+    clearMessages,
   };
 
   return (
-    <ChatContext.Provider value={contextValue}>
+    <ChatContext.Provider value={chatContextValue}>
       {children}
     </ChatContext.Provider>
   );
