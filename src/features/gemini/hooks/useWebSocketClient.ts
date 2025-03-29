@@ -1,7 +1,6 @@
 
-
 import { useState, useEffect, useRef, useCallback } from 'react';
-import API_CONFIG from '@/config/apiConfig'; // Use updated config
+import API_CONFIG from '@/config/apiConfig'; // Ensure we're using the right config
 
 /**
  * Hook for managing WebSocket connections with automatic reconnection
@@ -49,10 +48,12 @@ export function useWebSocketClient(clientId: string) {
       setIsConnecting(true);
       setError(null);
       
-      // *** CORRECTED URL CONSTRUCTION ***
-      const wsUrl = `${API_CONFIG.WS_BASE_URL}${API_CONFIG.WEBSOCKET.PATH}${clientId}`;
+      // Construct the WebSocket URL using API_CONFIG
+      const wsBaseUrl = API_CONFIG.WS_BASE_URL;
+      const wsPath = API_CONFIG.WEBSOCKET.PATH;
+      const wsUrl = `${wsBaseUrl}${wsPath}${clientId}`;
       
-      console.log(`Connecting to WebSocket: ${wsUrl}`); // Should now show correct URL
+      console.log(`Connecting to WebSocket: ${wsUrl}`);
       
       const ws = new WebSocket(wsUrl);
       
@@ -169,7 +170,6 @@ export function useWebSocketClient(clientId: string) {
         handlersRef.current.onError("Failed to create WebSocket connection");
       }
     }
-  // Add API_CONFIG to dependency array if its structure might change, though unlikely
   }, [clientId]); 
   
   /**

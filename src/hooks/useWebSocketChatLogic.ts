@@ -1,7 +1,9 @@
+
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 // Use the default export which contains the processed config
 import API_CONFIG from '@/config/apiConfig'; 
+import { v4 as uuidv4 } from 'uuid';
 
 type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
 
@@ -35,11 +37,10 @@ export function useWebSocketChatLogic() {
   const reconnectAttemptsRef = useRef(0);
   const { toast } = useToast();
   
-  // Use a stable client ID generation function
-  const getClientId = useCallback(() => `web-client-${Math.random().toString(36).substring(2, 9)}`, []);
-  const clientIdRef = useRef<string>(getClientId());
-
-  // MOVE Files state declaration BEFORE handleSendMessage
+  // Use UUID for stable client ID generation
+  const clientIdRef = useRef<string>(uuidv4());
+  
+  // Define files state
   const [files, setFiles] = useState<FileState[]>([]);
 
   // --- Audio Handling (Define BEFORE handleIncomingMessage) ---
@@ -60,157 +61,192 @@ export function useWebSocketChatLogic() {
     }
   }, []); 
 
-  // --- Disconnect Handler (Define before connectWebSocket uses it) ---
-  const handleDisconnect = useCallback((event?: CloseEvent, pingIntervalId?: NodeJS.Timeout) => {
-      console.log(`WebSocket disconnected. Code: ${event?.code}, Reason: ${event?.reason}`);
-      if (pingIntervalId) clearInterval(pingIntervalId);
-      setStatus('disconnected');
-      socketRef.current = null;
-
-      // Reconnect logic
-      if (reconnectAttemptsRef.current < API_CONFIG.DEFAULT_RECONNECT_ATTEMPTS) {
-          reconnectAttemptsRef.current++;
-          const delay = API_CONFIG.WEBSOCKET.RECONNECT_DELAY * Math.pow(2, reconnectAttemptsRef.current - 1); 
-          console.log(`Attempting reconnect ${reconnectAttemptsRef.current}/${API_CONFIG.DEFAULT_RECONNECT_ATTEMPTS} in ${delay}ms...`);
-          if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
-          retryTimeoutRef.current = setTimeout(() => {
-              connectWebSocket(); // connectWebSocket needs to be defined or passed correctly
-          }, delay);
-      } else {
-          console.error('Max reconnect attempts reached. Giving up.');
-          toast({ title: "Connection Lost", description: "Could not reconnect.", variant: "destructive" });
-      }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [toast]); // Removed connectWebSocket dependency temporarily
-
-  // --- Incoming Message Handler (Define before connectWebSocket uses it) ---
-  const handleIncomingMessage = useCallback((event: MessageEvent) => {
-      try {
-          if (event.data instanceof Blob) {
-              handleAudioChunk(new Blob([event.data], { type: 'audio/mp3' }));
-              return;
-          }
-          const data = JSON.parse(event.data);
-          switch (data.type) {
-              case 'text':
-                  setMessages(prev => {
-                      const lastMessage = prev[prev.length - 1];
-                      if (lastMessage?.role === 'assistant') {
-                          const updatedMessages = [...prev];
-                          updatedMessages[prev.length - 1] = { ...lastMessage, content: data.content }; 
-                          return updatedMessages;
-                      } else {
-                          return [...prev, { role: 'assistant', content: data.content, timestamp: Date.now(), id: `ai-${Date.now()}` }];
-                      }
-                  });
-                  break;
-              case 'complete': setIsProcessing(false); console.log("Assistant message complete."); break;
-              case 'audio_chunk_info': break; 
-              case 'error':
-                  console.error('Server processing error:', data.error);
-                  toast({ title: "Server Error", description: data.error || "An error occurred.", variant: "destructive" });
-                  setIsProcessing(false);
-                  break;
-              case 'pong': console.debug('Client Pong Received'); break;
-              case 'server_ping':
-                  console.debug('Server Ping Received, sending pong');
-                  if (socketRef.current?.readyState === WebSocket.OPEN) {
-                      socketRef.current.send(JSON.stringify({ type: 'client_pong' }));
-                  }
-                  break;
-              default: console.warn('Unhandled message type:', data.type, data);
-          }
-      } catch (err) {
-          console.error('Error handling incoming message:', err, event.data);
-      }
-  }, [handleAudioChunk, toast]); 
-
-
-  // --- WebSocket Connection Logic (Define before useEffect calls it) ---
+  // --- WebSocket Connection Logic ---
   const connectWebSocket = useCallback(() => {
-      if (socketRef.current || status === 'connecting') {
-          return; 
-      }
-      setStatus('connecting');
-      console.log(`Attempting WS connection (Attempt: ${reconnectAttemptsRef.current + 1})...`);
-      
-      // Read config values *inside* the function scope
-      const currentWsBaseUrl = API_CONFIG.WS_BASE_URL;
-      const currentWsPath = API_CONFIG.WEBSOCKET.PATH;
-      const currentClientId = clientIdRef.current; // Use ref value
-      const wsUrl = `${currentWsBaseUrl}${currentWsPath}${currentClientId}`;
-      
-      console.log(`>>> Trying to connect WebSocket to: ${wsUrl}`); // Log the URL being used
-      
-      let socket: WebSocket;
-      try {
-          socket = new WebSocket(wsUrl);
-      } catch (error) {
-          console.error('WebSocket constructor error:', error);
-          setStatus('error');
-          handleDisconnect(); 
-          return;
-      }
+    if (socketRef.current || status === 'connecting') {
+      return; 
+    }
+    setStatus('connecting');
+    console.log(`Attempting WS connection (Attempt: ${reconnectAttemptsRef.current + 1})...`);
+    
+    // Read config values directly from API_CONFIG
+    const wsBaseUrl = API_CONFIG.WS_BASE_URL;
+    const wsPath = API_CONFIG.WEBSOCKET.PATH;
+    const clientId = clientIdRef.current;
+    
+    // Construct the full WebSocket URL
+    const wsUrl = `${wsBaseUrl}${wsPath}${clientId}`;
+    
+    console.log(`>>> Connecting WebSocket to: ${wsUrl}`);
+    
+    let socket: WebSocket;
+    try {
+      socket = new WebSocket(wsUrl);
+    } catch (error) {
+      console.error('WebSocket constructor error:', error);
+      setStatus('error');
+      handleDisconnect(); 
+      return;
+    }
 
-      if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
+    if (retryTimeoutRef.current) {
+      clearTimeout(retryTimeoutRef.current);
       retryTimeoutRef.current = null;
+    }
 
-      socket.onopen = () => {
-          console.log('WebSocket connected.');
-          setStatus('connected');
-          reconnectAttemptsRef.current = 0;
-          const pingInterval = setInterval(() => {
-              if (socket.readyState === WebSocket.OPEN) {
-                  console.debug('Sending client ping');
-                  socket.send(JSON.stringify({ type: 'ping' }));
-              } else {
-                  clearInterval(pingInterval);
-              }
-          }, API_CONFIG.DEFAULT_PING_INTERVAL);
-          socket.onclose = (event) => handleDisconnect(event, pingInterval);
-          socketRef.current = socket; 
-      };
+    socket.onopen = () => {
+      console.log('WebSocket connected successfully.');
+      setStatus('connected');
+      reconnectAttemptsRef.current = 0;
+      
+      // Set up ping interval
+      const pingInterval = setInterval(() => {
+        if (socket.readyState === WebSocket.OPEN) {
+          console.debug('Sending client ping');
+          socket.send(JSON.stringify({ type: 'ping' }));
+        } else {
+          clearInterval(pingInterval);
+        }
+      }, API_CONFIG.DEFAULT_PING_INTERVAL);
+      
+      socket.onclose = (event) => handleDisconnect(event, pingInterval);
+      socketRef.current = socket; 
+    };
 
-      socket.onerror = (event) => {
-          console.error('WebSocket error:', event);
-          setStatus('error');
-      };
+    socket.onerror = (event) => {
+      console.error('WebSocket error:', event);
+      setStatus('error');
+    };
 
-      socket.onmessage = handleIncomingMessage; 
+    socket.onmessage = handleIncomingMessage; 
+  }, [status]); // Removed handleDisconnect and handleIncomingMessage as deps to avoid cycle
 
-  // Pass stable handlers as dependencies
-  }, [status, handleDisconnect, handleIncomingMessage]); 
+  // --- Disconnect Handler ---
+  const handleDisconnect = useCallback((event?: CloseEvent, pingIntervalId?: NodeJS.Timeout) => {
+    console.log(`WebSocket disconnected. Code: ${event?.code}, Reason: ${event?.reason}`);
+    if (pingIntervalId) clearInterval(pingIntervalId);
+    setStatus('disconnected');
+    socketRef.current = null;
 
-  // Add connectWebSocket back to handleDisconnect dependency array *after* it's defined
-  // NOTE: This creates a potential dependency cycle warning, often resolvable with useRef for connectWebSocket
-  // For now, we accept the potential ESLint warning or slight inefficiency.
+    // Reconnect logic
+    if (reconnectAttemptsRef.current < API_CONFIG.DEFAULT_RECONNECT_ATTEMPTS) {
+      reconnectAttemptsRef.current++;
+      const delay = API_CONFIG.WEBSOCKET.RECONNECT_DELAY * Math.pow(2, reconnectAttemptsRef.current - 1); 
+      console.log(`Attempting reconnect ${reconnectAttemptsRef.current}/${API_CONFIG.DEFAULT_RECONNECT_ATTEMPTS} in ${delay}ms...`);
+      
+      if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
+      retryTimeoutRef.current = setTimeout(() => {
+        connectWebSocket();
+      }, delay);
+    } else {
+      console.error('Max reconnect attempts reached. Giving up.');
+      toast({ 
+        title: "Connection Lost", 
+        description: "Could not reconnect.", 
+        variant: "destructive" 
+      });
+    }
+  }, [toast, connectWebSocket]);
+
+  // --- Incoming Message Handler ---
+  const handleIncomingMessage = useCallback((event: MessageEvent) => {
+    try {
+      if (event.data instanceof Blob) {
+        handleAudioChunk(new Blob([event.data], { type: 'audio/mp3' }));
+        return;
+      }
+      
+      const data = JSON.parse(event.data);
+      switch (data.type) {
+        case 'text':
+          setMessages(prev => {
+            const lastMessage = prev[prev.length - 1];
+            if (lastMessage?.role === 'assistant') {
+              const updatedMessages = [...prev];
+              updatedMessages[prev.length - 1] = { 
+                ...lastMessage, 
+                content: data.content 
+              }; 
+              return updatedMessages;
+            } else {
+              return [...prev, { 
+                role: 'assistant', 
+                content: data.content, 
+                timestamp: Date.now(), 
+                id: `ai-${Date.now()}` 
+              }];
+            }
+          });
+          break;
+        case 'complete': 
+          setIsProcessing(false); 
+          console.log("Assistant message complete."); 
+          break;
+        case 'audio_chunk_info': 
+          break; 
+        case 'error':
+          console.error('Server processing error:', data.error);
+          toast({ 
+            title: "Server Error", 
+            description: data.error || "An error occurred.", 
+            variant: "destructive" 
+          });
+          setIsProcessing(false);
+          break;
+        case 'pong': 
+          console.debug('Client Pong Received'); 
+          break;
+        case 'server_ping':
+          console.debug('Server Ping Received, sending pong');
+          if (socketRef.current?.readyState === WebSocket.OPEN) {
+            socketRef.current.send(JSON.stringify({ type: 'client_pong' }));
+          }
+          break;
+        default: 
+          console.warn('Unhandled message type:', data.type, data);
+      }
+    } catch (err) {
+      console.error('Error handling incoming message:', err, event.data);
+    }
+  }, [handleAudioChunk, toast]);
+
+  // --- Add Missing Dependencies for References ---
   useEffect(() => {
-    // This effect ensures handleDisconnect has the latest connectWebSocket reference
-    // but it's complex. Consider refactoring connection logic further if issues persist.
-  }, [handleDisconnect, connectWebSocket]);
+    // This effect resolves the dependency cycle by updating the references
+    const handleIncomingMessageRef = handleIncomingMessage;
+    const handleDisconnectRef = handleDisconnect;
+    
+    socketRef.current?.addEventListener('message', handleIncomingMessageRef);
+    
+    return () => {
+      socketRef.current?.removeEventListener('message', handleIncomingMessageRef);
+    };
+  }, [handleIncomingMessage, handleDisconnect]);
 
   // --- Effect to Initiate Connection ---
   useEffect(() => {
-      if (status === 'disconnected' && !socketRef.current && !retryTimeoutRef.current) {
-          console.log("useEffect initiating connection...");
-          reconnectAttemptsRef.current = 0; 
-          connectWebSocket();
+    if (status === 'disconnected' && !socketRef.current && !retryTimeoutRef.current) {
+      console.log("useEffect initiating connection...");
+      reconnectAttemptsRef.current = 0; 
+      connectWebSocket();
+    }
+    
+    // Cleanup function
+    return () => {
+      if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
+      if (socketRef.current) {
+        console.log('Closing WebSocket via cleanup effect.');
+        const socket = socketRef.current;
+        socket.onclose = null; 
+        socket.close();
+        socketRef.current = null;
       }
-      // Cleanup function remains the same
-      return () => {
-          if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
-          if (socketRef.current) {
-              console.log('Closing WebSocket via cleanup effect.');
-              socketRef.current.onclose = null; 
-              socketRef.current.close();
-              socketRef.current = null;
-          }
-      };
-  }, [status, connectWebSocket]); // Include connectWebSocket as a dependency
+    };
+  }, [status, connectWebSocket]);
 
   // --- Auto-scroll Effect ---
   useEffect(() => {
-      messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   // --- Send Message Logic ---
@@ -218,15 +254,23 @@ export function useWebSocketChatLogic() {
     if ((!input.trim() && files.length === 0) || isProcessing) {
       return;
     }
+    
     if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
       console.error('Cannot send: WebSocket not connected.');
-      toast({ title: "Connection Error", description: "Not connected.", variant: "destructive" });
-      if(status === 'disconnected') connectWebSocket();
+      toast({ 
+        title: "Connection Error", 
+        description: "Not connected.", 
+        variant: "destructive" 
+      });
+      
+      if (status === 'disconnected') connectWebSocket();
       return;
     }
+    
     try {
       const userMessageContent = input;
       const userFiles = [...files]; 
+      
       const userDisplayMessage: ChatMessage = {
         role: 'user',
         content: userMessageContent,
@@ -234,50 +278,113 @@ export function useWebSocketChatLogic() {
         timestamp: Date.now(),
         id: `user-${Date.now()}`,
       };
+      
       setMessages(prev => [...prev, userDisplayMessage]);
-      setInput(''); setFiles([]); setIsProcessing(true);
+      setInput(''); 
+      setFiles([]); 
+      setIsProcessing(true);
+      
       let messageToSend: any;
+      
       if (userFiles.length > 0) {
         const fileDataToSend = userFiles.map(file => {
           const base64Data = file.data.split(',')[1]; 
           if (!base64Data) throw new Error(`Invalid data URL for file ${file.name}`);
-          return { mime_type: file.mimeType, data: base64Data, filename: file.name };
+          return { 
+            mime_type: file.mimeType, 
+            data: base64Data, 
+            filename: file.name 
+          };
         });
+        
         messageToSend = {
           type: 'multimodal_message',
-          text: userMessageContent || null, files: fileDataToSend, role: 'user', enableTTS: true 
+          text: userMessageContent || null, 
+          files: fileDataToSend, 
+          role: 'user', 
+          enableTTS: true 
         };
+        
         console.log(`Sending multimodal msg w/ ${fileDataToSend.length} files.`);
       } else {
-        messageToSend = { type: 'text_message', text: userMessageContent, role: 'user', enableTTS: true };
+        messageToSend = { 
+          type: 'text_message', 
+          text: userMessageContent, 
+          role: 'user', 
+          enableTTS: true 
+        };
+        
         console.log(`Sending text message.`);
       }
+      
       socketRef.current.send(JSON.stringify(messageToSend));
     } catch (error: any) {
       console.error('Error sending message:', error);
-      toast({ title: "Send Error", description: error?.message || "Failed to send.", variant: "destructive" });
+      toast({ 
+        title: "Send Error", 
+        description: error?.message || "Failed to send.", 
+        variant: "destructive" 
+      });
+      
       setIsProcessing(false); 
     }
-  }, [input, files, isProcessing, status, toast, connectWebSocket]); 
+  }, [input, files, isProcessing, status, toast, connectWebSocket]);
 
   // --- File Handling Callbacks ---
   const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result as string; 
       const fileType = file.type.startsWith('image/') ? 'image' : 'document';
-      setFiles(prev => [...prev, { data: result, mimeType: file.type, name: file.name, type: fileType, preview: fileType === 'image' ? result : undefined }]);
+      
+      setFiles(prev => [...prev, { 
+        data: result, 
+        mimeType: file.type, 
+        name: file.name, 
+        type: fileType, 
+        preview: fileType === 'image' ? result : undefined 
+      }]);
     };
-    reader.onerror = (error) => { console.error("FileReader error:", error); toast({title: "File Error", description: "Could not read file.", variant: "destructive"}); };
+    
+    reader.onerror = (error) => { 
+      console.error("FileReader error:", error); 
+      toast({
+        title: "File Error", 
+        description: "Could not read file.", 
+        variant: "destructive"
+      }); 
+    };
+    
     reader.readAsDataURL(file);
+    
+    // Clear input value to allow selecting the same file again
     if (event.target) event.target.value = ''; 
   }, [toast]);
 
-  const removeFile = useCallback((index: number) => { setFiles(prev => prev.filter((_, i) => i !== index)); }, []);
-  const clearMessages = useCallback(() => { setMessages([]); }, []);
+  const removeFile = useCallback((index: number) => { 
+    setFiles(prev => prev.filter((_, i) => i !== index)); 
+  }, []);
+  
+  const clearMessages = useCallback(() => { 
+    setMessages([]); 
+  }, []);
 
   // --- Return Hook Values ---
-  return { messages, input, setInput, status, isProcessing, messageEndRef, files, setFiles, handleSendMessage, handleFileUpload, removeFile, clearMessages };
+  return { 
+    messages, 
+    input, 
+    setInput, 
+    status, 
+    isProcessing, 
+    messageEndRef, 
+    files, 
+    setFiles, 
+    handleSendMessage, 
+    handleFileUpload, 
+    removeFile, 
+    clearMessages 
+  };
 }

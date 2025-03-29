@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { AIMessage } from '@/types/chat';
-import { API_CONFIG } from '@/config/api';
+import API_CONFIG from '@/config/apiConfig'; // Import the updated config
 import { useGeminiAudioPlayback } from './useGeminiAudioPlayback';
 
 /**
@@ -48,13 +48,17 @@ export function useWebSocketChat() {
     setError(null);
     
     try {
-      const wsUrl = `${API_CONFIG.WS_BASE_URL}/ws/${clientId}`;
-      console.log('Connecting to WebSocket:', wsUrl);
+      // Construct the WebSocket URL using API_CONFIG
+      const wsBaseUrl = API_CONFIG.WS_BASE_URL;
+      const wsPath = API_CONFIG.WEBSOCKET.PATH;
+      const wsUrl = `${wsBaseUrl}${wsPath}${clientId}`;
+      
+      console.log('useWebSocketChat: Connecting to WebSocket:', wsUrl);
       
       const ws = new WebSocket(wsUrl);
       
       ws.onopen = () => {
-        console.log('WebSocket connected');
+        console.log('useWebSocketChat: WebSocket connected');
         setIsConnected(true);
         setIsConnecting(false);
         setError(null);
@@ -70,7 +74,8 @@ export function useWebSocketChat() {
             const assistantMessage: AIMessage = {
               role: 'assistant',
               content: data.content,
-              timestamp: Date.now()
+              timestamp: Date.now(),
+              id: `ai-${Date.now()}`
             };
             
             setMessages(prev => [...prev, assistantMessage]);
@@ -92,7 +97,7 @@ export function useWebSocketChat() {
           // Handle errors
           if (data.type === 'error') {
             const errorMessage = data.error || 'Unknown error';
-            console.error('WebSocket error message:', errorMessage);
+            console.error('useWebSocketChat: WebSocket error message:', errorMessage);
             setError(errorMessage);
             setIsLoading(false);
             
@@ -100,35 +105,36 @@ export function useWebSocketChat() {
             const errorMsg: AIMessage = {
               role: 'error',
               content: `Error: ${errorMessage}`,
-              timestamp: Date.now()
+              timestamp: Date.now(),
+              id: `error-${Date.now()}`
             };
             setMessages(prev => [...prev, errorMsg]);
           }
           
         } catch (e) {
-          console.error('Failed to parse WebSocket message:', e);
+          console.error('useWebSocketChat: Failed to parse WebSocket message:', e);
         }
       };
       
       ws.onerror = () => {
-        console.error('WebSocket error');
+        console.error('useWebSocketChat: WebSocket error');
         setIsConnected(false);
         setIsConnecting(false);
         setError('Connection error. Please try again.');
       };
       
       ws.onclose = () => {
-        console.log('WebSocket closed');
+        console.log('useWebSocketChat: WebSocket closed');
         setIsConnected(false);
         setIsConnecting(false);
         
         // Attempt to reconnect if not at max attempts
-        if (reconnectAttemptsRef.current < API_CONFIG.WEBSOCKET.RECONNECT_ATTEMPTS) {
+        if (reconnectAttemptsRef.current < API_CONFIG.DEFAULT_RECONNECT_ATTEMPTS) {
           reconnectAttemptsRef.current++;
-          console.log(`Attempting reconnect ${reconnectAttemptsRef.current}/${API_CONFIG.WEBSOCKET.RECONNECT_ATTEMPTS}`);
+          console.log(`useWebSocketChat: Attempting reconnect ${reconnectAttemptsRef.current}/${API_CONFIG.DEFAULT_RECONNECT_ATTEMPTS}`);
           
           // Exponential backoff
-          const delay = API_CONFIG.WEBSOCKET.RECONNECT_INTERVAL * Math.pow(2, reconnectAttemptsRef.current - 1);
+          const delay = API_CONFIG.WEBSOCKET.RECONNECT_DELAY * Math.pow(2, reconnectAttemptsRef.current - 1);
           reconnectTimeoutRef.current = window.setTimeout(() => {
             reconnectTimeoutRef.current = null;
             connect();
@@ -140,7 +146,7 @@ export function useWebSocketChat() {
       
       wsRef.current = ws;
     } catch (err) {
-      console.error('Error creating WebSocket:', err);
+      console.error('useWebSocketChat: Error creating WebSocket:', err);
       setIsConnecting(false);
       setError('Failed to create WebSocket connection');
     }
@@ -174,7 +180,8 @@ export function useWebSocketChat() {
       const userMessage: AIMessage = {
         role: 'user',
         content: content.trim(),
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        id: `user-${Date.now()}`
       };
       
       setMessages(prev => [...prev, userMessage]);
@@ -189,7 +196,7 @@ export function useWebSocketChat() {
       
       wsRef.current.send(JSON.stringify(message));
     } catch (err) {
-      console.error('Error sending message:', err);
+      console.error('useWebSocketChat: Error sending message:', err);
       setError('Failed to send message. Please try again.');
       setIsLoading(false);
     }
@@ -213,10 +220,10 @@ export function useWebSocketChat() {
         try {
           wsRef.current.send(JSON.stringify({ type: 'ping' }));
         } catch (e) {
-          console.error('Error sending ping:', e);
+          console.error('useWebSocketChat: Error sending ping:', e);
         }
       }
-    }, API_CONFIG.WEBSOCKET.PING_INTERVAL);
+    }, API_CONFIG.DEFAULT_PING_INTERVAL);
     
     // Cleanup on unmount
     return () => {
