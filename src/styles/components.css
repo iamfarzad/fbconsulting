@@ -6,27 +6,40 @@
 
 /* Simplified component styles */
 .hover-lift {
-  @apply transition-transform duration-300;
+  /* @apply transition-transform duration-300; */
+  transition-property: transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
 }
 
 .hover-lift:hover {
   transform: translateY(-4px);
 }
 
-/* Add a minimal accent styling that uses Giants Orange color */
+/* Define accent styles directly using hex code */
 .accent-border {
-  @apply border-giants-orange;
+  /* @apply border-giants-orange; */
+  border-color: #fe5a1d;
 }
 
 .accent-text {
-  @apply text-giants-orange;
+  /* @apply text-giants-orange; */
+  color: #fe5a1d;
 }
 
 .accent-bg {
-  @apply bg-giants-orange text-white;
+  /* @apply bg-giants-orange text-white; */
+  background-color: #fe5a1d;
+  color: #fff;
 }
 
-/* Add glassmorphism with accent color */
+/* Define glass-accent styles directly using hex code and rgba */
 .glass-accent {
-  @apply bg-giants-orange/10 backdrop-blur-lg border border-giants-orange/20 rounded-lg;
+  /* @apply bg-giants-orange/10 backdrop-blur-lg border border-giants-orange/20 rounded-lg; */
+  background-color: rgba(254, 90, 29, 0.1); /* #fe5a1d with 10% opacity */
+  backdrop-filter: blur(16px); /* backdrop-blur-lg */
+  border-width: 1px; /* border */
+  border-style: solid; /* border */
+  border-color: rgba(254, 90, 29, 0.2); /* #fe5a1d with 20% opacity */
+  border-radius: 0.5rem; /* rounded-lg */
 }
