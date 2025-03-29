@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { toast } from '@/components/ui/use-toast';
-import API_CONFIG from '@/config/apiConfig'; 
+import API_CONFIG from '@/config/apiConfigConfig'; 
 import { v4 as uuidv4 } from 'uuid'; 
 
 // --- Types --- (Consider moving to a shared types file)

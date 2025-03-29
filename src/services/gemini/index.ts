@@ -1,5 +1,5 @@
 
-import { API_CONFIG } from '@/config/api';
+import { API_CONFIG } from '@/config/apiConfig';
 
 export { useGeminiWebSocket } from '@/features/gemini/hooks/useGeminiWebSocket'; 
 export { useGeminiService } from '@/features/gemini/hooks/useGeminiService';

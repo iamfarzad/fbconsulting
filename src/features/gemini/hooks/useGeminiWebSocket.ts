@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import API_CONFIG from '@/config/apiConfig';
+import API_CONFIG from '@/config/apiConfigConfig';
 
 // WebSocket connection states
 type ConnectionState = 'disconnected' | 'connecting' | 'connected';

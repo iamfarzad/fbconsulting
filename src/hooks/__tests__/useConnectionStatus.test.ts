@@ -21,14 +21,14 @@ describe('useConnectionStatus', () => {
 
   it('should return connection status as true if API key is present', () => {
     const mockApiKey = 'mock-api-key';
-    jest.spyOn(require('@/config/api'), 'apiConfig', 'get').mockReturnValue({ geminiApiKey: mockApiKey });
+    jest.spyOn(require('@/config/apiConfig'), 'apiConfig', 'get').mockReturnValue({ geminiApiKey: mockApiKey });
 
     const { result } = renderHook(() => useConnectionStatus());
     expect(result.current.isConnected).toBe(true);
   });
 
   it('should check health status if API key is not present', async () => {
-    jest.spyOn(require('@/config/api'), 'apiConfig', 'get').mockReturnValue({ geminiApiKey: null });
+    jest.spyOn(require('@/config/apiConfig'), 'apiConfig', 'get').mockReturnValue({ geminiApiKey: null });
 
     const { result, waitForNextUpdate } = renderHook(() => useConnectionStatus());
 
@@ -39,7 +39,7 @@ describe('useConnectionStatus', () => {
   });
 
   it('should update connection status based on health check response', async () => {
-    jest.spyOn(require('@/config/api'), 'apiConfig', 'get').mockReturnValue({ geminiApiKey: null });
+    jest.spyOn(require('@/config/apiConfig'), 'apiConfig', 'get').mockReturnValue({ geminiApiKey: null });
 
     global.fetch.mockImplementationOnce(() =>
       Promise.resolve({

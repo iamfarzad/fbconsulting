@@ -1,5 +1,5 @@
 
-import { API_CONFIG } from '@/config/api';
+import { API_CONFIG } from '@/config/apiConfig';
 
 // Type definitions for Gemini service
 export interface GeminiConfig {

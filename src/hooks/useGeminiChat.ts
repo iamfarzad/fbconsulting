@@ -2,7 +2,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { AIMessage } from '@/services/chat/messageTypes';
-import { API_CONFIG } from '@/config/api';
+import { API_CONFIG } from '@/config/apiConfig';
 
 interface UseGeminiChatProps {
   apiKey?: string;

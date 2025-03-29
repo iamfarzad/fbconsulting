@@ -1,5 +1,5 @@
 
-import { API_CONFIG } from '@/config/api';
+import { API_CONFIG } from '@/config/apiConfig';
 import { formatErrorMessage } from './errorHandling';
 
 export interface WebSocketMessage {
