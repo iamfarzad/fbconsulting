@@ -1,20 +1,15 @@
 
 import { ReactNode } from 'react';
+import { MessageMedia } from '@/services/chat/messageTypes';
 
 // Basic AI message type
 export interface AIMessage {
-  id?: string;
+  id: string;
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
-  timestamp?: number;
-  media?: Array<{
-    type: string;
-    data: string;
-    mimeType?: string;
-    url?: string;
-    caption?: string;
-    fileName?: string;
-  }>;
+  timestamp: number;
+  media?: MessageMedia[];
+  feedback?: 'positive' | 'negative' | null;
 }
 
 // Props for ChatInput component
@@ -66,4 +61,31 @@ export interface UnifiedChatProps extends UnifiedChatConfig {
   initialMessages?: AIMessage[];
   onMessageSent?: (message: string) => void;
   onMessageReceived?: (message: AIMessage) => void;
+  title?: string;
+  subtitle?: string;
+  placeholderText?: string;
+  onToggleFullScreen?: () => void;
+}
+
+// Added missing types for ConnectionStatusIndicator
+export interface ConnectionStatusIndicatorProps {
+  status: 'connected' | 'connecting' | 'disconnected' | 'error';
+  className?: string;
+}
+
+// Added missing types for ChatHeader
+export interface ChatHeaderProps {
+  title?: string;
+  subtitle?: string;
+  onClose?: () => void;
+  rightContent?: React.ReactNode;
+  className?: string;
+}
+
+// Added missing types for UnifiedVoiceUI
+export interface UnifiedVoiceUIProps {
+  isListening?: boolean;
+  transcript?: string;
+  onToggleListening?: () => void;
+  className?: string;
 }
