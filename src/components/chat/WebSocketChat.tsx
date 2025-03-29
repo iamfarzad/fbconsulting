@@ -9,6 +9,11 @@ import { Mic, Send, Trash2, Volume, VolumeX, RefreshCw } from 'lucide-react';
 import { ConnectionStatus } from '@/components/chat/core/ConnectionStatus';
 import { Card } from '@/components/ui/card';
 
+interface ConnectionStatusProps {
+  isConnected: boolean;
+  isLoading: boolean;
+}
+
 export function WebSocketChat() {
   const { state, actions, error } = useChat();
   const [inputValue, setInputValue] = useState('');

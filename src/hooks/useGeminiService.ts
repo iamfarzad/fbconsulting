@@ -1,11 +1,3 @@
-import { 
-  GeminiAdapter,
-  GeminiConfig,
-  useGeminiMessageSubmission,
-  useGeminiInitialization,
-  useGeminiAudio,
-} from '@/features/gemini';
-// If this file exists, it likely uses the data
 
 import { useState, useCallback } from 'react';
 import { fetchGeminiResponse } from '../services/api';

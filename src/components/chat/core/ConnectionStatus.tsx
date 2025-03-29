@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, Wifi, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ConnectionStatusProps {
@@ -13,19 +13,19 @@ export function ConnectionStatus({ isConnected, isLoading, className }: Connecti
   return (
     <div className={cn("flex items-center", className)}>
       {isLoading ? (
-        <div className="flex items-center text-yellow-500">
+        <div className="flex items-center text-amber-500" title="Connecting...">
           <Loader2 className="h-4 w-4 animate-spin mr-1" />
-          <span className="text-xs">Connecting...</span>
+          <span className="text-xs">Connecting</span>
         </div>
       ) : isConnected ? (
-        <div className="flex items-center text-green-500">
-          <CheckCircle className="h-4 w-4 mr-1" />
+        <div className="flex items-center text-green-500" title="Connected">
+          <Wifi className="h-4 w-4 mr-1" />
           <span className="text-xs">Connected</span>
         </div>
       ) : (
-        <div className="flex items-center text-red-500">
-          <XCircle className="h-4 w-4 mr-1" />
-          <span className="text-xs">Disconnected</span>
+        <div className="flex items-center text-red-500" title="Disconnected">
+          <WifiOff className="h-4 w-4 mr-1" />
+          <span className="text-xs">Offline</span>
         </div>
       )}
     </div>
