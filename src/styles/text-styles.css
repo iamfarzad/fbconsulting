@@ -1,10 +1,31 @@
 
-/* Text gradient - simplified */
+/* Text gradient - simplified using direct CSS */
 .text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-black to-black/80 dark:from-white dark:to-white/80;
+  background-clip: text;
+  -webkit-background-clip: text; /* For broader compatibility */
+  color: transparent;
+  /* Apply the gradient directly */
+  background-image: linear-gradient(to right, #000, rgba(0, 0, 0, 0.8));
+  /* @apply bg-clip-text text-transparent bg-gradient-to-r from-black to-black/80 dark:from-white dark:to-white/80; */
 }
 
-/* Simple highlight */
+/* Handle dark mode separately */
+.dark .text-gradient {
+  /* @apply dark:from-white dark:to-white/80; */
+  background-image: linear-gradient(to right, #fff, rgba(255, 255, 255, 0.8));
+}
+
+/* Simple highlight - Likely okay, but replace to be safe */
 .text-highlight {
-  @apply bg-black/5 dark:bg-white/5 px-1 py-0.5 rounded;
+  /* @apply bg-black/5 dark:bg-white/5 px-1 py-0.5 rounded; */
+  background-color: rgba(0, 0, 0, 0.05);
+  padding-left: 0.25rem; /* px-1 */
+  padding-right: 0.25rem; /* px-1 */
+  padding-top: 0.125rem; /* py-0.5 */
+  padding-bottom: 0.125rem; /* py-0.5 */
+  border-radius: 0.25rem; /* rounded */
+}
+
+.dark .text-highlight {
+  background-color: rgba(255, 255, 255, 0.05);
 }
