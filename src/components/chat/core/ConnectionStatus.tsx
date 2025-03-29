@@ -1,33 +1,36 @@
 
 import React from 'react';
-import { Loader2, Wifi, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
 
 interface ConnectionStatusProps {
   isConnected: boolean;
-  isLoading: boolean;
+  isLoading?: boolean;
   className?: string;
 }
 
-export function ConnectionStatus({ isConnected, isLoading, className }: ConnectionStatusProps) {
+export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({ 
+  isConnected, 
+  isLoading = false,
+  className
+}) => {
   return (
-    <div className={cn("flex items-center", className)}>
+    <div className={cn("flex items-center gap-2", className)}>
       {isLoading ? (
-        <div className="flex items-center text-amber-500" title="Connecting...">
-          <Loader2 className="h-4 w-4 animate-spin mr-1" />
-          <span className="text-xs">Connecting</span>
-        </div>
-      ) : isConnected ? (
-        <div className="flex items-center text-green-500" title="Connected">
-          <Wifi className="h-4 w-4 mr-1" />
-          <span className="text-xs">Connected</span>
-        </div>
+        <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
       ) : (
-        <div className="flex items-center text-red-500" title="Disconnected">
-          <WifiOff className="h-4 w-4 mr-1" />
-          <span className="text-xs">Offline</span>
-        </div>
+        <div 
+          className={cn(
+            "h-2 w-2 rounded-full",
+            isConnected ? "bg-green-500" : "bg-red-500"
+          )}
+        />
       )}
+      <span className="text-xs text-muted-foreground">
+        {isLoading ? 'Connecting...' : isConnected ? 'Connected' : 'Disconnected'}
+      </span>
     </div>
   );
-}
+};
+
+export default ConnectionStatus;

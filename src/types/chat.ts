@@ -1,49 +1,39 @@
 
-// Basic chat types
+import { ReactNode } from 'react';
+
+// Basic AI message type
 export interface AIMessage {
+  id?: string;
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
-  timestamp: number;
-  id?: string;
-}
-
-export interface ChatMessage {
-  id: string;
-  content: string;
-  sender: 'user' | 'ai';
   timestamp?: number;
+  media?: Array<{
+    type: string;
+    data: string;
+    mimeType?: string;
+    url?: string;
+    caption?: string;
+    fileName?: string;
+  }>;
 }
 
-export interface ConnectionStatusIndicatorProps {
-  isConnected?: boolean;
-  isLoading?: boolean;
-  className?: string;
-  status?: 'connected' | 'connecting' | 'disconnected';
-  onRetry?: () => void;
-}
-
-export interface ChatMessageListProps {
-  messages?: AIMessage[];
-  showMessages?: boolean;
-  isFullScreen?: boolean;
-  isLoading?: boolean;
-}
-
+// Props for ChatInput component
 export interface ChatInputProps {
   placeholder?: string;
+  onSend?: (message: string) => void;
   disabled?: boolean;
-}
-
-export interface UnifiedChatProps {
-  title?: string;
-  subtitle?: string;
-  placeholderText?: string;
   className?: string;
-  apiKey?: string;
-  modelName?: string;
-  onToggleFullScreen?: () => void;
 }
 
+// Props for ChatMessageList component
+export interface ChatMessageListProps {
+  messages?: AIMessage[];
+  isLoading?: boolean;
+  isFullScreen?: boolean;
+  showMessages?: boolean;
+}
+
+// Props for FullScreenChat component
 export interface UnifiedFullScreenChatProps {
   onMinimize: () => void;
   placeholderText?: string;
@@ -51,25 +41,29 @@ export interface UnifiedFullScreenChatProps {
   modelName?: string;
 }
 
-export interface ChatHeaderProps {
-  title?: string;
-  subtitle?: string;
-  onClose?: () => void;
-  onClear?: () => void;
-  hasMessages?: boolean;
-  isConnected?: boolean;
-  isConnecting?: boolean;
-  onToggleFullScreen?: () => void;
-  isFullScreen?: boolean;
-  category?: string;
-  date?: string;
-  readTime?: string;
-  author?: string;
-  authorTitle?: string;
-  authorAvatar?: string;
+// For file attachments in chat
+export interface FileAttachment {
+  data: string;
+  mimeType: string;
+  name: string;
+  type: string;
+  size?: number;
 }
 
-export interface UnifiedVoiceUIProps {
-  onCommand?: (command: string) => Promise<void> | void;
-  noFloatingButton?: boolean;
+// Configuration for UnifiedChat component
+export interface UnifiedChatConfig {
+  apiKey?: string;
+  modelName?: string;
+  placeholder?: string;
+  autoFullScreen?: boolean;
+  onVoiceStart?: () => void;
+  onVoiceEnd?: () => void;
+}
+
+// Props for the UnifiedChat component
+export interface UnifiedChatProps extends UnifiedChatConfig {
+  className?: string;
+  initialMessages?: AIMessage[];
+  onMessageSent?: (message: string) => void;
+  onMessageReceived?: (message: AIMessage) => void;
 }
