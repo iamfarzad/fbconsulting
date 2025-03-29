@@ -9,7 +9,9 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import List, Optional, Dict, Any, Tuple
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, WebSocketState
+# Correct FastAPI/Starlette imports
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException 
+from starlette.websockets import WebSocketState # Import WebSocketState from starlette
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, ValidationError
 
@@ -19,7 +21,6 @@ from gemini_client import GeminiClient
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 loaded = load_dotenv(dotenv_path=dotenv_path, verbose=True)
 logger = logging.getLogger(__name__) # Setup logger early
-# Configure logging level early based on env or default
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
 logging.basicConfig(level=getattr(logging, LOG_LEVEL.upper(), logging.INFO),
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -30,10 +31,10 @@ HOST = os.getenv('HOST', '0.0.0.0')
 PORT = int(os.getenv('PORT', 8000))
 DEFAULT_VOICE = os.getenv('DEFAULT_VOICE', 'Charon')
 DEFAULT_LANGUAGE = os.getenv('DEFAULT_LANGUAGE', 'en-US')
-ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:3000,https://lovable.dev,https://*.googleprod.com').split(',')
+ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:3000,https://lovable.dev,https://*.googleprod.com').split(',') 
 WS_PING_INTERVAL = int(os.getenv('WS_PING_INTERVAL', 30))
 WS_PING_TIMEOUT = int(os.getenv('WS_PING_TIMEOUT', 10))
-API_VERSION = "0.2.0" # Reflects multimodal support
+API_VERSION = "0.2.0" 
 
 # --- Verify Critical Config --- 
 GOOGLE_API_KEY_LOADED = bool(os.getenv("GOOGLE_API_KEY"))
@@ -48,13 +49,13 @@ class FileData(BaseModel):
     filename: Optional[str] = None
 
 class TextMessage(BaseModel):
-    type: str # = Field("text_message", Literal=True) # Literal requires Python 3.8+
+    type: str 
     text: str
     role: str = "user"
     enableTTS: bool = True
 
 class MultimodalMessage(BaseModel):
-    type: str # = Field("multimodal_message", Literal=True)
+    type: str 
     text: Optional[str] = None
     files: List[FileData] = Field(..., min_items=1)
     role: str = "user"
@@ -74,7 +75,8 @@ async def lifespan(app: FastAPI):
     for client_id, (ws, client_instance) in list(connections.items()):
         logger.info(f"Closing connection for client {client_id} during shutdown...")
         if client_instance: await client_instance.close()
-        if ws.client_state != WebSocketState.DISCONNECTED:
+        # Use WebSocketState from starlette here
+        if ws.client_state != WebSocketState.DISCONNECTED: 
             try: await ws.close(code=1001)
             except Exception: pass
     connections.clear(); last_activity.clear()
@@ -86,7 +88,7 @@ app = FastAPI(
     version=API_VERSION,
     description="Provides a WebSocket interface to interact with Google Gemini.",
     openapi_tags=[{"name": "WebSocket", "description": "Main endpoint"}, {"name": "Meta", "description": "Metadata"}],
-    lifespan=lifespan # Use the lifespan context manager
+    lifespan=lifespan 
 )
 
 app.add_middleware(
@@ -145,6 +147,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
 
         # --- Audio Callback Setup ---
         async def audio_callback(audio_data: bytes):
+            # Use WebSocketState from starlette here
             if client_id in connections and connections[client_id][0].client_state == WebSocketState.CONNECTED:
                 try:
                     ws, _ = connections[client_id]
@@ -157,7 +160,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
         # --- Main Receive Loop ---
         while True:
             response_stream = None
-            raw_data = None # Initialize raw_data
+            raw_data = None
             try:
                 raw_data = await asyncio.wait_for(websocket.receive_text(), timeout=WS_PING_INTERVAL * 1.5)
                 message_data = json.loads(raw_data)
@@ -183,10 +186,14 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                 if response_stream:
                     full_response_text = ""
                     async for response in response_stream:
-                        if websocket.client_state != WebSocketState.CONNECTED: break
+                         # Use WebSocketState from starlette here
+                        if websocket.client_state != WebSocketState.CONNECTED: 
+                           logger.warning(f"Client {client_id} disconnected during stream."); break 
                         await websocket.send_json(response)
                         if response.get("type") == "text": full_response_text = response.get("content", full_response_text)
-                    if websocket.client_state == WebSocketState.CONNECTED: await websocket.send_json({"type": "complete", "text": full_response_text, "role": "assistant"})
+                    # Use WebSocketState from starlette here    
+                    if websocket.client_state == WebSocketState.CONNECTED: 
+                       await websocket.send_json({"type": "complete", "text": full_response_text, "role": "assistant"})
 
             except asyncio.TimeoutError:
                 logger.warning(f"Receive timeout for {client_id}. Closing.")
@@ -202,9 +209,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                 logger.exception(f"Error processing message for {client_id}: {loop_e}")
                 try: await websocket.send_json({"type": "error", "error": "Internal server error"})
                 except Exception: pass
-                break # Break loop on unexpected processing errors
+                break 
 
-    except Exception as handler_e: # Catch errors during initial setup phase
+    except Exception as handler_e:
         logger.exception(f"Unhandled exception in WebSocket handler setup for {client_id}: {handler_e}")
     finally:
         # --- Cleanup ---
@@ -212,6 +219,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
         if client_id in connections:
             ws, client_instance = connections.pop(client_id)
             if client_instance: await client_instance.close()
+             # Use WebSocketState from starlette here
             if ws.client_state != WebSocketState.DISCONNECTED: 
                 try: await ws.close(code=1000)
                 except Exception: pass
