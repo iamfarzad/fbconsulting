@@ -4,20 +4,21 @@ import { useGemini } from './GeminiProvider'; // Use the main provider context
 
 // Define the context type
 interface GeminiCopilotContextType {
-  // Messages needs to come from GeminiProvider eventually
   messages: Array<{
     role: 'user' | 'assistant' | 'system' | 'error';
     content: string;
-    timestamp?: number; // Make timestamp optional for now
+    timestamp?: number;
+    id?: string; // Add ID if needed for React keys
   }>;
-  sendMessage: (content: string) => void; // Will use context sendMessage
-  isLoading: boolean; // Should be derived from context isConnecting
-  // Voice-related state remains local for now
-  isListening: boolean;
-  transcript: string;
+  sendMessage: (content: string, files?: Array<{mime_type: string, data: string, filename?: string}>) => void; // Allow optional files
+  isLoading: boolean; // Derived from context
+  isListening: boolean; // Local state
+  transcript: string; // Local state
   toggleListening: () => void;
-  generateAndPlayAudio: (text: string) => void;
-  clearMessages?: () => void; // This needs to be handled by GeminiProvider too
+  generateAndPlayAudio: (text: string) => void; // Mock
+  clearMessages?: () => void; // From context
+  connectionError: string | null; // From context
+  isConnected: boolean; // From context
 }
 
 // Create the context
@@ -43,12 +44,12 @@ export function GeminiCopilotProvider({ children }: GeminiCopilotProviderProps) 
     isConnecting, 
     error: connectionError, 
     sendMessage: contextSendMessage, 
-    // Need message receiving and clearing from GeminiProvider
+    messages: contextMessages, // Get messages from the provider
+    isProcessing: contextIsProcessing,
+    clearMessages: contextClearMessages,
+    reconnect // Add reconnect if needed
   } = useGemini();
 
-  // TODO: Get messages from GeminiProvider context once available
-  const [messages, setMessages] = useState<GeminiCopilotContextType['messages']>([]);
-  
   // Simple voice state implementation (remains local)
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
@@ -66,41 +67,48 @@ export function GeminiCopilotProvider({ children }: GeminiCopilotProviderProps) 
   // Generate and play audio (mock implementation, remains local)
   const generateAndPlayAudio = useCallback((text: string) => {
     console.log('[GeminiCopilotProvider] Mock Playing audio for:', text);
+    // TODO: Integrate actual TTS from GeminiProvider if needed
   }, []);
 
   // Wrapper for sendMessage using context
-  const sendMessage = useCallback(async (content: string) => {
-    if (content.trim()) {
-      // Optimistically add user message (consider moving to GeminiProvider)
-      setMessages(prev => [...prev, { role: 'user', content, timestamp: Date.now() }]);
+  const sendMessage = useCallback(async (content: string, files?: Array<{mime_type: string, data: string, filename?: string}>) => {
+    if (!isConnected) {
+      console.error("[GeminiCopilotProvider] Not connected, attempting reconnect.");
+      reconnect();
+      // Consider throwing error or showing toast
+      return;
+    }
+    if (content.trim() || (files && files.length > 0)) {
+      let messageToSend: any;
+      if (files && files.length > 0) {
+          messageToSend = { type: 'multimodal_message', text: content || null, files };
+      } else {
+          messageToSend = { type: 'text_message', text: content };
+      }
+      
       try {
-        // Assume contextSendMessage handles text only for now
-        await contextSendMessage(content); 
-        // TODO: Need response handling from context
+        console.log("[GeminiCopilotProvider] Sending via context:", messageToSend);
+        await contextSendMessage(messageToSend); // Send structured message
       } catch (err) {
-         console.error("Error sending via context: ", err);
-         // TODO: Remove optimistic message or show error state
+         console.error("[GeminiCopilotProvider] Error sending via context: ", err);
+         // Handle error display if needed
       }
       if (transcript) setTranscript('');
     }
-  }, [contextSendMessage, transcript]);
-
-  // TODO: Implement clearMessages via context
-  const clearMessages = useCallback(() => {
-     console.warn("clearMessages called but not implemented in GeminiProvider yet.")
-     setMessages([]); // Local clear for now
-  }, []);
+  }, [isConnected, contextSendMessage, transcript, reconnect]);
 
 
   const value: GeminiCopilotContextType = {
-    messages, // Use local messages for now
+    messages: contextMessages, // Use messages from parent context
     sendMessage,
-    isLoading: isConnecting, // Use context connecting state for loading
+    isLoading: contextIsProcessing || isConnecting, // Combine loading states
     isListening,
     transcript,
     toggleListening,
     generateAndPlayAudio,
-    clearMessages 
+    clearMessages: contextClearMessages, // Use parent clear function
+    connectionError,
+    isConnected
   };
 
   return (
