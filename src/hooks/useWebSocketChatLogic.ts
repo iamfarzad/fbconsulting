@@ -1,290 +1,323 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { API_CONFIG } from '@/config/api';
+// Use the default export which contains the processed config
+import API_CONFIG from '@/config/apiConfig'; 
 
 type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
 
-interface Message {
+// Define a more specific FileState if needed, matching the backend expectation eventually
+interface FileState {
+  data: string; // Data URL for preview, Base64 extracted on send
+  mimeType: string;
+  name: string;
+  type: 'image' | 'document';
+  preview?: string;
+}
+
+// Define a clearer Message interface
+interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: number;
   id: string;
+  // Add optional fields if needed, e.g., for file attachments in UI
+  files?: Pick<FileState, 'name' | 'type'>[]; 
 }
 
 export function useWebSocketChatLogic() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [status, setStatus] = useState<ConnectionStatus>('disconnected');
   const [isProcessing, setIsProcessing] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
   const messageEndRef = useRef<HTMLDivElement>(null);
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectAttemptsRef = useRef(0);
   const { toast } = useToast();
   
   // Generate a client ID that persists for the session
   const clientIdRef = useRef<string>(`web-client-${Math.random().toString(36).substring(2, 9)}`);
 
-  // Handle audio data from the server
-  const handleAudioChunk = useCallback((audioBlob: Blob) => {
-    try {
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-      audio.play().catch(error => {
-        console.error('Error playing audio:', error);
-      });
-      
-      // Clean up the audio URL when done
-      audio.onended = () => {
-        URL.revokeObjectURL(audioUrl);
-      };
-    } catch (error) {
-      console.error('Error processing audio:', error);
-    }
-  }, []);
+  // MOVE Files state declaration BEFORE handleSendMessage
+  const [files, setFiles] = useState<FileState[]>([]);
 
-  // Set up WebSocket connection
-  useEffect(() => {
-    const connectWebSocket = () => {
+  // --- WebSocket Connection Logic ---
+  const connectWebSocket = useCallback(() => {
+      if (socketRef.current || status === 'connecting') {
+          console.log("Connection attempt already in progress or connected.");
+          return; // Avoid multiple connections
+      }
+      
       setStatus('connecting');
+      console.log(`Attempting WebSocket connection (Attempt: ${reconnectAttemptsRef.current + 1})...`);
       
+      // Construct URL correctly using WS_BASE_URL and WEBSOCKET.PATH
+      const wsUrl = `${API_CONFIG.WS_BASE_URL}${API_CONFIG.WEBSOCKET.PATH}${clientIdRef.current}`;
+      console.log(`Connecting to: ${wsUrl}`);
+      
+      let socket: WebSocket;
       try {
-        const wsUrl = `${API_CONFIG.WS_BASE_URL}/ws/${clientIdRef.current}`;
-        const socket = new WebSocket(wsUrl);
-        
-        socket.onopen = () => {
-          console.log('WebSocket connected');
-          setStatus('connected');
-          // Start regular pings to keep the connection alive
-          const pingInterval = setInterval(() => {
-            if (socket.readyState === WebSocket.OPEN) {
-              socket.send(JSON.stringify({ type: 'ping' }));
-            }
-          }, 30000); // 30 second ping
-
-          // Store the interval ID in the ref so we can clear it on disconnect
-          socketRef.current = socket;
-          
-          // Clean up the interval when the socket closes
-          socket.onclose = () => {
-            clearInterval(pingInterval);
-            setStatus('disconnected');
-            socketRef.current = null;
-          };
-        };
-        
-        socket.onerror = (error) => {
-          console.error('WebSocket error:', error);
-          setStatus('error');
-          toast({
-            title: "Connection Error",
-            description: "Failed to connect to chat service. Please try again later.",
-            variant: "destructive",
-          });
-        };
-        
-        socket.onmessage = (event) => {
-          try {
-            // Handle binary data (audio chunks)
-            if (event.data instanceof Blob) {
-              handleAudioChunk(event.data);
-              return;
-            }
-            
-            // Handle JSON data
-            const data = JSON.parse(event.data);
-            console.log('Received message:', data);
-            
-            switch (data.type) {
-              case 'text':
-                setMessages(prev => {
-                  // Find the last assistant message or create a new one
-                  const lastAssistantIndex = [...prev].reverse().findIndex(m => m.role === 'assistant');
-                  
-                  if (lastAssistantIndex >= 0) {
-                    const newMessages = [...prev];
-                    const actualIndex = prev.length - 1 - lastAssistantIndex;
-                    newMessages[actualIndex] = {
-                      ...newMessages[actualIndex],
-                      content: data.content,
-                    };
-                    return newMessages;
-                  } else {
-                    // If no existing assistant message, create a new one
-                    return [...prev, {
-                      role: 'assistant',
-                      content: data.content,
-                      timestamp: Date.now(),
-                      id: `ai-${Date.now()}`,
-                    }];
-                  }
-                });
-                break;
-                
-              case 'complete':
-                setIsProcessing(false);
-                break;
-                
-              case 'error':
-                console.error('Server error:', data.error);
-                toast({
-                  title: "Error",
-                  description: data.error || "An error occurred while processing your request.",
-                  variant: "destructive",
-                });
-                setIsProcessing(false);
-                break;
-                
-              case 'pong':
-                // Ping response received, connection is alive
-                console.log('Ping acknowledged');
-                break;
-                
-              case 'server_ping':
-                // Server is checking if we're still connected, respond with any message
-                socket.send(JSON.stringify({ type: 'client_pong' }));
-                break;
-                
-              default:
-                console.log('Unhandled message type:', data.type);
-            }
-          } catch (err) {
-            console.error('Error parsing message:', err, event.data);
-          }
-        };
+          socket = new WebSocket(wsUrl);
       } catch (error) {
-        console.error('Failed to create WebSocket:', error);
-        setStatus('error');
-        toast({
-          title: "Connection Error",
-          description: "Failed to initialize chat connection.",
-          variant: "destructive",
-        });
+          console.error('WebSocket constructor error:', error);
+          setStatus('error');
+          handleDisconnect(); // Trigger disconnect handling
+          return;
       }
-    };
-    
-    if (!socketRef.current) {
-      connectWebSocket();
-    }
-    
-    // Clean up WebSocket on component unmount
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.close();
-        socketRef.current = null;
-      }
-    };
-  }, [toast, handleAudioChunk]);
 
-  // Auto-scroll to bottom when messages change
+      // Clear any existing retry timeout
+      if (retryTimeoutRef.current) {
+          clearTimeout(retryTimeoutRef.current);
+          retryTimeoutRef.current = null;
+      }
+
+      socket.onopen = () => {
+          console.log('WebSocket connected successfully.');
+          setStatus('connected');
+          reconnectAttemptsRef.current = 0; // Reset attempts on successful connection
+
+          // Start client-side ping
+          const pingInterval = setInterval(() => {
+              if (socket.readyState === WebSocket.OPEN) {
+                  console.debug('Sending client ping');
+                  socket.send(JSON.stringify({ type: 'ping' }));
+              } else {
+                  clearInterval(pingInterval); // Stop pinging if not open
+              }
+          }, API_CONFIG.DEFAULT_PING_INTERVAL);
+
+          // Assign cleanup for the interval within onclose
+          socket.onclose = (event) => handleDisconnect(event, pingInterval);
+          socketRef.current = socket; // Assign socket to ref after setup
+      };
+
+      socket.onerror = (event) => {
+          console.error('WebSocket error:', event);
+          setStatus('error');
+          // Don't auto-reconnect immediately on error, let onclose handle it
+      };
+
+      socket.onmessage = handleIncomingMessage; // Separate message handling logic
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]); // Re-run only if status changes significantly?
+
+  // --- Disconnect and Reconnect Logic ---
+  const handleDisconnect = useCallback((event?: CloseEvent, pingIntervalId?: NodeJS.Timeout) => {
+      console.log(`WebSocket disconnected. Code: ${event?.code}, Reason: ${event?.reason}`);
+      if (pingIntervalId) clearInterval(pingIntervalId);
+      setStatus('disconnected');
+      socketRef.current = null;
+
+      // Reconnect logic
+      if (reconnectAttemptsRef.current < API_CONFIG.DEFAULT_RECONNECT_ATTEMPTS) {
+          reconnectAttemptsRef.current++;
+          const delay = API_CONFIG.WEBSOCKET.RECONNECT_DELAY * Math.pow(2, reconnectAttemptsRef.current - 1); // Exponential backoff
+          console.log(`Attempting reconnect ${reconnectAttemptsRef.current}/${API_CONFIG.DEFAULT_RECONNECT_ATTEMPTS} in ${delay}ms...`);
+          
+          // Clear previous timeout if any
+          if (retryTimeoutRef.current) clearTimeout(retryTimeoutRef.current);
+          
+          retryTimeoutRef.current = setTimeout(() => {
+              connectWebSocket();
+          }, delay);
+      } else {
+          console.error('Max reconnect attempts reached. Giving up.');
+          toast({ title: "Connection Lost", description: "Could not reconnect to the server.", variant: "destructive" });
+      }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connectWebSocket, toast]); // Need connectWebSocket here
+
+  // --- Incoming Message Handler ---
+  const handleIncomingMessage = useCallback((event: MessageEvent) => {
+      try {
+          if (event.data instanceof Blob) {
+              // We expect backend to send raw audio bytes, wrap in Blob if necessary
+              // Or handle ArrayBuffer directly if backend sends that
+              handleAudioChunk(new Blob([event.data], { type: 'audio/mp3' })); // Assuming mp3 for now
+              return;
+          }
+
+          const data = JSON.parse(event.data);
+          // console.debug('Received WebSocket data:', data);
+
+          switch (data.type) {
+              case 'text':
+                  setMessages(prev => {
+                      const lastMessage = prev[prev.length - 1];
+                      if (lastMessage?.role === 'assistant') {
+                          // Append to the last assistant message
+                          const updatedMessages = [...prev];
+                          updatedMessages[prev.length - 1] = { ...lastMessage, content: data.content }; // Replace content
+                          return updatedMessages;
+                      } else {
+                          // Start a new assistant message
+                          return [...prev, { role: 'assistant', content: data.content, timestamp: Date.now(), id: `ai-${Date.now()}` }];
+                      }
+                  });
+                  break;
+              case 'complete':
+                  setIsProcessing(false);
+                  console.log("Assistant message complete.");
+                  break;
+              case 'audio_chunk_info':
+                  // console.debug(`Audio chunk info: size=${data.size}, format=${data.format}`);
+                  break; // Info only, Blob handler deals with data
+              case 'error':
+                  console.error('Server processing error:', data.error);
+                  toast({ title: "Server Error", description: data.error || "An error occurred.", variant: "destructive" });
+                  setIsProcessing(false);
+                  break;
+              case 'pong':
+                  console.debug('Client Pong Received'); // Response to our ping
+                  break;
+              case 'server_ping':
+                  console.debug('Server Ping Received, sending pong');
+                  if (socketRef.current?.readyState === WebSocket.OPEN) {
+                      socketRef.current.send(JSON.stringify({ type: 'client_pong' }));
+                  }
+                  break;
+              default:
+                  console.warn('Unhandled message type:', data.type, data);
+          }
+      } catch (err) {
+          console.error('Error handling incoming message:', err, event.data);
+      }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [handleAudioChunk, toast]); // handleAudioChunk is stable
+
+  // --- Effect to Initiate Connection --- 
   useEffect(() => {
-    messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      // Only connect if disconnected and not already trying
+      if (status === 'disconnected' && !socketRef.current && !retryTimeoutRef.current) {
+          reconnectAttemptsRef.current = 0; // Reset attempts when manually initiating
+          connectWebSocket();
+      }
+
+      // Cleanup function
+      return () => {
+          if (retryTimeoutRef.current) {
+              clearTimeout(retryTimeoutRef.current);
+              retryTimeoutRef.current = null;
+          }
+          if (socketRef.current) {
+              console.log('Closing WebSocket connection via cleanup effect.');
+              socketRef.current.onclose = null; // Avoid triggering reconnect on manual close
+              socketRef.current.close();
+              socketRef.current = null;
+          }
+      };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]); // Re-run connection logic if status changes to disconnected?
+
+  // --- Auto-scroll Effect ---
+  useEffect(() => {
+      messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Handle sending a message
+  // --- Send Message Logic ---
   const handleSendMessage = useCallback(() => {
-    if ((!input.trim() && !files.length) || isProcessing || status !== 'connected') {
+    if ((!input.trim() && files.length === 0) || isProcessing) { // Removed status check, let send attempt handle it
+      console.warn('Send message blocked:', { inputEmpty: !input.trim(), filesEmpty: files.length === 0, isProcessing });
+      return;
+    }
+    
+    if (!socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) {
+      console.error('Cannot send: WebSocket not connected.');
+      toast({ title: "Connection Error", description: "Not connected. Please wait or refresh.", variant: "destructive" });
+      // Attempt reconnect if disconnected?
+      if(status === 'disconnected') connectWebSocket();
       return;
     }
     
     try {
-      // Add user message to the UI
-      const userMessage = {
-        role: 'user' as const,
-        content: input,
+      const userMessageContent = input;
+      const userFiles = [...files]; // Copy files state
+      
+      // Optimistically add user message to UI
+      const userDisplayMessage: ChatMessage = {
+        role: 'user',
+        content: userMessageContent,
+        files: userFiles.map(f => ({ name: f.name, type: f.type })), // Only add minimal file info for display
         timestamp: Date.now(),
         id: `user-${Date.now()}`,
       };
-      
-      setMessages(prev => [...prev, userMessage]);
+      setMessages(prev => [...prev, userDisplayMessage]);
+      setInput(''); 
+      setFiles([]); 
       setIsProcessing(true);
       
-      // Prepare message for WebSocket
-      if (files.length > 0) {
-        // Send as multimodal message
-        const fileData = files.map(file => ({
-          mime_type: file.mimeType,
-          data: file.data,
-          filename: file.name
-        }));
+      // Prepare message payload
+      let messageToSend: any;
+      if (userFiles.length > 0) {
+        // Extract base64 data from data URLs
+        const fileDataToSend = userFiles.map(file => {
+          const base64Data = file.data.split(',')[1]; 
+          if (!base64Data) throw new Error(`Invalid data URL for file ${file.name}`);
+          return { mime_type: file.mimeType, data: base64Data, filename: file.name };
+        });
         
-        const message = {
+        messageToSend = {
           type: 'multimodal_message',
-          text: input,
-          files: fileData,
+          text: userMessageContent || null, // Send null if text is empty
+          files: fileDataToSend,
           role: 'user',
-          enableTTS: true
+          // TODO: Get TTS preference from UI state
+          enableTTS: true 
         };
-        
-        socketRef.current?.send(JSON.stringify(message));
+        console.log(`Sending multimodal message with ${fileDataToSend.length} files.`);
+
       } else {
-        // Send as text-only message
-        const message = {
+        messageToSend = {
           type: 'text_message',
-          text: input,
+          text: userMessageContent,
           role: 'user',
-          enableTTS: true
+          enableTTS: true 
         };
-        
-        socketRef.current?.send(JSON.stringify(message));
+        console.log(`Sending text message.`);
       }
       
-      // Clear input and files after sending
-      setInput('');
-      clearFiles();
+      socketRef.current.send(JSON.stringify(messageToSend));
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
-        variant: "destructive",
-      });
-      setIsProcessing(false);
+      toast({ title: "Send Error", description: error?.message || "Failed to send.", variant: "destructive" });
+      setIsProcessing(false); // Reset processing on error
     }
-  }, [input, isProcessing, status, files, toast]);
+  }, [input, files, isProcessing, status, toast, connectWebSocket]); // Add connectWebSocket to deps
 
-  // Files state
-  const [files, setFiles] = useState<Array<{data: string, mimeType: string, name: string, type: string, preview?: string}>>([]);
-
-  // Handle file upload
+  // --- File Handling Callbacks ---
   const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result as string;
-        const fileType = file.type.startsWith('image/') ? 'image' : 'document';
-        
-        setFiles(prev => [...prev, {
-          data: result,
-          mimeType: file.type,
-          name: file.name,
-          type: fileType,
-          preview: fileType === 'image' ? result : undefined
-        }]);
-      };
-      reader.readAsDataURL(file);
-    }
-    // Reset the input value so the same file can be selected again
-    if (event.target) {
-      event.target.value = '';
-    }
-  }, []);
+    if (!file) return;
 
-  // Remove file
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string; // Data URL
+      const fileType = file.type.startsWith('image/') ? 'image' : 'document';
+      setFiles(prev => [...prev, {
+        data: result, mimeType: file.type, name: file.name, type: fileType,
+        preview: fileType === 'image' ? result : undefined
+      }]);
+    };
+    reader.onerror = (error) => {
+      console.error("FileReader error:", error);
+      toast({title: "File Error", description: "Could not read the file.", variant: "destructive"});
+    };
+    reader.readAsDataURL(file);
+    if (event.target) event.target.value = ''; // Reset input
+  }, [toast]);
+
   const removeFile = useCallback((index: number) => {
     setFiles(prev => prev.filter((_, i) => i !== index));
   }, []);
 
-  // Clear all files
-  const clearFiles = useCallback(() => {
-    setFiles([]);
-  }, []);
-
-  // Clear all messages
   const clearMessages = useCallback(() => {
     setMessages([]);
+    // Optionally send a reset signal to backend if needed
   }, []);
 
+  // --- Return Hook Values ---
   return {
     messages,
     input,
@@ -293,10 +326,10 @@ export function useWebSocketChatLogic() {
     isProcessing,
     messageEndRef,
     files,
+    setFiles, // Expose setter
     handleSendMessage,
     handleFileUpload,
     removeFile,
-    clearFiles,
     clearMessages
   };
 }
