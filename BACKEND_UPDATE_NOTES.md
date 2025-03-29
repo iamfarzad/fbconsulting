@@ -7,25 +7,34 @@
 - ⚙️ **Internal Refinements:** Further improvements to WebSocket handling and logging.
 - ✅ **Environment Stable:** Backend runs reliably in IDX.
 
-## Frontend Build Troubleshooting (In Progress)
+## Recent Frontend Implementation (v0.2.1)
 
-We identified that PostCSS errors were occurring due to complex `@apply` usage in global CSS files (like `base.css`, `voice-ui.css`, `glassmorphism.css`). Using `@apply` with CSS variables, opacity modifiers, responsive modifiers, or custom classes within these files seems problematic for the build process.
+- 🎤 **Audio Transcription API Added:** Implemented the `/api/gemini/transcribe` endpoint for audio processing.
+- 🔄 **WebSocket Refactoring:** Refactored WebSocket functionality into smaller, more maintainable hooks.
+- 🛠️ **Bug Fixes:** Resolved several build errors related to WebSocket communication.
+- 🧩 **Audio Services:** Implemented proper audio recording and processing infrastructure.
 
-**Recent Fixes Pushed:**
-- Corrected `postcss.config.cjs` to use `@tailwindcss/postcss`.
-- Replaced most `@apply` rules in `src/styles/base.css` with direct CSS or media queries.
-- Replaced most `@apply` rules in `src/styles/voice-ui.css` with direct CSS.
-- **Latest Fix (Just Pushed):** Refactored `src/styles/glassmorphism.css`: renamed `.glassmorphism` to `.glassmorphism-base` and removed the `.frosted-glass` and `.glass-card` classes that used `@apply glassmorphism`.
+## Known Issues and Next Steps
 
-**Action Required for Frontend:**
-- Pull the latest `main` branch.
-- **Update Components:** Search the frontend codebase for usages of the CSS classes `frosted-glass` and `glass-card`. Replace them by applying utility classes directly in the components. You might use the `.glassmorphism-base` class along with other utilities like `rounded-xl`, `p-6`, `border`, `border-white/10`, etc., as needed.
-  *Example: `<div className="frosted-glass">` might become `<div className="glassmorphism-base rounded-xl border border-white/10">`.*
-- **Restart & Check:** Restart the Vite dev server (`web` preview) and verify if the build errors are resolved.
+- 🚨 **Gemini API Transcription Limitation:** Currently using a mock implementation for `/api/gemini/transcribe` as Gemini's API doesn't have a direct audio transcription capability like OpenAI's Whisper API. Need to discuss options:
+  1. Implement server-side transcription using another service (Google Speech-to-Text API)
+  2. Use a different model or wait for Gemini's API to support audio transcription
+  3. Use browser's Speech API for transcription instead of server (current fallback approach)
+
+- 🐛 **Build Errors:** Working through remaining TypeScript errors related to the Copilot and UI components.
+
+## WebSocket Connection Troubleshooting
+
+We've identified and fixed several issues with WebSocket connections:
+- Fixed connection URL construction to properly use environment configuration
+- Improved reconnection logic and error handling
+- Added proper status logging and user feedback
+
+## Frontend Build Troubleshooting
+
+The CSS build errors have been resolved with the recent fixes. WebSocket connections are now more reliable with proper error handling and reconnection logic.
 
 ## Using Multimodal Input
-
-(Format definition as before...)
 
 ```json
 {
@@ -43,13 +52,7 @@ We identified that PostCSS errors were occurring due to complex `@apply` usage i
 }
 ```
 
-**Key Points:**
-(Details as before...)
-
-## Previous Q&A Summary
-
-(Summary as before...)
-
 ---
 
-Please update components as described above after pulling. Let us know the build status!
+Please continue to pull the latest changes and let us know if there are any issues with the implementation. Next priority is to implement a proper audio transcription solution that works with Gemini.
+
