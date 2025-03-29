@@ -2,9 +2,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useGemini } from '@/components/copilot/providers/GeminiProvider'; // Use the central context
 import { ChatInputBox as ChatInput } from '@/components/ui/ai-chat/input/ChatInputBox'; 
-// Correct import name for ChatMessageList
+// Correct the import name for ChatMessageList
 import { ChatMessageList } from '@/components/ui/ai-chat/ChatMessageList';
-import { FilePreview } from '@/components/ui/ai-chat/input/MediaPreview';
+// Correct the import name for MediaPreview, use alias FilePreview
+import { MediaPreview as FilePreview } from '@/components/ui/ai-chat/input/MediaPreview';
 import { ConnectionStatusIndicator } from '@/components/ui/ai-chat/ConnectionStatusIndicator'; 
 import { TypingIndicator } from '@/components/ui/ai-chat/TypingIndicator';
 import { useToast } from '@/hooks/use-toast'; // Import toast
@@ -16,6 +17,17 @@ interface FileState {
   name: string;
   type: 'image' | 'document';
   preview?: string;
+}
+
+// Define chat message interface (match ProviderMessage in GeminiProvider)
+interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system' | 'error';
+  content: string;
+  timestamp: number;
+  files?: Pick<FileState, 'name' | 'type'>[]; 
+  // Add isUser derived property for ChatMessageList component
+  isUser?: boolean;
 }
 
 export function WebSocketChat() {
@@ -56,7 +68,7 @@ export function WebSocketChat() {
     setLocalFiles([]); 
 
     try {
-      let messagePayload: any;
+      let messagePayload: any; // Use OutgoingWebSocketMessage type ideally
       if (filesToSend.length > 0) {
         const fileData = filesToSend.map(file => {
           const base64Data = file.data.split(',')[1]; 
@@ -99,6 +111,8 @@ export function WebSocketChat() {
   }, [toast]);
 
   const removeFile = useCallback((index: number) => {
+    // MediaPreview expects onRemove with index, but it maps internally.
+    // We just need to remove the file at the given index from localFiles.
     setLocalFiles(prev => prev.filter((_, i) => i !== index));
   }, []);
 
@@ -107,10 +121,16 @@ export function WebSocketChat() {
                            isConnected ? 'connected' : 
                            contextError ? 'error' : 'disconnected';
 
+  // Adapt messages from context for ChatMessageList component
+  const displayMessages: Array<ChatMessage & { isUser?: boolean }> = React.useMemo(() => 
+     contextMessages.map(msg => ({...msg, isUser: msg.role === 'user'})), 
+     [contextMessages]
+  );
+
   // Auto-scroll based on context messages
   useEffect(() => {
     localMessageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [contextMessages]);
+  }, [displayMessages]); // Use displayMessages
 
   // Auto-resize textarea
   useEffect(() => {
@@ -135,11 +155,9 @@ export function WebSocketChat() {
 
       {/* Message List Area */}
       <div className="flex-grow overflow-y-auto p-4 space-y-4">
-        {/* Use the imported ChatMessageList component */}
         <ChatMessageList 
-           messages={contextMessages.map(msg => ({...msg, isUser: msg.role === 'user'}))} 
-           // Pass other necessary props if ChatMessageList requires them
-           showMessages={true} // Assume we always show messages in this component
+           messages={displayMessages} // Pass adapted messages
+           showMessages={true} 
         /> 
         {contextIsProcessing && <TypingIndicator />} 
         <div ref={localMessageEndRef} />
@@ -149,16 +167,18 @@ export function WebSocketChat() {
       <div className="p-4 border-t border-border bg-muted/50">
          {localFiles.length > 0 && (
            <div className="mb-2 flex flex-wrap gap-2">
-             {localFiles.map((file, index) => (
-               <FilePreview key={index} file={file} onRemove={() => removeFile(index)} />
-             ))}
+             {/* Pass correct props to MediaPreview (aliased as FilePreview) */}
+             <FilePreview 
+               mediaItems={localFiles} // Pass the array of files
+               onRemove={removeFile} // Pass the remove function
+              />
            </div>
          )}
-        <ChatInput // Use the alias ChatInput which points to ChatInputBox
+        <ChatInput 
           textareaRef={textareaRef}
           value={localInput}
           onChange={(e) => setLocalInput(e.target.value)}
-          onKeyDown={handleKeyDown} // Use Enter key handler
+          onKeyDown={handleKeyDown}
           placeholder="Ask anything or drop a file..."
           disabled={!isConnected || contextIsProcessing}
         />
@@ -166,10 +186,3 @@ export function WebSocketChat() {
     </div>
   );
 }
-
-// Ensure FilePreview props match usage
-interface FilePreviewProps {
-  file: FileState; // Use the local FileState interface
-  onRemove: () => void;
-}
-
