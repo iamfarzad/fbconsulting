@@ -11,15 +11,13 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { UnifiedFullScreenChat } from '@/components/chat/UnifiedFullScreenChat';
 import { ChatContainer } from './ChatContainer';
 import { AIMessage } from '@/services/chat/messageTypes';
-import { Mic, Send } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useVoiceInput } from '@/hooks/useVoiceInput';
 import { useAutoResizeTextarea } from '@/hooks/useAutoResizeTextarea';
-import { FileAttachment } from '@/services/chat/messageTypes';
 import { ChatInputBox } from './input/ChatInputBox';
 import { MediaPreview } from './input/MediaPreview';
-import { TranscriptDisplay } from './input/TranscriptDisplay';
-import { ChatInputActions } from './input/ChatInputActions';
+import { VoiceInputArea } from './input/VoiceInputArea';
+import { SuggestionArea } from './input/SuggestionArea';
+import { ChatActions } from './input/ChatActions';
 
 interface UnifiedChatInputProps {
   placeholderText?: string;
@@ -40,6 +38,7 @@ export function UnifiedChatInput({
   onVoiceEnd,
   className = ''
 }: UnifiedChatInputProps) {
+  // Core chat state and functionality
   const {
     messages,
     inputValue,
@@ -67,6 +66,7 @@ export function UnifiedChatInput({
     mimeType?: string
   }>>([]);
 
+  // Handle auto full screen mode
   useEffect(() => {
     if (autoFullScreen && messages.length > 1 && !isFullScreen) {
       const timer = setTimeout(() => {
@@ -76,6 +76,7 @@ export function UnifiedChatInput({
     }
   }, [messages.length, autoFullScreen, isFullScreen, setIsFullScreen]);
 
+  // Return full screen view if active
   if (isFullScreen) {
     return (
       <AnimatePresence mode="wait">
@@ -98,10 +99,7 @@ export function UnifiedChatInput({
     }));
 
   // Textarea auto-resize
-  const {
-    textareaRef,
-    adjustHeight
-  } = useAutoResizeTextarea({
+  const { textareaRef, adjustHeight } = useAutoResizeTextarea({
     minHeight: 60,
     maxHeight: 200
   });
@@ -138,9 +136,12 @@ export function UnifiedChatInput({
     adjustHeight();
   }, [inputValue, adjustHeight]);
   
-  // Media upload toggle
+  // Media upload state
   const [showMediaUpload, setShowMediaUpload] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
   
+  // Input handlers
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -160,7 +161,7 @@ export function UnifiedChatInput({
     if (!inputValue.trim() && mediaItems.length === 0) return;
     
     // Convert mediaItems to FileAttachment format
-    const files: FileAttachment[] = mediaItems.map(item => ({
+    const files = mediaItems.map(item => ({
       mimeType: item.mimeType || '',
       data: item.data,
       name: item.name || 'file',
@@ -169,6 +170,7 @@ export function UnifiedChatInput({
     
     sendMessage(inputValue, files);
     setMediaItems([]); // Clear media items after sending
+    setShowMediaUpload(false); // Hide media upload panel
   };
   
   const handleSuggestionClick = () => {
@@ -178,6 +180,7 @@ export function UnifiedChatInput({
     }
   };
   
+  // Media handlers
   const addMediaItem = (item: {
     type: string,
     data: string,
@@ -232,11 +235,23 @@ export function UnifiedChatInput({
   };
 
   return (
-    <div className={cn('w-full', className)}>
+    <div className={className}>
       {/* Voice transcription display */}
-      <TranscriptDisplay isListening={isListening} transcript={transcript} />
+      <VoiceInputArea 
+        isListening={isListening} 
+        transcript={transcript} 
+        toggleListening={toggleListening}
+        isDisabled={isLoading}
+      />
+      
+      {/* Suggested response */}
+      <SuggestionArea 
+        suggestion={suggestedResponse} 
+        onSuggestionClick={handleSuggestionClick} 
+      />
       
       <div className="relative bg-white/95 dark:bg-slate-800/95 backdrop-blur-lg border border-black/20 dark:border-white/20 rounded-2xl transition-all duration-300 shadow-sm">
+        {/* Text input area */}
         <ChatInputBox
           value={inputValue}
           onChange={handleChange}
@@ -246,13 +261,14 @@ export function UnifiedChatInput({
           textareaRef={textareaRef}
         />
         
-        {/* Image/file previews */}
+        {/* File/image previews */}
         <MediaPreview 
           mediaItems={mediaItems} 
           onRemove={removeMediaItem}
         />
         
-        <ChatInputActions
+        {/* Action buttons */}
+        <ChatActions
           suggestedResponse={suggestedResponse}
           onSuggestionClick={handleSuggestionClick}
           onSend={handleSendMessage}
@@ -268,6 +284,8 @@ export function UnifiedChatInput({
           onFileUpload={handleFileUpload}
           hasMessages={Array.isArray(messages) && messages.filter(m => m.role !== 'system').length > 0}
           aiProcessing={aiProcessing}
+          fileInputRef={fileInputRef}
+          documentInputRef={documentInputRef}
         />
       </div>
       
