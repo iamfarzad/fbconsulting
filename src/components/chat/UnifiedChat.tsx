@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { ChatProvider, useChat } from '@/contexts/ChatContext';
 import { UnifiedChatProps } from '@/types/chat';
