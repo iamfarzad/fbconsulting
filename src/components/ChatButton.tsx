@@ -3,7 +3,7 @@ import React from 'react';
 import { Bot } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UnifiedChat } from '@/components/chat/UnifiedChat';
-import { UnifiedFullScreenChat } from '@/components/chat/UnifiedFullScreenChat';
+import UnifiedFullScreenChat from '@/components/chat/UnifiedFullScreenChat';
 import { useToast } from '@/hooks/use-toast';
 
 const ChatButton = () => {
@@ -37,7 +37,7 @@ const ChatButton = () => {
               title="AI Assistant"
               subtitle="How can I help you today?"
               onToggleFullScreen={toggleFullScreen}
-              placeholderText="Ask me anything about our AI services..."
+              placeholder="Ask me anything about our AI services..."
               className="h-full"
             />
           </motion.div>
