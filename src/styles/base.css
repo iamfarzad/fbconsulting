@@ -61,29 +61,43 @@
     /* color: hsl(var(--foreground)); */ /* Set text color directly if needed */
   }
   
-  /* Standardized typography */
+  /* Standardized typography - using media queries instead of responsive @apply */
   h1, .h1 {
-    @apply text-3xl md:text-4xl font-semibold leading-tight tracking-tight text-foreground dark:text-white;
+    @apply text-3xl font-semibold leading-tight tracking-tight text-foreground dark:text-white;
   }
-  
+  @media (min-width: 768px) { /* Tailwind's 'md' breakpoint */
+    h1, .h1 { @apply text-4xl; }
+  }
+
   h2, .h2 {
-    @apply text-2xl md:text-3xl font-semibold leading-tight tracking-tight text-foreground dark:text-white;
+    @apply text-2xl font-semibold leading-tight tracking-tight text-foreground dark:text-white;
   }
-  
+  @media (min-width: 768px) {
+    h2, .h2 { @apply text-3xl; }
+  }
+
   h3, .h3 {
-    @apply text-xl md:text-2xl font-medium leading-snug text-foreground dark:text-white;
+    @apply text-xl font-medium leading-snug text-foreground dark:text-white;
   }
-  
+  @media (min-width: 768px) {
+     h3, .h3 { @apply text-2xl; }
+  }
+
   h4, .h4 {
+    /* This one didn't use responsive utilities, should be fine */
     @apply text-lg font-medium leading-snug text-foreground dark:text-white;
   }
   
   p, .body {
-    @apply text-base leading-relaxed text-foreground dark:text-gray-200;
+    /* Replaced @apply text-foreground */
+     color: hsl(var(--foreground)); /* Direct CSS */
+     @apply text-base leading-relaxed dark:text-gray-200; /* Keep others */
   }
   
   .body-sm {
-    @apply text-sm leading-relaxed text-foreground dark:text-gray-200;
+    /* Replaced @apply text-foreground */
+    color: hsl(var(--foreground)); /* Direct CSS */
+    @apply text-sm leading-relaxed dark:text-gray-200; /* Keep others */
   }
 }
 
