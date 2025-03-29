@@ -55,12 +55,13 @@ in
   idx.previews = {
     previews = {
       web = {
-        command = [ "npm" "run" "dev" "--" "--port" "$PORT" "--host" "0.0.0.0" ];
+        # Use npx to ensure vite command is found
+        command = [ "npx" "vite" "--port" "$PORT" "--host" "0.0.0.0" ]; 
         manager = "web";
       }; # Semicolon
       backend = {
         command = [ "python3" "backend/gemini_service/main.py" ];
-        manager = "web"; # Changed from terminal to web
+        manager = "web"; 
       };
     };
   };
