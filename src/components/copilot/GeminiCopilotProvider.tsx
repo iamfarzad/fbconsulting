@@ -1,7 +1,6 @@
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { useWebSocketChat } from '@/features/gemini/hooks/useWebSocketChat';
-import { AIMessage } from '@/services/chat/messageTypes';
 
 // Define the context type
 interface GeminiCopilotContextType {
