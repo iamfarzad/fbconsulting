@@ -1,37 +1,25 @@
 
-import React from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useGemini } from '@/components/copilot/providers/GeminiProvider'; // Use the central context
 import { ChatInput } from '@/components/ui/ai-chat/input/ChatInputBox';
 import { ChatMessages } from '@/components/ui/ai-chat/ChatMessageList';
-import { FilePreview } from '@/components/ui/ai-chat/input/MediaPreview'; // Assuming FilePreview exists
-import { ConnectionStatusIndicator } from '@/components/ui/ai-chat/ConnectionStatusIndicator'; // Use the specific component
-import { TypingIndicator } from '@/components/ui/ai-chat/TypingIndicator'; // Assuming this component exists
+import { FilePreview } from '@/components/ui/ai-chat/input/MediaPreview';
+import { ConnectionStatusIndicator } from '@/components/ui/ai-chat/ConnectionStatusIndicator'; 
+import { TypingIndicator } from '@/components/ui/ai-chat/TypingIndicator';
+import { useToast } from '@/hooks/use-toast'; // Import toast
+
+// Define file state interface locally (or import from types if centralized)
+interface FileState {
+  data: string; 
+  mimeType: string;
+  name: string;
+  type: 'image' | 'document';
+  preview?: string;
+}
 
 export function WebSocketChat() {
   // Get state and handlers from the central Gemini context
   const {
-    messages,       
-    input,          // Need local input state management now
-    setInput,       // Need local input state management now
-    status,         
-    connectionError,
-    isProcessing,   
-    messageEndRef,  // Need local messageEndRef now
-    files,          // Need local file state now
-    setFiles,       // Need local file state now
-    handleSendMessage, // This needs to be recreated here using context's sendMessage
-    handleFileUpload, // Need local file handling now
-    removeFile,     // Need local file handling now
-    clearMessages,  
-    reconnect
-  } = useWebSocketChatLogic_Refactored(); // Rename the refactored hook temporarily
-  
-  // *** REFACTOR REQUIRED: WebSocketChat should now use useGemini() directly ***
-  // *** Or consume a simplified chat context if ChatProvider is kept ***
-  // *** The useWebSocketChatLogic_Refactored hook above still contains too much logic ***
-  
-  // Example structure (Needs full implementation based on useGemini)
-  const { 
     messages: contextMessages, 
     sendMessage: contextSendMessage, 
     isConnected, 
@@ -43,84 +31,133 @@ export function WebSocketChat() {
   } = useGemini();
 
   // Local state needed for input controls
-  const [localInput, setLocalInput] = React.useState('');
-  const [localFiles, setLocalFiles] = React.useState<any[]>([]); // Define actual file type
-  const localMessageEndRef = React.useRef<HTMLDivElement>(null);
+  const [localInput, setLocalInput] = useState('');
+  const [localFiles, setLocalFiles] = useState<FileState[]>([]); 
+  const localMessageEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
-  // Recreate handlers using context
-  const localHandleSendMessage = React.useCallback(() => {
-    // Logic to prepare text/multimodal message from localInput/localFiles
-    // Call contextSendMessage(messagePayload)
-    console.log("Local handleSendMessage called");
-    // Example text-only send:
-    if (localInput.trim() && !contextIsProcessing && isConnected) {
-      contextSendMessage({ type: 'text_message', text: localInput });
-      setLocalInput(''); // Clear local input
+  // Recreate handlers using context sendMessage
+  const handleSendMessage = useCallback(async () => {
+    const textToSend = localInput.trim();
+    const filesToSend = [...localFiles];
+    
+    if ((!textToSend && filesToSend.length === 0) || contextIsProcessing) return;
+    
+    if (!isConnected) {
+      toast({ title: "Not Connected", description: "Attempting to reconnect...", variant: "destructive" });
+      contextReconnect(); 
+      return;
     }
-     // TODO: Add multimodal logic here
-  }, [localInput, localFiles, contextIsProcessing, isConnected, contextSendMessage]);
 
-  const localHandleFileUpload = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    // Logic to handle file selection, read file, update localFiles state
-    console.log("Local file upload handler");
-    // Example (basic):
+    // Clear local input state immediately
+    setLocalInput(''); 
+    setLocalFiles([]); 
+
+    // No optimistic UI update here - rely on messages from context
+
+    try {
+      let messagePayload: any;
+      if (filesToSend.length > 0) {
+        const fileData = filesToSend.map(file => {
+          const base64Data = file.data.split(',')[1]; 
+          if (!base64Data) throw new Error(`Invalid data URL for file ${file.name}`);
+          return { mime_type: file.mimeType, data: base64Data, filename: file.name };
+        });
+        messagePayload = { type: 'multimodal_message', text: textToSend || null, files: fileData };
+      } else {
+        messagePayload = { type: 'text_message', text: textToSend };
+      }
+      
+      console.log('[WebSocketChat] Sending via context:', messagePayload);
+      await contextSendMessage(messagePayload); // Send the structured message
+
+    } catch (error: any) {
+      console.error('[WebSocketChat] Send Error:', error);
+      toast({ title: "Send Error", description: error?.message || "Failed to send.", variant: "destructive" });
+      // Maybe restore input/files to allow user to retry?
+      // setLocalInput(textToSend);
+      // setLocalFiles(filesToSend);
+    }
+  }, [localInput, localFiles, contextIsProcessing, isConnected, contextSendMessage, contextReconnect, toast]);
+
+  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      // Basic file state for now
-      setLocalFiles(prev => [...prev, { name: file.name, type: file.type, size: file.size }]);
-    }
-  }, []);
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const fileType = file.type.startsWith('image/') ? 'image' : 'document';
+      // Limit to one file for simplicity for now?
+      setLocalFiles([{ data: result, mimeType: file.type, name: file.name, type: fileType, preview: fileType === 'image' ? result : undefined }]);
+      // If allowing multiple:
+      // setLocalFiles(prev => [...prev, { data: result, mimeType: file.type, name: file.name, type: fileType, preview: fileType === 'image' ? result : undefined }]);
+    };
+    reader.onerror = (error) => { console.error("FileReader error:", error); toast({title: "File Error", description: "Could not read file.", variant: "destructive"}); };
+    reader.readAsDataURL(file);
+    if (event.target) event.target.value = ''; 
+  }, [toast]);
 
-  const localRemoveFile = React.useCallback((index: number) => {
+  const removeFile = useCallback((index: number) => {
     setLocalFiles(prev => prev.filter((_, i) => i !== index));
   }, []);
 
-  // Auto-scroll based on context messages
-  React.useEffect(() => {
-    localMessageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [contextMessages]);
-
+  // Map context status for the indicator
   const connectionStatus = isConnecting ? 'connecting' : 
                            isConnected ? 'connected' : 
                            contextError ? 'error' : 'disconnected';
 
+  // Auto-scroll based on context messages
+  useEffect(() => {
+    localMessageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [contextMessages]);
+
   return (
-    <div className="flex flex-col h-full bg-background text-foreground">
-      <ConnectionStatusIndicator 
-        status={connectionStatus} 
-        error={contextError}
-        onRetry={contextReconnect} 
-      />
+    <div className="flex flex-col h-full bg-background text-foreground border border-border rounded-lg shadow-md">
+      {/* Header with connection status */}
+      <div className="p-3 border-b border-border flex items-center justify-between">
+        <h2 className="text-lg font-semibold">AI Assistant Chat</h2>
+        <ConnectionStatusIndicator 
+          status={connectionStatus} 
+          error={contextError}
+          onRetry={contextReconnect} 
+        />
+      </div>
+
+      {/* Message List Area */}
       <div className="flex-grow overflow-y-auto p-4 space-y-4">
-        <ChatMessages messages={contextMessages} />
+        {/* Ensure contextMessages is mapped correctly to ChatMessages props */}
+        <ChatMessages messages={contextMessages.map(msg => ({...msg, isUser: msg.role === 'user'}))} /> 
         {contextIsProcessing && <TypingIndicator />} 
         <div ref={localMessageEndRef} />
       </div>
-      <div className="p-4 border-t border-border bg-background">
+
+      {/* Input Area */} 
+      <div className="p-4 border-t border-border bg-muted/50">
          {localFiles.length > 0 && (
            <div className="mb-2 flex flex-wrap gap-2">
              {localFiles.map((file, index) => (
-               <FilePreview key={index} file={file} onRemove={() => localRemoveFile(index)} />
+               <FilePreview key={index} file={file} onRemove={() => removeFile(index)} />
              ))}
            </div>
          )}
         <ChatInput 
           value={localInput}
           onChange={(e) => setLocalInput(e.target.value)}
-          onSend={localHandleSendMessage}
-          onFileChange={localHandleFileUpload}
+          onSend={handleSendMessage}
+          onFileChange={handleFileUpload}
           isProcessing={contextIsProcessing}
-          // Pass other necessary props like character limits, etc.
+          placeholder="Ask anything or drop a file..."
         />
-        {/* Add buttons for clear messages etc. if needed */} 
-        {/* <button onClick={contextClearMessages}>Clear</button> */} 
+        {/* Add other controls if needed */} 
+        {/* <button onClick={contextClearMessages} className="text-xs text-muted-foreground hover:text-foreground">Clear Chat</button> */} 
       </div>
     </div>
   );
 }
 
-// Temporary placeholder for the refactored hook - this should be removed/replaced
-function useWebSocketChatLogic_Refactored() {
-  console.warn("useWebSocketChatLogic_Refactored is a temporary placeholder and should be removed.");
-  return { messages: [], input: '', setInput: ()=>{}, status: 'disconnected', connectionError: null, isProcessing: false, messageEndRef: {current: null}, files: [], setFiles: ()=>{}, handleSendMessage: ()=>{}, handleFileUpload: ()=>{}, removeFile: ()=>{}, clearMessages: ()=>{}, reconnect: ()=>{} };
+// Ensure FilePreview props match usage
+interface FilePreviewProps {
+  file: FileState;
+  onRemove: () => void;
 }
+
