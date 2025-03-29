@@ -61,17 +61,21 @@
   */
 }
 
-/* Simplified glass styling - Use direct CSS for background opacity */
+/* Simplified glass styling - Use direct CSS */
 .glass {
-  /* Replace @apply bg-white/10 */
-  background-color: rgba(255, 255, 255, 0.1);
-  @apply backdrop-blur-md border border-white/20; /* Keep others */
+  background-color: rgba(255, 255, 255, 0.1); 
+  /* Replace @apply backdrop-blur-md */
+  backdrop-filter: blur(8px);
+  /* Keep border styles applied via @apply for now */
+  @apply border border-white/20;
 }
 
 .frosted-glass {
-   /* Replace @apply bg-white/5 */
   background-color: rgba(255, 255, 255, 0.05);
-  @apply backdrop-blur-md border border-white/10; /* Keep others */
+   /* Replace @apply backdrop-blur-md */
+  backdrop-filter: blur(8px);
+  /* Keep border styles applied via @apply for now */
+  @apply border border-white/10;
 }
 
 /* Simplified animation - Keep these */
