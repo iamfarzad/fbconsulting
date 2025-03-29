@@ -1,7 +1,8 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { toast } from '@/components/ui/use-toast';
-import API_CONFIG from '@/config/apiConfigConfig'; 
+// Correct the import path for the config file
+import API_CONFIG from '@/config/apiConfig'; 
 import { v4 as uuidv4 } from 'uuid'; 
 
 // --- Types --- (Consider moving to a shared types file)
@@ -29,6 +30,7 @@ interface IncomingWebSocketMessage {
   size?: number;
   format?: string;
 }
+
 
 interface GeminiContextType {
   sendMessage: (message: OutgoingWebSocketMessage) => Promise<void>; // Accept full message object
@@ -70,15 +72,21 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
   const clientIdRef = useRef<string>(uuidv4()); // Generate client ID once
 
   const connectWebSocket = useCallback(() => {
+    // Prevent multiple connection attempts
     if (isConnecting || wsRef.current?.readyState === WebSocket.OPEN) return;
+
     if (reconnectTimeoutRef.current) window.clearTimeout(reconnectTimeoutRef.current);
     reconnectTimeoutRef.current = null;
+
     setIsConnecting(true);
-    setError(null);
+    setError(null); // Clear previous errors on new attempt
+    
     const wsUrl = `${API_CONFIG.WS_BASE_URL}${API_CONFIG.WEBSOCKET.PATH}${clientIdRef.current}`;
     console.log('[GeminiProvider] Connecting to:', wsUrl);
+
     try {
       const ws = new WebSocket(wsUrl);
+
       ws.onopen = () => {
         console.log('[GeminiProvider] WebSocket connected');
         setIsConnected(true);
@@ -91,9 +99,10 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
         try {
           if (event.data instanceof Blob) {
              console.log("[GeminiProvider] Received audio blob - handling needed.");
-             // TODO: Implement audio handling
+             // TODO: Implement audio handling logic (e.g., emitting an event, updating context state)
              return;
           }
+
           const data = JSON.parse(event.data) as IncomingWebSocketMessage;
           console.log("[GeminiProvider] Received message:", data);
 
@@ -101,21 +110,19 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
           setMessages(prev => {
             const lastMsg = prev[prev.length - 1];
             if (data.type === 'text' && data.content) {
-              if (lastMsg?.role === 'assistant' && !contextIsProcessing /* Avoid appending to old message if new one started */) {
-                // Append to last assistant message content if still processing same response
-                // Best practice: Backend should send message IDs to reliably update.
-                // Simple approach for now: Update the last assistant message.
+              if (lastMsg?.role === 'assistant' && isProcessing /* Only append if currently processing */) {
+                // Append to last assistant message content
                 const updated = [...prev];
                 updated[prev.length-1] = { ...lastMsg, content: data.content }; 
                 return updated;
               } else {
                 // Add new assistant message
+                setIsProcessing(true); // Start processing on first text chunk
                 return [...prev, { id: uuidv4(), role: 'assistant', content: data.content, timestamp: Date.now() }];
               }
             } else if (data.type === 'error' && data.error) {
                return [...prev, { id: uuidv4(), role: 'error', content: data.error, timestamp: Date.now() }];
             }
-            // Return previous state if message type isn't handled for display
             return prev; 
           });
           // --- End Message Handling --- 
@@ -137,7 +144,7 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
 
       ws.onerror = (event) => {
         console.error('[GeminiProvider] WebSocket error:', event);
-        setError('Connection error occurred.');
+        setError('Connection error occurred.'); 
         setIsConnected(false);
         setIsConnecting(false);
       };
@@ -171,7 +178,7 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
     if (wsRef.current) wsRef.current.close(1000, "Manual Reconnect");
     reconnectAttemptsRef.current = 0;
     setError(null);
-    setIsProcessing(false); // Reset processing on reconnect
+    setIsProcessing(false); 
     connectWebSocket();
   }, [connectWebSocket]);
 
@@ -198,10 +205,10 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
        setError('Cannot send: WebSocket not connected.');
        console.error('Cannot send: WebSocket not connected.');
-       reconnect(); // Attempt reconnect
+       reconnect(); 
        throw new Error('WebSocket is not connected');
     }
-    setIsProcessing(true); 
+    setIsProcessing(true); // Set processing immediately on send
     setError(null); 
     return new Promise<void>((resolve, reject) => {
       try {
@@ -215,7 +222,6 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
         reject(error);
       }
     });
-  // Add dependencies that affect sending logic
   }, [reconnect]); 
 
   const resetError = useCallback(() => { setError(null); }, []);
