@@ -1,5 +1,5 @@
 
-import API_CONFIG from '@/config/apiConfig';
+import API_CONFIG from '@/config/apiConfigConfig';
 
 /**
  * Construct a WebSocket URL from the base URL, path, and client ID

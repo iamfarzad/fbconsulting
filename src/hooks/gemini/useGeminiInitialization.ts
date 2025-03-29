@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef } from 'react';
-import { API_CONFIG } from '@/config/api';
+import { API_CONFIG } from '@/config/apiConfig';
 import { useToast } from '@/hooks/use-toast';
 
 /**

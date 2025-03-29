@@ -1,5 +1,5 @@
 
-import API_CONFIG from '@/config/apiConfig'; // Use updated config
+import API_CONFIG from '@/config/apiConfigConfig'; // Use updated config
 import { formatErrorMessage } from '@/utils/errorHandling';
 import { v4 as uuidv4 } from 'uuid';
 import { WebSocketClientOptions, WebSocketMessage, AudioChunkInfo } from '../types/websocketTypes';

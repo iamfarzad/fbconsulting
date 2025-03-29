@@ -1,5 +1,5 @@
 
-import API_CONFIG from '@/config/apiConfig';
+import API_CONFIG from '@/config/apiConfigConfig';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 interface AudioOptions {

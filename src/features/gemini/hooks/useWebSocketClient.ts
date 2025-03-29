@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import API_CONFIG from '@/config/apiConfig'; // Ensure we're using the right config
+import API_CONFIG from '@/config/apiConfigConfig'; // Ensure we're using the right config
 
 /**
  * Hook for managing WebSocket connections with automatic reconnection
