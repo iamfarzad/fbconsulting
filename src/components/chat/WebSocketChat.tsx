@@ -1,229 +1,402 @@
-
-import React, { useState, useRef, useEffect } from 'react';
-import { useChat } from '@/contexts/ChatContext';
-import { Button } from '@/components/ui/button';
+import React, { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
-import { TypingIndicator } from '@/components/ui/ai-chat/TypingIndicator';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Mic, Send, Trash2, Volume, VolumeX, RefreshCw } from 'lucide-react';
-import { ConnectionStatus } from '@/components/chat/core/ConnectionStatus';
-import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Send, Mic, X, Image as ImageIcon, FileText } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { API_CONFIG } from '@/config/api';
+import { useFileUpload, UploadedFile } from '@/hooks/useFileUpload';
+import { MediaPreview } from '@/components/ui/ai-chat/input/MediaPreview';
+
+type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
+
+type Message = {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: number;
+  id: string;
+};
 
 export function WebSocketChat() {
-  const { state, actions, error } = useChat();
-  const [inputValue, setInputValue] = useState('');
-  const [offlineMode, setOfflineMode] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [status, setStatus] = useState<ConnectionStatus>('disconnected');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const socketRef = useRef<WebSocket | null>(null);
+  const messageEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Detect if the WebSocket connection fails repeatedly
+  const { 
+    files, 
+    isUploading, 
+    uploadFile, 
+    removeFile, 
+    clearFiles 
+  } = useFileUpload();
+
+  // Generate a client ID that persists for the session
+  const clientIdRef = useRef<string>(`web-client-${Math.random().toString(36).substring(2, 9)}`);
+
+  // Set up WebSocket connection
   useEffect(() => {
-    let failedAttempts = 0;
-    
-    const checkOfflineMode = () => {
-      if (!state.isConnected && error) {
-        failedAttempts++;
-        if (failedAttempts >= 3) {
-          setOfflineMode(true);
-        }
-      } else {
-        failedAttempts = 0;
-        setOfflineMode(false);
+    const connectWebSocket = () => {
+      setStatus('connecting');
+      
+      try {
+        const wsUrl = `${API_CONFIG.WS_BASE_URL}/ws/${clientIdRef.current}`;
+        const socket = new WebSocket(wsUrl);
+        
+        socket.onopen = () => {
+          console.log('WebSocket connected');
+          setStatus('connected');
+          // Start regular pings to keep the connection alive
+          const pingInterval = setInterval(() => {
+            if (socket.readyState === WebSocket.OPEN) {
+              socket.send(JSON.stringify({ type: 'ping' }));
+            }
+          }, 30000); // 30 second ping
+
+          // Store the interval ID in the ref so we can clear it on disconnect
+          socketRef.current = socket;
+          
+          // Clean up the interval when the socket closes
+          socket.onclose = () => {
+            clearInterval(pingInterval);
+            setStatus('disconnected');
+            socketRef.current = null;
+          };
+        };
+        
+        socket.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          setStatus('error');
+          toast({
+            title: "Connection Error",
+            description: "Failed to connect to chat service. Please try again later.",
+            variant: "destructive",
+          });
+        };
+        
+        socket.onmessage = (event) => {
+          try {
+            // Handle binary data (audio chunks)
+            if (event.data instanceof Blob) {
+              handleAudioChunk(event.data);
+              return;
+            }
+            
+            // Handle JSON data
+            const data = JSON.parse(event.data);
+            console.log('Received message:', data);
+            
+            switch (data.type) {
+              case 'text':
+                setMessages(prev => {
+                  // Find the last assistant message or create a new one
+                  const lastAssistantIndex = [...prev].reverse().findIndex(m => m.role === 'assistant');
+                  
+                  if (lastAssistantIndex >= 0) {
+                    const newMessages = [...prev];
+                    const actualIndex = prev.length - 1 - lastAssistantIndex;
+                    newMessages[actualIndex] = {
+                      ...newMessages[actualIndex],
+                      content: data.content,
+                    };
+                    return newMessages;
+                  } else {
+                    // If no existing assistant message, create a new one
+                    return [...prev, {
+                      role: 'assistant',
+                      content: data.content,
+                      timestamp: Date.now(),
+                      id: `ai-${Date.now()}`,
+                    }];
+                  }
+                });
+                break;
+                
+              case 'complete':
+                setIsProcessing(false);
+                break;
+                
+              case 'error':
+                console.error('Server error:', data.error);
+                toast({
+                  title: "Error",
+                  description: data.error || "An error occurred while processing your request.",
+                  variant: "destructive",
+                });
+                setIsProcessing(false);
+                break;
+                
+              case 'pong':
+                // Ping response received, connection is alive
+                console.log('Ping acknowledged');
+                break;
+                
+              case 'server_ping':
+                // Server is checking if we're still connected, respond with any message
+                socket.send(JSON.stringify({ type: 'client_pong' }));
+                break;
+                
+              default:
+                console.log('Unhandled message type:', data.type);
+            }
+          } catch (err) {
+            console.error('Error parsing message:', err, event.data);
+          }
+        };
+      } catch (error) {
+        console.error('Failed to create WebSocket:', error);
+        setStatus('error');
+        toast({
+          title: "Connection Error",
+          description: "Failed to initialize chat connection.",
+          variant: "destructive",
+        });
       }
     };
     
-    checkOfflineMode();
-    
-    // Set up an interval to check connection status
-    const intervalId = setInterval(checkOfflineMode, 10000);
-    
-    return () => clearInterval(intervalId);
-  }, [state.isConnected, error]);
-  
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (!socketRef.current) {
+      connectWebSocket();
     }
-  }, [state.messages]);
-  
-  const handleSend = () => {
-    if (inputValue.trim()) {
-      if (offlineMode) {
-        // In offline mode, provide a mock response
-        actions.sendMessage(inputValue);
-        setTimeout(() => {
-          const mockResponses = [
-            "I'm currently offline. Your message has been saved and I'll respond when connection is restored.",
-            "Sorry, I can't connect to the AI service right now. Please try again later.",
-            "It seems we're having connectivity issues. I've noted your message and will get back to you soon."
-          ];
-          const randomResponse = mockResponses[Math.floor(Math.random() * mockResponses.length)];
-          console.log("Sending mock response in offline mode:", randomResponse);
-        }, 1000);
-      } else {
-        actions.sendMessage(inputValue);
+    
+    // Clean up WebSocket on component unmount
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.close();
+        socketRef.current = null;
       }
-      setInputValue('');
+    };
+  }, [toast]);
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Handle sending a message
+  const handleSendMessage = () => {
+    if ((!input.trim() && files.length === 0) || isProcessing || status !== 'connected') {
+      return;
+    }
+    
+    try {
+      // Add user message to the UI
+      const userMessage = {
+        role: 'user' as const,
+        content: input,
+        timestamp: Date.now(),
+        id: `user-${Date.now()}`,
+      };
+      
+      setMessages(prev => [...prev, userMessage]);
+      setIsProcessing(true);
+      
+      // Prepare message for WebSocket
+      if (files.length > 0) {
+        // Send as multimodal message
+        const fileData = files.map(file => ({
+          mime_type: file.mimeType,
+          data: file.data,
+          filename: file.name
+        }));
+        
+        const message = {
+          type: 'multimodal_message',
+          text: input,
+          files: fileData,
+          role: 'user',
+          enableTTS: true
+        };
+        
+        socketRef.current?.send(JSON.stringify(message));
+      } else {
+        // Send as text-only message
+        const message = {
+          type: 'text_message',
+          text: input,
+          role: 'user',
+          enableTTS: true
+        };
+        
+        socketRef.current?.send(JSON.stringify(message));
+      }
+      
+      // Clear input and files after sending
+      setInput('');
+      clearFiles();
+      
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+      setIsProcessing(false);
     }
   };
-  
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
+
+  // Handle audio data from the server
+  const handleAudioChunk = (audioBlob: Blob) => {
+    try {
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      audio.play().catch(error => {
+        console.error('Error playing audio:', error);
+      });
+      
+      // Clean up the audio URL when done
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+      };
+    } catch (error) {
+      console.error('Error processing audio:', error);
     }
   };
-  
+
+  // Handle file upload button click
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      uploadFile(file);
+    }
+    // Reset the input value so the same file can be selected again
+    if (event.target) {
+      event.target.value = '';
+    }
+  };
+
   return (
     <div className="flex flex-col h-[600px]">
-      <div className="border-b pb-2">
-        <div className="flex justify-between items-center p-4">
-          <h2 className="text-xl font-semibold">Chat with Gemini</h2>
-          <div className="flex items-center space-x-2">
-            <ConnectionStatus 
-              isConnected={state.isConnected} 
-              isLoading={!state.isInitialized} 
+      <div className="p-3 border-b flex items-center justify-between bg-card">
+        <div>
+          <h3 className="font-semibold">Gemini Chat</h3>
+          <div className="text-xs flex items-center gap-1.5">
+            <div 
+              className={`w-2 h-2 rounded-full ${
+                status === 'connected' ? 'bg-green-500' : 
+                status === 'connecting' ? 'bg-yellow-500' : 
+                'bg-red-500'
+              }`}
             />
-            <span className="text-xs text-muted-foreground">ID: {state.clientId.substring(0, 8)}</span>
+            {status.charAt(0).toUpperCase() + status.slice(1)}
           </div>
         </div>
+        
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={() => setMessages([])}
+          disabled={messages.length === 0 || isProcessing}
+        >
+          Clear Chat
+        </Button>
       </div>
       
-      {offlineMode && (
-        <Card className="m-4 p-3 bg-amber-50 border-amber-200">
-          <div className="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-            <p className="text-sm text-amber-800">
-              Offline Mode: Limited functionality available. The AI assistant will provide basic responses.
-            </p>
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-muted-foreground">
+            Send a message to start chatting with Gemini AI
           </div>
-          <Button 
-            variant="outline"
-            size="sm" 
-            onClick={() => {
-              setOfflineMode(false);
-              actions.connect();
-            }}
-            className="mt-2 text-xs"
-          >
-            <RefreshCw className="h-3 w-3 mr-1" />
-            Try to reconnect
-          </Button>
-        </Card>
-      )}
-      
-      <ScrollArea className="flex-grow p-4">
-        {state.messages.length > 0 ? (
-          <div className="space-y-4">
-            {state.messages.map((message, index) => (
-              <div
-                key={message.id || index}
-                className={`p-3 rounded-lg ${
-                  message.role === 'user'
-                    ? 'bg-primary text-primary-foreground ml-12'
-                    : 'bg-muted mr-12'
+        ) : (
+          messages.map((message) => (
+            <div 
+              key={message.id}
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div 
+                className={`max-w-[80%] px-4 py-2 rounded-lg ${
+                  message.role === 'user' 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'bg-muted'
                 }`}
               >
-                {message.content}
-                
-                {/* Audio indicator for assistant messages */}
-                {message.role === 'assistant' && (
-                  <div className="flex items-center justify-end mt-2 text-xs text-muted-foreground">
-                    {state.isAudioPlaying && index === state.messages.length - 1 ? (
-                      <div className="flex items-center">
-                        <Volume className="h-3 w-3 mr-1" />
-                        <div className="w-20 bg-gray-200 rounded-full h-1.5">
-                          <div 
-                            className="bg-primary h-1.5 rounded-full transition-all duration-300" 
-                            style={{ width: `${state.audioProgress}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
-                )}
+                <div className="whitespace-pre-wrap">{message.content}</div>
               </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-        ) : (
-          <div className="h-full flex items-center justify-center text-muted-foreground flex-col space-y-4">
-            <p>No messages yet. Start a conversation!</p>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={actions.connect}
-              disabled={state.isConnected}
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Connect
-            </Button>
+            </div>
+          ))
+        )}
+        
+        {isProcessing && (
+          <div className="flex justify-start">
+            <div className="max-w-[80%] px-4 py-2 rounded-lg bg-muted">
+              <div className="flex space-x-2">
+                <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce"></div>
+                <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+              </div>
+            </div>
           </div>
         )}
         
-        {state.isLoading && (
-          <div className="mt-4">
-            <TypingIndicator />
-          </div>
-        )}
-        
-        {error && !offlineMode && (
-          <div className="mt-4 p-3 bg-red-100 border border-red-300 rounded-lg text-red-800">
-            <p className="font-medium">Connection Error</p>
-            <p className="text-sm">{error}</p>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="mt-2" 
-              onClick={actions.connect}
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Reconnect
-            </Button>
-          </div>
-        )}
-      </ScrollArea>
+        <div ref={messageEndRef} />
+      </div>
       
-      <div className="border-t p-4 space-x-2 flex">
-        <Input
-          placeholder={offlineMode ? "Offline mode - limited responses available" : "Type a message..."}
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={(!offlineMode && !state.isConnected) || state.isLoading}
-          className="flex-grow"
+      {/* File preview area */}
+      {files.length > 0 && (
+        <MediaPreview 
+          mediaItems={files.map(file => ({
+            type: file.type,
+            data: file.preview || file.data,
+            name: file.name,
+            mimeType: file.mimeType
+          }))} 
+          onRemove={removeFile}
         />
-        
-        <Button 
-          onClick={handleSend} 
-          disabled={(!offlineMode && !state.isConnected) || state.isLoading || !inputValue.trim()}
-          size="icon"
-        >
-          <Send className="h-4 w-4" />
-        </Button>
-        
-        {state.isAudioPlaying ? (
-          <Button variant="outline" size="icon" onClick={actions.stopAudio}>
-            <VolumeX className="h-4 w-4" />
+      )}
+      
+      <div className="p-3 border-t">
+        <div className="flex items-center gap-2">
+          <Input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Type a message..."
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+              }
+            }}
+            disabled={status !== 'connected' || isProcessing}
+            className="flex-1"
+          />
+          
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={status !== 'connected' || isProcessing}
+            title="Upload image"
+          >
+            <ImageIcon className="h-4 w-4" />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
           </Button>
-        ) : (
-          <Button variant="outline" size="icon" disabled={true}>
-            <Mic className="h-4 w-4" />
+          
+          <Button
+            size="icon"
+            variant="default"
+            onClick={handleSendMessage}
+            disabled={(!input.trim() && files.length === 0) || status !== 'connected' || isProcessing}
+          >
+            <Send className="h-4 w-4" />
           </Button>
-        )}
+        </div>
         
-        <Button 
-          variant="outline" 
-          size="icon"
-          onClick={actions.clearMessages} 
-          disabled={state.messages.length === 0}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        <div className="text-xs text-muted-foreground mt-2 text-center">
+          {status === 'connected'
+            ? 'Connected to Gemini AI'
+            : status === 'connecting'
+            ? 'Connecting to Gemini AI...'
+            : 'Not connected. Please reload the page to try again.'}
+        </div>
       </div>
     </div>
   );

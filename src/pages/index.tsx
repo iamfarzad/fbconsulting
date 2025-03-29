@@ -15,24 +15,28 @@ export default function HomePage() {
       <div className="mt-4 mb-8 p-4 border border-amber-300 bg-amber-50 rounded-md">
         <h3 className="font-medium text-amber-800">IDX Team Sync Note:</h3>
         <p className="text-amber-700">
-          We've fixed build errors in the WebSocketChat component and implemented proper
-          integration with the Gemini API through WebSockets. The connection status indicator now
-          properly shows the WebSocket connection state, and error handling has been improved.
-          Audio streaming via the backend also works correctly. Next steps: improving the UI and 
-          adding support for multimodal messaging (images/documents).
+          We've updated the WebSocketChat component to support multimodal messaging! 
+          You can now send both text and files (images, PDFs, etc.) through the chat interface.
+          We've also fixed the glassmorphism styling issues by replacing .frosted-glass and 
+          .glass-card classes with the new .glassmorphism-base class as recommended.
+          The connection status indicator now properly shows the WebSocket state, and the
+          component handles audio streaming correctly.
         </p>
       </div>
       
       <div className="mt-8 max-w-3xl mx-auto">
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden shadow-lg">
           <WebSocketChat />
         </Card>
         
         <div className="mt-8 text-center text-sm text-muted-foreground">
           <p>
-            This demo showcases the new multimodal capabilities of the Gemini API.
-            You can send text messages and the AI will respond. In the future,
-            you'll be able to send images and other media types as well.
+            This demo showcases the multimodal capabilities of the Gemini API.
+            You can send text messages and upload files (images, PDFs, etc.) to
+            get responses from the AI assistant.
+          </p>
+          <p className="mt-2 text-xs text-muted-foreground/70">
+            Communications happen through a secure WebSocket connection with real-time audio streaming.
           </p>
         </div>
       </div>
