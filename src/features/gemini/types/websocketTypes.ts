@@ -1,6 +1,6 @@
 
 export interface WebSocketClientOptions {
-  url: string;
+  url?: string;
   clientId?: string;
   onOpen?: () => void;
   onMessage?: (data: any) => void;
@@ -12,6 +12,7 @@ export interface WebSocketClientOptions {
   // Added missing properties for WebSocketClient
   debug?: boolean;
   autoReconnect?: boolean;
+  suppressErrors?: boolean;
   onAudioChunk?: (info: AudioChunkInfo, data: ArrayBuffer) => void;
 }
 

@@ -12,12 +12,16 @@ export class WebSocketClient {
   private pingInterval: number | null = null;
   private connectionTimeout: number | null = null;
   private clientId: string;
+  private suppressErrors: boolean;
+  private connectionState: 'disconnected' | 'connecting' | 'connected' = 'disconnected';
+  private hasReportedInitialError = false;
 
   constructor(options: WebSocketClientOptions) {
     this.options = {
       url: API_CONFIG.WS_BASE_URL + '/ws/',
       autoReconnect: true,
       debug: false,
+      suppressErrors: false,
       ...options
     };
     
@@ -26,6 +30,7 @@ export class WebSocketClient {
     
     // Construct the full WebSocket URL with client ID
     this.url = `${this.options.url}${this.clientId}`;
+    this.suppressErrors = this.options.suppressErrors || false;
     
     if (this.options.debug) {
       console.log(`WebSocketClient created with client ID: ${this.clientId}`);
@@ -33,16 +38,24 @@ export class WebSocketClient {
   }
 
   connect(): void {
-    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+    // Don't reconnect if already connected or connecting
+    if (this.connectionState !== 'disconnected') {
       if (this.options.debug) {
-        console.log('WebSocket already connected');
+        console.log(`WebSocket already ${this.connectionState}`);
       }
       return;
     }
 
     try {
+      this.connectionState = 'connecting';
+      
       if (this.options.debug) {
         console.log(`Connecting to WebSocket: ${this.url}`);
+      }
+      
+      // Check for WebSocket support
+      if (typeof WebSocket === 'undefined') {
+        throw new Error('WebSocket is not supported in this environment');
       }
       
       this.ws = new WebSocket(this.url);
@@ -59,6 +72,9 @@ export class WebSocketClient {
         if (this.options.debug) {
           console.log('WebSocket connected');
         }
+        
+        this.connectionState = 'connected';
+        this.hasReportedInitialError = false;
         
         if (this.connectionTimeout) {
           clearTimeout(this.connectionTimeout);
@@ -115,16 +131,26 @@ export class WebSocketClient {
       };
 
       this.ws.onerror = (event) => {
-        const errorMessage = `WebSocket error: ${JSON.stringify(event)}`;
-        console.error(errorMessage);
-        
-        if (this.options.onError) {
-          this.options.onError(errorMessage);
+        // Only log first error or if not suppressing errors
+        if (!this.suppressErrors || !this.hasReportedInitialError) {
+          const errorMessage = `WebSocket error occurred`;
+          if (!this.suppressErrors) {
+            console.error(errorMessage, event);
+          } else if (!this.hasReportedInitialError) {
+            console.warn('WebSocket connection unavailable - suppressing further errors');
+            this.hasReportedInitialError = true;
+          }
+          
+          if (this.options.onError) {
+            this.options.onError(errorMessage);
+          }
         }
       };
 
       this.ws.onclose = (event) => {
-        if (this.options.debug) {
+        this.connectionState = 'disconnected';
+        
+        if (this.options.debug && !this.suppressErrors) {
           console.log(`WebSocket closed with code ${event.code}: ${event.reason}`);
         }
         
@@ -142,20 +168,28 @@ export class WebSocketClient {
           this.options.onClose();
         }
         
-        if (this.options.autoReconnect && this.reconnectAttempts < (this.options.reconnectAttempts || API_CONFIG.WEBSOCKET.RECONNECT_ATTEMPTS)) {
+        if (this.options.autoReconnect && 
+            this.reconnectAttempts < (this.options.reconnectAttempts || API_CONFIG.WEBSOCKET.RECONNECT_ATTEMPTS)) {
           this.reconnectAttempts++;
           const delay = API_CONFIG.WEBSOCKET.RECONNECT_INTERVAL * Math.pow(2, this.reconnectAttempts - 1);
           
-          if (this.options.debug) {
+          if (this.options.debug && !this.suppressErrors) {
             console.log(`Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.options.reconnectAttempts || API_CONFIG.WEBSOCKET.RECONNECT_ATTEMPTS})`);
           }
           
           setTimeout(() => this.connect(), delay);
+        } else if (this.reconnectAttempts >= (this.options.reconnectAttempts || API_CONFIG.WEBSOCKET.RECONNECT_ATTEMPTS)) {
+          // Max reconnect attempts reached, enable suppression to avoid console spam
+          this.suppressErrors = true;
         }
       };
     } catch (error) {
+      this.connectionState = 'disconnected';
       const errorMessage = formatErrorMessage(error);
-      console.error(`Failed to create WebSocket connection: ${errorMessage}`);
+      
+      if (!this.suppressErrors) {
+        console.error(`Failed to create WebSocket connection: ${errorMessage}`);
+      }
       
       if (this.options.onError) {
         this.options.onError(errorMessage);
@@ -175,6 +209,7 @@ export class WebSocketClient {
     }
     
     if (this.ws) {
+      this.connectionState = 'disconnected';
       this.ws.close(1000, "Client disconnected");
       this.ws = null;
     }
@@ -182,7 +217,9 @@ export class WebSocketClient {
 
   send(data: any): boolean {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-      console.error('WebSocket not connected');
+      if (!this.suppressErrors) {
+        console.error('WebSocket not connected');
+      }
       return false;
     }
 
@@ -191,7 +228,9 @@ export class WebSocketClient {
       this.ws.send(message);
       return true;
     } catch (error) {
-      console.error('Error sending message:', error);
+      if (!this.suppressErrors) {
+        console.error('Error sending message:', error);
+      }
       return false;
     }
   }
@@ -211,10 +250,14 @@ export class WebSocketClient {
   }
 
   isConnected(): boolean {
-    return this.ws !== null && this.ws.readyState === WebSocket.OPEN;
+    return this.connectionState === 'connected';
   }
   
   getClientId(): string {
     return this.clientId;
+  }
+  
+  enableErrorSuppression(suppress: boolean = true): void {
+    this.suppressErrors = suppress;
   }
 }
