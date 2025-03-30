@@ -9,7 +9,6 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import List, Optional, Dict, Any, Tuple
 
-# Correct FastAPI/Starlette imports
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException 
 from starlette.websockets import WebSocketState # Import WebSocketState from starlette
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,7 +19,7 @@ from gemini_client import GeminiClient
 # --- Load Environment Variables FIRST ---
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 loaded = load_dotenv(dotenv_path=dotenv_path, verbose=True)
-logger = logging.getLogger(__name__) # Setup logger early
+logger = logging.getLogger(__name__) 
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
 logging.basicConfig(level=getattr(logging, LOG_LEVEL.upper(), logging.INFO),
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -31,7 +30,7 @@ HOST = os.getenv('HOST', '0.0.0.0')
 PORT = int(os.getenv('PORT', 8000))
 DEFAULT_VOICE = os.getenv('DEFAULT_VOICE', 'Charon')
 DEFAULT_LANGUAGE = os.getenv('DEFAULT_LANGUAGE', 'en-US')
-ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:3000,https://lovable.dev,https://*.googleprod.com').split(',') 
+ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:3000,https://lovable.dev,https://*.googleprod.com').split(',')
 WS_PING_INTERVAL = int(os.getenv('WS_PING_INTERVAL', 30))
 WS_PING_TIMEOUT = int(os.getenv('WS_PING_TIMEOUT', 10))
 API_VERSION = "0.2.0" 
@@ -62,7 +61,7 @@ class MultimodalMessage(BaseModel):
     enableTTS: bool = True
 
 # --- State Management --- 
-connections: Dict[str, Tuple[WebSocket, GeminiClient]] = {}
+connections: Dict[str, Tuple[WebSocket, Optional[GeminiClient]]] = {} # Client can be None now
 last_activity: Dict[str, float] = {}
 
 # --- Lifespan Management --- 
@@ -75,7 +74,6 @@ async def lifespan(app: FastAPI):
     for client_id, (ws, client_instance) in list(connections.items()):
         logger.info(f"Closing connection for client {client_id} during shutdown...")
         if client_instance: await client_instance.close()
-        # Use WebSocketState from starlette here
         if ws.client_state != WebSocketState.DISCONNECTED: 
             try: await ws.close(code=1001)
             except Exception: pass
@@ -90,27 +88,17 @@ app = FastAPI(
     openapi_tags=[{"name": "WebSocket", "description": "Main endpoint"}, {"name": "Meta", "description": "Metadata"}],
     lifespan=lifespan 
 )
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
+app.add_middleware(CORSMiddleware, allow_origins=ALLOWED_ORIGINS, allow_credentials=True, allow_methods=["*"], allow_headers=["*"],)
 logger.info(f"Starting Gemini WebSocket Service v{API_VERSION}")
 logger.info(f"Allowed Origins: {ALLOWED_ORIGINS}")
 
 # --- API Endpoints --- 
 @app.get("/version", tags=["Meta"])
-async def get_version():
-    return {"version": API_VERSION}
+async def get_version(): return {"version": API_VERSION}
 
 @app.get("/health", tags=["Meta"])
 async def health_check():
-    if not os.getenv("GOOGLE_API_KEY"):
-        logger.error("Health check failed: GOOGLE_API_KEY not configured")
+    if not GOOGLE_API_KEY_LOADED:
         raise HTTPException(status_code=503, detail="Service Unavailable: GOOGLE_API_KEY not configured")
     return {"status": "healthy", "version": API_VERSION, "timestamp": datetime.now().isoformat()}
 
@@ -121,45 +109,40 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
     await websocket.accept()
     logger.info(f"Connection accepted for {client_id}")
     client = None
-    ping_task = None
     try:
-        # --- Client Initialization ---
+        # --- Client Initialization (TEMPORARILY COMMENTED OUT) ---
         api_key = os.getenv("GOOGLE_API_KEY")
         logger.info(f"[ws/{client_id}] Checking API Key. Found: {bool(api_key)}") 
         if not api_key:
             logger.error(f"[ws/{client_id}] Closing: Missing GOOGLE_API_KEY configuration")
             await websocket.close(code=1008, reason="Missing GOOGLE_API_KEY configuration")
             return
-        try:
-            logger.info(f"[ws/{client_id}] Initializing GeminiClient...")
-            client = GeminiClient(api_key)
-            logger.info(f"[ws/{client_id}] Initializing Gemini Session...")
-            await client.initialize_session(DEFAULT_VOICE, DEFAULT_LANGUAGE)
-            logger.info(f"[ws/{client_id}] Gemini session initialized successfully.")
-        except Exception as init_error:
-            logger.exception(f"[ws/{client_id}] Gemini initialization failed: {init_error}")
-            await websocket.close(code=1011, reason=f"Failed to initialize Gemini session: {init_error}")
-            return
+        
+        # --- TEMPORARY: Skip Gemini Client Init --- 
+        logger.warning(f"[ws/{client_id}] TEMPORARY DEBUG: Skipping GeminiClient initialization.")
+        # try:
+        #     logger.info(f"[ws/{client_id}] Initializing GeminiClient...")
+        #     client = GeminiClient(api_key)
+        #     logger.info(f"[ws/{client_id}] Initializing Gemini Session...")
+        #     await client.initialize_session(DEFAULT_VOICE, DEFAULT_LANGUAGE)
+        #     logger.info(f"[ws/{client_id}] Gemini session initialized successfully.")
+        # except Exception as init_error:
+        #     logger.exception(f"[ws/{client_id}] Gemini initialization failed: {init_error}")
+        #     await websocket.close(code=1011, reason=f"Failed to initialize Gemini session: {init_error}")
+        #     return
+        # --- END TEMPORARY SKIP --- 
 
-        connections[client_id] = (websocket, client)
+        connections[client_id] = (websocket, client) # Store websocket, client will be None
         last_activity[client_id] = asyncio.get_event_loop().time()
-        logger.info(f"Client {client_id} connected. Active connections: {len(connections)}")
+        logger.info(f"Client {client_id} connected (NO GEMINI CLIENT). Active connections: {len(connections)}")
 
-        # --- Audio Callback Setup ---
+        # --- Audio Callback Setup (Will do nothing if client is None) ---
         async def audio_callback(audio_data: bytes):
-            # Use WebSocketState from starlette here
-            if client_id in connections and connections[client_id][0].client_state == WebSocketState.CONNECTED:
-                try:
-                    ws, _ = connections[client_id]
-                    await ws.send_json({"type": "audio_chunk_info", "size": len(audio_data), "format": "mp3"})
-                    await ws.send_bytes(audio_data)
-                except Exception as audio_e: logger.error(f"Audio send error for {client_id}: {audio_e}")
-            else: logger.warning(f"Audio callback for disconnected client {client_id}")
-        client.set_audio_callback(audio_callback)
+             pass # No client to call
+        if client: client.set_audio_callback(audio_callback)
 
-        # --- Main Receive Loop ---
+        # --- Main Receive Loop (Will error if trying to use client) ---
         while True:
-            response_stream = None
             raw_data = None
             try:
                 raw_data = await asyncio.wait_for(websocket.receive_text(), timeout=WS_PING_INTERVAL * 1.5)
@@ -170,39 +153,39 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                 if message_type == 'ping': await websocket.send_json({"type": "pong"}); continue
                 logger.info(f"Received type '{message_type}' from {client_id}")
 
-                if message_type == "text_message":
-                    message = TextMessage.model_validate(message_data)
-                    response_stream = client.send_message(message.text, role=message.role, enable_tts=message.enableTTS, files_data=None)
-                elif message_type == "multimodal_message":
-                    message = MultimodalMessage.model_validate(message_data)
-                    processed_files = []
-                    for file_info in message.files:
-                        decoded_bytes = base64.b64decode(file_info.data)
-                        processed_files.append({"mime_type": file_info.mime_type, "data": decoded_bytes, "filename": file_info.filename})
-                    response_stream = client.send_message(message.text, role=message.role, enable_tts=message.enableTTS, files_data=processed_files)
-                elif message_type == "update_settings": logger.info(f"Settings update from {client_id}"); await websocket.send_json({"type": "settings_ack"}); continue
-                else: logger.warning(f"Unknown type '{message_type}' from {client_id}"); await websocket.send_json({"type": "error", "error": f"Unknown type: {message_type}"}); continue
+                # --- TEMPORARY: Send simple ack instead of processing --- 
+                logger.warning(f"[ws/{client_id}] TEMPORARY DEBUG: Received message, sending ack (no processing).")
+                await websocket.send_json({"type": "ack", "received_type": message_type})
+                # --- END TEMPORARY --- 
 
-                if response_stream:
-                    full_response_text = ""
-                    async for response in response_stream:
-                         # Use WebSocketState from starlette here
-                        if websocket.client_state != WebSocketState.CONNECTED: 
-                           logger.warning(f"Client {client_id} disconnected during stream."); break 
-                        await websocket.send_json(response)
-                        if response.get("type") == "text": full_response_text = response.get("content", full_response_text)
-                    # Use WebSocketState from starlette here    
-                    if websocket.client_state == WebSocketState.CONNECTED: 
-                       await websocket.send_json({"type": "complete", "text": full_response_text, "role": "assistant"})
+                # --- Original Processing Logic (Commented Out) ---
+                # response_stream = None
+                # if message_type == "text_message":
+                #     message = TextMessage.model_validate(message_data)
+                #     if client: response_stream = client.send_message(message.text, role=message.role, enable_tts=message.enableTTS, files_data=None)
+                # elif message_type == "multimodal_message":
+                #     message = MultimodalMessage.model_validate(message_data)
+                #     processed_files = []
+                #     for file_info in message.files:
+                #         decoded_bytes = base64.b64decode(file_info.data)
+                #         processed_files.append({"mime_type": file_info.mime_type, "data": decoded_bytes, "filename": file_info.filename})
+                #     if client: response_stream = client.send_message(message.text, role=message.role, enable_tts=message.enableTTS, files_data=processed_files)
+                # elif message_type == "update_settings": logger.info(f"Settings update from {client_id}"); await websocket.send_json({"type": "settings_ack"}); continue
+                # else: logger.warning(f"Unknown type '{message_type}' from {client_id}"); await websocket.send_json({"type": "error", "error": f"Unknown type: {message_type}"}); continue
+                # 
+                # if response_stream:
+                #     full_response_text = ""
+                #     async for response in response_stream:
+                #         if websocket.client_state != WebSocketState.CONNECTED: break
+                #         await websocket.send_json(response)
+                #         if response.get("type") == "text": full_response_text = response.get("content", full_response_text)
+                #     if websocket.client_state == WebSocketState.CONNECTED: await websocket.send_json({"type": "complete", "text": full_response_text, "role": "assistant"})
+                # --- End Original Processing --- 
 
-            except asyncio.TimeoutError:
-                logger.warning(f"Receive timeout for {client_id}. Closing.")
-                break
-            except WebSocketDisconnect:
-                logger.info(f"{client_id} disconnected gracefully.")
-                break
+            except asyncio.TimeoutError: logger.warning(f"Receive timeout for {client_id}. Closing."); break
+            except WebSocketDisconnect: logger.info(f"{client_id} disconnected gracefully."); break
             except (json.JSONDecodeError, ValidationError, ValueError, base64.binascii.Error) as data_err:
-                logger.error(f"Data/Validation error for {client_id}: {data_err} - Data: {raw_data[:200] if raw_data else 'N/A'}...", exc_info=True)
+                logger.error(f"Data/Validation error for {client_id}: {data_err} - Data: {raw_data[:200] if raw_data else 'N/A'}...", exc_info=False)
                 try: await websocket.send_json({"type": "error", "error": f"Invalid message format or data: {data_err}"})
                 except Exception: pass
             except Exception as loop_e:
@@ -211,15 +194,14 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                 except Exception: pass
                 break 
 
-    except Exception as handler_e:
+    except Exception as handler_e: 
         logger.exception(f"Unhandled exception in WebSocket handler setup for {client_id}: {handler_e}")
     finally:
-        # --- Cleanup ---
+        # --- Cleanup (Remains the same) ---
         logger.info(f"Cleaning up connection for client {client_id}")
         if client_id in connections:
             ws, client_instance = connections.pop(client_id)
             if client_instance: await client_instance.close()
-             # Use WebSocketState from starlette here
             if ws.client_state != WebSocketState.DISCONNECTED: 
                 try: await ws.close(code=1000)
                 except Exception: pass
@@ -231,4 +213,3 @@ if __name__ == "__main__":
     import uvicorn
     logger.info(f"Starting Uvicorn server on {HOST}:{PORT}")
     uvicorn.run("main:app", host=HOST, port=PORT, log_level=LOG_LEVEL.lower(), reload=False)
-
