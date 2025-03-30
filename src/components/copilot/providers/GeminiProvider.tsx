@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { toast } from '@/components/ui/use-toast';
-// Correct the import path for the config file
+// Ensure this path is correct after tsconfig fixes
 import API_CONFIG from '@/config/apiConfig'; 
 import { v4 as uuidv4 } from 'uuid'; 
 
@@ -72,7 +72,7 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
       };
       wsRef.current = ws;
     } catch (err) { console.error('[GeminiProvider] Error creating WebSocket:', err); setIsConnecting(false); setError('Failed to create WebSocket'); }
-  }, [isConnecting, isProcessing]); // Corrected dependency
+  }, [isConnecting, isProcessing, toast]); // Added toast dependency
 
   const reconnect = useCallback(() => { console.log("[GeminiProvider] Manual reconnect."); if (wsRef.current) wsRef.current.close(1000); reconnectAttemptsRef.current = 0; setError(null); setIsProcessing(false); connectWebSocket(); }, [connectWebSocket]);
   useEffect(() => { connectWebSocket(); const ping = setInterval(() => { if (wsRef.current?.readyState === WebSocket.OPEN) wsRef.current.send(JSON.stringify({ type: 'ping' })); }, API_CONFIG.DEFAULT_PING_INTERVAL); return () => { console.log("[GeminiProvider] Unmounting."); clearInterval(ping); if (reconnectTimeoutRef.current) window.clearTimeout(reconnectTimeoutRef.current); wsRef.current?.close(1000); }; }, [connectWebSocket]);
