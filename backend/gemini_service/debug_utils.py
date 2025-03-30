@@ -10,7 +10,8 @@ import matplotlib.pyplot as plt
 from pydub import AudioSegment
 from datetime import datetime
 
-logging.basicConfig(level=logging.INFO)
+# Remove redundant basicConfig - rely on main.py for setup
+# logging.basicConfig(level=logging.INFO) 
 logger = logging.getLogger(__name__)
 
 class PerformanceMetrics:
@@ -116,6 +117,7 @@ async def run_performance_test(
                 
                 # Send message
                 await websocket.send(json.dumps({
+                    "type": "text_message", # Explicitly set type
                     "text": message,
                     "role": "user",
                     "enableTTS": True
@@ -132,7 +134,7 @@ async def run_performance_test(
                                 metrics.log_error(data.get("error"))
                             elif data.get("type") == "complete":
                                 break
-                        else:
+                        elif isinstance(response, bytes):
                             audio_chunks.append(response)
                     except websockets.exceptions.ConnectionClosed:
                         break
@@ -163,11 +165,12 @@ async def run_performance_test(
         report_path.write_text(json.dumps(report, indent=2))
         
         logger.info("Performance test complete. Report saved to: %s", report_path)
-        logger.info("\nSummary:")
+        logger.info("
+Summary:")
         logger.info(json.dumps(report["metrics"], indent=2))
 
     except Exception as e:
-        logger.error(f"Error during performance test: {e}")
+        logger.error(f"Error during performance test: {e}", exc_info=True)
 
 if __name__ == "__main__":
     import argparse
@@ -179,6 +182,10 @@ if __name__ == "__main__":
     parser.add_argument("--no-audio", action="store_false", dest="save_audio", help="Don't save audio files")
     
     args = parser.parse_args()
+    
+    # Ensure logging is configured if running standalone
+    # Consider adding a simple basicConfig here if running this file directly is common
+    # logging.basicConfig(level=logging.INFO) 
     
     asyncio.run(run_performance_test(
         host=args.host,
