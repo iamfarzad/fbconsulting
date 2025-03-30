@@ -1,17 +1,12 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { toast } from '@/components/ui/use-toast';
-// Correct the import path for the config file AGAIN
+// Correct the import path for the config file
 import API_CONFIG from '@/config/apiConfig'; 
 import { v4 as uuidv4 } from 'uuid'; 
 
 // --- Types ---
-interface ProviderMessage {
-  id: string;
-  role: 'user' | 'assistant' | 'system' | 'error';
-  content: string;
-  timestamp: number;
-}
+interface ProviderMessage { id: string; role: 'user' | 'assistant' | 'system' | 'error'; content: string; timestamp: number; }
 interface OutgoingWebSocketMessage { type: 'text_message' | 'multimodal_message'; text?: string | null; files?: Array<{ mime_type: string; data: string; filename?: string }>; role?: string; enableTTS?: boolean; }
 interface IncomingWebSocketMessage { type: string; content?: string; error?: string; status?: string; size?: number; format?: string; }
 interface GeminiContextType { sendMessage: (message: OutgoingWebSocketMessage) => Promise<void>; messages: ProviderMessage[]; isConnected: boolean; isConnecting: boolean; isProcessing: boolean; error: string | null; resetError: () => void; reconnect: () => void; clearMessages: () => void; }
@@ -77,10 +72,10 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
       };
       wsRef.current = ws;
     } catch (err) { console.error('[GeminiProvider] Error creating WebSocket:', err); setIsConnecting(false); setError('Failed to create WebSocket'); }
-  }, [isConnecting, isProcessing]); // Added isProcessing dependency
+  }, [isConnecting, isProcessing]); // Corrected dependency
 
   const reconnect = useCallback(() => { console.log("[GeminiProvider] Manual reconnect."); if (wsRef.current) wsRef.current.close(1000); reconnectAttemptsRef.current = 0; setError(null); setIsProcessing(false); connectWebSocket(); }, [connectWebSocket]);
-  useEffect(() => { connectWebSocket(); const ping = setInterval(() => { if (wsRef.current?.readyState === WebSocket.OPEN) wsRef.current.send(JSON.stringify({ type: 'ping' })); }, API_CONFIG.DEFAULT_PING_INTERVAL); return () => { clearInterval(ping); if (reconnectTimeoutRef.current) window.clearTimeout(reconnectTimeoutRef.current); wsRef.current?.close(1000); }; }, [connectWebSocket]);
+  useEffect(() => { connectWebSocket(); const ping = setInterval(() => { if (wsRef.current?.readyState === WebSocket.OPEN) wsRef.current.send(JSON.stringify({ type: 'ping' })); }, API_CONFIG.DEFAULT_PING_INTERVAL); return () => { console.log("[GeminiProvider] Unmounting."); clearInterval(ping); if (reconnectTimeoutRef.current) window.clearTimeout(reconnectTimeoutRef.current); wsRef.current?.close(1000); }; }, [connectWebSocket]);
   const sendMessage = useCallback(async (message: OutgoingWebSocketMessage) => { if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) { setError('Not connected'); reconnect(); throw new Error('WS not connected'); } setIsProcessing(true); setError(null); return new Promise<void>((res, rej) => { try { console.log("[GeminiProvider] Sending:", message); wsRef.current?.send(JSON.stringify(message)); res(); } catch (e) { console.error('Send Error:', e); setError('Failed to send'); setIsProcessing(false); rej(e); } }); }, [reconnect]); 
   const resetError = useCallback(() => { setError(null); }, []);
   const clearMessages = useCallback(() => { setMessages([]); }, []);

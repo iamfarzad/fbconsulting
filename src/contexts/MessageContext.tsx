@@ -1,36 +1,42 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface MessageContextType {
   message: string | null;
-  setMessage: (msg: string | null) => void;
+  setMessage: (message: string | null) => void;
   audioEnabled: boolean;
-  setAudioEnabled: (enabled: boolean) => void;
+  toggleAudio: () => void;
 }
 
-const MessageContext = createContext<MessageContextType | undefined>(undefined);
-
-export function MessageProvider({ children }: { children: React.ReactNode }) {
-  const [message, setMessage] = useState<string | null>(null);
-  const [audioEnabled, setAudioEnabled] = useState(true);
-
-  return (
-    <MessageContext.Provider
-      value={{
-        message,
-        setMessage,
-        audioEnabled,
-        setAudioEnabled,
-      }}
-    >
-      {children}
-    </MessageContext.Provider>
-  );
-}
+const MessageContext = createContext<MessageContextType | null>(null);
 
 export function useMessage() {
   const context = useContext(MessageContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useMessage must be used within a MessageProvider');
   }
   return context;
+}
+
+interface MessageProviderProps {
+  children: ReactNode;
+}
+
+export function MessageProvider({ children }: MessageProviderProps) {
+  const [message, setMessage] = useState<string | null>(null);
+  const [audioEnabled, setAudioEnabled] = useState(true);
+
+  const toggleAudio = () => setAudioEnabled(prev => !prev);
+
+  const value: MessageContextType = {
+    message,
+    setMessage,
+    audioEnabled,
+    toggleAudio,
+  };
+
+  return (
+    <MessageContext.Provider value={value}>
+      {children}
+    </MessageContext.Provider>
+  );
 }

@@ -8,7 +8,7 @@ import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import type { VoiceUIProps } from '@/types/voice';
 import { useToast } from '@/hooks/use-toast';
 import { useLocation } from 'react-router-dom';
-import { useGeminiService } from '@/hooks/gemini';
+import { useGemini } from '@/components/copilot/providers/GeminiProvider';
 import { useMessage } from '@/contexts/MessageContext';
 
 const VoiceUI: React.FC<VoiceUIProps> = ({ onCommand, noFloatingButton = false }) => {
@@ -22,15 +22,18 @@ const VoiceUI: React.FC<VoiceUIProps> = ({ onCommand, noFloatingButton = false }
   const { toast } = useToast();
   const commandTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { setMessage, audioEnabled } = useMessage();
-  const { sendMessage, messages, isLoading: isProcessingMessage } = useGeminiService({
-    onError: (error) => {
+  const { sendMessage, messages, isProcessing: isProcessingMessage, error } = useGemini();
+  
+  // Handle Gemini errors
+  useEffect(() => {
+    if (error) {
       toast({
         title: "AI Service Error",
         description: error,
         variant: "destructive"
       });
     }
-  });
+  }, [error, toast]);
 
   // Watch for new AI messages and update audio playback
   useEffect(() => {
@@ -73,7 +76,11 @@ const VoiceUI: React.FC<VoiceUIProps> = ({ onCommand, noFloatingButton = false }
         }, 30000);
 
         // Send command to get AI response
-        await sendMessage(command);
+        await sendMessage({
+          type: 'text_message',
+          text: command,
+          enableTTS: audioEnabled
+        });
         
         // Call original onCommand if provided
         if (onCommand) {
