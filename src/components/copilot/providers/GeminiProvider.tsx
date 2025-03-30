@@ -1,8 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
-import { toast } from '@/components/ui/use-toast';
-// Correct the import path for the config file AGAIN
-import API_CONFIG from '@/config/apiConfig'; 
+import { useToast } from '@/hooks/use-toast';
+import API_CONFIG from '@/config/apiConfig';
 import { v4 as uuidv4 } from 'uuid'; 
 
 // --- Types ---
@@ -28,6 +27,7 @@ export const useGemini = () => {
 interface GeminiProviderProps { children: ReactNode; }
 
 export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
+  const { toast } = useToast();
   const [messages, setMessages] = useState<ProviderMessage[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -62,7 +62,15 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
             return prev; 
           });
           if (data.type === 'complete') { setIsProcessing(false); }
-          else if (data.type === 'error' && data.error) { setError(data.error); setIsProcessing(false); toast({ title: 'Server Error', description: data.error, variant: 'destructive' }); }
+          else if (data.type === 'error' && data.error) { 
+            setError(data.error); 
+            setIsProcessing(false); 
+            toast({ 
+              title: 'Server Error', 
+              description: data.error, 
+              variant: 'destructive' 
+            }); 
+          }
           else if (data.type === 'pong') { /* console.debug("Pong received"); */ }
         } catch (e) { console.error('[GeminiProvider] Failed to parse message:', e, event.data); }
       };
@@ -73,7 +81,14 @@ export const GeminiProvider: React.FC<GeminiProviderProps> = ({ children }) => {
           reconnectAttemptsRef.current++; const delay = API_CONFIG.WEBSOCKET.RECONNECT_DELAY * Math.pow(2, reconnectAttemptsRef.current - 1);
           console.log(`[GeminiProvider] Reconnecting attempt ${reconnectAttemptsRef.current} in ${delay}ms...`);
           reconnectTimeoutRef.current = window.setTimeout(() => { reconnectTimeoutRef.current = null; connectWebSocket(); }, delay);
-        } else if (event.code !== 1000) { setError('Failed to reconnect.'); toast({ title: "Connection Lost", description: "Could not reconnect.", variant: "destructive" }); }
+        } else if (event.code !== 1000) { 
+          setError('Failed to reconnect.'); 
+          toast({ 
+            title: "Connection Lost", 
+            description: "Could not reconnect.", 
+            variant: "destructive" 
+          }); 
+        }
       };
       wsRef.current = ws;
     } catch (err) { console.error('[GeminiProvider] Error creating WebSocket:', err); setIsConnecting(false); setError('Failed to create WebSocket'); }

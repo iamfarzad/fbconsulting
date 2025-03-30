@@ -1,34 +1,32 @@
+import { toast as sonnerToast } from 'sonner';
 
-import { toast as sonnerToast } from "sonner";
+type ToastVariant = 'default' | 'success' | 'error' | 'destructive' | 'warning';
 
-export type ToastProps = {
+interface ToastOptions {
   title?: string;
   description?: string;
-  variant?: "default" | "destructive" | "success";
-  action?: React.ReactNode;
+  variant?: ToastVariant;
   duration?: number;
-};
+}
 
-export const useToast = () => {
-  const toast = ({ title, description, variant, action, duration }: ToastProps) => {
-    const options: any = {
+export function useToast() {
+  const toast = ({ title, description, variant = 'default', duration = 5000 }: ToastOptions) => {
+    const options = {
       description,
-      action,
-      duration
+      duration,
+      className: `toast-${variant}`,
     };
 
-    if (variant === "destructive") {
-      return sonnerToast.error(title, options);
+    if (variant === 'destructive' || variant === 'error') {
+      sonnerToast.error(title, options);
+    } else if (variant === 'success') {
+      sonnerToast.success(title, options);
+    } else if (variant === 'warning') {
+      sonnerToast.warning(title, options);
+    } else {
+      sonnerToast(title, options);
     }
-
-    if (variant === "success") {
-      return sonnerToast.success(title, options);
-    }
-
-    return sonnerToast(title, options);
   };
 
   return { toast };
-};
-
-export { useToast as useToastHook };
+}

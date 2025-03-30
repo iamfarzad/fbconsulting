@@ -1,21 +1,18 @@
-
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { useWebSocketChat } from '@/features/gemini/hooks/useWebSocketChat';
+import { useGemini } from './providers/GeminiProvider';
+import { Message } from '@/types/message';
+import { useGeminiAudioPlayback } from '@/features/gemini/hooks/useGeminiAudioPlayback';
 
 // Define the context type
 interface GeminiCopilotContextType {
-  messages: Array<{
-    role: 'user' | 'assistant' | 'system' | 'error';
-    content: string;
-    timestamp?: number;
-  }>;
+  messages: Message[];
   sendMessage: (content: string) => void;
   isLoading: boolean;
   isListening: boolean;
   transcript: string;
   toggleListening: () => void;
   generateAndPlayAudio: (text: string) => void;
-  clearMessages?: () => void;
+  clearMessages: () => void;
 }
 
 // Create the context
@@ -35,59 +32,53 @@ interface GeminiCopilotProviderProps {
 }
 
 export function GeminiCopilotProvider({ children }: GeminiCopilotProviderProps) {
-  // Use the WebSocket Chat hook
+  // Use Gemini Provider
   const {
     messages,
-    isLoading,
-    sendMessage: wssSendMessage,
+    sendMessage: geminiSendMessage,
+    isProcessing: isLoading,
     clearMessages
-  } = useWebSocketChat();
+  } = useGemini();
 
-  // Simple voice state implementation (without actual functionality)
+  // Use audio playback hook
+  const { handleAudioChunk } = useGeminiAudioPlayback();
+
+  // Voice state
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
 
   // Toggle voice input
   const toggleListening = useCallback(() => {
     setIsListening(prev => !prev);
-    // In a real implementation, we would start/stop the speech recognition here
-    if (!isListening) {
-      // Mock transcript after a delay
-      setTimeout(() => {
-        setTranscript('This is a simulated voice transcript');
-        setIsListening(false);
-      }, 2000);
-    } else {
+    if (isListening) {
       setTranscript('');
     }
   }, [isListening]);
 
-  // Generate and play audio (mock implementation)
+  // Generate and play audio using the audio playback hook
   const generateAndPlayAudio = useCallback((text: string) => {
-    console.log('Playing audio for:', text);
-    // In a real implementation, we would generate and play audio here
+    // In a real implementation, we would call the TTS service here
+    // and pass the audio buffer to handleAudioChunk
+    console.log('TTS requested for:', text);
   }, []);
 
-  // Wrapper for sendMessage for simplicity
+  // Wrapper for sendMessage to handle voice input
   const sendMessage = useCallback((content: string) => {
     if (content.trim()) {
-      wssSendMessage(content);
+      geminiSendMessage({
+        type: 'text_message',
+        text: content,
+        enableTTS: true
+      });
       // Clear transcript if it was set
       if (transcript) {
         setTranscript('');
       }
     }
-  }, [wssSendMessage, transcript]);
-
-  // Convert AIMessage array to the format expected by the context
-  const formattedMessages = messages.map(msg => ({
-    role: msg.role,
-    content: msg.content,
-    timestamp: msg.timestamp
-  }));
+  }, [geminiSendMessage, transcript]);
 
   const value: GeminiCopilotContextType = {
-    messages: formattedMessages,
+    messages,
     sendMessage,
     isLoading,
     isListening,

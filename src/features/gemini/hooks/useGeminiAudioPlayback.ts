@@ -1,162 +1,59 @@
+import { useState, useCallback } from 'react';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
-
-interface UseGeminiAudioPlaybackProps {
-  onPlaybackError?: (error: string) => void;
-  onPlaybackStart?: () => void;
-  onPlaybackEnd?: () => void;
-}
-
-/**
- * Hook to handle audio playback from the Gemini API
- */
-export function useGeminiAudioPlayback({
-  onPlaybackError,
-  onPlaybackStart,
-  onPlaybackEnd
-}: UseGeminiAudioPlaybackProps = {}) {
+export function useGeminiAudioPlayback() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
   
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const audioSourceRef = useRef<string | null>(null);
-  
-  // Cleanup audio resources
-  useEffect(() => {
-    return () => {
-      clearAudio();
-    };
-  }, []);
-  
-  // Handle an audio chunk from the WebSocket (ArrayBuffer)
+  // Initialize or resume AudioContext
+  const initAudioContext = useCallback(() => {
+    if (!audioContext) {
+      const context = new AudioContext();
+      setAudioContext(context);
+      return context;
+    }
+    
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
+    return audioContext;
+  }, [audioContext]);
+
+  // Handle audio chunk from the provider
   const handleAudioChunk = useCallback((chunk: ArrayBuffer) => {
+    if (!chunk || chunk.byteLength === 0) return;
+    
     try {
-      // Convert ArrayBuffer to Blob
-      const blob = new Blob([chunk], { type: 'audio/mpeg' });
-      audioChunksRef.current.push(blob);
+      const context = initAudioContext();
+      setIsPlaying(true);
       
-      // If this is the first chunk and we're not already playing, start playback
-      if (audioChunksRef.current.length === 1 && !isPlaying) {
-        playAudioChunks();
-      }
-    } catch (err) {
-      const errorMessage = `Failed to process audio chunk: ${err instanceof Error ? err.message : 'Unknown error'}`;
-      console.error(errorMessage);
-      setError(errorMessage);
-      if (onPlaybackError) onPlaybackError(errorMessage);
-    }
-  }, [isPlaying, onPlaybackError]);
-  
-  // Handle audio metadata (not used yet)
-  const handleAudioMetadata = useCallback((_metadata: any) => {
-    // Future: Handle metadata like duration, format, etc.
-  }, []);
-  
-  // Play concatenated audio chunks
-  const playAudioChunks = useCallback(() => {
-    try {
-      if (audioChunksRef.current.length === 0) {
-        return;
-      }
-      
-      // Revoke previous URL to prevent memory leaks
-      if (audioSourceRef.current) {
-        URL.revokeObjectURL(audioSourceRef.current);
-      }
-      
-      // Create a new audio element if needed
-      if (!audioRef.current) {
-        audioRef.current = new Audio();
+      context.decodeAudioData(chunk, (buffer) => {
+        const source = context.createBufferSource();
+        source.buffer = buffer;
+        source.connect(context.destination);
+        source.start(0);
         
-        // Set up audio event listeners
-        audioRef.current.addEventListener('play', () => {
-          setIsPlaying(true);
-          if (onPlaybackStart) onPlaybackStart();
-        });
-        
-        audioRef.current.addEventListener('ended', () => {
+        source.onended = () => {
           setIsPlaying(false);
-          setProgress(100);
-          if (onPlaybackEnd) onPlaybackEnd();
-        });
-        
-        audioRef.current.addEventListener('timeupdate', () => {
-          if (audioRef.current) {
-            const percentage = (audioRef.current.currentTime / audioRef.current.duration) * 100;
-            setProgress(Math.round(percentage));
-          }
-        });
-        
-        audioRef.current.addEventListener('error', (e) => {
-          const errorMessage = `Audio playback error: ${e.type}`;
-          console.error(errorMessage, e);
-          setError(errorMessage);
-          setIsPlaying(false);
-          if (onPlaybackError) onPlaybackError(errorMessage);
-        });
-      }
-      
-      // Combine chunks into a single blob
-      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/mpeg' });
-      audioSourceRef.current = URL.createObjectURL(audioBlob);
-      
-      // Set the source and play
-      audioRef.current.src = audioSourceRef.current;
-      audioRef.current.play().catch(err => {
-        const errorMessage = `Could not play audio: ${err.message}`;
-        console.error(errorMessage);
-        setError(errorMessage);
-        setIsPlaying(false);
-        if (onPlaybackError) onPlaybackError(errorMessage);
+        };
       });
-      
-    } catch (err) {
-      const errorMessage = `Failed to play audio: ${err instanceof Error ? err.message : 'Unknown error'}`;
-      console.error(errorMessage);
-      setError(errorMessage);
+    } catch (error) {
+      console.error('Error playing audio:', error);
       setIsPlaying(false);
-      if (onPlaybackError) onPlaybackError(errorMessage);
     }
-  }, [onPlaybackError, onPlaybackStart, onPlaybackEnd]);
-  
+  }, [initAudioContext]);
+
   // Stop audio playback
   const stopAudio = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      setIsPlaying(false);
-      setProgress(0);
+    if (audioContext) {
+      audioContext.suspend();
     }
-  }, []);
-  
-  // Clear all audio resources
-  const clearAudio = useCallback(() => {
-    stopAudio();
-    
-    // Clear audio chunks
-    audioChunksRef.current = [];
-    
-    // Revoke object URL
-    if (audioSourceRef.current) {
-      URL.revokeObjectURL(audioSourceRef.current);
-      audioSourceRef.current = null;
-    }
-    
-    // Clear error
-    setError(null);
-  }, [stopAudio]);
-  
+    setIsPlaying(false);
+  }, [audioContext]);
+
   return {
     isPlaying,
-    progress,
-    error,
     handleAudioChunk,
-    handleAudioMetadata,
-    playAudioChunks,
-    stopAudio,
-    clearAudio
+    stopAudio
   };
 }
 
