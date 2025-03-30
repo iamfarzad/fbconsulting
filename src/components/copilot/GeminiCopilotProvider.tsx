@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { useGemini } from './providers/GeminiProvider';
-import { Message } from '@/types/message';
-import { useGeminiAudioPlayback } from '@/features/gemini/hooks/useGeminiAudioPlayback';
+import { Message } from '../../types/message';
 
 // Define the context type
 interface GeminiCopilotContextType {
@@ -37,11 +36,12 @@ export function GeminiCopilotProvider({ children }: GeminiCopilotProviderProps) 
     messages,
     sendMessage: geminiSendMessage,
     isProcessing: isLoading,
-    clearMessages
+    clearMessages,
+    startRecording,
+    stopRecording,
+    isRecording,
+    stopAudio
   } = useGemini();
-
-  // Use audio playback hook
-  const { handleAudioChunk } = useGeminiAudioPlayback();
 
   // Voice state
   const [isListening, setIsListening] = useState(false);
@@ -49,18 +49,23 @@ export function GeminiCopilotProvider({ children }: GeminiCopilotProviderProps) 
 
   // Toggle voice input
   const toggleListening = useCallback(() => {
-    setIsListening(prev => !prev);
     if (isListening) {
+      stopRecording();
       setTranscript('');
+    } else {
+      startRecording();
     }
-  }, [isListening]);
+    setIsListening(prev => !prev);
+  }, [isListening, startRecording, stopRecording]);
 
-  // Generate and play audio using the audio playback hook
+  // Generate and play audio using the consolidated audio functionality
   const generateAndPlayAudio = useCallback((text: string) => {
-    // In a real implementation, we would call the TTS service here
-    // and pass the audio buffer to handleAudioChunk
-    console.log('TTS requested for:', text);
-  }, []);
+    geminiSendMessage({
+      type: 'text_message',
+      text,
+      enableTTS: true
+    });
+  }, [geminiSendMessage]);
 
   // Wrapper for sendMessage to handle voice input
   const sendMessage = useCallback((content: string) => {
