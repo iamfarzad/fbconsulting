@@ -1,9 +1,4 @@
-
 import { API_CONFIG } from '@/config/apiConfig';
-
-export { useGeminiWebSocket } from '@/features/gemini/hooks/useGeminiWebSocket'; 
-export { useGeminiService } from '@/features/gemini/hooks/useGeminiService';
-export { useGeminiAudioPlayback } from '@/features/gemini/hooks/useGeminiAudioPlayback';
 
 export interface GeminiConfig {
   apiKey: string;
@@ -32,7 +27,7 @@ export async function sendGeminiChatRequest(
         model: config.model || 'gemini-pro',
         max_tokens: config.maxTokens || 1024,
         temperature: config.temperature || 0.7,
-        safety_settings: config.safetySettings || []
+        safety_settings: config.safetySettings || DEFAULT_SAFETY_SETTINGS
       })
     });
 
@@ -90,31 +85,29 @@ export async function sendMultimodalRequest(
  * Convert chat messages to Gemini format
  */
 export function convertToGeminiMessages(
-  messages: Array<{ role: string; content: string }>, 
+  messages: Array<{ role: string; content: string }>,
   systemPrompt?: string
 ): Array<{ role: string; content: string }> {
   const result = messages.map(msg => ({
     role: msg.role === 'user' ? 'user' : msg.role === 'assistant' ? 'model' : 'system',
     content: msg.content
   }));
-  
-  // Add system prompt if provided
+
   if (systemPrompt) {
     result.unshift({
       role: 'system',
       content: systemPrompt
     });
   }
-  
+
   return result;
 }
 
 // Default configuration
-export const DEFAULT_CONFIG = {
+export const DEFAULT_CONFIG: GeminiConfig = {
+  apiKey: '',
   maxTokens: 1024,
-  temperature: 0.7,
-  topP: 0.95,
-  topK: 40
+  temperature: 0.7
 };
 
 // Default safety settings
