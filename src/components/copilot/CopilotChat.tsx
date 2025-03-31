@@ -1,12 +1,12 @@
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { Card, CardHeader } from '../ui/card';
-import { useToast } from '../../hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import ChatHeader from './chat/ChatHeader';
 import ChatMessages from './chat/ChatMessages';
-import { UnifiedChatInput } from '../ui/ai-chat/UnifiedChatInput';
+import { Button } from '../ui/button';
+import { Send } from 'lucide-react';
+import { Textarea } from '../ui/textarea';
 import ErrorDisplay from './chat/ErrorDisplay';
-import type { Message } from '../../types/message';
 import { useGemini } from './providers/GeminiProvider';
 
 interface CopilotChatProps {
@@ -16,53 +16,81 @@ interface CopilotChatProps {
 }
 
 export const CopilotChat: React.FC<CopilotChatProps> = ({
-  apiKey: propApiKey,
-  systemMessage = 'You are a helpful AI assistant.',
-  className = '',
+  className = ''
 }) => {
   const { toast } = useToast();
-  const { sendMessage: geminiSendMessage, messages: geminiMessages, isProcessing, error: geminiError } = useGemini();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { 
+    sendMessage,
+    messages,
+    isProcessing,
+    error
+  } = useGemini();
   
-  useEffect(() => {
-    if (geminiError) {
-      setError(geminiError);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [inputValue, setInputValue] = React.useState('');
+
+  const handleSendMessage = async () => {
+    if (!inputValue.trim() || isProcessing) return;
+
+    try {
+      await sendMessage({
+        type: 'text_message',
+        text: inputValue.trim(),
+        enableTTS: true
+      });
+      setInputValue('');
+    } catch (err) {
       toast({
         title: "Error",
-        description: geminiError,
+        description: err instanceof Error ? err.message : "Failed to send message",
         variant: "destructive"
       });
     }
-  }, [geminiError, toast]);
-  
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
   return (
     <div className={`rounded-lg border shadow-sm overflow-hidden flex flex-col h-[600px] ${className}`}>
-      {/* Chat header */}
       <CardHeader className="p-4 border-b">
-        <h3 className="text-lg font-medium">AI Assistant</h3>
-        <p className="text-sm text-muted-foreground">{geminiError ? "Error" : "Ready"}</p>
+        <ChatHeader
+          title="AI Assistant"
+          subtitle={error ? "Error" : "Ready"}
+        />
       </CardHeader>
-      
-      {/* Messages area */}
+
       <div className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900">
-        <ChatMessages 
-          messages={geminiMessages} 
+        <ChatMessages
+          messages={messages}
           isLoading={isProcessing}
           error={error}
           messagesEndRef={messagesEndRef}
         />
       </div>
-      
-      {/* Error display */}
+
       {error && <ErrorDisplay error={error} />}
-      
-      {/* Input area */}
-      <UnifiedChatInput 
-        placeholderText="Type your message..."
-        className="p-4 border-t"
-        apiKey={propApiKey}
-      />
+
+      <div className="border-t p-4 flex gap-2">
+        <Textarea
+          placeholder="Type your message..."
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="min-h-[44px] max-h-32"
+          rows={1}
+        />
+        <Button 
+          onClick={handleSendMessage}
+          disabled={!inputValue.trim() || isProcessing}
+        >
+          <Send className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 };
