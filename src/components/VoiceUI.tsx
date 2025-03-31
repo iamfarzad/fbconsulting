@@ -1,29 +1,34 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { AnimatedBars } from './ui/AnimatedBars';
-import { VoiceControls } from './ui/ai-chat/VoiceControls';
+import { Button } from './ui/button';
+import { Mic, MicOff } from 'lucide-react';
 import { VoicePanel } from './voice/VoicePanel';
-import { DemoVoiceControls } from './voice/DemoVoiceControls';
-import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
+import { useGemini } from '@/components/copilot/providers/GeminiProvider';
 import type { VoiceUIProps } from '@/types/voice';
 import { useToast } from '@/hooks/use-toast';
-import { useLocation } from 'react-router-dom';
-import { useGemini } from '@/components/copilot/providers/GeminiProvider';
-import { useMessage } from '@/contexts/MessageContext';
+import { cn } from '@/lib/utils';
 
 const VoiceUI: React.FC<VoiceUIProps> = ({ onCommand, noFloatingButton = false }) => {
   const [showTooltip, setShowTooltip] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(() => {
     return localStorage.getItem('hasInteractedWithVoice') === 'true';
   });
 
   const { toast } = useToast();
   const commandTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { setMessage, audioEnabled } = useMessage();
-  const { sendMessage, messages, isProcessing: isProcessingMessage, error } = useGemini();
   
+  const {
+    sendMessage,
+    messages,
+    isProcessing,
+    error,
+    startRecording,
+    stopRecording,
+    isRecording
+  } = useGemini();
+
   // Handle Gemini errors
   useEffect(() => {
     if (error) {
@@ -35,17 +40,8 @@ const VoiceUI: React.FC<VoiceUIProps> = ({ onCommand, noFloatingButton = false }
     }
   }, [error, toast]);
 
-  // Watch for new AI messages and update audio playback
-  useEffect(() => {
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage?.role === 'assistant' && audioEnabled) {
-      setMessage(lastMessage.content);
-    }
-  }, [messages, audioEnabled, setMessage]);
-
   const handleCommand = async (command: string) => {
-    console.log('Received voice command:', command);
-    if (isProcessing || isProcessingMessage) {
+    if (isProcessing) {
       console.log('Already processing a command, ignoring');
       return;
     }
@@ -61,12 +57,8 @@ const VoiceUI: React.FC<VoiceUIProps> = ({ onCommand, noFloatingButton = false }
 
     try {
       if (command.trim()) {
-        setIsProcessing(true);
-        setMessage(null); // Clear previous message
-        
         commandTimeoutRef.current = setTimeout(() => {
           if (isProcessing) {
-            setIsProcessing(false);
             toast({
               title: "Processing Timed Out",
               description: "Command took too long to process. Please try again.",
@@ -79,9 +71,9 @@ const VoiceUI: React.FC<VoiceUIProps> = ({ onCommand, noFloatingButton = false }
         await sendMessage({
           type: 'text_message',
           text: command,
-          enableTTS: audioEnabled
+          enableTTS: true
         });
-        
+
         // Call original onCommand if provided
         if (onCommand) {
           await onCommand(command);
@@ -101,7 +93,6 @@ const VoiceUI: React.FC<VoiceUIProps> = ({ onCommand, noFloatingButton = false }
         variant: "destructive"
       });
     } finally {
-      setIsProcessing(false);
       if (commandTimeoutRef.current) {
         clearTimeout(commandTimeoutRef.current);
         commandTimeoutRef.current = null;
@@ -109,36 +100,27 @@ const VoiceUI: React.FC<VoiceUIProps> = ({ onCommand, noFloatingButton = false }
     }
   };
 
-  const { isListening, transcript, toggleListening, voiceError } = useSpeechRecognition(handleCommand);
-  
-  // Show error toast if there's a voice error
-  useEffect(() => {
-    if (voiceError) {
-      console.error("Voice recognition error:", voiceError);
-      toast({
-        title: "Voice Recognition Error",
-        description: voiceError,
-        variant: "destructive"
-      });
-    }
-  }, [voiceError, toast]);
-  
   const handleToggleListening = async () => {
     if (isProcessing) return;
-    await toggleListening();
-    setShowTooltip(true);
     
-    if (!hasInteracted) {
-      setIsExpanded(true);
-      setHasInteracted(true);
-      localStorage.setItem('hasInteractedWithVoice', 'true');
+    if (isRecording) {
+      stopRecording();
+    } else {
+      await startRecording();
+      setShowTooltip(true);
+
+      if (!hasInteracted) {
+        setIsExpanded(true);
+        setHasInteracted(true);
+        localStorage.setItem('hasInteractedWithVoice', 'true');
+      }
     }
-    
+
     const tooltipTimeout = setTimeout(() => setShowTooltip(false), 5000);
     return () => clearTimeout(tooltipTimeout);
   };
-  
-  // Cleanup effect for any remaining timeouts when component unmounts
+
+  // Cleanup effect
   useEffect(() => {
     return () => {
       if (commandTimeoutRef.current) {
@@ -147,61 +129,72 @@ const VoiceUI: React.FC<VoiceUIProps> = ({ onCommand, noFloatingButton = false }
       }
     };
   }, []);
-  
+
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
   };
-  
+
+  const VoiceButton = ({ className }: { className?: string }) => (
+    <Button
+      variant="outline"
+      size="icon"
+      className={cn(
+        "relative h-12 w-12 shrink-0",
+        isRecording && "bg-red-50 hover:bg-red-100 border-red-200 text-red-600",
+        className
+      )}
+      onClick={isExpanded ? handleToggleListening : toggleExpanded}
+      disabled={isProcessing}
+    >
+      {isRecording ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
+      {isProcessing && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/5 rounded-lg">
+          <AnimatedBars isActive small />
+        </div>
+      )}
+    </Button>
+  );
+
   return (
     <>
       {!noFloatingButton && (
         <div className="fixed bottom-4 right-4 z-50">
-          <VoiceControls 
-            isListening={isListening}
-            toggleListening={isExpanded ? handleToggleListening : toggleExpanded}
-            disabled={isProcessing || isProcessingMessage}
-            aiProcessing={isProcessing || isProcessingMessage}
-          />
+          <VoiceButton />
         </div>
       )}
-      
+
       {noFloatingButton && (
         <div className="flex justify-center">
-          <DemoVoiceControls 
-            isListening={isListening}
-            toggleListening={handleToggleListening}
-            disabled={isProcessing}
-            aiProcessing={isProcessing}
-          />
+          <VoiceButton className="mx-auto" />
         </div>
       )}
-      
+
       <AnimatePresence>
         {isExpanded && (
           <VoicePanel
-            isListening={isListening}
-            transcript={transcript}
+            isListening={isRecording}
+            transcript={messages[messages.length - 1]?.content || ''}
             onClose={toggleExpanded}
             onToggleListening={handleToggleListening}
             aiResponse={messages[messages.length - 1]?.role === 'assistant' ? messages[messages.length - 1].content : ''}
           />
         )}
       </AnimatePresence>
-      
+
       {showTooltip && !isExpanded && (
         <div className="fixed bottom-20 right-6 p-3 bg-black text-white rounded-lg shadow-lg z-50 max-w-xs">
           <p className="text-sm mb-2">Hey, I'm your voice assistant—say something to try it out!</p>
-          {isListening && (
+          {isRecording && (
             <div className="voice-waveform flex justify-center items-end h-5">
-              <AnimatedBars isActive={isListening} small={true} />
+              <AnimatedBars isActive={isRecording} small={true} />
             </div>
           )}
         </div>
       )}
-      
-      {transcript && isListening && !isExpanded && (
+
+      {messages[messages.length - 1]?.content && isRecording && !isExpanded && (
         <div className="fixed bottom-24 right-24 p-2 bg-white/90 text-black rounded shadow-md">
-          "{transcript}"
+          "{messages[messages.length - 1].content}"
         </div>
       )}
     </>
