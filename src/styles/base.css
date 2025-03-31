@@ -46,17 +46,12 @@
 
   body {
     font-feature-settings: "rlig" 1, "calt" 1;
-    /* Removed @apply antialiased; - Rely on browser defaults or apply in component if needed */
   }
-  
-  /* Removed problematic @apply rules for base typography */
 }
 
-/* Simplified glass styling - Use direct CSS */
 .glass {
   background-color: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(8px);
-  /* Replace @apply border border-white/20 */
   border-width: 1px;
   border-style: solid;
   border-color: rgba(255, 255, 255, 0.2);
@@ -65,13 +60,11 @@
 .frosted-glass {
   background-color: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(8px);
-  /* Replace @apply border border-white/10 */
   border-width: 1px;
   border-style: solid;
   border-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Simplified animation - Keep these */
 .animate-subtle-bounce {
   animation: subtle-bounce 2s ease-in-out infinite;
 }
