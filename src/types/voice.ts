@@ -3,17 +3,17 @@ export interface VoiceUIProps {
   noFloatingButton?: boolean;
 }
 
-export interface VoiceControlsProps {
-  isListening: boolean;
-  toggleListening: () => void;
-  disabled?: boolean;
-  aiProcessing?: boolean;
-}
-
 export interface VoicePanelProps {
   isListening: boolean;
   transcript: string;
   onClose: () => void;
   onToggleListening: () => void;
   aiResponse: string;
+}
+
+export interface AudioOptions {
+  voice_name?: string;
+  language_code?: string;
+  rate?: number;
+  pitch?: number;
 }
