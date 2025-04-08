@@ -2,9 +2,9 @@
 import { ReactNode } from 'react';
 
 export interface ToastOptions {
-  title?: ReactNode;
-  description: ReactNode;
-  duration?: number;
+  title?: string;
+  description: string;
   variant?: 'default' | 'destructive' | 'success';
+  duration?: number;
   action?: ReactNode;
 }

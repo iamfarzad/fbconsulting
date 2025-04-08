@@ -1,34 +1,43 @@
 
 import { toast as sonnerToast } from "sonner";
-import { ToastOptions } from "@/types/toast";
+
+// Define toast options type
+type ToastProps = {
+  title?: string;
+  description?: string;
+  variant?: "default" | "destructive" | "success";
+  duration?: number;
+  action?: React.ReactNode;
+};
 
 export const useToast = () => {
-  // Create our enhanced toast function with variants
-  const toast = (options: ToastOptions) => {
-    sonnerToast({
-      ...options,
+  const toast = (options: ToastProps) => {
+    sonnerToast(options.title || "", {
+      description: options.description,
+      duration: options.duration,
+      icon: options.variant === "success" ? "✓" : 
+            options.variant === "destructive" ? "✕" : undefined,
+      action: options.action
     });
   };
   
-  // Add convenience methods
-  toast.success = (description: string) => {
-    sonnerToast({
-      variant: "success",
+  toast.success = (description: string, title?: string) => {
+    sonnerToast(title || "Success", {
       description,
+      icon: "✓"
     });
   };
   
-  toast.error = (description: string) => {
-    sonnerToast({
-      variant: "destructive",
+  toast.error = (description: string, title?: string) => {
+    sonnerToast(title || "Error", {
       description,
+      icon: "✕"
     });
   };
   
-  toast.info = (description: string) => {
-    sonnerToast({
-      variant: "default",
-      description,
+  toast.info = (description: string, title?: string) => {
+    sonnerToast(title || "Info", {
+      description
     });
   };
   
