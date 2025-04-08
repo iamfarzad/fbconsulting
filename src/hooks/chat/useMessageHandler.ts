@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { sendGeminiChatRequest, convertToGeminiMessages } from '@/services/gemini';
 import { AIMessage } from '@/services/chat/messageTypes';
+import { generateMessageId } from '@/utils/messageUtils';
 
 interface GeminiConfig {
   apiKey: string;
@@ -38,6 +39,7 @@ export const useMessageHandler = ({
     
     // Add the user message to the messages array
     const userMessage: AIMessage = {
+      id: generateMessageId(),
       role: 'user',
       content,
       timestamp: Date.now()
@@ -66,6 +68,7 @@ export const useMessageHandler = ({
       
       // Add the AI's response to the messages array
       addMessage({
+        id: generateMessageId(),
         role: 'assistant',
         content: response || 'I apologize, but I was unable to generate a response.',
         timestamp: Date.now()

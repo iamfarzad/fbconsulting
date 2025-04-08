@@ -6,14 +6,14 @@ import { Button } from '../ui/button';
 import { AnimatedBars } from '../ui/AnimatedBars';
 import { ChatInput } from '../ui/ai-chat/ChatInput';
 import { ChatMessageList } from '../ui/ai-chat/ChatMessageList';
-import { AIMessage } from '@/types/chat';
+import { AIMessage } from '@/services/chat/messageTypes';
 import { UploadedFile } from '@/hooks/useFileUpload';
 import { useFullScreenChatState } from '@/hooks/chat/useFullScreenChatState';
 
 interface FullScreenChatProps {
   onMinimize: () => void;
   initialMessages?: AIMessage[];
-  onSendMessage: (files?: { mimeType: string; data: string; name: string; type: string }[]) => void;
+  onSendMessage: (files?: { mimeType: string, data: string, name: string, type: string }[]) => void;
   inputValue: string;
   setInputValue: (value: string) => void;
   isLoading: boolean;
@@ -43,6 +43,7 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
   removeFile,
   isUploading = false
 }) => {
+  // Use our hook to manage state
   const { messages } = useFullScreenChatState(initialMessages);
 
   // Prevent body scrolling when fullscreen chat is open

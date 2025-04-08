@@ -1,15 +1,9 @@
 
-export interface Message {
-  id: string;
-  role: 'user' | 'assistant' | 'system' | 'error';
-  content: string;
-  timestamp: number;
-  mediaItems?: MessageMedia[];
-  feedback?: 'positive' | 'negative' | null;
-}
+// Define a union of allowed media types for strict typing
+export type MediaType = 'image' | 'document' | 'code' | 'link';
 
 export interface MessageMedia {
-  type: 'image' | 'document' | 'code' | 'link';
+  type: MediaType;
   url?: string;
   data?: string;
   caption?: string;

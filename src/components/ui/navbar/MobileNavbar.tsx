@@ -1,115 +1,82 @@
-import React from "react";
-import { Menu, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { Accordion } from "@/components/ui/accordion";
-import { MenuItem } from "./MenuItem";
-import { renderMobileMenuItem } from "./MobileMenuItem";
-import { MobileDarkModeToggle, DarkModeToggleProps } from "./DarkModeToggle";
-import { SearchButton } from "@/components/ui/search/SearchButton";
-import { SearchBar } from "@/components/ui/search/SearchBar";
-import { Logo3D } from "@/components/3d/Logo3D";
 
-interface NavbarLogoProps {
-  url: string;
-  src: string;
-  alt: string;
-  title: string;
-}
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useTheme } from 'next-themes';
+import { Menu, X, Sun, Moon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import Logo from '@/components/ui/Logo';
+import MobileMenuItem from './MobileMenuItem';
+import SearchButton from '@/components/ui/search/SearchButton';
 
 interface MobileNavbarProps {
-  logo: NavbarLogoProps;
-  menu: MenuItem[];
-  mobileExtraLinks: {
-    name: string;
-    url: string;
-  }[];
-  ctaButton: {
-    text: string;
-    url: string;
-  };
-  darkModeToggle?: DarkModeToggleProps;
+  onSearchClick: () => void;
 }
 
-export const MobileNavbar: React.FC<MobileNavbarProps> = ({
-  logo,
-  menu,
-  mobileExtraLinks,
-  ctaButton,
-  darkModeToggle,
-}) => {
+const MobileNavbar: React.FC<MobileNavbarProps> = ({ onSearchClick }) => {
+  const [open, setOpen] = useState(false);
+  const { setTheme, theme } = useTheme();
+  
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+  
+  const handleLinkClick = () => {
+    setOpen(false);
+  };
+
   return (
-    <div className="block lg:hidden">
-      <div className="flex items-center justify-between">
-        <a href={logo.url} className="flex items-center gap-2">
-          <Logo3D size="w-10 h-10" />
-          <span className="text-lg font-semibold">{logo.title}</span>
-        </a>
-        <div className="flex items-center gap-2">
-          <SearchButton variant="ghost" iconOnly size="icon" />
-          {darkModeToggle && (
-            <MobileDarkModeToggle
-              isDarkMode={darkModeToggle.isDarkMode}
-              onToggle={darkModeToggle.onToggle}
-            />
-          )}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon">
-                <Menu className="size-4" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle>
-                  <a href={logo.url} className="flex items-center gap-2">
-                    <Logo3D size="w-10 h-10" />
-                    <span className="text-lg font-semibold">
-                      {logo.title}
-                    </span>
-                  </a>
-                </SheetTitle>
-              </SheetHeader>
-              <div className="mt-4 mb-6">
-                <SearchBar onSearch={() => {}} className="w-full" />
+    <div className="flex lg:hidden items-center justify-between py-4">
+      {/* Logo */}
+      <Logo size="sm" />
+      
+      {/* Actions */}
+      <div className="flex items-center">
+        <Button
+          onClick={toggleTheme}
+          size="sm"
+          variant="ghost"
+          className="mr-2"
+        >
+          {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </Button>
+        
+        <SearchButton onClick={onSearchClick} size="sm" iconOnly />
+        
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="sm" className="ml-2">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right">
+            <div className="flex flex-col h-full">
+              <div className="flex justify-between items-center mb-8">
+                <Logo size="sm" variant="default" />
+                <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>
+                  <X className="h-5 w-5" />
+                </Button>
               </div>
-              <div className="flex flex-col gap-6">
-                <Accordion
-                  type="single"
-                  collapsible
-                  className="flex w-full flex-col gap-4"
-                >
-                  {menu.map((item) => renderMobileMenuItem(item))}
-                </Accordion>
-                <div className="border-t py-4">
-                  <div className="grid grid-cols-2 justify-start">
-                    {mobileExtraLinks.map((link, idx) => (
-                      <a
-                        key={idx}
-                        className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-md px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-accent-foreground"
-                        href={link.url}
-                      >
-                        {link.name}
-                      </a>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <Button asChild>
-                    <a href={ctaButton.url}>{ctaButton.text}</a>
-                  </Button>
-                </div>
+              
+              <nav className="flex flex-col space-y-4">
+                <MobileMenuItem href="/" onClick={handleLinkClick}>Home</MobileMenuItem>
+                <MobileMenuItem href="/about" onClick={handleLinkClick}>About</MobileMenuItem>
+                <MobileMenuItem href="/services" onClick={handleLinkClick}>Services</MobileMenuItem>
+                <MobileMenuItem href="/blog" onClick={handleLinkClick}>Blog</MobileMenuItem>
+                <MobileMenuItem href="/contact" onClick={handleLinkClick}>Contact</MobileMenuItem>
+              </nav>
+              
+              <div className="mt-auto">
+                <Button asChild className="w-full">
+                  <Link to="/contact" onClick={handleLinkClick}>Book a Consultation</Link>
+                </Button>
               </div>
-            </SheetContent>
-          </Sheet>
-        </div>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </div>
   );
 };
+
+export default MobileNavbar;

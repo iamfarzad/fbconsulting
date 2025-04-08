@@ -1,29 +1,14 @@
 
-import { useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { AIMessage } from '@/services/chat/messageTypes';
 
-export interface UseFullScreenChatStateOptions {
-  initialMessages?: AIMessage[];
-}
-
-export const useFullScreenChatState = (initialMessages: AIMessage[] = []) => {
+export function useFullScreenChatState(initialMessages: AIMessage[]) {
   const [messages, setMessages] = useState<AIMessage[]>(initialMessages);
 
-  // Add a new message
-  const addMessage = useCallback((message: AIMessage) => {
-    setMessages(prev => [...prev, message]);
-  }, []);
+  // Update messages when props change
+  useEffect(() => {
+    setMessages(initialMessages);
+  }, [initialMessages]);
 
-  // Clear all messages
-  const clearMessages = useCallback(() => {
-    setMessages([]);
-  }, []);
-
-  return {
-    messages,
-    addMessage,
-    clearMessages
-  };
-};
-
-export default useFullScreenChatState;
+  return { messages };
+}

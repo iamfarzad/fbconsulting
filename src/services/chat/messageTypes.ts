@@ -1,6 +1,8 @@
 
+export type MediaType = 'image' | 'document' | 'code' | 'link';
+
 export interface MessageMedia {
-  type: 'image' | 'document' | 'code' | 'link';
+  type: MediaType;
   url?: string;
   data?: string;
   caption?: string;
@@ -36,4 +38,8 @@ export interface LeadInfo {
   stage?: string;
   lastContact?: number;
   notes?: string;
+  phone?: string; // Added to fix TS2353 error
 }
+
+// Define LeadStage for useLeadStage.ts
+export type LeadStage = 'new' | 'discovery' | 'proposal' | 'negotiation' | 'closed';

@@ -2,7 +2,7 @@
 import React, { useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot } from "lucide-react";
-import { AIMessage } from "@/types/chat";
+import { AIMessage } from "@/services/chat/messageTypes";
 import { TypingIndicator } from "./TypingIndicator";
 
 interface ChatMessageProps {
@@ -101,7 +101,7 @@ export const ChatMessageList = ({
           >
             <Bot size={40} className="text-white/90 mb-4" />
             <h3 className="text-white/90 text-lg font-medium mb-2">
-              How can I help with your Farzad-AI automation needs?
+              How can I help with your AI automation needs?
             </h3>
             <p className="text-white/70 max-w-lg">
               Ask me anything about implementing AI in your business, from chatbots to 

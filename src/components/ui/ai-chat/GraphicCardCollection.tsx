@@ -1,32 +1,45 @@
 
 import React from 'react';
-import { GraphicCard, CardType } from './GraphicCard';
+import GraphicCard, { type CardType } from './GraphicCard';
 
-interface GraphicCardCollectionProps {
-  cards: Array<{
-    type: CardType;
-    title: string;
-    description: string;
-    variant?: 'default' | 'bordered' | 'minimal';
-  }>;
+interface Card {
+  type: CardType;
+  title: string;
+  content: React.ReactNode;
   variant?: 'default' | 'bordered' | 'minimal';
 }
 
-export const GraphicCardCollection: React.FC<GraphicCardCollectionProps> = ({ 
-  cards, 
-  variant = 'default' 
+interface GraphicCardCollectionProps {
+  cards: Card[];
+  className?: string;
+  columns?: 1 | 2 | 3;
+}
+
+const GraphicCardCollection: React.FC<GraphicCardCollectionProps> = ({
+  cards,
+  className = '',
+  columns = 1,
 }) => {
+  const gridCols = {
+    1: 'grid-cols-1',
+    2: 'grid-cols-1 md:grid-cols-2',
+    3: 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
+  }[columns];
+
   return (
-    <div className="flex flex-col gap-2 my-2 w-full">
-      {cards.map((card, index) => (
+    <div className={`grid ${gridCols} gap-4 my-4 ${className}`}>
+      {cards.map((card, i) => (
         <GraphicCard
-          key={index}
+          key={i}
           type={card.type}
-          title={card.title}
-          description={card.description}
-          variant={card.variant || variant}
-        />
+          title={card.title} 
+          variant={card.variant || 'default'}
+        >
+          {card.content}
+        </GraphicCard>
       ))}
     </div>
   );
 };
+
+export default GraphicCardCollection;

@@ -1,19 +1,16 @@
 
-import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface TypingIndicatorProps {
   className?: string;
 }
 
-export const TypingIndicator: React.FC<TypingIndicatorProps> = ({ className }) => {
+export const TypingIndicator = ({ className }: TypingIndicatorProps) => {
   return (
-    <div className={cn("flex items-center space-x-1.5", className)}>
-      <div className="w-2 h-2 rounded-full bg-primary/70 animate-pulse" style={{ animationDelay: "0ms" }} />
-      <div className="w-2 h-2 rounded-full bg-primary/70 animate-pulse" style={{ animationDelay: "200ms" }} />
-      <div className="w-2 h-2 rounded-full bg-primary/70 animate-pulse" style={{ animationDelay: "400ms" }} />
+    <div className={cn("flex items-center gap-1", className)}>
+      <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+      <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+      <div className="w-2 h-2 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
     </div>
   );
 };
-
-export default TypingIndicator;

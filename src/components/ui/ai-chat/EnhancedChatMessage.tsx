@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { AIMessage } from '@/services/chat/messageTypes';
-import { MessageMedia } from './MessageMedia';
+import { AIMessage, MessageMedia } from '@/services/chat/messageTypes';
 import { TypingIndicator } from './TypingIndicator';
 
 interface EnhancedChatMessageProps {
@@ -10,6 +9,29 @@ interface EnhancedChatMessageProps {
   isTyping?: boolean;
   className?: string;
 }
+
+// Simple component to render message media
+const MessageMedia: React.FC<{ media: MessageMedia[], className?: string }> = ({ media, className }) => {
+  if (!media || media.length === 0) return null;
+  
+  return (
+    <div className={cn("flex flex-wrap gap-2", className)}>
+      {media.map((item, index) => (
+        <div key={index} className="border rounded-md p-2 bg-background/50">
+          {item.type === 'image' && item.url && (
+            <img src={item.url} alt={item.caption || "Image"} className="max-h-40 rounded" />
+          )}
+          {item.type === 'document' && (
+            <div className="flex items-center gap-2">
+              <span>{item.fileName || "Document"}</span>
+            </div>
+          )}
+          {item.caption && <p className="text-xs text-muted-foreground mt-1">{item.caption}</p>}
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export const EnhancedChatMessage: React.FC<EnhancedChatMessageProps> = ({
   message,

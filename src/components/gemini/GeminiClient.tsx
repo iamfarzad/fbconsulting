@@ -1,140 +1,129 @@
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { AIMessage } from '@/types/chat';
-import { toast } from '@/components/ui/use-toast';
+import React, { useState, useCallback } from 'react';
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { AIMessage } from "@/services/chat/messageTypes";
+import { generateMessageId } from "@/utils/messageUtils";
 
-interface GeminiClientContextType {
-  sendMessage: (content: string) => Promise<AIMessage>;
-  generateAudio: (text: string) => Promise<Blob | null>;
-  isLoading: boolean;
-  error: string | null;
-  clearError: () => void;
+interface GeminiClientProps {
+  children?: React.ReactNode;
+  initialPrompt?: string;
+  className?: string;
+  apiEndpoint?: string;
+  temperature?: number;
+  onResponse?: (response: any) => void;
 }
 
-const GeminiClientContext = createContext<GeminiClientContextType | null>(null);
-
-export const useGeminiClient = () => {
-  const context = useContext(GeminiClientContext);
-  if (!context) {
-    throw new Error('useGeminiClient must be used within a GeminiClientProvider');
-  }
-  return context;
-};
-
-interface GeminiClientProviderProps {
-  children: React.ReactNode;
-  apiKey?: string;
-}
-
-export const GeminiClientProvider: React.FC<GeminiClientProviderProps> = ({ 
-  children, 
-  apiKey 
+const GeminiClient: React.FC<GeminiClientProps> = ({
+  children,
+  initialPrompt = "How can I help you today?",
+  className = "",
+  apiEndpoint = "/api/gemini",
+  temperature = 0.7,
+  onResponse
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState<AIMessage[]>([]);
+  const [inputValue, setInputValue] = useState("");
+  const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Send a chat message to the Gemini API
-  const sendMessage = useCallback(async (content: string): Promise<AIMessage> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const response = await fetch('/api/gemini/stream', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages: [{
-            role: 'user',
-            content,
-          }]
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to communicate with Gemini API');
-      }
-
-      const data = await response.json();
-      
-      // Create and return message
-      return {
-        role: 'assistant',
-        content: data.content || '',
-        timestamp: Date.now(),
-      };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      setError(errorMessage);
-      toast({
-        title: 'Error',
-        description: errorMessage,
-        variant: 'destructive',
-      });
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  // Generate audio from text using Gemini's TTS
-  const generateAudio = useCallback(async (text: string): Promise<Blob | null> => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const response = await fetch('/api/gemini/audio', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          text,
-          config: {
-            voice: 'Charon',
-          }
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(errorData || 'Failed to generate audio');
-      }
-
-      return await response.blob();
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      setError(errorMessage);
-      toast({
-        title: 'Error',
-        description: 'Failed to generate audio',
-        variant: 'destructive',
-      });
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const clearError = useCallback(() => {
+  const { toast } = useToast();
+  
+  const handleSendMessage = useCallback(async (content: string) => {
+    if (!content.trim() || isProcessing) return;
+    
+    setIsProcessing(true);
     setError(null);
-  }, []);
+    
+    // Add user message
+    const userMessage: AIMessage = {
+      id: generateMessageId(),
+      role: 'user',
+      content,
+      timestamp: Date.now()
+    };
+    setMessages(prev => [...prev, userMessage]);
 
-  const value = {
-    sendMessage,
-    generateAudio,
-    isLoading,
-    error,
-    clearError,
+    try {
+      // Simulate API response for now
+      const response = "This is a test response from the simulated Gemini API.";
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Create assistant message
+      const assistantMessage: AIMessage = {
+        id: generateMessageId(),
+        role: 'assistant',
+        content: response,
+        timestamp: Date.now()
+      };
+      
+      setMessages(prev => [...prev, assistantMessage]);
+      
+      if (onResponse) {
+        onResponse(response);
+      }
+    } catch (error) {
+      console.error("Error processing message:", error);
+      setError("Failed to get a response. Please try again.");
+      
+      toast({
+        description: "Failed to get a response. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessing(false);
+      setInputValue("");
+    }
+  }, [isProcessing, onResponse, toast]);
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSendMessage(inputValue);
   };
 
   return (
-    <GeminiClientContext.Provider value={value}>
-      {children}
-    </GeminiClientContext.Provider>
+    <div className={`flex flex-col ${className}`}>
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.length === 0 && (
+          <div className="text-center text-muted-foreground p-4">
+            {initialPrompt}
+          </div>
+        )}
+        
+        {messages.map((message) => (
+          <div 
+            key={message.id} 
+            className={`p-3 rounded-lg ${message.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-muted mr-auto'} max-w-[80%]`}
+          >
+            {message.content}
+          </div>
+        ))}
+        
+        {isProcessing && (
+          <div className="bg-muted p-3 rounded-lg mr-auto max-w-[80%]">
+            <div className="flex space-x-2">
+              <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "0ms" }}></div>
+              <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "150ms" }}></div>
+              <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce" style={{ animationDelay: "300ms" }}></div>
+            </div>
+          </div>
+        )}
+      </div>
+      
+      <form onSubmit={handleSubmit} className="border-t p-4 flex gap-2">
+        <input
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          placeholder="Type a message..."
+          className="flex-1 p-2 border rounded-md"
+          disabled={isProcessing}
+        />
+        <Button type="submit" disabled={isProcessing || !inputValue.trim()}>
+          Send
+        </Button>
+      </form>
+    </div>
   );
 };
 
-export default GeminiClientProvider;
+export default GeminiClient;
