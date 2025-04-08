@@ -1,8 +1,10 @@
 
+import { ReactNode } from 'react';
+
 export interface ToastOptions {
-  title?: React.ReactNode;
-  description: React.ReactNode;
+  title?: ReactNode;
+  description: ReactNode;
   duration?: number;
   variant?: 'default' | 'destructive' | 'success';
-  action?: React.ReactNode;
+  action?: ReactNode;
 }

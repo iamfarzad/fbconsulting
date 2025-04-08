@@ -1,14 +1,21 @@
 
-import { useToast as useShadcnToast } from "@/components/ui/use-toast";
+import { useToast as useShadcnToast, type ToastActionElement } from "@/components/ui/toast";
 import { ToastOptions } from "@/types/toast";
 
 export const useToast = () => {
+  // Get the base toast function from shadcn/ui
   const { toast: shadcnToast } = useShadcnToast();
   
+  // Create our enhanced toast function with variants
   const toast = (options: ToastOptions) => {
-    shadcnToast(options);
+    shadcnToast({
+      ...options,
+      // Ensure description exists
+      description: options.description || "",
+    });
   };
   
+  // Add convenience methods
   toast.success = (description: string) => {
     toast({
       description,
@@ -32,3 +39,5 @@ export const useToast = () => {
   
   return { toast };
 };
+
+export default useToast;

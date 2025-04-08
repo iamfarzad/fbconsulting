@@ -7,7 +7,6 @@ import { GeminiProvider } from '@/components/copilot/providers/GeminiProvider';
 
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
-  const { language } = useLanguage();
   
   return (
     <GeminiProvider>

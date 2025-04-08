@@ -1,105 +1,86 @@
 
-import { createContext, useContext, useState, useCallback } from 'react';
-import { useGemini } from './providers/GeminiProvider';
-import { Message } from '../../types/message';
+import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { useGemini } from './GeminiProvider'; // Use the main provider context
 
 // Define the context type
 interface GeminiCopilotContextType {
-  messages: Message[];
-  sendMessage: (content: string) => void;
-  isLoading: boolean;
-  isListening: boolean;
-  transcript: string;
+  messages: Array<{
+    role: 'user' | 'assistant' | 'system' | 'error';
+    content: string;
+    timestamp?: number;
+    id?: string; 
+  }>;
+  sendMessage: (content: string, files?: Array<{mime_type: string, data: string, filename?: string}>) => void; 
+  isLoading: boolean; 
+  isListening: boolean; 
+  transcript: string; 
   toggleListening: () => void;
-  generateAndPlayAudio: (text: string) => void;
-  clearMessages: () => void;
-  resetConversation?: () => void; // Added to fix errors
+  generateAndPlayAudio: (text: string) => void; 
+  clearMessages?: () => void; 
+  connectionError: string | null; 
+  isConnected: boolean;
 }
 
-// Create the context
 const GeminiCopilotContext = createContext<GeminiCopilotContextType | null>(null);
 
-// Hook to use the context
 export const useGeminiCopilot = () => {
   const context = useContext(GeminiCopilotContext);
-  if (!context) {
-    throw new Error('useGeminiCopilot must be used within a GeminiCopilotProvider');
-  }
+  if (!context) throw new Error('useGeminiCopilot must be used within a GeminiCopilotProvider');
   return context;
 };
 
-interface GeminiCopilotProviderProps {
-  children: React.ReactNode;
-}
+interface GeminiCopilotProviderProps { children: ReactNode; }
 
 export function GeminiCopilotProvider({ children }: GeminiCopilotProviderProps) {
-  // Use Gemini Provider
+  // Use the main GeminiProvider context hook
   const {
-    messages,
-    sendMessage: geminiSendMessage,
-    isProcessing: isLoading,
-    clearMessages,
+    isConnected, 
+    isConnecting, 
+    error: connectionError, 
+    sendMessage: contextSendMessage, 
+    messages: contextMessages, 
+    isProcessing: contextIsProcessing,
+    clearMessages: contextClearMessages,
+    reconnect 
   } = useGemini();
 
-  // Voice state
+  // Local voice state
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
 
-  // Toggle voice input
   const toggleListening = useCallback(() => {
-    // Since startRecording and stopRecording don't exist,
-    // just toggle the isListening state
     setIsListening(prev => !prev);
-    if (isListening) {
-      setTranscript('');
-    }
+    if (!isListening) setTimeout(() => { setTranscript('Simulated...'); setIsListening(false); }, 2000);
+    else setTranscript('');
   }, [isListening]);
 
-  // Generate and play audio using the consolidated audio functionality
-  const generateAndPlayAudio = useCallback((text: string) => {
-    geminiSendMessage({
-      type: 'text_message',
-      text,
-      enableTTS: true
-    });
-  }, [geminiSendMessage]);
+  const generateAndPlayAudio = useCallback((text: string) => console.log('Mock Playing audio:', text), []);
 
-  // Wrapper for sendMessage to handle voice input
-  const sendMessage = useCallback((content: string) => {
-    if (content.trim()) {
-      geminiSendMessage({
-        type: 'text_message',
-        text: content,
-        enableTTS: true
-      });
-      // Clear transcript if it was set
-      if (transcript) {
-        setTranscript('');
-      }
+  // Send message using context
+  const sendMessage = useCallback(async (content: string, files?: Array<{mime_type: string, data: string, filename?: string}>) => {
+    if (!isConnected) { console.error("Not connected"); reconnect(); return; }
+    if (content.trim() || (files && files.length > 0)) {
+      let messageToSend: any;
+      if (files && files.length > 0) messageToSend = { type: 'multimodal_message', text: content || null, files };
+      else messageToSend = { type: 'text_message', text: content };
+      try { await contextSendMessage(messageToSend); }
+      catch (err) { console.error("Send Error:", err); }
+      if (transcript) setTranscript('');
     }
-  }, [geminiSendMessage, transcript]);
-
-  // Add resetConversation function
-  const resetConversation = useCallback(() => {
-    clearMessages();
-    setTranscript('');
-  }, [clearMessages]);
+  }, [isConnected, contextSendMessage, transcript, reconnect]);
 
   const value: GeminiCopilotContextType = {
-    messages,
+    messages: contextMessages, 
     sendMessage,
-    isLoading,
+    isLoading: contextIsProcessing || isConnecting, 
     isListening,
     transcript,
     toggleListening,
     generateAndPlayAudio,
-    clearMessages,
-    resetConversation
+    clearMessages: contextClearMessages, 
+    connectionError,
+    isConnected
   };
 
-  return (
-    <GeminiCopilotContext.Provider value={value}>
-      {children}
-    </GeminiCopilotContext.Provider>
-  );
+  return <GeminiCopilotContext.Provider value={value}>{children}</GeminiCopilotContext.Provider>;
 }

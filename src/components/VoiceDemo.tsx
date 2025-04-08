@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import VoiceUI from './VoiceUI';
+import { VoiceUI } from './VoiceUI';
 import { useToast } from '@/hooks/use-toast';
 
 const VoiceDemo = () => {

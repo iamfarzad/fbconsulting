@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { Mic, MicOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { AnimatedBars } from '@/components/ui/AnimatedBars';
@@ -12,10 +12,9 @@ interface VoiceUIProps {
   noFloatingButton?: boolean;
 }
 
-export const VoiceUI: React.FC<VoiceUIProps> = ({
-  onCommand,
-  noFloatingButton = false
-}) => {
+export const VoiceUI = ({ 
+  noFloatingButton = false 
+}: VoiceUIProps) => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [aiResponse, setAiResponse] = useState("");
   
@@ -110,3 +109,5 @@ export const VoiceUI: React.FC<VoiceUIProps> = ({
     </>
   );
 };
+
+export default VoiceUI;

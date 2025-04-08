@@ -1,15 +1,11 @@
 
-import React from 'react';
+import { useState } from 'react';
 import { Bot } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { UnifiedChat } from '@/components/chat/UnifiedChat';
-import UnifiedFullScreenChat from '@/components/chat/UnifiedFullScreenChat';
-import { useToast } from '@/hooks/use-toast';
 
 const ChatButton = () => {
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [isFullScreen, setIsFullScreen] = React.useState(false);
-  const { toast } = useToast();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   
   const toggleChat = () => {
     setIsOpen(!isOpen);
@@ -25,34 +21,6 @@ const ChatButton = () => {
   
   return (
     <>
-      <AnimatePresence mode="wait">
-        {isOpen && !isFullScreen && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-20 right-4 md:right-6 z-50 w-80 md:w-96 h-96"
-          >
-            <UnifiedChat
-              title="AI Assistant"
-              subtitle="How can I help you today?"
-              onToggleFullScreen={toggleFullScreen}
-              placeholder="Ask me anything about our AI services..."
-              className="h-full"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
-      <AnimatePresence mode="wait">
-        {isOpen && isFullScreen && (
-          <UnifiedFullScreenChat 
-            onMinimize={toggleFullScreen}
-            placeholderText="Ask me anything about our AI services..."
-          />
-        )}
-      </AnimatePresence>
-      
       {/* Only show the button if not in fullscreen */}
       {!isFullScreen && (
         <motion.button

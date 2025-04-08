@@ -3,7 +3,7 @@ import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChatMessageList } from "./ChatMessageList";
 import { ChatInput } from "./ChatInput";
-import { AIMessage } from "@/services/chat/messageTypes";
+import { AIMessage } from "@/types/chat";
 import { UploadedFile } from "@/hooks/useFileUpload";
 
 interface ChatContainerProps {

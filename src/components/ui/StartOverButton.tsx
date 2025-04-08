@@ -22,7 +22,7 @@ export function StartOverButton({
   
   const handleReset = () => {
     if (!confirmReset || confirm("Are you sure you want to start over? This will reset the conversation.")) {
-      clearMessages();
+      clearMessages?.();
       toast({
         description: 'Conversation reset successfully'
       });
