@@ -1,82 +1,39 @@
 
-export type MediaType = 'image' | 'code' | 'link-preview' | 'poll' | 'audio' | 'video';
-
-export interface MediaContent {
-  type: MediaType;
-  content: string;
-  metadata?: {
-    title?: string;
-    description?: string;
-    thumbnail?: string;
-    language?: string; // For code blocks
-    duration?: number; // For audio/video
-    options?: string[]; // For polls
-  };
-}
-
-export interface ChatMessageMedia {
-  media?: MediaContent[];
-}
-
-// New MessageMedia type for multimodal support
 export interface MessageMedia {
-  type: 'image' | 'code' | 'link' | 'document';
+  type: 'image' | 'document' | 'code' | 'link';
   url?: string;
-  data: string; // Changed from optional to required to match the type in chat.ts
+  data?: string;
   caption?: string;
-  fileName?: string;
   mimeType?: string;
+  fileName?: string;
+  // Code-specific properties
+  codeContent?: string;
+  codeLanguage?: string;
+  // Link-specific properties
+  linkTitle?: string;
+  linkDescription?: string;
+  linkImage?: string;
 }
 
-// Update AIMessage to support media attachments
 export interface AIMessage {
-  id: string; // Made required to match the type in chat.ts
+  id: string;
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
   timestamp: number;
-  media?: MessageMedia[];
-  isLoading?: boolean;
-  error?: string;
-  feedback?: 'positive' | 'negative' | null; // Added to fix ChatMessage errors
+  mediaItems?: MessageMedia[];
+  feedback?: 'positive' | 'negative' | null;
 }
 
-// Multimodal Message format for WebSocket communication
-export interface MultiModalMessage {
-  type: 'multimodal_message';
-  text?: string;
-  files: {
-    mime_type: string;
-    data: string;
-    filename?: string;
-  }[];
-  role: 'user' | 'assistant' | 'system';
-  enableTTS: boolean;
+export interface LeadInfo {
+  name?: string;
+  email?: string;
+  company?: string;
+  industry?: string;
+  needs?: string[];
+  budget?: string;
+  timeline?: string;
+  source?: string;
+  stage?: string;
+  lastContact?: number;
+  notes?: string;
 }
-
-// Text-only Message format for WebSocket communication
-export interface TextMessage {
-  type: 'text_message';
-  text: string;
-  role: 'user' | 'assistant' | 'system';
-  enableTTS: boolean;
-}
-
-// Adding FileAttachment type
-export interface FileAttachment {
-  mimeType: string;
-  data: string;
-  name: string;
-  type: string;
-}
-
-// Adding LeadStage type
-export type LeadStage = 
-  'initial' | 
-  'discovery' | 
-  'evaluation' | 
-  'decision' | 
-  'implementation' | 
-  'retention' |
-  'qualification' | 
-  'interested' | 
-  'ready-to-book';

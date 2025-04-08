@@ -1,49 +1,24 @@
 
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 
-export const getPersonStructuredData = () => {
-  return {
+const AboutStructuredData: React.FC = () => {
+  const structuredData = {
     "@context": "https://schema.org",
-    "@type": "Person",
-    "name": "AI Automation Expert",
-    "jobTitle": "AI Automation Consultant",
-    "description": "Based in Oslo, Norway, with over 10 years of experience in business automation and AI integration, I help companies streamline operations, reduce costs, and scale efficiently.",
-    "knowsAbout": [
-      "Artificial Intelligence", 
-      "Machine Learning", 
-      "Business Process Automation", 
-      "Natural Language Processing", 
-      "Data Analytics",
-      "Workflow Optimization",
-      "Virtual Assistants",
-      "Chatbot Development",
-      "AI Strategy",
-      "Cost Reduction Through AI"
-    ],
-    "hasOccupation": {
-      "@type": "Occupation",
-      "name": "AI Automation Consultant",
-      "occupationLocation": {
-        "@type": "City",
-        "name": "Oslo"
-      },
-      "description": "Providing expert AI automation consulting services to businesses looking to optimize workflows and reduce costs",
-      "skills": "AI integration, workflow automation, chatbot development, business process optimization"
-    },
-    "location": {
-      "@type": "Place",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Oslo",
-        "addressCountry": "Norway"
-      }
-    },
-    "worksFor": {
-      "@type": "Organization",
-      "name": "F.B Consulting",
-      "url": typeof window !== 'undefined' ? window.location.origin : ''
-    }
+    "@type": "AboutPage",
+    "name": "About",
+    "description": "Learn about our AI consulting services and expertise"
   };
+
+  return (
+    <Helmet>
+      <script type="application/ld+json">
+        {JSON.stringify(structuredData)}
+      </script>
+      <title>About - AI Consulting Services</title>
+      <meta name="description" content="Learn about our AI consulting services and expertise" />
+    </Helmet>
+  );
 };
 
-export default getPersonStructuredData;
+export default AboutStructuredData;

@@ -1,5 +1,5 @@
 
-import { AboutStructuredData } from '@/components/about/AboutStructuredData';
+import AboutStructuredData from '@/components/about/AboutStructuredData';
 
 const About = () => {
   return (
