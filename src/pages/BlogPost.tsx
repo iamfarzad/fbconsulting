@@ -1,134 +1,116 @@
-import React, { useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeftIcon } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { Card } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import { ShareIcon, BookmarkIcon, ArrowLeft } from 'lucide-react';
 import PostHeader from '@/components/blog/PostHeader';
-import PostContent from '@/components/blog/PostContent';
-import ShareSection from '@/components/blog/ShareSection';
-import RelatedPosts from '@/components/blog/RelatedPosts';
-import { getBlogPostBySlug, getRelatedPosts } from '@/services/blog';
-import SEO from '@/components/SEO';
-import DotPattern from '@/components/ui/dot-pattern';
+import { Link } from 'react-router-dom';
 
 const BlogPost = () => {
-  const { slug } = useParams<{ slug: string }>();
-  
-  useEffect(() => {
-    // Remove previous class first if exists
-    document.body.classList.remove('page-enter');
-    document.body.classList.add('page-enter-active');
-    
-    return () => {
-      document.body.classList.remove('page-enter-active');
-      document.body.classList.add('page-enter');
-    };
-  }, []);
-  
-  // Get the blog post by slug from the service
-  const post = getBlogPostBySlug(slug || '');
-  
-  // If no post is found, we could render a not found message
-  if (!post) {
-    return (
-      <div className="flex flex-col min-h-screen bg-background">
-        <Navbar />
-        <main className="flex-grow pt-24 pb-16 relative">
-          <div className="container px-4 mx-auto relative z-10">
-            <div className="text-center">
-              <h1 className="text-3xl font-bold mb-4">Post Not Found</h1>
-              <p className="mb-6">The blog post you're looking for doesn't exist.</p>
-              <Button asChild>
-                <Link to="/blog">Return to Blog</Link>
-              </Button>
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  // Map BlogPost[] to RelatedPost[] for the RelatedPosts component
-  const relatedBlogPosts = getRelatedPosts(post?.slug || '').map(post => ({
-    id: post.slug || '', // Using slug as id since it's unique
-    title: post.title,
-    slug: post.slug || ''
-  }));
-
-  // Create article structured data
-  const articleStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    "headline": post.title,
-    "image": post.featuredImage || "",
-    "datePublished": post.date,
-    "dateModified": post.date,
-    "author": {
-      "@type": "Person",
-      "name": post.author
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "F.B Consulting",
-      "logo": {
-        "@type": "ImageObject",
-        "url": `${window.location.origin}/og-image.png`
+  // Sample blog post data - would come from a database or CMS in real app
+  const post = {
+    id: '1',
+    title: 'How AI is Transforming Business Operations',
+    content: `
+      <p>Artificial Intelligence (AI) is rapidly changing the landscape of business operations across industries. From customer service to data analysis, AI technologies are providing unprecedented opportunities for efficiency and innovation.</p>
+      
+      <h2>The Rise of AI in Business</h2>
+      <p>Over the past decade, AI has evolved from experimental technology to a critical business tool. Companies that leverage AI effectively are seeing significant advantages in:</p>
+      <ul>
+        <li>Customer engagement and service</li>
+        <li>Process automation and optimization</li>
+        <li>Data-driven decision making</li>
+        <li>Predictive analytics and forecasting</li>
+      </ul>
+      
+      <h2>Real-World Applications</h2>
+      <p>Many businesses are already implementing AI solutions that deliver tangible benefits:</p>
+      <p>Chatbots and virtual assistants are handling customer inquiries, reducing wait times and freeing human agents to address more complex issues. Machine learning algorithms are analyzing vast amounts of data to identify patterns and trends that would be impossible for humans to detect manually.</p>
+      
+      <h2>Implementation Challenges</h2>
+      <p>Despite the clear advantages, implementing AI solutions comes with its own set of challenges:</p>
+      <ul>
+        <li>Data quality and accessibility</li>
+        <li>Integration with existing systems</li>
+        <li>Skills gap and training requirements</li>
+        <li>Ethical considerations and regulatory compliance</li>
+      </ul>
+      
+      <h2>Looking Ahead</h2>
+      <p>As AI technology continues to evolve, we can expect to see even more innovative applications in business. Companies that start building their AI capabilities now will be better positioned to compete in an increasingly automated future.</p>
+    `,
+    date: 'April 12, 2023',
+    readTime: '5 min read',
+    author: 'Jane Smith',
+    authorTitle: 'AI Specialist',
+    category: 'AI & Machine Learning',
+    relatedPosts: [
+      { 
+        id: '2', 
+        title: 'Machine Learning for Small Businesses', 
+        excerpt: 'How even small organizations can benefit from machine learning technologies.'
+      },
+      { 
+        id: '3', 
+        title: 'The Ethics of AI Implementation', 
+        excerpt: 'Navigating the complex ethical landscape of artificial intelligence in business.'
       }
-    },
-    "description": post.excerpt || post.title,
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": window.location.href
-    }
+    ]
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <SEO 
-        title={`${post.title} | F.B Consulting Blog`}
-        description={post.excerpt || `Read about ${post.title} in our AI automation blog`}
-        ogType="article"
-        ogImage={post.featuredImage || ""}
-        structuredData={articleStructuredData}
+    <div className="container mx-auto py-12 px-4">
+      {/* Back to blog link */}
+      <Link to="/blog" className="flex items-center text-muted-foreground hover:text-foreground mb-8">
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to blog
+      </Link>
+      
+      {/* Post header */}
+      <PostHeader 
+        title={post.title}
+        date={post.date}
+        readTime={post.readTime}
+        author={post.author}
+        authorTitle={post.authorTitle}
+        category={post.category}
       />
-      <Navbar />
-      <main className="flex-grow pt-24 pb-16 relative">
-        <DotPattern width={14} height={14} cx={7} cy={7} cr={1.2} className="opacity-20" />
-        <div className="container px-4 mx-auto relative z-10">
-          <div className="mb-8">
-            <Button variant="ghost" asChild>
-              <Link to="/blog" className="inline-flex items-center">
-                <ArrowLeftIcon className="mr-2 h-4 w-4" />
-                Back to all posts
-              </Link>
-            </Button>
-          </div>
-
-          <article className="max-w-3xl mx-auto">
-            <PostHeader 
-              title={post.title}
-              category={post.category}
-              date={post.date}
-              readTime={post.readTime}
-              author={post.author}
-              authorTitle={post.authorTitle}
-              authorAvatar={post.authorAvatar}
-            />
-            
-            <PostContent 
-              content={post.content}
-              title={post.title}
-            />
-            
-            <ShareSection />
-            
-            <RelatedPosts posts={relatedBlogPosts} />
-          </article>
+      
+      {/* Share and save buttons */}
+      <div className="flex gap-4 mb-8">
+        <Button variant="outline" size="sm">
+          <ShareIcon className="mr-2 h-4 w-4" />
+          Share
+        </Button>
+        <Button variant="outline" size="sm">
+          <BookmarkIcon className="mr-2 h-4 w-4" />
+          Save
+        </Button>
+      </div>
+      
+      {/* Featured image */}
+      <div className="w-full h-[400px] bg-muted rounded-lg mb-8"></div>
+      
+      {/* Post content */}
+      <div className="prose dark:prose-invert max-w-none mb-12">
+        <div dangerouslySetInnerHTML={{ __html: post.content }} />
+      </div>
+      
+      <Separator className="my-12" />
+      
+      {/* Related posts */}
+      <div>
+        <h2 className="text-2xl font-bold mb-6">Related Articles</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {post.relatedPosts.map((relatedPost) => (
+            <Card key={relatedPost.id} className="p-6">
+              <h3 className="text-xl font-medium mb-2">{relatedPost.title}</h3>
+              <p className="text-muted-foreground mb-4">{relatedPost.excerpt}</p>
+              <Button variant="outline" size="sm">Read Article</Button>
+            </Card>
+          ))}
         </div>
-      </main>
-      <Footer />
+      </div>
     </div>
   );
 };

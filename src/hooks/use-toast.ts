@@ -7,30 +7,28 @@ export const useToast = () => {
   const toast = (options: ToastOptions) => {
     sonnerToast({
       ...options,
-      // Ensure description exists
-      description: options.description || "",
     });
   };
   
   // Add convenience methods
   toast.success = (description: string) => {
     sonnerToast({
-      description,
       variant: "success",
+      description,
     });
   };
   
   toast.error = (description: string) => {
     sonnerToast({
-      description,
       variant: "destructive",
+      description,
     });
   };
   
   toast.info = (description: string) => {
     sonnerToast({
-      description,
       variant: "default",
+      description,
     });
   };
   

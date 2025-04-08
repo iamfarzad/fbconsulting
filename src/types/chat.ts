@@ -2,16 +2,17 @@
 import { ReactNode } from 'react';
 
 export interface AIMessage {
-  id: string;  // Make id required to match usage throughout the app
+  id: string;
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
-  timestamp?: number;
+  timestamp: number;
   mediaItems?: Array<{
     type: string;
     data: string;
     name?: string;
     mimeType?: string;
   }>;
+  feedback?: 'positive' | 'negative' | null;
 }
 
 export interface ChatComponentProps {
@@ -51,6 +52,10 @@ export interface ChatHeaderProps {
   authorTitle?: string;
   authorAvatar?: string;
   hasMessages?: boolean;
+  subtitle?: string;
+  onClose?: () => void;
+  isConnecting?: boolean;
+  clientId?: string;
 }
 
 export interface ConnectionStatusIndicatorProps {
@@ -58,4 +63,5 @@ export interface ConnectionStatusIndicatorProps {
   isLoading?: boolean;
   status?: string;
   onRetry?: () => void;
+  className?: string;
 }
