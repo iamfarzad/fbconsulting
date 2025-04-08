@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Bot } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const ChatButton = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,11 +12,6 @@ const ChatButton = () => {
     if (isFullScreen && !isOpen) {
       setIsFullScreen(false);
     }
-  };
-  
-  const toggleFullScreen = () => {
-    console.log('Toggle fullscreen clicked. Current state:', isFullScreen);
-    setIsFullScreen(!isFullScreen);
   };
   
   return (

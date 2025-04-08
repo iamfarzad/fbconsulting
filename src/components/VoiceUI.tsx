@@ -13,6 +13,7 @@ interface VoiceUIProps {
 }
 
 export const VoiceUI = ({ 
+  onCommand,
   noFloatingButton = false 
 }: VoiceUIProps) => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -38,6 +39,13 @@ export const VoiceUI = ({
   const togglePanel = () => {
     setIsPanelOpen(!isPanelOpen);
   };
+  
+  // Handle voice commands if the onCommand prop is provided
+  useEffect(() => {
+    if (onCommand && transcript && !isListening) {
+      onCommand(transcript);
+    }
+  }, [onCommand, transcript, isListening]);
   
   if (noFloatingButton) return null;
 

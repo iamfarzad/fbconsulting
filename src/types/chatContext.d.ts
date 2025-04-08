@@ -1,7 +1,7 @@
 
 import { AIMessage } from './chat';
 
-// Update to include missing voice-related properties
+// Update to include voice-related properties
 export interface GeminiContextType {
   messages: AIMessage[];
   sendMessage: (message: { type: string; text?: string; files?: any[]; enableTTS?: boolean }) => Promise<void>;
@@ -13,4 +13,7 @@ export interface GeminiContextType {
   stopRecording?: () => void;
   isRecording?: boolean;
   stopAudio?: () => void;
+  // Additional properties needed by VoiceUI and other components
+  toggleListening?: () => void;
 }
+

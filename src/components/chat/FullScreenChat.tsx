@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
@@ -5,7 +6,7 @@ import { Button } from '../ui/button';
 import { AnimatedBars } from '../ui/AnimatedBars';
 import { ChatInput } from '../ui/ai-chat/ChatInput';
 import { ChatMessageList } from '../ui/ai-chat/ChatMessageList';
-import { AIMessage } from '@/services/copilotService';
+import { AIMessage } from '@/types/chat';
 import { UploadedFile } from '@/hooks/useFileUpload';
 import { useFullScreenChatState } from '@/hooks/chat/useFullScreenChatState';
 
@@ -42,7 +43,7 @@ const FullScreenChat: React.FC<FullScreenChatProps> = ({
   removeFile,
   isUploading = false
 }) => {
-  const { messages, addMessage, clearMessages } = useFullScreenChatState(initialMessages);
+  const { messages } = useFullScreenChatState(initialMessages);
 
   // Prevent body scrolling when fullscreen chat is open
   useEffect(() => {

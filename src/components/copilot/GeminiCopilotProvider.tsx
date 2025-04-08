@@ -1,14 +1,14 @@
 
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { useGemini } from './GeminiProvider'; // Use the main provider context
+import { useGemini } from '@/components/copilot/providers/GeminiProvider'; 
 
 // Define the context type
 interface GeminiCopilotContextType {
   messages: Array<{
+    id: string;
     role: 'user' | 'assistant' | 'system' | 'error';
     content: string;
     timestamp?: number;
-    id?: string; 
   }>;
   sendMessage: (content: string, files?: Array<{mime_type: string, data: string, filename?: string}>) => void; 
   isLoading: boolean; 
@@ -29,7 +29,9 @@ export const useGeminiCopilot = () => {
   return context;
 };
 
-interface GeminiCopilotProviderProps { children: ReactNode; }
+interface GeminiCopilotProviderProps { 
+  children: ReactNode; 
+}
 
 export function GeminiCopilotProvider({ children }: GeminiCopilotProviderProps) {
   // Use the main GeminiProvider context hook
@@ -69,8 +71,19 @@ export function GeminiCopilotProvider({ children }: GeminiCopilotProviderProps) 
     }
   }, [isConnected, contextSendMessage, transcript, reconnect]);
 
+  // Ensure messages have the required 'id' property
+  const messagesWithIds = contextMessages.map(msg => {
+    if (!msg.id) {
+      return {
+        ...msg,
+        id: `${msg.role}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      };
+    }
+    return msg;
+  });
+
   const value: GeminiCopilotContextType = {
-    messages: contextMessages, 
+    messages: messagesWithIds, 
     sendMessage,
     isLoading: contextIsProcessing || isConnecting, 
     isListening,

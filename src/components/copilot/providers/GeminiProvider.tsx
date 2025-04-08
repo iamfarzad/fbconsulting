@@ -31,15 +31,9 @@ export const useGemini = () => useContext(GeminiContext);
 
 interface GeminiProviderProps {
   children: ReactNode;
-  apiKey?: string;
-  modelName?: string;
 }
 
-export function GeminiProvider({ 
-  children, 
-  apiKey,
-  modelName = 'gemini-pro'
-}: GeminiProviderProps) {
+export function GeminiProvider({ children }: GeminiProviderProps) {
   // State management
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);

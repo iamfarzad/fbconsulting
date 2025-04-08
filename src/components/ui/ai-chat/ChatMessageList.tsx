@@ -2,7 +2,7 @@
 import React, { useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot } from "lucide-react";
-import { AIMessage } from "@/services/chat/messageTypes";
+import { AIMessage } from "@/types/chat";
 import { TypingIndicator } from "./TypingIndicator";
 
 interface ChatMessageProps {
@@ -15,7 +15,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const isUser = message.role === 'user';
   
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+    <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div className={`max-w-[80%] p-3 rounded-lg ${isUser ? 'bg-gray-100' : 'bg-white border border-gray-200'}`}>
         {message.content}
       </div>
@@ -63,7 +63,18 @@ export const ChatMessageList = ({
     }
   }, [showMessages]);
 
-  if (!showMessages && messages.length === 0) {
+  // Ensure all messages have an ID
+  const messagesWithIds = messages.map((msg, index) => {
+    if (!msg.id) {
+      return {
+        ...msg,
+        id: `msg-${index}-${Date.now()}`
+      };
+    }
+    return msg;
+  });
+
+  if (!showMessages && messagesWithIds.length === 0) {
     return null;
   }
 
@@ -72,7 +83,7 @@ export const ChatMessageList = ({
       ref={containerRef}
       className={`${isFullScreen ? 'bg-transparent' : 'bg-black/95 backdrop-blur-lg rounded-2xl border border-white/20 shadow-lg'} p-4`}
       style={{
-        height: messages.length > 0 ? 'auto' : '200px',
+        height: messagesWithIds.length > 0 ? 'auto' : '200px',
         minHeight: '120px',
         maxHeight: isFullScreen ? '100%' : '400px',
         scrollbarGutter: 'stable',
@@ -82,7 +93,7 @@ export const ChatMessageList = ({
       }}
     >
       <AnimatePresence>
-        {messages.length === 0 ? (
+        {messagesWithIds.length === 0 ? (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -99,9 +110,9 @@ export const ChatMessageList = ({
           </motion.div>
         ) : (
           <div className="flex flex-col space-y-4">
-            {messages.map((msg, index) => (
+            {messagesWithIds.map((msg) => (
               <ChatMessage 
-                key={index} 
+                key={msg.id} 
                 message={msg} 
               />
             ))}

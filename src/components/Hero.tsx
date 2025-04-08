@@ -1,6 +1,5 @@
 
 import { useRef } from 'react';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { HeroContent } from './hero/HeroContent';
 import { HeroBackground } from './hero/HeroBackground';
 import { GeminiProvider } from '@/components/copilot/providers/GeminiProvider';
