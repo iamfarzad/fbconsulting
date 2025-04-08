@@ -1,6 +1,5 @@
 
-import React, { useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { HeroContent } from './hero/HeroContent';
 import { HeroBackground } from './hero/HeroBackground';
@@ -9,11 +8,6 @@ import { GeminiProvider } from '@/components/copilot/providers/GeminiProvider';
 const Hero = () => {
   const heroRef = useRef<HTMLDivElement>(null);
   const { language } = useLanguage();
-  const [chatInputValue, setChatInputValue] = useState('');
-  
-  const handleInputChange = (value: string) => {
-    setChatInputValue(value);
-  };
   
   return (
     <GeminiProvider>
@@ -23,10 +17,7 @@ const Hero = () => {
       >
         <HeroBackground />
         
-        <HeroContent 
-          chatInputValue={chatInputValue}
-          onInputChange={handleInputChange}
-        />
+        <HeroContent />
       </section>
     </GeminiProvider>
   );

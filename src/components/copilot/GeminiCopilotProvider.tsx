@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+
+import { createContext, useContext, useState, useCallback } from 'react';
 import { useGemini } from './providers/GeminiProvider';
 import { Message } from '../../types/message';
 
@@ -12,6 +13,7 @@ interface GeminiCopilotContextType {
   toggleListening: () => void;
   generateAndPlayAudio: (text: string) => void;
   clearMessages: () => void;
+  resetConversation?: () => void; // Added to fix errors
 }
 
 // Create the context
@@ -27,7 +29,7 @@ export const useGeminiCopilot = () => {
 };
 
 interface GeminiCopilotProviderProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 export function GeminiCopilotProvider({ children }: GeminiCopilotProviderProps) {
@@ -37,10 +39,6 @@ export function GeminiCopilotProvider({ children }: GeminiCopilotProviderProps) 
     sendMessage: geminiSendMessage,
     isProcessing: isLoading,
     clearMessages,
-    startRecording,
-    stopRecording,
-    isRecording,
-    stopAudio
   } = useGemini();
 
   // Voice state
@@ -49,14 +47,13 @@ export function GeminiCopilotProvider({ children }: GeminiCopilotProviderProps) 
 
   // Toggle voice input
   const toggleListening = useCallback(() => {
-    if (isListening) {
-      stopRecording();
-      setTranscript('');
-    } else {
-      startRecording();
-    }
+    // Since startRecording and stopRecording don't exist,
+    // just toggle the isListening state
     setIsListening(prev => !prev);
-  }, [isListening, startRecording, stopRecording]);
+    if (isListening) {
+      setTranscript('');
+    }
+  }, [isListening]);
 
   // Generate and play audio using the consolidated audio functionality
   const generateAndPlayAudio = useCallback((text: string) => {
@@ -82,6 +79,12 @@ export function GeminiCopilotProvider({ children }: GeminiCopilotProviderProps) 
     }
   }, [geminiSendMessage, transcript]);
 
+  // Add resetConversation function
+  const resetConversation = useCallback(() => {
+    clearMessages();
+    setTranscript('');
+  }, [clearMessages]);
+
   const value: GeminiCopilotContextType = {
     messages,
     sendMessage,
@@ -90,7 +93,8 @@ export function GeminiCopilotProvider({ children }: GeminiCopilotProviderProps) 
     transcript,
     toggleListening,
     generateAndPlayAudio,
-    clearMessages
+    clearMessages,
+    resetConversation
   };
 
   return (

@@ -1,15 +1,7 @@
-import React from 'react';
+
 import { HeroChat } from './HeroChat';
 
-interface HeroContentProps {
-  chatInputValue: string;
-  onInputChange: (value: string) => void;
-}
-
-export function HeroContent({ 
-  chatInputValue,
-  onInputChange 
-}: HeroContentProps) {
+export function HeroContent() {
   return (
     <div className="container mx-auto z-10 flex flex-col items-center">
       <div className="text-center mb-8">

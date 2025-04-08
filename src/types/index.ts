@@ -50,3 +50,11 @@ export type GeminiAction =
   | { type: 'SET_PROPOSAL'; payload: ProposalData | null }
   | { type: 'RESTORE_STATE'; payload: GeminiState }
   | { type: 'RESET_STATE' };
+
+// Add specific OutgoingWebSocketMessage type to fix Context errors
+export interface OutgoingWebSocketMessage {
+  type: "text_message" | "multimodal_message";
+  text?: string | null;
+  files?: any[];
+  enableTTS?: boolean;
+}

@@ -1,6 +1,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
-import { toast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 /**
  * Hook to manage API key logic
@@ -10,6 +10,7 @@ export function useApiKeyManagement(
   contextApiKey?: string
 ) {
   const envApiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const { toast } = useToast();
 
   // Determine which API key to use (prop > context > env)
   const apiKey = useMemo(() => {
@@ -21,12 +22,11 @@ export function useApiKeyManagement(
   useEffect(() => {
     if (!apiKey) {
       toast({
-        title: 'AI Configuration Error',
         description: 'API key not found. Please check your configuration.',
         variant: 'destructive'
       });
     }
-  }, [apiKey]);
+  }, [apiKey, toast]);
 
   return { apiKey };
 }

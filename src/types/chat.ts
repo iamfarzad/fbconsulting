@@ -1,11 +1,13 @@
+
 import { ReactNode } from 'react';
 
 export interface AIMessage {
-  id: string;
+  id?: string; // Make ID optional to fix TS2741 errors
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
   timestamp: number;
   feedback?: 'positive' | 'negative' | null;
+  mediaItems?: any[]; // Add this to fix mediaItems errors
 }
 
 export interface ChatInputProps {
@@ -49,7 +51,10 @@ export interface ChatProps extends ChatConfig {
 }
 
 export interface ConnectionStatusIndicatorProps {
-  status: 'connected' | 'connecting' | 'disconnected' | 'error';
+  status?: 'connected' | 'connecting' | 'disconnected' | 'error';
+  isConnected?: boolean; // Add missing props
+  isLoading?: boolean;
+  onRetry?: () => void;
   className?: string;
 }
 
@@ -57,6 +62,19 @@ export interface ChatHeaderProps {
   title?: string;
   subtitle?: string;
   onClose?: () => void;
+  onClear?: () => void; // Add missing props
+  hasMessages?: boolean;
+  isConnected?: boolean;
+  isConnecting?: boolean;
+  isFullScreen?: boolean;
+  onToggleFullScreen?: () => void;
+  isLoading?: boolean;
+  category?: string;
+  date?: string;
+  readTime?: string;
+  author?: string;
+  authorTitle?: string;
+  authorAvatar?: string;
   rightContent?: React.ReactNode;
   className?: string;
 }

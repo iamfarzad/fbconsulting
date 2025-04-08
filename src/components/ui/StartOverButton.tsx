@@ -1,8 +1,8 @@
-import React from 'react';
+
 import { Button } from '@/components/ui/button';
 import { RotateCcw } from 'lucide-react';
 import { useGeminiCopilot } from '@/components/copilot/GeminiCopilotProvider';
-import { toast } from '@/components/ui/toast';
+import { useToast } from '@/hooks/use-toast';
 
 interface StartOverButtonProps {
   variant?: 'default' | 'outline' | 'ghost';
@@ -17,12 +17,15 @@ export function StartOverButton({
   className = '',
   confirmReset = true
 }: StartOverButtonProps) {
-  const { resetConversation } = useGeminiCopilot();
+  const { clearMessages } = useGeminiCopilot();
+  const { toast } = useToast();
   
   const handleReset = () => {
     if (!confirmReset || confirm("Are you sure you want to start over? This will reset the conversation.")) {
-      resetConversation();
-      toast.success('Conversation reset successfully');
+      clearMessages();
+      toast({
+        description: 'Conversation reset successfully'
+      });
     }
   };
   

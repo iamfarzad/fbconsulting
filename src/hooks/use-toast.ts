@@ -1,32 +1,34 @@
-import { toast as sonnerToast } from 'sonner';
 
-type ToastVariant = 'default' | 'success' | 'error' | 'destructive' | 'warning';
+import { useToast as useShadcnToast } from "@/components/ui/use-toast";
+import { ToastOptions } from "@/types/toast";
 
-interface ToastOptions {
-  title?: string;
-  description?: string;
-  variant?: ToastVariant;
-  duration?: number;
-}
-
-export function useToast() {
-  const toast = ({ title, description, variant = 'default', duration = 5000 }: ToastOptions) => {
-    const options = {
-      description,
-      duration,
-      className: `toast-${variant}`,
-    };
-
-    if (variant === 'destructive' || variant === 'error') {
-      sonnerToast.error(title, options);
-    } else if (variant === 'success') {
-      sonnerToast.success(title, options);
-    } else if (variant === 'warning') {
-      sonnerToast.warning(title, options);
-    } else {
-      sonnerToast(title, options);
-    }
+export const useToast = () => {
+  const { toast: shadcnToast } = useShadcnToast();
+  
+  const toast = (options: ToastOptions) => {
+    shadcnToast(options);
   };
-
+  
+  toast.success = (description: string) => {
+    toast({
+      description,
+      variant: "success",
+    });
+  };
+  
+  toast.error = (description: string) => {
+    toast({
+      description,
+      variant: "destructive",
+    });
+  };
+  
+  toast.info = (description: string) => {
+    toast({
+      description,
+      variant: "default",
+    });
+  };
+  
   return { toast };
-}
+};

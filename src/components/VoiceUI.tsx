@@ -1,204 +1,112 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { AnimatePresence } from 'framer-motion';
-import { AnimatedBars } from './ui/AnimatedBars';
-import { Button } from './ui/button';
-import { Mic, MicOff } from 'lucide-react';
-import { VoicePanel } from './voice/VoicePanel';
+
+import { useState, useEffect } from 'react';
+import { Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { AnimatedBars } from '@/components/ui/AnimatedBars';
 import { useGemini } from '@/components/copilot/providers/GeminiProvider';
-import type { VoiceUIProps } from '@/types/voice';
-import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { useGeminiCopilot } from '@/components/copilot/GeminiCopilotProvider';
 
-const VoiceUI: React.FC<VoiceUIProps> = ({ onCommand, noFloatingButton = false }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(() => {
-    return localStorage.getItem('hasInteractedWithVoice') === 'true';
-  });
+interface VoiceUIProps {
+  onCommand?: (command: string) => void;
+  noFloatingButton?: boolean;
+}
 
-  const { toast } = useToast();
-  const commandTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+export const VoiceUI: React.FC<VoiceUIProps> = ({
+  onCommand,
+  noFloatingButton = false
+}) => {
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [aiResponse, setAiResponse] = useState("");
   
-  const {
-    sendMessage,
-    messages,
-    isProcessing,
-    error,
-    startRecording,
-    stopRecording,
-    isRecording
-  } = useGemini();
-
-  // Handle Gemini errors
+  const { messages } = useGemini();
+  
+  // Use the copilot context that has the voice methods
+  const { 
+    isListening, 
+    transcript, 
+    toggleListening 
+  } = useGeminiCopilot();
+  
+  // Update AI response when messages change
   useEffect(() => {
-    if (error) {
-      toast({
-        title: "AI Service Error",
-        description: error,
-        variant: "destructive"
-      });
+    const assistantMessages = messages.filter(m => m.role === 'assistant');
+    if (assistantMessages.length > 0) {
+      setAiResponse(assistantMessages[assistantMessages.length - 1].content);
     }
-  }, [error, toast]);
+  }, [messages]);
 
-  const handleCommand = async (command: string) => {
-    if (isProcessing) {
-      console.log('Already processing a command, ignoring');
-      return;
-    }
-
-    if (!hasInteracted) {
-      localStorage.setItem('hasInteractedWithVoice', 'true');
-      setHasInteracted(true);
-    }
-
-    if (commandTimeoutRef.current) {
-      clearTimeout(commandTimeoutRef.current);
-    }
-
-    try {
-      if (command.trim()) {
-        commandTimeoutRef.current = setTimeout(() => {
-          if (isProcessing) {
-            toast({
-              title: "Processing Timed Out",
-              description: "Command took too long to process. Please try again.",
-              variant: "destructive"
-            });
-          }
-        }, 30000);
-
-        // Send command to get AI response
-        await sendMessage({
-          type: 'text_message',
-          text: command,
-          enableTTS: true
-        });
-
-        // Call original onCommand if provided
-        if (onCommand) {
-          await onCommand(command);
-        }
-      } else {
-        toast({
-          title: "No Speech Detected",
-          description: "Please try speaking again.",
-          variant: "default"
-        });
-      }
-    } catch (error) {
-      console.error("Error processing voice command:", error);
-      toast({
-        title: "Command Error",
-        description: error instanceof Error ? error.message : "Failed to process voice command",
-        variant: "destructive"
-      });
-    } finally {
-      if (commandTimeoutRef.current) {
-        clearTimeout(commandTimeoutRef.current);
-        commandTimeoutRef.current = null;
-      }
-    }
+  const togglePanel = () => {
+    setIsPanelOpen(!isPanelOpen);
   };
-
-  const handleToggleListening = async () => {
-    if (isProcessing) return;
-    
-    if (isRecording) {
-      stopRecording();
-    } else {
-      await startRecording();
-      setShowTooltip(true);
-
-      if (!hasInteracted) {
-        setIsExpanded(true);
-        setHasInteracted(true);
-        localStorage.setItem('hasInteractedWithVoice', 'true');
-      }
-    }
-
-    const tooltipTimeout = setTimeout(() => setShowTooltip(false), 5000);
-    return () => clearTimeout(tooltipTimeout);
-  };
-
-  // Cleanup effect
-  useEffect(() => {
-    return () => {
-      if (commandTimeoutRef.current) {
-        clearTimeout(commandTimeoutRef.current);
-        commandTimeoutRef.current = null;
-      }
-    };
-  }, []);
-
-  const toggleExpanded = () => {
-    setIsExpanded(!isExpanded);
-  };
-
-  const VoiceButton = ({ className }: { className?: string }) => (
-    <Button
-      variant="outline"
-      size="icon"
-      className={cn(
-        "relative h-12 w-12 shrink-0",
-        isRecording && "bg-red-50 hover:bg-red-100 border-red-200 text-red-600",
-        className
-      )}
-      onClick={isExpanded ? handleToggleListening : toggleExpanded}
-      disabled={isProcessing}
-    >
-      {isRecording ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
-      {isProcessing && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/5 rounded-lg">
-          <AnimatedBars isActive small />
-        </div>
-      )}
-    </Button>
-  );
+  
+  if (noFloatingButton) return null;
 
   return (
     <>
-      {!noFloatingButton && (
-        <div className="fixed bottom-4 right-4 z-50">
-          <VoiceButton />
-        </div>
-      )}
+      {/* Floating voice button */}
+      <motion.button
+        className="fixed bottom-24 right-4 z-50 bg-primary text-white p-3.5 rounded-full shadow-lg hover:bg-primary/90 transition-colors"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={togglePanel}
+        aria-label="Toggle voice assistant"
+      >
+        {isPanelOpen ? <MicOff size={20} /> : <Mic size={20} />}
+      </motion.button>
 
-      {noFloatingButton && (
-        <div className="flex justify-center">
-          <VoiceButton className="mx-auto" />
-        </div>
-      )}
-
+      {/* Voice panel */}
       <AnimatePresence>
-        {isExpanded && (
-          <VoicePanel
-            isListening={isRecording}
-            transcript={messages[messages.length - 1]?.content || ''}
-            onClose={toggleExpanded}
-            onToggleListening={handleToggleListening}
-            aiResponse={messages[messages.length - 1]?.role === 'assistant' ? messages[messages.length - 1].content : ''}
-          />
+        {isPanelOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-40 right-4 z-50 w-80 bg-background border rounded-lg shadow-lg p-4 flex flex-col"
+          >
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="font-medium">Voice Assistant</h3>
+              <Button variant="ghost" size="icon" onClick={togglePanel}>
+                <MicOff size={16} />
+              </Button>
+            </div>
+            
+            <div className="bg-muted p-3 rounded-md mb-3 min-h-[100px] overflow-auto">
+              {isListening ? (
+                <>
+                  <p className="text-sm font-medium mb-2">Listening...</p>
+                  <div className="flex justify-center">
+                    <AnimatedBars isActive={true} />
+                  </div>
+                  {transcript && (
+                    <p className="text-sm italic mt-2">{transcript}</p>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm">{aiResponse || "Ask me anything with your voice..."}</p>
+              )}
+            </div>
+            
+            <div className="flex justify-center">
+              <Button
+                onClick={toggleListening}
+                variant={isListening ? "destructive" : "default"}
+                className="gap-2"
+              >
+                {isListening ? (
+                  <>
+                    <MicOff size={16} /> Stop Listening
+                  </>
+                ) : (
+                  <>
+                    <Mic size={16} /> Start Listening
+                  </>
+                )}
+              </Button>
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
-
-      {showTooltip && !isExpanded && (
-        <div className="fixed bottom-20 right-6 p-3 bg-black text-white rounded-lg shadow-lg z-50 max-w-xs">
-          <p className="text-sm mb-2">Hey, I'm your voice assistant—say something to try it out!</p>
-          {isRecording && (
-            <div className="voice-waveform flex justify-center items-end h-5">
-              <AnimatedBars isActive={isRecording} small={true} />
-            </div>
-          )}
-        </div>
-      )}
-
-      {messages[messages.length - 1]?.content && isRecording && !isExpanded && (
-        <div className="fixed bottom-24 right-24 p-2 bg-white/90 text-black rounded shadow-md">
-          "{messages[messages.length - 1].content}"
-        </div>
-      )}
     </>
   );
 };
-
-export default VoiceUI;

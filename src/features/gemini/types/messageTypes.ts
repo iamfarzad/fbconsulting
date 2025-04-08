@@ -3,7 +3,7 @@ export interface AIMessage {
   role: 'user' | 'assistant' | 'system' | 'error';
   content: string;
   timestamp: number;
-  id?: string;
+  id?: string; // Make id optional
   mediaItems?: MessageMedia[];
   feedback?: 'positive' | 'negative' | null;
 }
