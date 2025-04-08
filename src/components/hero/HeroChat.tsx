@@ -1,43 +1,45 @@
 
-import { useState } from 'react';
-import { GeminiAdapter } from '@/features/gemini/services/geminiAdapter';
+import React, { useState } from 'react';
+import { useGemini } from '@/components/copilot/providers/GeminiProvider';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 export function HeroChat() {
-  const [message, setMessage] = useState('');
-  const [response, setResponse] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
+  const [inputValue, setInputValue] = useState('');
+  const { messages, sendMessage, isProcessing: isLoading } = useGemini();
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
+    if (!inputValue.trim()) return;
 
-    setIsLoading(true);
     try {
-      const result = await GeminiAdapter.generateResponse({
-        prompt: message
+      await sendMessage({
+        type: 'text_message',
+        text: inputValue,
       });
-      setResponse(result.text);
-      setMessage('');
+      setInputValue('');
     } catch (error) {
       console.error('Chat error:', error);
-      setResponse('Sorry, there was an error processing your request.');
-    } finally {
-      setIsLoading(false);
     }
   };
 
+  // Find the most recent response from the assistant
+  const latestResponse = messages
+    .filter(msg => msg.role === 'assistant')
+    .pop()?.content || '';
+
   return (
     <div className="w-full max-w-2xl mx-auto p-4">
-      <div className="bg-white rounded-lg shadow-lg p-6">
+      <div className="bg-white rounded-lg shadow-lg p-6 dark:bg-gray-800 dark:text-white">
         <div className="min-h-[200px] mb-4">
-          {response && (
-            <div className="prose">
-              <p>{response}</p>
+          {latestResponse && (
+            <div className="prose dark:prose-invert">
+              <p>{latestResponse}</p>
             </div>
           )}
           {isLoading && (
             <div className="flex justify-center items-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
             </div>
           )}
         </div>
@@ -45,18 +47,18 @@ export function HeroChat() {
         <form onSubmit={handleSubmit} className="flex gap-2">
           <input
             type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
             placeholder="Ask me anything..."
-            className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
           />
-          <button
+          <Button
             type="submit"
-            disabled={isLoading || !message.trim()}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50"
+            disabled={isLoading || !inputValue.trim()}
+            className="px-4 py-2"
           >
             Send
-          </button>
+          </Button>
         </form>
       </div>
     </div>
