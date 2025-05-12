@@ -1,6 +1,6 @@
 
 // Re-export all Gemini-related hooks
-export { useGeminiInitialization } from './useGeminiInitialization';
+// export { useGeminiInitialization } from './useGeminiInitialization'; // Temporarily commented out due to missing file
 
 // Create a basic service to temporarily fix imports
 export const useGeminiService = ({ onError }: { onError?: (error: string) => void } = {}) => {

@@ -1,5 +1,4 @@
 
-import React from 'react';
 import { Button } from '@/components/ui/button';
 import AnimatedText from '@/components/AnimatedText';
 import { Check, ArrowRight } from 'lucide-react';

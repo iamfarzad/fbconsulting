@@ -1,40 +1,41 @@
-
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+// Define response type
+interface TranscribeResponse {
+  text: string;
+  error?: string;
+}
+
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse<TranscribeResponse>
 ) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ text: '', error: 'Method not allowed' });
   }
 
   try {
-    const { audio, apiKey, model, speechConfig } = req.body;
+    const { text, apiKey } = req.body;
 
-    if (!audio || !apiKey) {
-      return res.status(400).json({ error: 'Missing required parameters' });
+    if (!text || !apiKey) {
+      return res.status(400).json({ text: '', error: 'Missing required parameters' });
     }
 
     // Initialize the Gemini API
     const genAI = new GoogleGenerativeAI(apiKey);
-    const geminiModel = genAI.getGenerativeModel({
-      model: model || 'gemini-pro',
-    });
+    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
-    // In a real implementation, you would use the appropriate Gemini API 
-    // method for audio transcription. Since direct audio transcription isn't 
-    // currently supported in the same way as OpenAI's Whisper, you might need
-    // to use a different approach.
+    // Send the request to Gemini
+    const result = await model.generateContent(text);
+    const response = await result.response;
+    const generatedText = response.text();
 
-    // For now, return a mock response
-    res.status(200).json({
-      text: "This is a mock transcription. Implement actual Gemini transcription on your server."
-    });
+    res.status(200).json({ text: generatedText });
   } catch (error) {
-    console.error('Transcription error:', error);
+    console.error('Error in transcribe endpoint:', error);
     res.status(500).json({ 
+      text: '',
       error: error instanceof Error ? error.message : 'Unknown error during transcription' 
     });
   }

@@ -1,5 +1,4 @@
 
-import React from 'react';
 import { Shield, Zap, Target } from 'lucide-react';
 import FeatureCard from './FeatureCard';
 import AnimatedText from './AnimatedText';

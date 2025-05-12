@@ -1,34 +1,36 @@
 
-import React, { useState } from 'react';
+import React, { useState } from 'react'; // Keep React for React.FC for now, address linter separately if runtime is fine
 import { motion } from 'framer-motion';
 import { Flag } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import LocationGreeting from '@/components/LocationGreeting';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { HeroActions } from './HeroActions';
-import { HeroVoiceInput } from './HeroVoiceInput';
+// import { HeroVoiceInput } from './HeroVoiceInput'; // Temporarily commented out
 
 interface HeroContentProps {
-  chatInputValue: string;
-  isListening: boolean;
-  transcript: string;
-  toggleListening: () => void;
-  isVoiceSupported: boolean;
-  isTranscribing: boolean;
-  useGeminiApi: boolean;
-  onInputChange?: (value: string) => void;
+  // chatInputValue: string; // Commented out as HeroVoiceInput is
+  // isListening: boolean;    // Commented out
+  // transcript: string;      // Commented out
+  // toggleListening: () => void; // Commented out
+  // isVoiceSupported: boolean; // Commented out
+  // isTranscribing: boolean;   // Commented out
+  // useGeminiApi: boolean;     // Commented out
+  // onInputChange?: (value: string) => void; // Commented out
 }
 
-export const HeroContent: React.FC<HeroContentProps> = ({
-  chatInputValue,
-  isListening,
-  transcript,
-  toggleListening,
-  isVoiceSupported,
-  isTranscribing,
-  useGeminiApi,
-  onInputChange
-}) => {
+export const HeroContent: React.FC<HeroContentProps> = (
+  {
+  // chatInputValue, // Commented out
+  // isListening,    // Commented out
+  // transcript,     // Commented out
+  // toggleListening,// Commented out
+  // isVoiceSupported,// Commented out
+  // isTranscribing, // Commented out
+  // useGeminiApi,   // Commented out
+  // onInputChange   // Commented out
+}
+) => {
   const { t, language } = useLanguage();
   const isNorwegian = language === 'no';
 
@@ -69,7 +71,7 @@ export const HeroContent: React.FC<HeroContentProps> = ({
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
                 transition={{ delay: 0.7, duration: 0.6 }}
-              ></motion.span>
+              /> {/* Self-closing span */}
             </span>
           ) : "How can AI automation help your business?"}
         </motion.h1>
@@ -83,7 +85,7 @@ export const HeroContent: React.FC<HeroContentProps> = ({
           {isNorwegian ? t('hero_subtitle') : "Ask me anything about AI automation, workflow optimization, or how to reduce costs with intelligent systems"}
         </motion.p>
         
-        <HeroVoiceInput 
+        {/* <HeroVoiceInput 
           chatInputValue={chatInputValue}
           isListening={isListening}
           transcript={transcript}
@@ -92,7 +94,7 @@ export const HeroContent: React.FC<HeroContentProps> = ({
           isTranscribing={isTranscribing}
           useGeminiApi={useGeminiApi}
           onInputChange={onInputChange}
-        />
+        /> */}
         
         <HeroActions />
       </div>

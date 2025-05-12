@@ -1,86 +1,106 @@
-
 import { useState, useCallback } from 'react';
 import { fetchGeminiResponse } from '../services/api';
 
+interface Message {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+}
+
+interface GeminiResponse {
+  text?: string;
+  error?: string;
+  status: 'success' | 'error';
+  data: Message[];
+}
+
+interface GeminiServiceState {
+  loading: boolean;
+  error: string | null;
+  retryCount: number;
+  response: GeminiResponse | null;
+  messages: Message[];
+}
+
 export const useGeminiService = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [response, setResponse] = useState(null);
-  const [messages, setMessages] = useState([]);
-  
-  const sendMessage = useCallback(async (message) => {
-    setLoading(true);
-    setError(null);
+  const [state, setState] = useState<GeminiServiceState>({
+    loading: false,
+    error: null,
+    retryCount: 0,
+    response: null,
+    messages: []
+  });
+
+  const sendMessage = useCallback(async (message: string) => {
+    setState(prev => ({ ...prev, loading: true, error: null }));
     
     try {
       const result = await fetchGeminiResponse(message);
       
-      // Super defensive check for data structure
-      if (result) {
-        // Ensure result.data is always an array
-        if (!result.data) {
-          result.data = [];
-        } else if (!Array.isArray(result.data)) {
-          result.data = [result.data];
-        }
-        
-        // Ensure messages are properly formatted
-        const formattedMessages = Array.isArray(result.data) 
-          ? result.data.map(msg => {
-              // Ensure each message has required properties
-              return {
-                role: msg.role || 'assistant',
-                content: msg.content || msg.text || JSON.stringify(msg)
-              };
-            })
-          : [];
-        
-        // Update messages with safe array
-        setMessages(prevMessages => {
-          // Ensure prevMessages is an array
-          const safeMessages = Array.isArray(prevMessages) ? prevMessages : [];
-          return [...safeMessages, ...formattedMessages];
-        });
+      if (result.error) {
+        throw new Error(result.error);
       }
+
+      // Format messages with type safety
+      const formattedMessages: Message[] = Array.isArray(result.data) 
+        ? result.data.map(msg => ({
+            role: msg.role === 'user' || msg.role === 'assistant' ? msg.role : 'assistant',
+            content: msg.content || msg.text || JSON.stringify(msg)
+          }))
+        : result.text 
+          ? [{ role: 'assistant', content: result.text }]
+          : [];
       
-      setResponse(result);
+      // Update state atomically
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: null,
+        retryCount: 0,
+        response: result,
+        messages: [...prev.messages, ...formattedMessages]
+      }));
+
       return result;
     } catch (err) {
       console.error("Error in useGeminiService:", err);
-      setError(err.message || 'Error fetching response');
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: errorMessage,
+        retryCount: prev.retryCount + 1
+      }));
+
       return {
         status: 'error',
-        error: err.message,
-        data: [] // Always return an array
-      };
-    } finally {
-      setLoading(false);
+        error: errorMessage,
+        data: []
+      } as GeminiResponse;
     }
   }, []);
-  
-  // Reset function to clear messages
+
   const resetMessages = useCallback(() => {
-    setMessages([]);
-    setResponse(null);
-    setError(null);
+    setState({
+      loading: false,
+      error: null,
+      retryCount: 0,
+      response: null,
+      messages: []
+    });
   }, []);
-  
-  // Generate and play audio (mock implementation for interface compatibility)
-  const generateAndPlayAudio = useCallback((text) => {
+
+  const generateAndPlayAudio = useCallback((text: string) => {
     console.log("Would play audio for:", text);
-    // This is a placeholder implementation
     return Promise.resolve();
   }, []);
-  
+
   return {
-    loading,
-    error,
-    response,
-    messages,
+    ...state,
     sendMessage,
     resetMessages,
-    isLoading: loading, // Alias for compatibility
-    generateAndPlayAudio // Added for GeminiCopilotProvider
+    isLoading: state.loading,
+    generateAndPlayAudio
   };
 };
 
