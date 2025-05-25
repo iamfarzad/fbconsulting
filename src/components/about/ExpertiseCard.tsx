@@ -1,4 +1,3 @@
-
 import React from 'react';
 import BulletPoint from './BulletPoint';
 import { motion } from 'framer-motion';
@@ -28,8 +27,10 @@ const ExpertiseCard: React.FC<ExpertiseCardProps> = ({
         return <LineChart className="w-5 h-5 text-[#fe5a1d]" />;
       case "Smartphone":
         return <Smartphone className="w-5 h-5 text-[#fe5a1d]" />;
+      case "":
+        return <div className="w-5 h-5 text-[#fe5a1d]">No Icon</div>;
       default:
-        return <Brain className="w-5 h-5 text-[#fe5a1d]" />;
+        return <div className="w-5 h-5 text-[#fe5a1d]">Invalid Icon</div>;
     }
   };
 
