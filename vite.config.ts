@@ -2,25 +2,8 @@ import { defineConfig, ConfigEnv, UserConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 
-// Use dynamic import for ESM modules in development
-const loadTagger = async () => {
-  if (process.env.NODE_ENV === 'development') {
-    try {
-      // Use dynamic import to handle ESM module
-      const taggerModule = await import("lovable-tagger").catch(() => null);
-      return taggerModule?.componentTagger ? taggerModule.componentTagger() : null;
-    } catch (e) {
-      console.warn('Failed to load lovable-tagger:', e);
-      return null;
-    }
-  }
-  return null;
-};
-
 // Define a synchronous config function
-export default defineConfig(async ({ mode }: ConfigEnv): Promise<UserConfig> => {
-  const tagger = await loadTagger();
-  
+export default defineConfig(({ mode }: ConfigEnv): UserConfig => {
   return {
     server: {
       host: "::",
@@ -29,9 +12,8 @@ export default defineConfig(async ({ mode }: ConfigEnv): Promise<UserConfig> => 
     },
     plugins: [
       react(),
-      // Only include tagger in development and only if it loaded successfully
-      mode === 'development' && tagger,
-    ].filter(Boolean),
+      // lovable-tagger related plugin removed
+    ].filter(Boolean), // filter(Boolean) might be removable if no other conditional plugins
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
