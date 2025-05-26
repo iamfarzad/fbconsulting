@@ -3,13 +3,14 @@ import React from 'react';
 import AnimatedText from '@/components/AnimatedText';
 import HeroBadge from './HeroBadge';
 import HeroActions from './HeroActions';
+import { getResponsiveHeadingClass } from '@/utils/responsiveHeadings';
 
 const HeroContent = () => {
   return (
     <div className="lg:col-span-7">
       <HeroBadge />
       
-      <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-futuristic mb-6 leading-tight">
+      <h1 className={`${getResponsiveHeadingClass('xl')} font-bold font-futuristic mb-6 leading-tight`}>
         <AnimatedText 
           text="Transform Your Business" 
           className="text-white block" 

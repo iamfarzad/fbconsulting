@@ -10,7 +10,7 @@ const Blog = () => {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-12">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Blog</h1>
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">Blog</h1>
           <SearchButton onClick={() => setSearchOpen(true)} />
         </div>
         

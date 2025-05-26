@@ -27,7 +27,7 @@ export const BusinessIntelligenceComponent: React.FC = () => {
 
   return (
     <div className="p-6 bg-white dark:bg-black/80 rounded-lg shadow-md border border-gray-200 dark:border-gray-800 space-y-6">
-      <h2 className="text-2xl font-bold mb-4">Business Intelligence MCP Example</h2>
+      <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4">Business Intelligence MCP Example</h2>
       
       {/* Loading and error states */}
       {isLoading && (

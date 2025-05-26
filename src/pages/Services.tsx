@@ -53,7 +53,7 @@ const Services = () => {
   return (
     <div className="container mx-auto py-12 px-4">
       <div className="text-center mb-16">
-        <h1 className="text-4xl font-bold mb-4">AI Services & Solutions</h1>
+        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4">AI Services & Solutions</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
           Strategic consulting and implementation services to help your business harness the power of artificial intelligence.
         </p>
@@ -64,7 +64,7 @@ const Services = () => {
           <Link to={`/services/${service.id}`} key={service.id}>
             <Card className="h-full transition-all hover:shadow-lg hover:-translate-y-1">
               <CardHeader>
-                <div className="text-4xl mb-3">{service.icon}</div>
+                <div className="text-2xl md:text-4xl lg:text-5xl mb-3">{service.icon}</div>
                 <CardTitle>{service.title}</CardTitle>
                 <CardDescription>{service.description}</CardDescription>
               </CardHeader>
@@ -81,7 +81,7 @@ const Services = () => {
       
       <div className="mt-16 bg-muted p-8 rounded-xl">
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold mb-2">Not sure which service you need?</h2>
+          <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-2">Not sure which service you need?</h2>
           <p className="text-muted-foreground">Let's discuss your project goals and find the right solution together.</p>
         </div>
         <div className="flex justify-center">

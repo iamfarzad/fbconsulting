@@ -9,7 +9,7 @@ const Index: React.FC = () => {
     <GeminiProvider>
       <div className="container mx-auto py-8">
         <div className="flex flex-col items-center justify-center mb-8">
-          <h1 className="text-4xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-gray-700 to-black dark:from-gray-200 dark:to-white">
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-gray-700 to-black dark:from-gray-200 dark:to-white">
             Gemini AI Assistant
           </h1>
           

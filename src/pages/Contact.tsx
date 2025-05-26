@@ -8,7 +8,7 @@ const Contact = () => {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Get in Touch</h1>
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4">Get in Touch</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Have questions about how AI can transform your business? Need expert consulting on your next AI project?
             I'm here to help.

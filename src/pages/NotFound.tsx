@@ -26,7 +26,7 @@ const NotFound = () => {
     <div className="min-h-screen flex items-center justify-center bg-background relative">
       <DotPattern width={20} height={20} cx={10} cy={10} cr={2} className="opacity-30" />
       <div className="text-center relative z-10">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
+        <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4">404</h1>
         <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
         <a href="/" className="text-blue-500 hover:text-blue-700 underline">
           Return to Home

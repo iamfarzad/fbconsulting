@@ -42,10 +42,10 @@ export const CounterComponent: React.FC<CounterComponentProps> = ({
 
   return (
     <div className="p-6 bg-white dark:bg-black/80 rounded-lg shadow-md border border-gray-200 dark:border-gray-800">
-      <h2 className="text-2xl font-bold mb-4">MCP Counter Example</h2>
+      <h2 className="text-xl md:text-2xl lg:text-3xl font-bold mb-4">MCP Counter Example</h2>
       
       <div className="mb-6">
-        <div className="text-4xl font-bold mb-2 text-center">{model.count}</div>
+        <div className="text-2xl md:text-4xl lg:text-5xl font-bold mb-2 text-center">{model.count}</div>
         <div className="text-sm text-gray-500 dark:text-gray-400 text-center">
           Range: {minValue} to {maxValue}
         </div>
