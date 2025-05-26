@@ -1,34 +1,24 @@
-Flask==2.3.2
-python-dotenv==1.0.0
-
-setuptools>=58.0.0
-wheel>=0.38.4
-pip>=21.0.0
-
-# Core dependencies - simplified to avoid subprocess issues
+# Core web framework
 fastapi>=0.104.1
-uvicorn>=0.24.0
+uvicorn>=0.24.0 # Server for FastAPI
+
+# Environment variable management
 python-dotenv>=1.0.0
+
+# WebSocket support (though often an indirect FastAPI dependency)
 websockets>=12.0
+
+# Google Generative AI client
 google-generativeai>=0.3.3
+
+# Data validation
 pydantic>=2.0.0
 
-# Audio processing
-pydub>=0.25.1
-
 # Utilities
-python-multipart>=0.0.5
-aiofiles>=0.7.0
+python-multipart>=0.0.5 
 
-# Testing
-pytest>=7.0.0
-pytest-asyncio>=0.18.0
-httpx>=0.24.0
-
-# Logging & monitoring
-structlog>=21.1.0
-python-json-logger>=2.0.0
-
-# CORS & middleware
-starlette>=0.14.2
-werkzeug==3.0.1
+# Note: Starlette is a dependency of FastAPI.
+# Note: Werkzeug was for Flask.
+# Note: matplotlib, pydub (and its dependency ffmpeg) are considered dev dependencies (used by debug_utils.py).
+# Note: All testing, build tools, and unused logging libraries have been removed.
+#       These should be in a requirements-dev.txt or similar.
